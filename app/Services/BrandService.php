@@ -13,36 +13,18 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 
-class BrandService
+class BrandService extends BaseService
 {
-    protected $brand;
     public function __construct(Brand $brand)
     {
-        $this->brand = $brand;
+        parent::__construct($brand);
     }
 
-    public function getAllBrand(): LengthAwarePaginator
-    {
-        try {
-            Log::info('Fetching all categories');
-            $categories = $this->brand->orderByDesc('created_at')->paginate(10);
-            return $categories;
-        } catch (Exception $e) {
-            Log::error('Failed to fetch brand: ' . $e->getMessage());
-            throw new Exception('Failed to fetch brand');
-        }
-    }
+    public function pagination() {}
 
     public function getBrandAll()
     {
-        try {
-            Log::info('Fetching all categories');
-            $categories = $this->brand->get();
-            return $categories;
-        } catch (Exception $e) {
-            Log::error('Failed to fetch brand: ' . $e->getMessage());
-            throw new Exception('Failed to fetch brand');
-        }
+        return $this->pluck(['name', 'id'], [], [], ['name', 'asc']);
     }
 
     /**
@@ -96,7 +78,7 @@ class BrandService
                 'name' => $data->name
             ];
 
-            if($data->hasFile('images')){
+            if ($data->hasFile('images')) {
                 $criteria['logo'] = saveImages($data, 'images', 'brand', 300, 300);
             }
 
@@ -124,28 +106,24 @@ class BrandService
 
     public function deleteBrand($id)
     {
-        try{
+        try {
             $brand = $this->getBrandById($id);
             $brand->delete();
             DB::commit();
-        }
-        catch(Exception $e)
-        {
+        } catch (Exception $e) {
             DB::rollBack();
-            Log::error("Failed to delete brand:" .$e->getMessage());
+            Log::error("Failed to delete brand:" . $e->getMessage());
             throw new Exception("Failed to delete brand");
         }
     }
 
     public function findBrandBySupplier($supplier_id): LengthAwarePaginator
     {
-        try{
+        try {
             $brand = $this->brand->where('supplier_id', $supplier_id)->paginate(10);
             return $brand;
-        }
-        catch(Exception $e)
-        {
-            Log::error('Failed to find brand: ' .$e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Failed to find brand: ' . $e->getMessage());
             throw new Exception('Failed to find brand');
         }
     }

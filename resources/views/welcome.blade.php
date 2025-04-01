@@ -411,11 +411,12 @@
                                 <th class="text-center" scope="col">Số lượng đã bán</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        {{-- <tbody>
                             @foreach ($topProducts as $item)
+                            @dd($item)
                                 <tr>
                                     <td class="text-center"><a
-                                            href="{{ route('admin.product.edit', ['id' => $item->product_id]) }}">{{ $item->code }}</a>
+                                            href="{{ route('admin.product.edit', $item) }}">{{ $item->code }}</a>
                                     </td>
                                     <td class="text-center">{{ $item->name ?? '' }}</td>
                                     <td class="text-center">{{ number_format($item->price ?? '') }}</td>
@@ -423,7 +424,7 @@
                                     <td class="text-center">{{ $item->total_quantity ?? '' }}</td>
                                 </tr>
                             @endforeach
-                        </tbody>
+                        </tbody> --}}
                     </table>
                 </div>
             </div>

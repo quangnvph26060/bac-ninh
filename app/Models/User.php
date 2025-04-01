@@ -15,8 +15,6 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'users';
-
     protected $fillable = [
         'name',
         'phone',
@@ -34,7 +32,8 @@ class User extends Authenticatable
         'address',
         'storage_id',
         'wallet',
-        'img_url'
+        'img_url',
+        'remember_token'
     ];
 
     protected $hidden = [

@@ -1,9 +1,6 @@
 @extends('admin.layout.index')
 @section('content')
-    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
         body {
             font-family: 'Roboto', sans-serif;
@@ -254,7 +251,6 @@
     </div>
 
     <script>
-        CKEDITOR.replace('description');
 
         $(document).ready(function() {
             $('.delete-image').on('click', function() {

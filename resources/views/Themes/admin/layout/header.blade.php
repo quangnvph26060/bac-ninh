@@ -32,10 +32,10 @@
 
             <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
                 <li class="nav-item topbar-user dropdown hidden-caret">
-                    <a class="dropdown-toggle profile-pic" target="_blank" href="{{ route('admin.transaction.payment') }}"
-                        aria-expanded="false">
+                    <a class="dropdown-toggle profile-pic" target="_blank"
+                        href="{{ route('admin.transaction.payment') }}" aria-expanded="false">
                         <i style="font-size: 18px; padding: 0px 5px; color: rgb(138, 135, 135)"
-                            class="fa-solid fa-wallet"></i> Ví: {{session('authUser')->wallet}} đ
+                            class="fa-solid fa-wallet"></i> Ví: {{ auth()->user()->wallet }} đ
 
                     </a>
                 </li>

@@ -119,12 +119,10 @@
         </div>
     </div>
 
-    {{-- <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script> --}}
     <script>
         function submitForm() {
             document.getElementById('editcategory').submit();
         }
-        CKEDITOR.replace('description');
         var validateorder = {
         'name': {
             'element': document.getElementById('name'),

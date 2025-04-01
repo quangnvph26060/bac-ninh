@@ -8,12 +8,12 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class CompanyService
+class CompanyService extends BaseService
 {
     protected $company;
     public function __construct(Company $company)
     {
-        $this->company = $company;
+        parent::__construct($company);
     }
 
     public function getAllCompany(): LengthAwarePaginator
@@ -26,15 +26,11 @@ class CompanyService
         }
     }
 
-    public function getCompany()
+    public function getCompanyAll()
     {
-        try {
-            return $this->company->get();
-        } catch (Exception $e) {
-            Log::error('Failed to fetch companies: ' . $e->getMessage());
-            throw new Exception('Failed to fetch companies');
-        }
+        return $this->pluck(['name', 'id'], [], [], ['name', 'asc']);
     }
+
     public function companyFilter($name, $city_id)
     {
         try {

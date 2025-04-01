@@ -15,25 +15,42 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 
-class ProductService
+class ProductService  extends BaseService
 {
-    protected $product;
-    protected $productStorage;
-    public function __construct(Product $product, ProductStorage $productStorage)
+    // public function __construct(Product $product, ProductStorage $productStorage)
+    // {
+    //     $this->product = $product;
+    //     $this->productStorage = $productStorage;
+    // }
+
+    public function __construct(Product $product)
     {
-        $this->product = $product;
-        $this->productStorage = $productStorage;
+        parent::__construct($product);
     }
 
-    public function getProductAll(): LengthAwarePaginator
+    public function getProductAll()
     {
-        try {
-            Log::info('Fetching all products');
-            return $this->product->orderByDesc('created_at')->paginate(10);
-        } catch (Exception $e) {
-            Log::error('Failed to fetch products: ' . $e->getMessage());
-            throw new Exception('Failed to fetch products');
-        }
+
+        $columns = [
+            'id',
+            'name',
+            'brand_id',
+            'category_id',
+            'product_unit',
+            'price',
+            'quantity'
+        ];
+
+        $relations = ['productCompanies', 'brand', 'category'];
+
+        return $this->queryBuilder(
+            $columns,
+            $relations,
+            false,
+            ['category_id', 'brand_id'],
+            [],
+            ['productCompanies' => 'company_id']
+        );
     }
 
 

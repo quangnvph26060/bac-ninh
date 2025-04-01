@@ -8,11 +8,7 @@
             }
         }
     </style>
-    @if (session('success'))
-        <div id="alert-success" class="alert alert-success position-fixed top-0 end-0 m-3" role="alert">
-            {{ session('success') }}
-        </div>
-    @endif
+
 
     <div class="bg-overlay"></div>
     <!-- auth-page content -->
@@ -32,38 +28,7 @@
                                             </a>
                                         </div>
                                         <div class="mt-auto">
-                                            {{-- <div class="mb-3">
-                                                <i class="ri-double-quotes-l display-4 text-success"></i>
-                                            </div>
 
-                                            <div id="qoutescarouselIndicators" class="carousel slide"
-                                                data-bs-ride="carousel">
-                                                <div class="carousel-indicators">
-                                                    <button type="button" data-bs-target="#qoutescarouselIndicators"
-                                                        data-bs-slide-to="0" class="active" aria-current="true"
-                                                        aria-label="Slide 1"></button>
-                                                    <button type="button" data-bs-target="#qoutescarouselIndicators"
-                                                        data-bs-slide-to="1" aria-label="Slide 2"></button>
-                                                    <button type="button" data-bs-target="#qoutescarouselIndicators"
-                                                        data-bs-slide-to="2" aria-label="Slide 3"></button>
-                                                </div>
-                                                <div class="carousel-inner text-center text-white-50 pb-5">
-                                                    <div class="carousel-item active">
-                                                        <p class="fs-15 fst-italic">" Tuyệt vời! Mã sạch, thiết kế sạch, dễ
-                                                            tùy chỉnh. Cảm ơn rất nhiều!"</p>
-                                                    </div>
-                                                    <div class="carousel-item">
-                                                        <p class="fs-15 fst-italic">
-                                                            "Chủ đề này thực sự tuyệt vời với dịch vụ hỗ trợ khách hàng
-                                                            tuyệt vời."</p>
-                                                    </div>
-                                                    <div class="carousel-item">
-                                                        <p class="fs-15 fst-italic"> "Tuyệt vời! Mã sạch, thiết kế sạch, dễ
-                                                            tùy chỉnh. Cảm ơn rất nhiều!"</p>
-                                                    </div>
-                                                </div>
-                                            </div> --}}
-                                            <!-- end carousel -->
                                         </div>
                                     </div>
                                 </div>
@@ -84,6 +49,9 @@
                                                 <label for="username" class="form-label">Email hoặc Số điện thoại</label>
                                                 <input type="text" class="form-control" id="email" name="email"
                                                     placeholder="Tên đăng nhập">
+                                                @error('email')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
                                             </div>
 
                                             <div class="mb-3">
@@ -91,6 +59,9 @@
                                                 <div class="position-relative auth-pass-inputgroup mb-3">
                                                     <input type="password" id="password" name="password"
                                                         class="form-control pe-5 password-input" placeholder="Mật khẩu">
+                                                    @error('password')
+                                                        <small class="text-danger">{{ $message }}</small>
+                                                    @enderror
                                                     <button
                                                         class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
                                                         type="button" id="password-addon"><i
@@ -99,8 +70,8 @@
                                             </div>
 
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value=""
-                                                    id="auth-remember-check">
+                                                <input class="form-check-input" type="checkbox" name="remember"
+                                                    value="1" id="auth-remember-check">
                                                 <label class="form-check-label" for="auth-remember-check">Lưu thông
                                                     tin</label>
                                             </div>
@@ -113,26 +84,7 @@
                                                 <a href="{{ route('forget-password') }}" class="text-muted">Quên mật
                                                     khẩu?</a>
                                             </div>
-                                            {{-- <div class="mt-2 text-center">
-                                            <div class="signin-other-title">
-                                                <h5 class="fs-13 mb-4 title" style="padding: 10px;">Sign In with</h5>
-                                            </div>
 
-                                            <div>
-                                                <button type="button"
-                                                    class="btn btn-primary btn-icon waves-effect waves-light"><i
-                                                        class="ri-facebook-fill fs-16"></i></button>
-                                                <button type="button"
-                                                    class="btn btn-danger btn-icon waves-effect waves-light"><i
-                                                        class="ri-google-fill fs-16"></i></button>
-                                                <button type="button"
-                                                    class="btn btn-dark btn-icon waves-effect waves-light"><i
-                                                        class="ri-github-fill fs-16"></i></button>
-                                                <button type="button"
-                                                    class="btn btn-info btn-icon waves-effect waves-light"><i
-                                                        class="ri-twitter-fill fs-16"></i></button>
-                                            </div>
-                                        </div> --}}
 
                                         </form>
                                     </div>
@@ -165,12 +117,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="text-center">
-                        {{-- <p class="mb-0">&copy;
-                        <script>
-                            document.write(new Date().getFullYear())
-                        </script> Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by
-                        Themesbrand
-                    </p> --}}
+
                     </div>
                 </div>
             </div>
@@ -190,62 +137,6 @@
                 } else {
                     passwordField.attr('type', 'password');
                     eyeIcon.removeClass('ri-eye-off-fill').addClass('ri-eye-fill');
-                }
-            });
-        });
-
-        $(document).ready(function() {
-            // Lấy dữ liệu tài khoản đã lưu từ localStorage
-            var savedAccounts = JSON.parse(localStorage.getItem('accounts')) || {};
-
-            // Hàm để điền thông tin email và mật khẩu đã lưu
-            function populateFields(email) {
-                console.log('Populating fields for email:', email);
-                if (savedAccounts[email]) {
-                    $('#email').val(email);
-                    $('#password').val(savedAccounts[email]);
-                    console.log('Password populated:', savedAccounts[email]);
-                }
-            }
-
-            // Kiểm tra nếu chỉ có một tài khoản đã lưu và tự động điền
-            if (Object.keys(savedAccounts).length === 1) {
-                var email = Object.keys(savedAccounts)[0];
-                console.log('Single saved account found:', email);
-                populateFields(email);
-                $('#auth-remember-check').prop('checked', true);
-            }
-
-            // Sự kiện thay đổi trên trường email để điền mật khẩu đã lưu
-            $('#email').on('input', function() {
-                var email = $(this).val();
-                console.log('Email changed to:', email);
-                populateFields(email);
-            });
-
-            // Xử lý sự kiện submit của form đăng nhập
-            $('#login-form').submit(function(event) {
-                var email = $('#email').val();
-                var password = $('#password').val();
-                var remember = $('#auth-remember-check').is(':checked');
-
-                console.log('Form submitted with:', {
-                    email,
-                    password,
-                    remember
-                });
-
-                if (remember) {
-                    savedAccounts[email] = password;
-                    localStorage.setItem('accounts', JSON.stringify(savedAccounts));
-                    console.log('Account saved:', {
-                        email,
-                        password
-                    });
-                } else {
-                    delete savedAccounts[email];
-                    localStorage.setItem('accounts', JSON.stringify(savedAccounts));
-                    console.log('Account removed:', email);
                 }
             });
         });
