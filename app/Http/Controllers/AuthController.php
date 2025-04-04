@@ -20,23 +20,31 @@ class AuthController extends Controller
     }
     public function login(Request $request)
     {
-        try {
-            $credentials = $request->only(['email', 'password']);
-            $result = $this->userService->authenticateUser($credentials);
-            if ($result['user']->role_id == 1) {
-                session()->put('authUser', $result['user']);
-                return redirect()->route('admin.dashboard');
-            } elseif ($result['user']->role_id == 2) {
-                session()->put('authUser', $result['user']);
-                return redirect()->route('staff.index');
-            } elseif ($result['user']->role_id == 3) {
-                session()->put('authUser', $result['user']);
-                return redirect()->route('sa.store.index');
-            }
-            // dd($result);
-        } catch (\Exception $e) {
-            return $this->handleLoginError($request, $e);
+
+        $credentials = $request->validate(
+            [
+                'email' => 'required|email|exists:users',
+                'password' => 'required'
+            ]
+        );
+
+        $remember = $request->has('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
+
+            $user = Auth::user();
+
+            toastr()->success('Đăng nhập thành công.');
+            return match ($user->role_id) {
+                1 =>  redirect()->route('admin.dashboard'),
+                2 =>  redirect()->route('staff.index'),
+                3 =>  redirect()->route('sa.store.index'),
+            };
         }
+
+        toastr()->error('Tài khoản hoặc mật khẩu không chính xác!');
+
+        return redirect()->back()->withInput(['email']);
     }
 
     public function logout(Request $request)
@@ -44,10 +52,5 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->flush();
         return redirect()->route('formlogin');
-    }
-
-    protected function handleLoginError($request, \Exception $e)
-    {
-        return redirect()->back()->withErrors(['error' => $e->getMessage()]);
     }
 }

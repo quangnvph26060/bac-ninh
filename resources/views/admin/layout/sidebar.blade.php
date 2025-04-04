@@ -44,18 +44,28 @@
                     <div class="collapse" id="product">
                         <ul class="nav nav-collapse">
                             <li>
-                                <a href="{{ route('admin.product.store') }}">
-                                    <span class="sub-item">Danh sách sản phẩm</span>
+                                <a href="{{ route('admin.products.index') }}">
+                                    <span class="sub-item">Quản lý sản phẩm</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.category.index') }}">
-                                    <span class="sub-item">Danh mục</span>
+                                <a href="{{ route('admin.categories.index') }}">
+                                    <span class="sub-item">Quản lý danh mục</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.brand.store') }}">
-                                    <span class="sub-item">Thương hiệu</span>
+                                <a href="{{ route('admin.brands.index') }}">
+                                    <span class="sub-item">Quản lý thương hiệu</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.attributes.index') }}">
+                                    <span class="sub-item">Quản lý thuộc tính</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.collections.index') }}">
+                                    <span class="sub-item">Quản lý bộ sưu tập</span>
                                 </a>
                             </li>
                         </ul>
@@ -105,25 +115,10 @@
                 </li>
 
                 <li class="nav-item">
-                    <a data-bs-toggle="collapse" href="#sidebarnhacungcap">
+                    <a href="{{ route('admin.suppliers.index') }}">
                         <i class="fas fa-building"></i>
                         <p>Nhà cung cấp</p>
-                        <span class="caret"></span>
                     </a>
-                    <div class="collapse" id="sidebarnhacungcap">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a href="{{ route('admin.company.index') }}">
-                                    <span class="sub-item">Danh sách</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="">
-                                    <span class="sub-item">Nhóm nhà cung cấp</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
                 </li>
 
 

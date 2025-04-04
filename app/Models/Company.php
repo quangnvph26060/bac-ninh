@@ -41,8 +41,8 @@ class Company extends Model
         return $this->supplier()->exists();
     }
 
-    public function product()
+    public function products()
     {
-        return $this->belongsToMany(Product::class, 'company_product');
+        return $this->hasMany(Product::class);
     }
 }

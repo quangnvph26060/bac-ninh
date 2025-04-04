@@ -1,50 +1,56 @@
 <?php
 
+use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
-function saveImages($request, string $inputName, string $directory = 'images', $width = 150, $height = 150, $isArray = false)
-{
-    $paths = [];
+if (!function_exists('uploadImages')) {
+    function uploadImages($flieName, string $directory = 'images', $resize = false, $width = 150, $height = 150, $isArray = false)
+    {
+        $paths = [];
 
-    // Kiểm tra xem có file không
-    if ($request->hasFile($inputName)) {
-
-        // Lấy tất cả các file hình ảnh
-        $images = $request->file($inputName);
-
+        $images = request()->file($flieName);
         if (!is_array($images)) {
-            $images = [$images]; // Đưa vào mảng nếu chỉ có 1 ảnh
+            $images = [$images];
         }
 
-        // Tạo instance của ImageManager
-        $manager = new ImageManager(new Driver());
+        $manager = new ImageManager(['driver' => 'gd']);
+        $storagePath = storage_path('app/public/' . trim($directory, '/'));
+
+        if (!file_exists($storagePath)) {
+            mkdir($storagePath, 0777, true);
+        }
 
         foreach ($images as $key => $image) {
 
-            // Đọc hình ảnh từ đường dẫn thực
-            $img = $manager->read($image->getPathName());
+            if ($image instanceof \Illuminate\Http\UploadedFile) {
+                $img = $manager->make($image->getRealPath());
 
-            // Thay đổi kích thước
-            $img->resize($width, $height);
+                // Resize nếu $resize = true
+                if ($resize) {
+                    $img->resize($width, $height);
+                }
 
-            // Tạo tên file duy nhất
-            $filename = time() . uniqid() . '.' . $image->getClientOriginalExtension();
+                $filename = time() . uniqid() . '.' . 'webp';
 
-            // Lưu hình ảnh đã được thay đổi kích thước vào storage
-            Storage::disk('public')->put($directory . '/' . $filename, $img->encode());
+                Storage::disk('public')->put($directory . '/' . $filename, $img->encode());
 
-            // Lưu đường dẫn vào mảng
-            $paths[$key] = $directory . '/' . $filename;
+                $paths[$key] = $directory . '/' . $filename;
+            }
         }
-
-        // Trả về danh sách các đường dẫn
-        return $isArray ? $paths : $paths[0];
+        return $isArray ? $paths : $paths[0] ?? null;
     }
+}
 
-    return null;
+if (!function_exists('hasFile')) {
+    function hasFile($filename)
+    {
+        return request()->hasFile($filename);
+    }
 }
 
 if (!function_exists('showImage')) {
@@ -57,13 +63,115 @@ if (!function_exists('showImage')) {
             return $storage->url($image);
         }
 
-        return asset('images/default.jpg');
+        return asset('backend/assets/img/image-default.jpg');
     }
 }
 
-function deleteImage($path)
-{
-    if ($path && Storage::disk('public')->exists($path)) {
-        Storage::disk('public')->delete($path);
+if (!function_exists('deleteImage')) {
+    function deleteImage($path)
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+}
+
+if (!function_exists('pluralModelName')) {
+    function pluralModelName($row)
+    {
+        return Str::plural(Str::lower(class_basename($row)));
+    }
+}
+
+if (!function_exists('generateSlug')) {
+    function generateSlug(string $text)
+    {
+        return Str::slug($text);
+    }
+}
+
+
+if (!function_exists('transaction')) {
+    function transaction($callback, $onError = null)
+    {
+        DB::beginTransaction();
+        try {
+            $result = $callback();
+            DB::commit();
+            return $result;
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            if ($onError && is_callable($onError)) {
+                $onError($e);
+            }
+
+            Log::error('Exception Details:', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'function' => getErrorFunction($e),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return errorResponse('Có lỗi xảy ra, vui lòng thử lại sau!');
+        }
+    }
+}
+
+
+if (!function_exists('getErrorFunction')) {
+    function getErrorFunction(Throwable $exception): ?string
+    {
+        // Kiểm tra nếu có trace và function gọi lỗi
+        $trace = $exception->getTrace();
+        return isset($trace[0]['function']) ? $trace[0]['function'] : null;
+    }
+}
+
+
+if (!function_exists('successResponse')) {
+    function successResponse($message, $data = null, $code = 200, bool $isResponse = false)
+    {
+        $response = ['success' => true, 'message' => $message, 'data' => $data, 'code' => $code];
+        return  $isResponse ? response()->json($response, $code) : $response;
+    }
+}
+
+if (!function_exists('handleResponse')) {
+    function handleResponse($message, $success, $code = 200)
+    {
+        $type = $success ? 'success' : 'error';
+
+        if ($type == 'success') sessionFlash('success', $message);
+
+        return response()->json(['success' => $success, 'message' => $message], $code);
+    }
+}
+
+if (!function_exists('errorResponse')) {
+    function errorResponse(string $message, bool $isResponse = false,  $code = 500)
+    {
+        $response = [
+            'success' => false,
+            'message' => $message,
+            'code' => $code
+        ];
+        return $isResponse ? response()->json($response, $code) : $response;
+    }
+}
+
+if (!class_exists('sessionFlash')) {
+    function sessionFlash($key, $message)
+    {
+        session()->flash($key, $message);
+    }
+}
+
+if (!class_exists('formatNumber')) {
+    function formatNumber($number)
+    {
+        if (!$number) return 0;
+        return number_format($number, 0, ',', '.');
     }
 }

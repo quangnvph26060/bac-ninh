@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\BrandController;
-use App\Http\Controllers\Admin\CategorieController;
+use App\Http\Controllers\Admin\BulkActionController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CheckInventoryController;
 use App\Http\Controllers\Admin\ClientController;
+use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
@@ -51,6 +54,7 @@ Route::post('/check-account', [SignUpController::class, 'checkAccount'])->name('
 // Route::get('/check-email-exists', [SignUpController::class, 'checkEmailExists'])->name('check-email-exists');
 Route::get('/dang-ky', [SignUpController::class, 'index'])->name('register.index');
 Route::post('/register_account', [SignUpController::class, 'store'])->name('register.signup');
+
 Route::get('/', function () {
     return view('auth.login');
 })->name('formlogin');
@@ -81,33 +85,46 @@ Route::get('/employee', function () {
     return view('Themes.pages.employee.index');
 })->name('employee');
 
-Route::middleware(CheckLogin::class)->prefix('admin')->name('admin.')->group(function () {
-    Route::prefix('transaction')->name('transaction.')->group(function() {
+
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::post('handle-bulk-action', [BulkActionController::class, 'handleBulkAction'])->name('handle.bulk.action');
+
+    Route::prefix('transaction')->name('transaction.')->group(function () {
         Route::get('', [TransactionController::class, 'index'])->name('index');
         Route::get('search', [TransactionController::class, 'search'])->name('search');
         Route::get('payment', [TransactionController::class, 'payment'])->name('payment');
         Route::post('store', [TransactionController::class, 'store'])->name('store');
         Route::get('export-pdf/{id}', [TransactionController::class, 'exportPDF'])->name('export_pdf');
         Route::get('generateQR', [TransactionController::class, 'generateQrCode'])->name('generate');
+    });
 
+    Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('export1', 'export1')->name('export1');
+        Route::post('import', 'import')->name('import');
+        Route::get('export', 'export')->name('export');
+        Route::get('download-product-template', 'downloadTemplate')->name('download.product.template');
+
+        Route::get('create', 'create')->name('create');
+        Route::post('create', 'store')->name('store');
+        Route::get('edit/{id}', 'edit')->name('edit');
+        Route::put('edit/{id}', 'update')->name('update');
+
+        Route::get('search-products',  'search')->name('search.products');
+        Route::get('selected-attributes/{id}',  'getValueByAttributeId')->name('selected.attributes');
     });
-    Route::prefix('product')->name('product.')->group(function () {
-        Route::get('export1', [ProductController::class, 'export1'])->name('export1');
-        Route::get('productFilter', [ProductController::class, 'productFilter'])->name('productFilter');
-        Route::get('', [ProductController::class, 'index'])->name('store');
-        Route::get('import', [ProductController::class, 'formimport'])->name('formimport');
-        Route::post('import', [ProductController::class, 'import'])->name('import');
-        Route::get('export', [ProductController::class, 'export'])->name('export');
-        Route::get('add', [ProductController::class, 'addForm'])->name('addForm');
-        Route::post('add', [ProductController::class, 'addSubmit'])->name('add');
-        Route::get('{id}', [ProductController::class, 'editForm'])->name('edit');
-        Route::post('{id}', [ProductController::class, 'update'])->name('update');
-        Route::delete('/delete/{id}', [ProductController::class, 'delete'])->name('delete');
-        Route::get('product-images/{id}', [ProductController::class, 'deleteImagesProduct'])->name('deleteImagesProduct');
-        Route::post('product-category', [ProductController::class, 'Changecategory'])->name('changecategory');
-        Route::post('product-status', [ProductController::class, 'Changestatus'])->name('changestatus');
-        // Route::get('search/name', [ProductController::class, 'findByName'])->name('findName');
+
+    Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('create', 'create')->name('create');
+        Route::post('create', 'store')->name('store');
+        Route::get('edit/{id}', 'edit')->name('edit');
+        Route::put('edit/{id}', 'update')->name('update');
     });
+
+
+
     Route::prefix('company')->name('company.')->group(function () {
         Route::get("/", [CompanyController::class, 'index'])->name('index');
         Route::get('findByName', [CompanyController::class, 'findByName'])->name('findByName');
@@ -137,14 +154,21 @@ Route::middleware(CheckLogin::class)->prefix('admin')->name('admin.')->group(fun
     Route::get('/detail/{id}', [AdminController::class, 'getAdminInfor'])->name('detail');
     Route::post('/update/{id}', [AdminController::class, 'updateAdminInfor'])->name('update');
     Route::post('/changePassword', [AdminController::class, 'changePassword'])->name('changePassword');
-    Route::prefix('category')->name('category.')->group(function () {
-        Route::get('/',  [CategorieController::class, 'index'])->name('index');
-        Route::get('create', [CategorieController::class, 'add'])->name('add');
-        Route::post('create', [CategorieController::class, 'store'])->name('store');
-        Route::delete('delete/{id}', [CategorieController::class, 'delete'])->name('delete');
-        Route::get('detail/{id}', [CategorieController::class, 'edit'])->name('detail');
-        Route::post('update/{id}', [CategorieController::class, 'update'])->name('update');
-        Route::get('search/name', [CategorieController::class, 'findByName'])->name('findName');
+
+    Route::prefix('categories')->controller(CategoryController::class)->name('categories.')->group(function () {
+        Route::get('/',   'index')->name('index');
+        Route::get('create',  'create')->name('create');
+        Route::post('create',  'store')->name('store');
+        Route::get('edit/{id}',  'edit')->name('edit');
+        Route::put('edit/{id}',  'update')->name('update');
+    });
+
+    Route::prefix('collections')->controller(CollectionController::class)->name('collections.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('create', 'create')->name('create');
+        Route::post('create', 'store')->name('store');
+        Route::get('edit/{id}', 'edit')->name('edit');
+        Route::put('edit/{id}', 'update')->name('update');
     });
 
     Route::prefix('user')->name('staff.')->group(function () {
@@ -158,16 +182,14 @@ Route::middleware(CheckLogin::class)->prefix('admin')->name('admin.')->group(fun
         Route::get('search/phone', [UserController::class, 'findByPhone'])->name('findByPhone');
     });
 
-    Route::prefix('brand')->name('brand.')->group(function () {
-        Route::get('', [BrandController::class, 'index'])->name('store');
-        Route::get('add', [BrandController::class, 'addForm'])->name('addForm');
-        Route::post('add', [BrandController::class, 'add'])->name('add');
-        Route::delete('delete/{id}', [BrandController::class, 'delete'])->name('delete');
-        Route::get('update/{id}', [BrandController::class, 'edit'])->name('edit');
-        Route::post('update/{id}', [BrandController::class, 'update'])->name('update');
-        Route::get('search/name', [BrandController::class, 'findByName'])->name('findByName');
-        Route::get('search/supplier', [BrandController::class, 'findBySupplier'])->name('findBySupplier');
+    Route::prefix('brands')->controller(BrandController::class)->name('brands.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('create', 'create')->name('create');
+        Route::post('create', 'store')->name('store');
+        Route::get('edit/{id}', 'edit')->name('edit');
+        Route::put('edit/{id}', 'update')->name('update');
     });
+
     Route::prefix('client')->name('client.')->group(function () {
         Route::get('/', [ClientController::class, 'index'])->name('index');
         Route::get('/detail/{id}', [ClientController::class, 'edit'])->name('detail');
@@ -178,15 +200,11 @@ Route::middleware(CheckLogin::class)->prefix('admin')->name('admin.')->group(fun
         Route::get('/export', [ClientController::class, 'export'])->name('export');
     });
 
-
-    Route::prefix('supplier')->name('supplier.')->group(function () {
-        Route::get("/{company_id}", [SupplierController::class, 'index'])->name('index');
-        Route::get('/findByPhone', [SupplierController::class, 'findByPhone'])->name('findByPhone');
-        Route::get('/add/{company_id}', [SupplierController::class, 'add'])->name('add');
-        Route::post('/store', [SupplierController::class, 'store'])->name('store');
-        Route::get('detail/{id}', [SupplierController::class, 'edit'])->name('detail');
-        Route::post('update/{id}', [SupplierController::class, 'update'])->name('update');
-        Route::delete('delete/{id}', [SupplierController::class, 'delete'])->name('delete');
+    Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(function () {
+        Route::get("/", 'index')->name('index');
+        Route::get("create", 'create')->name('create');
+        Route::get("edit/{id}", 'edit')->name('edit');
+        Route::put("edit/{id}", 'update')->name('update');
     });
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');

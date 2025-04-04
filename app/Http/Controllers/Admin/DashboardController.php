@@ -24,9 +24,9 @@ class DashboardController extends Controller
         try {
             $title = "Dashboard";
             $topProducts = DB::table('order_details')
-            ->select('order_details.product_id', 'products.name', 'products.price', 'products.code', 'products.priceBuy', DB::raw('SUM(order_details.quantity) as total_quantity'))
+            ->select('order_details.product_id', 'products.name', 'products.import_price', 'products.sku', 'products.sale_price', DB::raw('SUM(order_details.quantity) as total_quantity'))
             ->join('products', 'order_details.product_id', '=', 'products.id')
-            ->groupBy('order_details.product_id', 'products.name', 'products.price', 'products.code', 'products.priceBuy')
+            ->groupBy('order_details.product_id', 'products.name', 'products.import_price', 'products.sku', 'products.sale_price')
             ->orderByDesc('total_quantity')
             ->limit(5)
             ->get();

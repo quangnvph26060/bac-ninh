@@ -411,11 +411,12 @@
                                 <th class="text-center" scope="col">Số lượng đã bán</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        {{-- <tbody>
                             @foreach ($topProducts as $item)
+                            @dd($item)
                                 <tr>
                                     <td class="text-center"><a
-                                            href="{{ route('admin.product.edit', ['id' => $item->product_id]) }}">{{ $item->code }}</a>
+                                            href="{{ route('admin.product.edit', $item) }}">{{ $item->code }}</a>
                                     </td>
                                     <td class="text-center">{{ $item->name ?? '' }}</td>
                                     <td class="text-center">{{ number_format($item->price ?? '') }}</td>
@@ -423,7 +424,7 @@
                                     <td class="text-center">{{ $item->total_quantity ?? '' }}</td>
                                 </tr>
                             @endforeach
-                        </tbody>
+                        </tbody> --}}
                     </table>
                 </div>
             </div>
@@ -575,13 +576,13 @@
             })
         });
 
-        function formatCurrency(number) {
-            // return Number(number).toLocaleString('vi-VN') + ' VND';
-            return new Intl.NumberFormat('vi-VN', {
-                style: 'currency',
-                currency: 'VND'
-            }).format(number).replace('₫', 'VND');
-        }
+        // function formatCurrency(number) {
+        //     // return Number(number).toLocaleString('vi-VN') + ' VND';
+        //     return new Intl.NumberFormat('vi-VN', {
+        //         style: 'currency',
+        //         currency: 'VND'
+        //     }).format(number).replace('₫', 'VND');
+        // }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

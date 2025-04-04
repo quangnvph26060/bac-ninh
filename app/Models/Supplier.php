@@ -8,16 +8,28 @@ use Illuminate\Database\Eloquent\Model;
 class Supplier extends Model
 {
     use HasFactory;
-    protected $table = 'suppliers';
+
     protected $fillable = [
-        'name',
-        'email',
+        'bank_id',
+        'company_name',
+        'representative_name',
+        'position',
         'phone',
-        'company_id',
+        'email',
+        'address',
+        'tax_code',
+        'bank_account_number',
+        'notes',
+        'status'
     ];
 
-    protected function company()
+    public function bank()
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Bank::class);
+    }
+
+    public function brands()
+    {
+        return $this->hasMany(BrandSupplier::class);
     }
 }

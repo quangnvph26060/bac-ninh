@@ -14,7 +14,15 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->string('description')->nullable();
+            $table->string('slug')->unique();
+            $table->string('image')->nullable();
+            $table->text('description')->nullable();
+
+            $table->text('seo_title')->nullable();
+            $table->string('seo_description')->nullable();
+
+            $table->integer('status')->default(1)->comment('1: true, 2: false');
+            $table->nestedSet();
             $table->timestamps();
         });
     }

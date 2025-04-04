@@ -13,10 +13,17 @@ return new class extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('company_name');
+            $table->string('representative_name');
+            $table->string('position');
+            $table->string('phone');
             $table->string('email')->unique();
-            $table->string('phone')->nullable();
-            $table->string('address')->nullable();
+            $table->string('address');
+            $table->string('tax_code')->unique();
+            $table->string('bank_account_number')->nullable();
+            $table->string('bank_name')->nullable();
+            $table->unsignedBigInteger('status')->default(1);
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }
