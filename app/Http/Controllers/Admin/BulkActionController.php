@@ -29,7 +29,7 @@ class BulkActionController extends Controller
         try {
             switch ($type) {
                 case 'delete':
-                    // Xóa các bản ghi dựa trên ID (soft delete)
+                    $this->deleteImages($modelClass, $validatedData['ids']);
                     $modelClass::whereIn('id', $validatedData['ids'])->delete();
                     return response()->json(['message' => 'Xóa thành công!'], 200);
 
@@ -56,5 +56,23 @@ class BulkActionController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
+    }
+
+    protected function deleteImages($modelClass, $ids)
+    {
+        $records = $modelClass::whereIn('id', $ids)->get();
+
+        foreach ($records as $record) {
+            foreach ($record->getFillable() as $column) {
+                if ($this->isImageColumn($column) && !empty($record->$column)) {
+                    deleteImage($record->$column);
+                }
+            }
+        }
+    }
+
+    protected function isImageColumn($column)
+    {
+        return preg_match('/(image|photo|avatar|thumbnail|logo)/i', $column);
     }
 }

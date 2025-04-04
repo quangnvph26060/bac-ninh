@@ -92,7 +92,7 @@ if (!function_exists('generateSlug')) {
 
 
 if (!function_exists('transaction')) {
-    function transaction($callback)
+    function transaction($callback, $onError = null)
     {
         DB::beginTransaction();
         try {
@@ -100,24 +100,25 @@ if (!function_exists('transaction')) {
             DB::commit();
             return $result;
         } catch (\Exception $e) {
-            Log::error('Exception Details:', [
-                'error' => $e->getMessage(),  // Tên lỗi
-                'file' => $e->getFile(),      // File xảy ra lỗi
-                'line' => $e->getLine(),      // Dòng xảy ra lỗi
-                'function' => getErrorFunction($e), // Function xảy ra lỗi
-                'trace' => $e->getTraceAsString(), // Stack trace (tùy chọn)
-            ]);
             DB::rollBack();
 
-            if (session()->has('executeError') && session('executeError')) {
-                $imagePath = session('executeError');
-                deleteImage($imagePath);
+            if ($onError && is_callable($onError)) {
+                $onError($e);
             }
+
+            Log::error('Exception Details:', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'function' => getErrorFunction($e),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             return errorResponse('Có lỗi xảy ra, vui lòng thử lại sau!');
         }
     }
 }
+
 
 if (!function_exists('getErrorFunction')) {
     function getErrorFunction(Throwable $exception): ?string
@@ -132,26 +133,31 @@ if (!function_exists('getErrorFunction')) {
 if (!function_exists('successResponse')) {
     function successResponse($message, $data = null, $code = 200, bool $isResponse = false)
     {
-        return  $isResponse ? response()->json(['success' => true, 'message' => $message, 'data' => $data], $code) : $message;
+        $response = ['success' => true, 'message' => $message, 'data' => $data, 'code' => $code];
+        return  $isResponse ? response()->json($response, $code) : $response;
     }
 }
 
 if (!function_exists('handleResponse')) {
-    function handleResponse($message, $code = 200, $isToastr = false)
+    function handleResponse($message, $success, $code = 200)
     {
-        $isToastr ? sessionFlash('success', $message) : '';
-        return response()->json(['success' => true, 'message' => $message], $code);
+        $type = $success ? 'success' : 'error';
+
+        if ($type == 'success') sessionFlash('success', $message);
+
+        return response()->json(['success' => $success, 'message' => $message], $code);
     }
 }
 
 if (!function_exists('errorResponse')) {
     function errorResponse(string $message, bool $isResponse = false,  $code = 500)
     {
-
-        return $isResponse ? response()->json([
+        $response = [
             'success' => false,
-            'message' => $message
-        ], $code) : $message;
+            'message' => $message,
+            'code' => $code
+        ];
+        return $isResponse ? response()->json($response, $code) : $response;
     }
 }
 
@@ -159,5 +165,13 @@ if (!class_exists('sessionFlash')) {
     function sessionFlash($key, $message)
     {
         session()->flash($key, $message);
+    }
+}
+
+if (!class_exists('formatNumber')) {
+    function formatNumber($number)
+    {
+        if (!$number) return 0;
+        return number_format($number, 0, ',', '.');
     }
 }

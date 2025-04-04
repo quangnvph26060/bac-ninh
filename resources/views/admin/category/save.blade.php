@@ -12,6 +12,7 @@
             @if ($category)
                 @method('PUT')
             @endif
+
             <div class="row">
                 <div class="gap-3 col-md-9">
                     <div class="card">
@@ -21,8 +22,8 @@
 
                                     <div class="mb-3 position-relative col-md-12">
                                         <label for="name" class="form-label required">Tên danh mục</label>
-                                        <input type="text" placeholder="Tên sản phẩm" class="form-control" name="name"
-                                            id="name" aria-required="true" required="required"
+                                        <input type="text" placeholder="Tên sản phẩm" aria-required="true" required
+                                            class="form-control" name="name" id="name"
                                             value="{{ optional($category)->name }}">
                                     </div>
 
@@ -34,9 +35,12 @@
                                                 aria-describedby="basic-addon3" value="{{ optional($category)->slug }}">
                                         </div>
                                         <small class="form-hint mt-n2 text-truncate">Xem trước:
-                                            <a href=" {{ env('APP_URL') }}" id="preview-path" target="_blank"
-                                                style="pointer-events: none">
-                                                {{ env('APP_URL') }}/</a></small>
+                                            <a href="{{ env('APP_URL') }}/{{ $category && $category->parent ? $category->parent->slug . '/' : '' }}{{ optional($category)->slug }}"
+                                                id="preview-path" target="_blank"
+                                                @if (!$category) style="pointer-events: none;" @endif>
+                                                {{ env('APP_URL') }}/{{ $category && $category->parent ? $category->parent->slug . '/' : '' }}{{ optional($category)->slug }}
+                                            </a>
+                                        </small>
                                     </div>
 
                                     <div class="mb-3 position-relative col-md-12">
@@ -127,6 +131,25 @@
 
                     <div class="card">
                         <div class="card-header">
+                            <h4 class="card-title">Bộ sưu tập sản phẩm</h4>
+                        </div>
+                        <div class="card-body">
+                            @foreach ($collections as $cID => $cName)
+                                <div class="form-check p-0 ms-0">
+                                    <input class="form-check-input" name="collection_id[]" type="checkbox"
+                                        value="{{ $cID }}" id="collection_{{ $cID }}"
+                                        @checked(in_array($cID, $selectedCollections ?? []))>
+                                    <label class="form-check-label" for="collection_{{ $cID }}">
+                                        {{ $cName }}
+                                    </label>
+                                </div>
+                            @endforeach
+
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
                             <h4 class="card-title">Hình ảnh nổi bật</h4>
                         </div>
                         <div class="card-body">
@@ -177,10 +200,10 @@
                 $('.seo-edit-section').toggle(); // Ẩn/hiện các trường SEO
             });
 
+            updateCharCount('#name', 250)
+
             submitForm('#myForm', function(response) {
-                Notifications(response.message, "success");
-
-
+                window.location.href = "{{ route('admin.categories.index') }}"
             })
         })
     </script>
@@ -189,17 +212,4 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('backend/assets/css/select2.min.css') }}">
-
-    <style>
-        #toggle-seo-fields {
-            font-size: 1rem !important;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .seo-edit-section,
-        .existed-seo-meta {
-            display: none;
-        }
-    </style>
 @endpush

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AttributeValue;
 use App\Models\CompanyProduct;
 use App\Models\OrderDetail;
 use App\Models\Product;
@@ -23,7 +24,7 @@ class ProductService  extends BaseService
     //     $this->productStorage = $productStorage;
     // }
 
-    public function __construct(Product $product)
+    public function __construct(Product $product, public AttributeValue $attributeValue)
     {
         parent::__construct($product);
     }
@@ -36,21 +37,99 @@ class ProductService  extends BaseService
             'name',
             'brand_id',
             'category_id',
+            'company_id',
             'product_unit',
-            'price',
-            'quantity'
+            'sale_price',
+            'stock',
+            'status'
         ];
 
-        $relations = ['productCompanies', 'brand', 'category'];
+        $relations = ['company', 'brand', 'category'];
 
         return $this->queryBuilder(
             $columns,
             $relations,
             false,
-            ['category_id', 'brand_id'],
-            [],
-            ['productCompanies' => 'company_id']
+            ['category_id', 'brand_id', 'company_id'],
         );
+    }
+
+    public function show(string $id)
+    {
+        return $this->findById($id, ['*'], ['category', 'brand', 'company', 'attributes', 'variants']);
+    }
+
+    public function getVariants($product)
+    {
+        return $product->variants->map(function ($variant) {
+            $attributeValues = explode('-', $variant->attribute_value_combine);
+            $variantName = $this->attributeValue
+                ->whereIn('id', $attributeValues)
+                ->get()
+                ->pluck('value')
+                ->implode(' - ');
+
+            return [
+                'variant_name' => $variantName,
+                'sku' => $variant->sku,
+                'sale_price' => $variant->sale_price,
+                'discount_price' => $variant->discount_price,
+                'discount_start' => !empty($variant->discount_start) ? $variant->discount_start->format('d-m-Y') : null,
+                'discount_end' => !empty($variant->discount_end) ? $variant->discount_end->format('d-m-Y') : null,
+                'product_unit' => $variant->product_unit,
+                'stock_status' => $variant->stock_status,
+                'status' => $variant->status,
+                'id' => $variant->id,
+                // 'stock' => $variant->stock,
+            ];
+        });
+    }
+
+    public function getProductCrossSell($product)
+    {
+        $crossSellIds = array_map('intval', explode(',', $product->cross_sell));
+
+        $products = $this->all(['id', 'name', 'image'], [], [], [], ['In' => ['id', $crossSellIds]]);
+        return $products;
+    }
+
+    public function attributesWithValues($product)
+    {
+        return $product->attributes->mapWithKeys(function ($attribute) {
+            // Giải mã các giá trị đã chọn từ JSON
+            $selectedValues = json_decode($attribute->pivot->attribute_values_ids);
+
+            // Lấy thông tin thuộc tính
+            $attributeName = $attribute->name;
+            $attributeId = $attribute->id;  // Lấy ID của thuộc tính
+
+            // Lấy tất cả giá trị của thuộc tính từ bảng `attribute_values`
+            $allValues = $this->attributeValue::where('attribute_id', $attributeId)->get();
+
+            // Lấy các giá trị đã chọn và ID của các giá trị đó
+            $attributeValues = [];  // Mảng chứa tên và ID của tất cả giá trị của thuộc tính
+            $selected = [];  // Mảng chứa tên và ID của các giá trị đã chọn
+
+            foreach ($allValues as $value) {
+                // Thêm tất cả các giá trị vào mảng `values`
+                $attributeValues[$value->id] = $value->value;
+
+                // Kiểm tra xem giá trị có trong danh sách đã chọn không
+                if (in_array($value->id, $selectedValues)) {
+                    // Nếu có thì thêm vào mảng `selected`
+                    $selected[] = $value->id;
+                }
+            }
+
+            // Sử dụng attribute_id làm key của mảng
+            return [
+                $attributeId => [
+                    'attribute' => $attributeName,  // Trả về tên thuộc tính
+                    'selected' => $selected,        // Trả về các giá trị đã chọn với ID và tên
+                    'values' => $attributeValues    // Trả về tất cả giá trị của thuộc tính
+                ]
+            ];
+        });
     }
 
 
@@ -76,175 +155,120 @@ class ProductService  extends BaseService
             throw new Exception('Failed to fetch product in storage');
         }
     }
-    public function getProductById($id): Product
+
+    public function store(array $payload)
     {
-        try {
-            Log::info('Fetching  products by id');
-            return $this->product->find($id);
-        } catch (Exception $e) {
-            Log::error('Failed to fetch products: ' . $e->getMessage());
-            throw new Exception('Failed to Fetching  products by id');
-        }
-    }
+        // dd($payload);
+        $uploadedImage = null;
+        $uploadedImages = null;
+        return transaction(function () use ($payload, &$uploadedImage, &$uploadedImages) {
 
-    public function getProductsByStatus(): \Illuminate\Database\Eloquent\Collection
-    {
-        try {
-            Log::info('Fetching all products by published');
-            return $this->product->where('status', 'published')->where('quantity', '>', 0)->get();
-        } catch (Exception $e) {
-            Log::error('Failed to fetch products: ' . $e->getMessage());
-            throw new Exception('Failed to fetch products');
-        }
-    }
+            if (!isset($payload['slug']) || !$payload['slug']) {
+                $payload['slug'] = generateSlug($payload['name']);
+            }
 
-    public function createProduct($data): Product
-    {
-        $images = saveImages($data, 'images', 'product', 300, 300, true);
+            if (hasFile('image')) {
+                $uploadedImage = uploadImages('image', 'products');
+                $payload['image'] = $uploadedImage;
+            }
 
-        DB::beginTransaction();
-        try {
-            Log::info("Creating a new product with name: {$data['name']}");
+            if (!empty($payload['tags'])) {
+                // Giải mã chuỗi JSON thành mảng
+                $tagsArray = json_decode($payload['tags'], true);
 
-            $product = $this->product->create([
-                'name' => $data->name,
-                'price' => $data->price,
-                'quantity' => $data->quantity,
-                'product_unit' => $data->product_unit,
-                'category_id' => $data->category_id,
-                'description' => $data->description,
-                'is_featured' => $data->is_featured,
-                'is_new_arrival' => $data->is_new_arrival,
-                'status' =>  'published',
-                'discount_id' => $data->discount_id,
-                'brands_id' => $data->brand_id,
-                // 'supplier_id' => $data['suppliers'],
-            ]);
+                $tags = array_map(function ($tag) {
+                    return $tag['value'];
+                }, $tagsArray);
 
-            // $company_product = CompanyProduct::create([
-            //     'product_id' => $product->id,
-            //     'company_id' => $data['company_id'],
-            // ]);
+                $payload['tags'] = $tags;
+            }
 
+            if (! $product = $this->create($payload)) {
+                return errorResponse('Có lỗi xảy ra. Vui lòng thử lại sau!');
+            }
 
-            if ($images) {
-                foreach ($images as $image) {
-                    ProductImages::create([
+            if (hasFile('images')) {
+                $uploadedImages = uploadImages('images', 'thumnails', false, 0, 0, true);
+
+                foreach ($uploadedImages as $image) {
+                    $product->images()->create([
                         'product_id' => $product->id,
-                        'image_path' => $image,
+                        'image' => $image,
                     ]);
                 }
             }
 
-            DB::commit();
-            return $product;
-        } catch (Exception $e) {
-            if ($images) {
-                foreach ($images as $image) {
+            if (!empty($payload['attributes'])) {
+                $this->productAttributes($product, $payload);
+            }
+
+            if (!empty($payload['variants'])) {
+                $this->productVariants($product, $payload);
+            }
+
+            return successResponse('Thêm sản phẩm thành công', [], 201);
+        }, function () use ($uploadedImage, $uploadedImages) {
+            if ($uploadedImage) {
+                deleteImage($uploadedImage);
+            }
+
+            if ($uploadedImages) {
+                foreach ($uploadedImages as $image) {
                     deleteImage($image);
                 }
             }
 
-            DB::rollBack();
-
-            throw new Exception('Failed to create product');
-        }
+            return errorResponse('Có lỗi xảy ra. Vui lòng thử lại sau!');
+        });
     }
 
-    public function updateProduct(int $id, $data): Product
+    protected function productVariants($product, $payload)
     {
-        $images = saveImages($data, 'images', 'product', 300, 300, true);
+        $variants = collect($payload['variants'])->map(fn($variant, $key) => [
+            'sku'                       => $variant['sku'],
+            'sale_price'                => $variant['sale_price'],
+            'attribute_value_combine'   => $key,
+            'discount_price'            => $variant['discount_price'] ?? null,
+            'product_unit'              => $variant['product_unit'] ?? null,
+            'discount_start'            => $variant['discount_start'] ?? null,
+            'discount_end'              => $variant['discount_end'] ?? null,
+            'stock_status'              => $variant['stock_status'],
+            'status'                    =>  $variant['status'] ?? 2,
+        ]);
 
-        DB::beginTransaction();
-        try {
-            $product = $this->getProductById($id);
+        $product->variants()->createMany($variants);
+    }
 
-            if ($images) {
-                foreach ($images as $image) {
-                    ProductImages::create([
-                        'product_id' => $product->id,
-                        'image_path' => $image,
-                    ]);
-                }
+    public function productAttributes($product, $payload)
+    {
+        // Lấy các attribute_ids từ payload (danh sách các thuộc tính)
+        $attributeIds = array_keys($payload['attributes']);  // Lấy danh sách các attribute_id (ví dụ: 15, 2)
+
+        // Duyệt qua các thuộc tính và giá trị đã chọn
+        $pivotData = [];
+        foreach ($payload['attributes'] as $attributeId => $values) {
+            // Chỉ lưu các giá trị được chọn cho mỗi thuộc tính
+            $valueIds = [];
+
+            foreach ($values as $value) {
+                // Tách "51-Xanh" thành mảng [51, 'Xanh']
+                list($valueId, $valueName) = explode('-', $value);
+
+                // Thêm giá trị vào mảng valueIds
+                $valueIds[] = (int)$valueId;  // Store the value ID as an integer
             }
 
-            if ($data->delete_images) {
-                foreach ($data->delete_images as $id) {
-                    if (is_null($id)) {
-                        continue;
-                    }
-                    $image =  ProductImages::where('id', $id)->first();
-                    deleteImage($image->image_path);
-                    $image->delete();
-                }
-            }
-
-            $product->update($data->toArray());
-
-            DB::commit();
-            return $product;
-        } catch (Exception $e) {
-            dd($e->getMessage());
-            DB::rollBack();
-            Log::error("Failed to update product: {$e->getMessage()}");
-            throw new Exception('Failed to update product');
+            // Gắn thông tin giá trị vào bảng trung gian, bao gồm các giá trị được chọn cho mỗi thuộc tính
+            $pivotData[] = [
+                'attribute_id' => $attributeId,  // Lấy ID thuộc tính
+                'attribute_values_ids' => json_encode($valueIds),  // Store the value IDs directly as an array
+                'product_id' => $product->id
+            ];
         }
-    }
 
-    public function deleteProduct(int $id): void
-    {
-        DB::beginTransaction();
-        try {
-            $product = $this->getProductById($id);
-            if (OrderDetail::where('product_id', $id)->exists()) {
-                throw new Exception('Sản phẩm đang tồn tại trong đơn hàng, không thể xóa.');
-            }
-            $productimages = ProductImages::where('product_id', $id)->get();
-            foreach ($productimages as $image) {
-                deleteImage($image->image_path);
-                $image->delete();
-            }
-            $product->delete();
-            DB::commit();
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error("Failed to delete product: {$e->getMessage()}");
-            throw new Exception('Failed to delete product');
-        }
-    }
-
-
-    public function getProductByCategory($categoryId): \Illuminate\Database\Eloquent\Collection
-    {
-        try {
-            Log::info('Fetching  products by categoryId');
-            return $this->product->where('category_id', $categoryId)->get();
-        } catch (Exception $e) {
-            Log::error('Failed to fetch products by categoryId: ' . $e->getMessage());
-            throw new Exception('Failed to fetch products by categoryId');
-        }
-    }
-
-    public function getProductByBrand($brand_id): \Illuminate\Database\Eloquent\Collection
-    {
-        try {
-            Log::info('Fetching  products by brands');
-            return $this->product->where('brands_id ', $brand_id)->get();
-        } catch (Exception $e) {
-            Log::error('Failed to fetch products: ' . $e->getMessage());
-            throw new Exception('Failed to fetch products by brands');
-        }
-    }
-
-    public function productByName($name): LengthAwarePaginator
-    {
-        try {
-            $products = $this->product->where('name', 'LIKE', '%' . $name . '%')->paginate(10);
-            // dd($products);
-            return $products;
-        } catch (Exception $e) {
-            Log::error("Failed to search products: {$e->getMessage()}");
-            throw new Exception('Failed to search products');
+        // Đồng bộ các thuộc tính vào bảng trung gian (tránh đồng bộ nhiều lần)
+        if (count($pivotData)) {
+            $product->attributes()->syncWithoutDetaching($pivotData);
         }
     }
 

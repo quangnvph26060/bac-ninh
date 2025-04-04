@@ -28,37 +28,9 @@ class CompanyService extends BaseService
 
     public function getCompanyAll()
     {
-        return $this->pluck(['name', 'id'], [], [], ['name', 'asc']);
+        return $this->pluck(['id', 'name'], [], [], ['name', 'asc'], ['products']);
     }
 
-    public function companyFilter($name, $city_id)
-    {
-        try {
-            $query = $this->company->query();
-            if ($city_id) {
-                $query->where('city_id', $city_id);
-            }
-            if ($name) {
-                $query->where('name', 'LIKE', "%{$name}%");
-            }
-
-            $companies = $query->orderByDesc('created_at')->paginate(10);
-            return $companies;
-        } catch (Exception $e) {
-            Log::error('Failed to find company: ' . $e->getMessage());
-            throw new Exception('Failed to find company');
-        }
-    }
-
-    public function getCompanyByName($name)
-    {
-        try {
-            return $this->company->where('name', 'LIKE', '%' . $name . '%')->paginate(10);
-        } catch (Exception $e) {
-            Log::error('Failed to get company by name: ' . $e->getMessage());
-            throw new Exception('Failed to get company by name');
-        }
-    }
     public function findCompanyById($id)
     {
         try {

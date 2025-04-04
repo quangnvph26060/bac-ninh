@@ -4,26 +4,20 @@ namespace App\Http\Controllers\Admin;
 
 use App\Exports\ProductTemplateExport;
 use App\Imports\ProductImport;
+use App\Services\AttributeService;
 use App\Services\CompanyService;
 use App\Traits\PaginateTrait;
-use Exception;
-use App\Models\Company;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Services\BrandService;
 use App\Services\ProductService;
 use App\Services\CategoryService;
 use App\Services\SupplierService;
-use App\Http\Responses\ApiResponse;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Exceptions\ProductNotFoundException;
-use App\Http\Requests\Product\ProductStoreRequest;
-use App\Http\Requests\Product\ProductUpdateRequest;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Exports\ProductExport;
+use App\Http\Requests\Product\ProductRequest;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
@@ -34,14 +28,9 @@ class ProductController extends Controller
         public CategoryService $categoryService,
         public BrandService $brandService,
         public SupplierService $supplierService,
-        public CompanyService $companyService
-    ) {
-        $this->productService = $productService;
-        $this->categoryService = $categoryService;
-        $this->brandService = $brandService;
-        $this->supplierService = $supplierService;
-        $this->companyService = $companyService;
-    }
+        public CompanyService $companyService,
+        public AttributeService $attributeService
+    ) {}
     public function index()
     {
         if (request()->ajax()) {
@@ -51,9 +40,9 @@ class ProductController extends Controller
                 $query,
                 fn($dataTable) =>
                 $dataTable
-                    ->editColumn('brand_id', fn($row) => $row->brand->name ?? 'Unknown')
-                    ->editColumn('category_id', fn($row) => $row->category->name ?? 'Unknown')
-                    ->editColumn('company_name',  fn($row) => $row->productCompanies->count() > 0 ? $row->productCompanies->pluck('name')->toArray() : 'Đang cập nhật...')
+                    ->editColumn('brand_id', fn($row) => $row->brand->name ?? '-----')
+                    ->editColumn('category_id', fn($row) => $row->category->name ?? '-----')
+                    ->editColumn('company_name',  fn($row) => $row->company->name ?? '-----')
                     ->addColumn('operations', function ($row) {
                         return view('admin.components.operation', compact('row'));
                     }),
@@ -65,27 +54,7 @@ class ProductController extends Controller
         $brands         = $this->brandService->getBrandAll();
         $companies      = $this->companyService->getCompanyAll();
 
-        // dd($companies);
         return view('admin.product.index', compact('categories', 'brands', 'companies'));
-    }
-
-    public function productFilter(Request $request)
-    {
-        // dd($request->all());
-        $name = $request->input('name');
-        $company_id = $request->input('company_id');
-        $category = $this->categoryService->getCategoryAllStaff();
-        $brand = $this->brandService->getAllBrand();
-        $title = 'Sản phẩm';
-        $companies = Company::orderBy('name', 'asc')->get();
-        try {
-            $product = $this->productService->productFilter($name, $company_id);
-            // dd($products);
-            return view('admin.product.index', compact('product', 'companies', 'title', 'category', 'brand'));
-        } catch (Exception $e) {
-            Log::error("Failed to find Product: " . $e->getMessage());
-            return redirect()->route('admin.product.store')->with('error', 'Failed to find Product');
-        }
     }
 
     public function create()
@@ -93,59 +62,38 @@ class ProductController extends Controller
         $title = 'thêm sản phẩm';
         $brands = $this->brandService->getBrandAll();
         $categories = $this->categoryService->getCategoryAll();
-        return view('admin.product.save', compact('brands', 'categories', 'title'));
+        $attributes = $this->attributeService->getPluck();
+        return view('admin.product.save', compact('brands', 'categories', 'title', 'attributes'));
     }
 
-    public function addSubmit(ProductStoreRequest $request)
+    public function store(ProductRequest $request)
     {
-        try {
-            $product = $this->productService->createProduct($request);
-            return redirect()->route('admin.product.store')->with('success', 'Thêm sản phẩm thành công !');
-        } catch (ModelNotFoundException $e) {
-            $exception = new ProductNotFoundException();
-            return $exception->render(request());
-        } catch (Exception $e) {
-            dd($e->getMessage());
-            Log::error('Failed to fetch add products: ' . $e->getMessage());
-            return ApiResponse::error('Failed to fetch add products', 500);
-        }
+        $payload = $request->validated();
+        $response = $this->productService->store($payload);
+        return handleResponse($response['message'], $response['success'], $response['code']);
     }
 
-    public function edit(Product $product)
+    public function edit(string $id)
     {
-        $title = 'Sửa sản phẩm';
-        $categories = $this->categoryService->getCategoryAll();
+        $title = 'Cập nhật sản phẩm';
+
         $brands = $this->brandService->getBrandAll();
-        return view('admin.product.save', compact('product', 'brands', 'categories', 'title'));
+        $categories = $this->categoryService->getCategoryAll();
+        $attributes = $this->attributeService->getPluck();
+        $product = $this->productService->show($id);
+        $variants = $this->productService->getVariants($product);
+        $selectedAttributes =   $product->attributes->pluck('id')->toArray();
+        $attributesWithValues = $this->productService->attributesWithValues($product);
+        $productCrossSell = $this->productService->getProductCrossSell($product);
+
+        return view('admin.product.save', compact('product', 'brands', 'categories', 'attributesWithValues', 'title', 'selectedAttributes', 'attributes', 'variants', 'productCrossSell'));
     }
 
-    public function update($id, ProductUpdateRequest $request)
+    public function update($id, Request $request)
     {
+        dd($request->toArray());
         $product = $this->productService->updateProduct($id, $request);
         return redirect()->route('admin.product.store')->with('success', 'Cập nhật sản phẩm thành công');
-    }
-
-
-    // ProductController.php
-    public function delete($id)
-    {
-        try {
-            $this->productService->deleteProduct($id);
-
-            // Lấy lại danh sách sản phẩm sau khi xóa
-            $product = Product::orderByDesc('created_at')->paginate(10); // Điều chỉnh số lượng sản phẩm trên mỗi trang nếu cần thiết
-            $view = view('admin.product.table', compact('product'))->render(); // Tạo view cho bảng sản phẩm
-
-            return response()->json(['success' => true, 'message' => 'Xóa thành công!', 'table' => $view]);
-        } catch (Exception $e) {
-            Log::error('Failed to delete product: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Sản phẩm không thể xóa.']);
-        }
-    }
-
-    public function formimport()
-    {
-        return view('admin.product.importexcel');
     }
 
     public function import(Request $request)
@@ -254,5 +202,39 @@ class ProductController extends Controller
         );
 
         return $response;
+    }
+
+    /**
+     * Tìm kiếm sản phẩm dựa trên query.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search(Request $request)
+    {
+        // Lấy query từ request
+        $query = $request->get('query');
+        $page = $request->get('page', 1); // Mặc định trang là 1
+        $perPage = $request->get('per_page', 10); // Mặc định 10 sản phẩm mỗi trang
+
+        // Tìm kiếm sản phẩm theo tên
+        $products = Product::where('name', 'like', '%' . $query . '%')
+            ->paginate($perPage); // Phân trang kết quả
+
+        // Trả về kết quả tìm kiếm dạng JSON, bao gồm dữ liệu sản phẩm và phân trang
+        return response()->json([
+            'data' => $products->items(),
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'total_pages' => $products->lastPage(),
+                'prev_page_url' => $products->previousPageUrl(),
+                'next_page_url' => $products->nextPageUrl(),
+            ],
+        ]);
+    }
+
+    public function getValueByAttributeId($attributeId)
+    {
+        return $this->attributeService->getValueByAttributeId($attributeId);
     }
 }

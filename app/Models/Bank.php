@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Bank extends Model
 {
     use HasFactory;
-    protected $table = 'banks';
 
     protected $fillable = ['name', 'code', 'bin', 'shortName'];
 
@@ -25,5 +24,10 @@ class Bank extends Model
     public function superAdmin()
     {
         return $this->hasOne(SuperAdmin::class, 'bank_id');
+    }
+
+    public function suppliers()
+    {
+        return $this->hasMany(Supplier::class, 'bank_id');
     }
 }

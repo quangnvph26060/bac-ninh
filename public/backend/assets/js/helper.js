@@ -1,5 +1,5 @@
 function formatCurrency(amount) {
-    return "₫" + amount.toLocaleString("vi-VN");
+    return "₫" + Math.round(amount).toLocaleString("vi-VN");
 }
 
 function updateCharCount(inputSelector, maxLength) {
@@ -128,10 +128,9 @@ function submitForm(formId, successCallback) {
                     successCallback(response);
                 }
             },
-            error: function (xhr, status, error) {
-                Notifications(xhr.JsonResponse.message, "error");
-
-                console.log("Lỗi khi gửi dữ liệu: ", error);
+            error: function (xhr) {
+                Notifications(xhr.responseJSON.message, "danger");
+                console.log("Lỗi khi gửi dữ liệu: ", xhr);
             },
             complete: function () {
                 // Khôi phục trạng thái nút sau khi API hoàn tất (thành công hoặc lỗi)
@@ -155,7 +154,7 @@ function Notifications(message, type) {
                 from: "bottom",
                 align: "right",
             },
-            time: 1000,
+            time: 100000,
         }
     );
 }

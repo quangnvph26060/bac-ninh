@@ -20,111 +20,82 @@ class BrandService extends BaseService
         parent::__construct($brand);
     }
 
-    public function pagination() {}
-
-    public function getBrandAll()
+    public function pagination()
     {
-        return $this->pluck(['name', 'id'], [], [], ['name', 'asc']);
+        $columns = [
+            'id',
+            'name',
+            'logo',
+            'created_at',
+            'website',
+            'status'
+        ];
+
+        return $this->queryBuilder(
+            $columns,
+        );
     }
 
-    /**
-     * Summary of createBrand
-     * @param array $data
-     * @throws Exception
-     * @return Brand
-     */
-    public function createBrand($data): Brand
+    public function getBrandAll($useWithCount = true)
     {
-        $image = saveImages($data, 'images', 'brand', 300, 300);
-        DB::beginTransaction();
-        try {
-
-            Log::info("Creating a new Brand with name: {$data->name}");
-
-            $brand = $this->brand->create([
-                'name' => $data->name,
-                'logo' => $image,
-            ]);
-            DB::commit();
-            return $brand;
-        } catch (Exception $e) {
-            deleteImage($image);
-            DB::rollBack();
-            Log::error("Failed to create Brand: {$e->getMessage()}");
-            throw new Exception('Failed to create Brand');
-        }
+        $withCounts =  $useWithCount ? ['products'] : [];
+        return $this->pluck(['id', 'name'], [], [], ['name', 'asc'], $withCounts);
     }
 
-    public function getBrandById(int $id): Brand
+    public function store(array $payload)
     {
-        Log::info("Fetching product with ID: $id");
-        $brand = $this->brand->find($id);
+        $uploadedImage = null;
 
-        if (!$brand) {
-            Log::warning("Product with ID: $id not found");
-            throw new ModelNotFoundException("Product not found");
-        }
-        return $brand;
-    }
-
-    public function updateBrand(int $id, $data): Brand
-    {
-        DB::beginTransaction();
-        try {
-            $brand = $this->getBrandById($id);
-            Log::info("Updating product with ID: $id");
-
-            $criteria = [
-                'name' => $data->name
-            ];
-
-            if ($data->hasFile('images')) {
-                $criteria['logo'] = saveImages($data, 'images', 'brand', 300, 300);
+        return transaction(function () use ($payload, &$uploadedImage) {
+            if (!isset($payload['slug']) || !$payload['slug']) {
+                $payload['slug'] = generateSlug($payload['name']);
             }
 
-            $update = $brand->update($criteria);
+            if (hasFile('logo')) {
+                $uploadedImage = uploadImages('logo', 'brands');
+                $payload['logo'] = $uploadedImage;
+            }
 
-            DB::commit();
-            return $brand;
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error("Failed to update brand: {$e->getMessage()}");
-            throw new Exception('Failed to update brand');
-        }
+            if (!$brand = $this->create($payload)) {
+                errorResponse('Thêm thương hiệu thất bại!');
+            }
+
+            return successResponse('Thêm thương hiệu thành công.', $brand, 201);
+        }, function () use (&$uploadedImage) {
+            if (!empty($uploadedImage)) {
+                deleteImage($uploadedImage);
+            }
+        });
     }
 
-    public function brandByName($name)
+    public function show(string $id)
     {
-        try {
-            $brand = $this->brand->where('name', 'LIKE', '%' . $name . '%')->first();
-            return $brand;
-        } catch (Exception $e) {
-            Log::error("Failed to search products: {$e->getMessage()}");
-            throw new Exception('Failed to search products');
-        }
+        return $this->findById($id);
     }
 
-    public function deleteBrand($id)
+    public function update(string $id, array $payload)
     {
-        try {
-            $brand = $this->getBrandById($id);
-            $brand->delete();
-            DB::commit();
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error("Failed to delete brand:" . $e->getMessage());
-            throw new Exception("Failed to delete brand");
-        }
-    }
+        $uploadedImage = null;
 
-    public function findBrandBySupplier($supplier_id): LengthAwarePaginator
-    {
-        try {
-            $brand = $this->brand->where('supplier_id', $supplier_id)->paginate(10);
-            return $brand;
-        } catch (Exception $e) {
-            Log::error('Failed to find brand: ' . $e->getMessage());
-            throw new Exception('Failed to find brand');
-        }
+        return transaction(function () use ($id, $payload, &$uploadedImage) {
+            if (!isset($payload['slug']) || !$payload['slug']) {
+                $payload['slug'] = generateSlug($payload['name']);
+            }
+
+            if (hasFile('logo')) {
+                $uploadedImage = uploadImages('logo', 'brands');
+                $payload['logo'] = $uploadedImage;
+            }
+
+            if (!$brand = $this->updateData($id, $payload)) {
+                errorResponse('Thêm thương hiệu thất bại!');
+            }
+
+            return successResponse('Thêm thương hiệu thành công.', $brand, 201);
+        }, function () use (&$uploadedImage) {
+            if (!empty($uploadedImage)) {
+                deleteImage($uploadedImage);
+            }
+        });
     }
 }

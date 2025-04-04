@@ -4,109 +4,46 @@ namespace App\Services;
 
 use App\Models\Supplier;
 use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
-class SupplierService
+class SupplierService extends BaseService
 {
-    protected $supplier;
-    public function __construct(Supplier $supplier)
+    public function __construct(public Supplier $supplier)
     {
-        $this->supplier = $supplier;
+        parent::__construct($supplier);
     }
 
-    public function GetAllSupplier()
+    public function pagination()
     {
-        try {
-            return $this->supplier->orderByDesc('created_at')->paginate(10);
-        } catch (Exception $e) {
-            Log::error('Failed to fetch Supplier : ' . $e->getMessage());
-            throw new Exception('Failed to fetch Supplier');
-        }
+        $columns = ['id', 'company_name', 'representative_name', 'phone', 'email', 'status', 'bank_account_number', 'bank_id', 'tax_code'];
+
+        return $this->queryBuilder($columns, ['bank']);
     }
-    public function getSuppliersByCompanyId($companyId)
+    public function show(string $id)
     {
-        try {
-            return $this->supplier
-                ->where('company_id', $companyId)
-                ->orderBy('created_at', 'desc')
-                ->paginate(10);
-        } catch (\Exception $e) {
-            Log::error('Failed to get suppliers by company ID: ' . $e->getMessage());
-            throw new \Exception('Failed to fetch suppliers');
-        }
-    }
-    public function GetSuppliersAll()
-    {
-        try {
-            return $this->supplier->get();
-        } catch (Exception $e) {
-            Log::error('Failed to fetch Supplier : ' . $e->getMessage());
-            throw new Exception('Failed to fetch Supplier');
-        }
+        return $this->findById($id, ['*'], ['brands']);
     }
 
-    public function findSupplierByPhone($phone)
-    {
-        try {
-            $supplier = $this->supplier->where('phone', $phone)->first();
-            return $supplier;
-        } catch (Exception $e) {
-            Log::error('Failed to find supplier information: ' . $e->getMessage());
-            throw new Exception('Failed to find supplier informations');
-        }
-    }
+    public function create(array $data) {}
 
-    public function addSupplier(array $data)
+    public function update(string $id, array $payload)
     {
-        DB::beginTransaction();
-        try {
-            $supplier = $this->supplier->create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'],
-                'company_id' => $data['company_id'] // Thêm công ty ID
-            ]);
-            DB::commit();
-            return $supplier;
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error("Failed Add Supplier : " . $e->getMessage());
-            throw new Exception("Failed Add Supplier");
-        }
-    }
+        return transaction(function () use ($id, $payload) {
+            if (! $supplier = $this->updateData($id, $payload)) {
+                return errorResponse('Đã có lỗi xảy ra. Vui lòng thử lại sau!!!');
+            }
 
+            if (!empty($payload['brand_id'])) {
+                $supplier->brands()->delete();
 
-    public function findSupplierById($id)
-    {
-        try {
-            return $this->supplier->find($id);
-        } catch (Exception $e) {
-            Log::error('Failed to find suppler: ' . $e->getMessage());
-            throw new Exception('Failed to find supplier');
-        }
-    }
+                $brands = collect($payload['brand_id'])->map(fn($brand_id) =>  ['brand_id' => $brand_id]);
 
-    public function updateSupplier(array $data, $id)
-    {
-        DB::beginTransaction();
-        try {
-            $supplier = $this->supplier->find($id);
-            $supplier->update([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'],
-            ]);
-            DB::commit();
-            return $supplier;
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error("Failed update Supplier : " . $e->getMessage());
-            throw new Exception("Failed update Supplier");
-        }
+                $supplier->brands()->createMany($brands);
+            }
+
+            return successResponse('Lưu thay đổi thành công.');
+        });
     }
 
     public function deleteSupplier($id)

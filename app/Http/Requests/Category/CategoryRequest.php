@@ -25,13 +25,34 @@ class CategoryRequest extends FormRequest
 
         return [
             'name' => 'required|unique:categories,name,' . $id,
-            'slug' => 'nullable|unique:categories,name,' . $id,
+            'slug' => 'nullable|unique:categories,slug,' . $id,
             'description' => 'nullable|string',
             'status' => 'required|in:1,2',
             'parent_id' => 'nullable|exists:categories,id',
             'seo_title' => 'nullable|string|max:250',
             'seo_description' => 'nullable|string|max:250',
-            'image' => 'nullable|image|mimes:png,jpg,jpeg,gif,webp|max:2048'
+            'image' => 'nullable|image|mimes:png,jpg,jpeg,gif,webp|max:2048',
+            'collection_id' => 'nullable|exists:collections,id'
+        ];
+    }
+
+    public function messages()
+    {
+        return __('request.messages');
+    }
+
+    public function attributes()
+    {
+        return [
+            'name' => 'Tên danh mục',
+            'slug' => 'Đường dẫn',
+            'description' => 'Mô tả',
+            'status' => 'Trạng thái',
+            'parent_id' => 'Danh mục cha',
+            'seo_title' => 'Tiêu đề SEO',
+            'seo_description' => 'Mô tả SEO',
+            'image' => 'Hình ảnh',
+            'collection_id' => 'Bộ sưu tập'
         ];
     }
 }

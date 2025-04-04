@@ -11,7 +11,7 @@ if (hasDtControl) {
     thead += "<th></th>"; // Chỗ này để chừa vị trí cho dt-control
 }
 
-thead += '<th><input type="checkbox" id="selectAll" /></th>';
+thead += '<th><input type="checkbox" id="selectAll" class="form-check-input" /></th>';
 
 // Thêm các cột khác vào thead
 columns.forEach(function (column) {
@@ -141,7 +141,7 @@ const dataTables = (
 
     $(document).on("click", ".btn-operation-destroy", function () {
         let id = $(this).data("id");
-
+        let pageInfo = table.page.info();
         Swal.fire({
             title: "Bạn có chắc chắn muốn xóa?",
             text: "Hành động này sẽ không thể hoàn tác!",
@@ -162,7 +162,19 @@ const dataTables = (
                         type: "delete",
                     },
                     success: function (response) {
-                        table.ajax.reload();
+                        table.ajax.reload(function () {
+                            let newPageInfo = table.page.info();
+
+                            // Nếu trang hiện tại vẫn còn dữ liệu, giữ nguyên
+                            if (pageInfo.page < newPageInfo.pages) {
+                                table.page(pageInfo.page).draw(false);
+                            } else {
+                                // Nếu không còn dữ liệu ở trang hiện tại, quay về trang trước đó
+                                table
+                                    .page(Math.max(pageInfo.page - 1, 0))
+                                    .draw(false);
+                            }
+                        }, false);
                         $.notify(
                             {
                                 icon: "icon-bell",
@@ -321,8 +333,6 @@ const dataTables = (
     $("#actionSelect").on("change", function () {
         const selectedAction = $("#actionSelect").val();
 
-        console.log(selectedAction);
-
         if (!selectedAction) return;
 
         const selectedIds = $(".row-checkbox:checked")
@@ -330,6 +340,8 @@ const dataTables = (
                 return $(this).val();
             })
             .get();
+
+        let pageInfo = table.page.info(); // Lưu trang hiện tại
 
         if (selectedAction === "delete") {
             $.ajax({
@@ -341,7 +353,19 @@ const dataTables = (
                     type: "delete",
                 },
                 success: function (response) {
-                    table.ajax.reload(); // Sử dụng biến table thay vì gọi lại $('#myTable').DataTable()
+                    table.ajax.reload(function () {
+                        let newPageInfo = table.page.info();
+
+                        // Nếu trang hiện tại vẫn còn dữ liệu, giữ nguyên
+                        if (pageInfo.page < newPageInfo.pages) {
+                            table.page(pageInfo.page).draw(false);
+                        } else {
+                            // Nếu không còn dữ liệu ở trang hiện tại, quay về trang trước đó
+                            table
+                                .page(Math.max(pageInfo.page - 1, 0))
+                                .draw(false);
+                        }
+                    }, false); // Sử dụng biến table thay vì gọi lại $('#myTable').DataTable()
                     $.notify(
                         {
                             icon: "icon-bell",

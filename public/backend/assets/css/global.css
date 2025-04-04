@@ -43,6 +43,11 @@ table tbody tr td {
     font-weight: 500;
 }
 
+a {
+    color: rgba(32, 107, 196, 1);
+    text-decoration: none;
+}
+
 .breadcrumb-item {
     line-height: 1;
 }
@@ -179,8 +184,8 @@ a.form-hint {
 .switch {
     position: relative;
     display: inline-block;
-    width: 60px;
-    height: 30px;
+    width: 50px;
+    height: 26px;
 }
 
 .switch input {
@@ -204,10 +209,10 @@ a.form-hint {
 .slider:before {
     position: absolute;
     content: "";
-    height: 26px;
-    width: 26px;
+    height: 20px;
+    width: 20px;
     left: 3px;
-    bottom: 2px;
+    bottom: 3px;
     background-color: white;
     -webkit-transition: 0.4s;
     transition: 0.4s;
@@ -222,9 +227,9 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
-    -webkit-transform: translateX(28px);
-    -ms-transform: translateX(28px);
-    transform: translateX(28px);
+    -webkit-transform: translateX(23px);
+    -ms-transform: translateX(23px);
+    transform: translateX(23px);
 }
 
 /* Rounded sliders */
@@ -254,6 +259,152 @@ input:checked + .slider:before {
 
 .card-title .form-label {
     font-size: 1.1rem !important;
+    margin-bottom: 0 !important;
+}
+
+.form-check-input {
+    width: 1.25em;
+    height: 1.25em;
+}
+
+.select2-container .select2-search--inline .select2-search__field {
+    margin-top: 9px !important;
+}
+
+.select2-container--default
+    .select2-selection--multiple
+    .select2-selection__choice {
+    margin-top: 6px !important;
+}
+
+#toggle-seo-fields {
+    font-size: 1rem !important;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.seo-edit-section,
+.existed-seo-meta {
+    display: none;
+}
+.seo-preview * {
+    word-break: break-all;
+}
+
+.seo-preview .page-title-seo {
+    color: #1a0dab;
+    font-size: 18px;
+    font-weight: 400;
+    margin-bottom: 2px;
+}
+
+.seo-preview .page-url-seo p {
+    word-wrap: break-word;
+    color: #006621;
+    display: block;
+    font-size: 13px;
+    line-height: 16px;
+    margin-bottom: 2px;
+}
+
+.list-group {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.list-search-data h4 {
+    font-size: 1rem;
+}
+
+.avatar {
+    align-items: center;
+    background: #eef3f6 no-repeat center/cover;
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 1px rgba(4, 32, 69, 0.1);
+    color: #6c7a91;
+    display: inline-flex;
+    font-size: 1rem;
+    font-weight: 500;
+    height: 2.5rem;
+    justify-content: center;
+    line-height: 1;
+    position: relative;
+    text-align: center;
+    text-transform: uppercase;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    vertical-align: bottom;
+    width: 2.5rem;
+}
+
+.list-group-flush {
+    scrollbar-width: thin; /* Cho Firefox */
+    scrollbar-color: #747474 #e0e0e0; /* Màu thumb và track cho Firefox */
+}
+.list-group-flush::-webkit-scrollbar {
+    width: 8px;
+}
+
+.list-group-flush::-webkit-scrollbar-track {
+    background: #e0e0e0; /* Màu xám nhạt cho track, giống hình */
+    border-radius: 100px; /* Bo góc track */
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1); /* Hiệu ứng bóng đổ nhẹ bên trong */
+}
+
+.list-group-flush::-webkit-scrollbar-thumb {
+    background: #d9d9d9; /* Màu thumb */
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.2); /* Bóng đổ cho thumb */
+}
+
+.list-group-flush::-webkit-scrollbar-thumb:hover {
+    background: #bfbfbf; /* Màu thumb khi hover */
+    cursor: pointer;
+}
+
+.list-group-item.active,
+.list-group-item:active,
+.list-group-item:focus,
+.list-group-item:hover {
+    background-color: rgba(108, 122, 145, 0.08);
+}
+
+.list-group-hoverable .list-group-item-actions {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.list-group-hoverable .list-group-item-actions.show,
+.list-group-hoverable .list-group-item:hover .list-group-item-actions {
+    opacity: 1;
+}
+
+.image-uploader .uploaded .uploaded-image {
+    width: calc(12.666667% - 1rem) !important;
+    padding-bottom: calc(12.666667% - 1rem) !important;
+}
+
+.form-label-description {
+    color: #6c7a91;
+    float: right;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+table.dataTable th.dt-type-numeric,
+table.dataTable th.dt-type-date,
+table.dataTable td.dt-type-numeric,
+table.dataTable td.dt-type-date {
+    text-align: inherit !important;
+}
+
+.accordion-button {
+    padding: 10px !important;
+}
+
+.select-all.position-absolute {
+    top: 15px;
+    right: 20px;
 }
 
 @media (min-width: 768px) {

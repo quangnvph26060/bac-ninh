@@ -24,6 +24,11 @@ class CategoryService extends BaseService
         return $this->sortCategories($categories);
     }
 
+    public function loadCategoriesWithParent()
+    {
+        return $this->pluck(['name', 'id'], [], [['parent_id', '<>', null]]);
+    }
+
     private function sortCategories($categories, $parentId = null)
     {
         $result = [];
@@ -53,7 +58,13 @@ class CategoryService extends BaseService
     }
     public function getCategoryAll()
     {
-        return $this->pluck(['name', 'id'], [], [], ['name', 'asc']);
+        return $this->pluck(['id', 'name'], [], [], ['name', 'asc'], ['products']);
+    }
+
+    public function getSelectedCollections(string $id)
+    {
+        $category = $this->show($id);
+        return $category->collections()->pluck('collections.id')->toArray();
     }
 
     public function getCategoryAllStaff()
@@ -66,90 +77,87 @@ class CategoryService extends BaseService
             throw new Exception('Failed to fetch categories');
         }
     }
-    public function createCategory(array $data): Category
+    public function store(array $payload)
     {
-        try {
-            Log::info('Creating new category');
-            $category = $this->categories->create($data);
-            DB::commit();
-            return $category;
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to create category: ' . $e->getMessage());
-            throw new Exception('Failed to create category');
-        }
+        $uploadedImage = null;
+
+        return transaction(function () use ($payload, &$uploadedImage) {
+            if (!isset($payload['slug']) || !$payload['slug']) {
+                $payload['slug'] = generateSlug($payload['name']);
+            }
+
+            if (hasFile('image')) {
+                $uploadedImage = uploadImages('image', 'categories');
+                $payload['image'] = $uploadedImage;
+            }
+
+            if (!$category = $this->create($payload)) {
+                errorResponse('Thêm danh mục thất bại!');
+            }
+
+            $category->collections()->sync($credentials['collection_id'] ?? []);
+
+            if (!isset($payload['parent_id']) || !$payload['parent_id']) {
+                $category->saveAsRoot();
+            } else {
+                $parent = $this->firstdByWhere(['*'], [['id', $payload['parent_id']]], ['parent']);
+                if (!$parent) {
+                    errorResponse("Không tìm thấy danh mục cha!");
+                }
+                $depth = $parent->depth + 1;
+                $this->updateData($category->id, ['depth' => $depth]);
+                $parent->appendNode($category);
+            }
+
+            return successResponse('Thêm danh mục thành công.', $category, 201);
+        }, function () use (&$uploadedImage) {
+            if (!empty($uploadedImage)) {
+                deleteImage($uploadedImage);
+            }
+        });
     }
 
     public function show(string $id)
     {
-        return $this->findById($id);
+        return $this->findById($id, ['*'], ['collections']);
     }
 
     public function update(string $id, array $credentials)
     {
-        if (!$credentials['slug']) {
-            $credentials['slug'] = generateSlug($credentials['name']);
-        }
+        $uploadedImage = null;
 
-        if (hasFile('image')) {
-            $credentials['image'] = uploadImages('image', 'categories');
-        }
+        return transaction(function () use ($id, $credentials, &$uploadedImage) {
+            $category = $this->findById($id);
 
-        if (!$category = $this->updateData($id, $credentials)) {
-            return errorResponse('Cập nhật thất bại!');
-        }
+            if (!$credentials['slug']) {
+                $credentials['slug'] = generateSlug($credentials['name']);
+            }
 
-        if (!$credentials['parent_id']) {
-            $category->saveAsRoot();
-        } else {
-            $parent = $this->firstdByWhere(['*'], [['id', $credentials['parent_id']]], ['parent']);
-            $depth = $parent->depth + 1;
-            $this->updateData($id, ['depth' => $depth]);
-            $parent->appendNode($category);
-        }
+            if (hasFile('image')) {
+                $uploadedImage = uploadImages('image', 'categories');
+                $credentials['image'] = $uploadedImage;
+            }
 
-        return successResponse('Lưu thay đổi thành công.');
-    }
+            if (! $this->updateData($id, $credentials)) {
+                return errorResponse('Cập nhật thất bại!');
+            }
 
-    public function deleteCategory(int $id): void
-    {
-        DB::beginTransaction();
-        try {
-            Log::info("Deleting category with ID: $id");
-            $category = $this->categories->findOrFail($id);
-            $category->delete();
-            DB::commit();
-        } catch (ModelNotFoundException $e) {
-            DB::rollBack();
-            Log::error('Category not found: ' . $e->getMessage());
-            throw new ModelNotFoundException('Category not found');
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to delete category: ' . $e->getMessage());
-            throw new Exception('Failed to delete category');
-        }
-    }
-    public function findOrFailCategory($id)
-    {
-        try {
-            Log::info('Creating new category');
-            $category = $this->categories->findOrFail($id);
+            $category->collections()->sync($credentials['collection_id'] ?? []);
 
-            return $category;
-        } catch (Exception $e) {
+            if (!$credentials['parent_id']) {
+                $category->saveAsRoot();
+            } else {
+                $parent = $this->firstdByWhere(['*'], [['id', $credentials['parent_id']]], ['parent']);
+                $depth = $parent->depth + 1;
+                $this->updateData($id, ['depth' => $depth]);
+                $parent->appendNode($category);
+            }
 
-            Log::error('Failed to find category: ' . $e->getMessage());
-            throw new Exception('Failed to find category');
-        }
-    }
-    public function findCategoryByName($name): LengthAwarePaginator
-    {
-        try {
-            $category = $this->categories->where('name', 'LIKE', '%' . $name . '%')->paginate(10);
-            return $category;
-        } catch (Exception $e) {
-            Log::error('Failed to find category: ' . $e->getMessage());
-            throw new Exception('Failed to find category');
-        }
+            return successResponse('Lưu thay đổi thành công.');
+        }, function () use (&$uploadedImage) {
+            if (!empty($uploadedImage)) {
+                deleteImage($uploadedImage);
+            }
+        });
     }
 }

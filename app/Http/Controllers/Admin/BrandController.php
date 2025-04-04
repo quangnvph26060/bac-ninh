@@ -3,120 +3,68 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Responses\ApiResponse;
-use App\Models\Brand;
+use App\Http\Requests\Brand\BrandRequest;
 use App\Services\BrandService;
 use App\Services\CompanyService;
 use App\Services\SupplierService;
-use Exception;
+use App\Traits\PaginateTrait;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Log;
 
 class BrandController extends Controller
 {
-    //
+
+    use PaginateTrait;
     protected $brandService;
     protected $supplierService;
-    protected $companyService;
     public function __construct(BrandService $brandService, SupplierService $supplierService, CompanyService $companyService)
     {
         $this->brandService = $brandService;
         $this->supplierService = $supplierService;
-        $this->companyService = $companyService;
     }
-    public function index(Request $request)
+    public function index()
     {
-        try {
-            $supplier = $this->supplierService->GetAllSupplier();
-            $title = 'Thương hiệu';
+        if (request()->ajax()) {
+            $query = $this->brandService->pagination();
 
-            $brand = Brand::orderByDesc('created_at')->paginate(10);
-
-            if ($request->ajax()) {
-                $view = view('admin.brand.table', compact('brand'))->render();
-                $pagination = view('vendor.pagination.custom', ['paginator' => $brand])->render();
-                return response()->json(['success' => true, 'table' => $view, 'pagination' => $pagination]);
-            }
-
-            return view('admin.brand.index', compact('brand', 'title', 'supplier'));
-        } catch (Exception $e) {
-            Log::error('Failed to fetch brands: ' . $e->getMessage());
-            return ApiResponse::error('Failed to fetch brands', 500);
-        }
-    }
-
-
-    public function findByName(Request $request)
-    {
-        try {
-            $supplier = $this->supplierService->GetAllSupplier();
-            $title = 'Thương hiêu ';
-            $brands = $this->brandService->brandByName($request->input('name'));
-            $brand = new LengthAwarePaginator(
-                $brands ? [$brands] : [],
-                $brands ? 1 : 0,
-                10,
-                1,
-                ['path' => Paginator::resolveCurrentPath()]
+            return $this->processDataTable(
+                $query,
+                fn($dataTable) =>
+                $dataTable
+                    ->editColumn('website', fn($row) => "<a target='_blank' href='$row->website'>$row->website</a>" ?? '-----')
+                    ->editColumn('logo', fn($row) => '<img class="img-fluid" src="' . showImage($row->logo) . '" alt="' . $row->name . '" />')
+                    ->editColumn('created_at', fn($row) => $row->created_at->format('d-m-Y'))
+                    ->addColumn('operations', fn($row) => view('admin.components.operation', compact('row'))),
+                ['operations', 'logo', 'website']
             );
-            return view('admin.brand.index', compact('brand', 'title', 'supplier'));
-        } catch (Exception $e) {
-            Log::error('Failed to find brand: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to find brand'], 500);
         }
-    }
-    public function addForm()
-    {
-        $supplier = $this->supplierService->GetAllSupplier();
-        $title = 'Thêm thương hiệu ';
-        return view('admin.brand.add', compact('title', 'supplier'));
+        return view('admin.brand.index');
     }
 
-    public function add(Request $request)
+    public function create()
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'images' => 'required|file|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        $brand = $this->brandService->createBrand($request);
-        return redirect()->route('admin.brand.store')->with('success', 'Thêm thành công');
+        $title = 'Thêm thương hiệu';
+        $brand = null;
+        return view('admin.brand.save', compact('title', 'brand'));
     }
 
-    public function edit($id)
+    public function store(BrandRequest $request)
     {
-        $supplier = $this->supplierService->GetAllSupplier();
-        $title = 'Sửa thương hiệu';
-        $brand = $this->brandService->getBrandById($id);
-        return view('admin.brand.edit', compact('brand', 'title', 'supplier'));
+        $payload = $request->validated();
+        $response = $this->brandService->store($payload);
+        return handleResponse($response['message'], $response['success'], $response['code']);
     }
 
-    public function update($id, Request $request)
+    public function edit(string $id)
     {
-        $brand = $this->brandService->updateBrand($id, $request);
-        return redirect()->route('admin.brand.store')->with('success', 'Sửa thành công');
+        $title = 'Cập nhật thương hiệu';
+        $brand = $this->brandService->show($id);
+        return view('admin.brand.save', compact('brand', 'title'));
     }
 
-    public function delete($id)
+    public function update(string $id, BrandRequest $request)
     {
-        try {
-            $this->brandService->deleteBrand($id);
-            $brand = Brand::orderByDesc('created_at')->paginate(10);
-            $view = view('admin.brand.table', compact('brand'))->render();
-            return response()->json(['success' => true, 'message' => 'Xoá thương hiệu thành công!', 'table' => $view]);
-        } catch (Exception $e) {
-            Log::error('Failed to delete brand: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Không thể xóa thương hiệu']);
-        }
-    }
-
-    public function findBySupplier(Request $request)
-    {
-        $supplier = $this->companyService->getCompany();
-        $title = 'Thương hiệu ';
-        $brand = $this->brandService->findBrandBySupplier($request->input('supplier_id'));
-        return view('admin.brand.index', compact('brand', 'title', 'supplier'));
+        $payload = $request->validated();
+        $response = $this->brandService->update($id, $payload);
+        return handleResponse($response['message'], $response['success'], $response['code']);
     }
 }

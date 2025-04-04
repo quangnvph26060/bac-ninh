@@ -9,6 +9,7 @@ const columns = [
         data: "name",
         name: "name",
         title: "tên sản phẩm",
+        width: "15%",
     },
     {
         data: "brand_id",
@@ -16,6 +17,7 @@ const columns = [
         title: "thương hiệu",
         orderable: false,
         searchable: false,
+        width: "10%",
     },
     {
         data: "category_id",
@@ -23,18 +25,19 @@ const columns = [
         title: "danh mục",
         orderable: false,
         searchable: false,
+        width: "10%",
     },
     {
-        data: "quantity",
-        name: "quantity",
+        data: "stock",
+        name: "stock",
         title: "số lượng",
         width: "5%",
         searchable: false,
     },
     {
-        data: "price",
-        name: "price",
-        title: "giá nhập",
+        data: "sale_price",
+        name: "sale_price",
+        title: "giá bán",
         width: "12%",
         render(data, type, row) {
             return formatCurrency(data);
@@ -46,6 +49,19 @@ const columns = [
         name: "company_name",
         title: "nhà cung cấp",
         orderable: false,
+        searchable: false,
+    },
+    {
+        data: "status",
+        name: "status",
+        title: "trạng thái",
+        render: function (data) {
+            if (data == 1) {
+                return `<span class="badge" style="background-color: rgb(47, 179, 68);">Xuất bản</span>`;
+            } else {
+                return `<span class="badge" style="background-color: rgb(247, 103, 7);">Chưa xuất bản</span>`;
+            }
+        },
         searchable: false,
     },
 ];

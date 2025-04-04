@@ -1,4 +1,4 @@
-<a href="{{ route('admin.' . pluralModelName($row) . '.edit', $row->id) }}"
+<a target="_blank" href="{{ route('admin.' . pluralModelName($row) . '.edit', $row->id) }}"
     class="btn btn-primary btn-sm table-actions btn-operation-edit">
     <i class="ti ti-edit"></i>
 </a>

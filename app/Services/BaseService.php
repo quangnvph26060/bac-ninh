@@ -14,12 +14,12 @@ class BaseService
         $this->model = $model;
     }
 
-    // public function create(array $data)
-    // {
-    //     return $this->model->create($data);
-    // }
+    public function create(array $data)
+    {
+        return $this->model->create($data);
+    }
 
-    public function updateData(int $id, array $payload)
+    public function updateData(string $id, array $payload)
     {
         $record = $this->findById($id);
         if ($record->update($payload)) {
@@ -28,11 +28,11 @@ class BaseService
         return false;
     }
 
-    // public function destroy(int $id)
-    // {
-    //     $record = $this->model->findOrFail($id);
-    //     return $record->delete();
-    // }
+    public function getSelected(string $id, string $relation, string $column)
+    {
+        $record = $this->findById($id, ['*'], [$relation]);
+        return $record->$relation()->pluck($column)->toArray();
+    }
 
     public function firstdByWhere(array $columns = ['*'], array $wheres = [], array $relations = [])
     {
@@ -58,6 +58,7 @@ class BaseService
         array $relations = [],
         array $wheres = [],
         array $whereHasConditions = [],
+        array $whereMethods = [],
         array $withCount = [],
         array $order = [],
     ) {
@@ -78,6 +79,16 @@ class BaseService
                 $query->where($condition[0], $condition[1], $condition[2]);
             } elseif (count($condition) === 2) {
                 $query->where($condition[0], $condition[1]);
+            }
+        }
+
+        foreach ($whereMethods as $method => $array) {
+            if ($method === 'In') {
+                $query->whereIn($array[0], $array[1]);
+            } elseif ($method === 'NotIn') {
+                $query->whereNotIn($array[0], $array[1]);
+            } else {
+                $query->where($array[0], $array[1]);
             }
         }
 
@@ -128,7 +139,7 @@ class BaseService
         return request()->toArray();
     }
 
-    public function pluck(array $columns = [], array $relations = [], array $where = [], array $order = [])
+    public function pluck(array $columns = [], array $relations = [], array $wheres = [], array $order = [], array $withCounts = [])
     {
         $query = $this->model->query();
 
@@ -136,7 +147,7 @@ class BaseService
             $query->with($relations);
         }
 
-        foreach ($where as $condition) {
+        foreach ($wheres as $condition) {
             if (count($condition) === 3) {
                 $query->where($condition[0], $condition[1], $condition[2]);
             } elseif (count($condition) === 2) {
@@ -146,11 +157,39 @@ class BaseService
 
         if (!empty($order)) {
             $query->orderBy($order[0], $order[1]);
+        } else {
+            $query->latest('id');
         }
 
-        Log::info($query->toSql());
+        Log::info($query->toRawSql());
 
-        return $query->pluck(...$columns)->toArray();
+        if (!empty($withCounts)) {
+            // Thêm cột "_count" vào select nếu có withCount
+            foreach ($withCounts as $count) {
+                $query->withCount($count);
+            }
+
+            // Chỉ lấy các cột cần thiết (id, name, và count)
+            $results = $query->get(array_unique(array_merge($columns, array_map(fn($c) => $c . '_count', $withCounts))));
+
+            return $results->mapWithKeys(function ($item) use ($columns, $withCounts) {
+                $key = $item[$columns[0]]; // ID làm key
+                $value = $item[$columns[1]]; // Name làm value
+
+                // Nếu có withCount, thêm vào giá trị
+                foreach ($withCounts as $count) {
+                    $countKey = $count . '_count';
+                    if (isset($item[$countKey])) {
+                        $value .= ' (' . $item[$countKey] . ')';
+                    }
+                }
+
+                return [$key => $value];
+            })->toArray();
+        }
+
+        // Nếu không có withCounts, dùng pluck() để tối ưu query
+        return $query->pluck($columns[1], $columns[0])->toArray();
     }
 
     public function queryBuilder(

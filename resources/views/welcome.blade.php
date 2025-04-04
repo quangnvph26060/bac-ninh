@@ -576,13 +576,13 @@
             })
         });
 
-        function formatCurrency(number) {
-            // return Number(number).toLocaleString('vi-VN') + ' VND';
-            return new Intl.NumberFormat('vi-VN', {
-                style: 'currency',
-                currency: 'VND'
-            }).format(number).replace('₫', 'VND');
-        }
+        // function formatCurrency(number) {
+        //     // return Number(number).toLocaleString('vi-VN') + ' VND';
+        //     return new Intl.NumberFormat('vi-VN', {
+        //         style: 'currency',
+        //         currency: 'VND'
+        //     }).format(number).replace('₫', 'VND');
+        // }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
