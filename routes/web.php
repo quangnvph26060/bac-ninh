@@ -55,12 +55,7 @@ Route::post('/check-account', [SignUpController::class, 'checkAccount'])->name('
 Route::get('/dang-ky', [SignUpController::class, 'index'])->name('register.index');
 Route::post('/register_account', [SignUpController::class, 'store'])->name('register.signup');
 
-Route::get('/', function () {
-    return view('auth.login');
-})->name('formlogin');
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::get('/verify-otp', [AuthController::class, 'showVerifyOtp'])->name('verify-otp');
-Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('verify_otp_confirm');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/home', function () {
         return view('home');
@@ -88,7 +83,88 @@ Route::get('/employee', function () {
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::post('handle-bulk-action', [BulkActionController::class, 'handleBulkAction'])->name('handle.bulk.action');
+
+    Route::middleware('admin.auth')->group(function () {
+
+        // Dashboard Router
+        Route::controller(DashboardController::class)->group(function () {
+            Route::get('/', 'dashboard')->name('dashboard');
+        });
+
+        // Logout Router
+        Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+
+        // Action Router
+        Route::post('handle-bulk-action', [BulkActionController::class, 'handleBulkAction'])->name('handle.bulk.action');
+
+        // Product Router
+        Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('import', 'import')->name('import');
+            Route::get('export', 'export')->name('export');
+            Route::get('download-product-template', 'downloadTemplate')->name('download.product.template');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+            Route::get('search-products', 'search')->name('search.products');
+            Route::get('selected-attributes/{id}',  'getValueByAttributeId')->name('selected.attributes');
+        });
+
+        // Attribute Router
+        Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+        });
+
+        // Category Router
+        Route::prefix('categories')->controller(CategoryController::class)->name('categories.')->group(function () {
+            Route::get('/',   'index')->name('index');
+            Route::get('create',  'create')->name('create');
+            Route::post('create',  'store')->name('store');
+            Route::get('edit/{id}',  'edit')->name('edit');
+            Route::put('edit/{id}',  'update')->name('update');
+        });
+
+        // Collection Router
+        Route::prefix('collections')->controller(CollectionController::class)->name('collections.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+        });
+
+        // Brand Router
+        Route::prefix('brands')->controller(BrandController::class)->name('brands.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+        });
+
+        // Supplier Router
+        Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(function () {
+            Route::get("/", 'index')->name('index');
+            Route::get("create", 'create')->name('create');
+            Route::get("edit/{id}", 'edit')->name('edit');
+            Route::put("edit/{id}", 'update')->name('update');
+        });
+    });
+
+    Route::middleware('admin.guest')->group(function () {
+        Route::controller(AuthController::class)->group(function () {
+            Route::get('login', 'login')->name('login');
+            Route::post('login', 'authenticate')->name('login.authenticate');
+            Route::get('verify-otp', 'showVerifyOtp')->name('verify-otp');
+            Route::post('verify-otp', 'verifyOtp')->name('verify_otp_confirm');
+        });
+    });
+
 
     Route::prefix('transaction')->name('transaction.')->group(function () {
         Route::get('', [TransactionController::class, 'index'])->name('index');
@@ -98,32 +174,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('export-pdf/{id}', [TransactionController::class, 'exportPDF'])->name('export_pdf');
         Route::get('generateQR', [TransactionController::class, 'generateQrCode'])->name('generate');
     });
-
-    Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::get('export1', 'export1')->name('export1');
-        Route::post('import', 'import')->name('import');
-        Route::get('export', 'export')->name('export');
-        Route::get('download-product-template', 'downloadTemplate')->name('download.product.template');
-
-        Route::get('create', 'create')->name('create');
-        Route::post('create', 'store')->name('store');
-        Route::get('edit/{id}', 'edit')->name('edit');
-        Route::put('edit/{id}', 'update')->name('update');
-
-        Route::get('search-products',  'search')->name('search.products');
-        Route::get('selected-attributes/{id}',  'getValueByAttributeId')->name('selected.attributes');
-    });
-
-    Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::get('create', 'create')->name('create');
-        Route::post('create', 'store')->name('store');
-        Route::get('edit/{id}', 'edit')->name('edit');
-        Route::put('edit/{id}', 'update')->name('update');
-    });
-
-
 
     Route::prefix('company')->name('company.')->group(function () {
         Route::get("/", [CompanyController::class, 'index'])->name('index');
@@ -135,19 +185,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('delete/{id}', [CompanyController::class, 'delete'])->name('delete');
         Route::get('filter', [CompanyController::class, 'companyFilter'])->name('filter');
     });
+
     Route::prefix('profit')->name('profit.')->group(function () {
         Route::get('', [ReportController::class, 'profitIndex'])->name('index');
         Route::post('/profit-report', [ReportController::class, 'getProfitReportByFilterNew'])->name('getProfitReportByFilter');
         Route::post('/profit-report-pdf', [ReportController::class, 'getProfitReportByFilterPDF'])->name('getProfitReportByFilterPDF');
     });
+
     Route::prefix('inventory')->name('inventory.')->group(function () {
         Route::get('', [ReportController::class, 'index'])->name('index');
         Route::post('report', [ReportController::class, 'getReportByStorage'])->name('getReportByStorage');
         Route::get('exportPdf', [ReportController::class, 'exportPdf'])->name('exportPdf');
     });
 
-    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/day', [DashboardController::class, 'StatisticsByDay'])->name('dashboard.day');
     Route::get('/dashboard/month', [DashboardController::class, 'StatisticsByMonth'])->name('dashboard.month');
     Route::get('/dashboard/year', [DashboardController::class, 'StatisticsByYear'])->name('dashboard.year');
@@ -155,21 +205,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/update/{id}', [AdminController::class, 'updateAdminInfor'])->name('update');
     Route::post('/changePassword', [AdminController::class, 'changePassword'])->name('changePassword');
 
-    Route::prefix('categories')->controller(CategoryController::class)->name('categories.')->group(function () {
-        Route::get('/',   'index')->name('index');
-        Route::get('create',  'create')->name('create');
-        Route::post('create',  'store')->name('store');
-        Route::get('edit/{id}',  'edit')->name('edit');
-        Route::put('edit/{id}',  'update')->name('update');
-    });
 
-    Route::prefix('collections')->controller(CollectionController::class)->name('collections.')->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::get('create', 'create')->name('create');
-        Route::post('create', 'store')->name('store');
-        Route::get('edit/{id}', 'edit')->name('edit');
-        Route::put('edit/{id}', 'update')->name('update');
-    });
+
+
 
     Route::prefix('user')->name('staff.')->group(function () {
         Route::get('', [UserController::class, 'index'])->name('store');
@@ -182,13 +220,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('search/phone', [UserController::class, 'findByPhone'])->name('findByPhone');
     });
 
-    Route::prefix('brands')->controller(BrandController::class)->name('brands.')->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::get('create', 'create')->name('create');
-        Route::post('create', 'store')->name('store');
-        Route::get('edit/{id}', 'edit')->name('edit');
-        Route::put('edit/{id}', 'update')->name('update');
-    });
+
 
     Route::prefix('client')->name('client.')->group(function () {
         Route::get('/', [ClientController::class, 'index'])->name('index');
@@ -200,12 +232,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/export', [ClientController::class, 'export'])->name('export');
     });
 
-    Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(function () {
-        Route::get("/", 'index')->name('index');
-        Route::get("create", 'create')->name('create');
-        Route::get("edit/{id}", 'edit')->name('edit');
-        Route::put("edit/{id}", 'update')->name('update');
-    });
+
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
         Route::get('/detail/{id}', [OrderController::class, 'detail'])->name('detail');
@@ -240,12 +267,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/importCoupon', [importCouponController::class, 'add'])->name('importCoupon.add');
         Route::get('/detail/{id}', [ImportProductController::class, 'importdetail'])->name('importCoupon.detail');
     });
+
     Route::prefix('debts')->name('debts.')->group(function () {
         Route::get('/client', [DebtClientController::class, 'index'])->name('client');
         Route::get('/client/detail/{id}', [DebtClientController::class, 'detail'])->name('client.detail');
         Route::get('/supplier', [DebtNccController::class, 'index'])->name('supplier');
         Route::get('/supplier/detail/{id}', [DebtNccController::class, 'detail'])->name('supplier.detail');
     });
+
     Route::prefix('quanlythuchi')->name('quanlythuchi.')->group(function () {
         Route::prefix('receipts')->name('receipts.')->group(function () { // phiếu thu
             Route::get('/', [ReceiptController::class, 'index'])->name('index');
@@ -262,6 +291,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/debt', [ExpenseController::class, 'debt'])->name('debt');
         });
     });
+
     Route::prefix('storage')->name('storage.')->group(function () {
         Route::get('', [StorageController::class, 'index'])->name('index');
         Route::get('detail/{id}', [StorageController::class, 'edit'])->name('detail');
@@ -272,6 +302,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('delete/{id}', [StorageController::class, 'delete'])->name('delete');
         Route::get('/products/{id}', [StorageController::class, 'detail'])->name('products');
     });
+
     Route::prefix('report')->name('report.')->group(function () {
         Route::prefix('debt')->name('debt.')->group(function () {
             Route::get('/', [ReportdebtController::class, 'index'])->name('index');
@@ -286,7 +317,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('get-daily-import-data', [DailyReportController::class, 'getDailyImportData'])->name('getDailyImportData');
         });
     });
-})->middleware('checkRole:1');
+});
 
 Route::middleware([CheckLogin::class])->prefix('ban-hang')->name('staff.')->group(function () {
     Route::get('product/search', [StaffProductController::class, 'search'])->name('product.search');

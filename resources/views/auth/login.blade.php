@@ -24,11 +24,10 @@
                                     <div class="position-relative h-100 d-flex flex-column">
                                         <div class="mb-4">
                                             <a href="index.html" class="d-block">
-                                                <img src="assets/images/logo-light.png" alt="" height="18">
+                                                <img src="{{ asset('backend/auth/assets/images/logo-light.png') }}" alt="" height="18">
                                             </a>
                                         </div>
                                         <div class="mt-auto">
-
                                         </div>
                                     </div>
                                 </div>
@@ -43,7 +42,7 @@
                                     </div>
 
                                     <div class="mt-4">
-                                        <form action="{{ route('login') }}" method="post">
+                                        <form action="{{ route('admin.login') }}" method="post">
                                             @csrf
                                             <div class="mb-3">
                                                 <label for="username" class="form-label">Email hoặc Số điện thoại</label>
@@ -124,6 +123,13 @@
         </div>
     </footer>
     <!-- end Footer -->
+
+
+    <!-- Add necessary icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/2.5.0/remixicon.css" rel="stylesheet">
+@endsection
+
+@push('scripts')
     <script>
         $(document).ready(function() {
             $('#password-addon').on('click', function() {
@@ -151,7 +157,4 @@
             }
         });
     </script>
-
-    <!-- Add necessary icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/2.5.0/remixicon.css" rel="stylesheet">
-@endsection
+@endpush

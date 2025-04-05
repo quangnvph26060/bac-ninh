@@ -94,5 +94,14 @@ class Product extends Model
             $nextNumber = $latastproduct ? ((int)substr($latastproduct->sku, 2)) + 1 : 1;
             $model->sku = 'KH' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
         });
+
+        static::updating(function ($model) {
+            // Lấy giá trị ảnh cũ trước khi cập nhật
+            $oldImage = $model->getOriginal('image');
+            // Nếu có ảnh cũ và ảnh mới khác ảnh cũ
+            if (!empty($oldImage) && $oldImage !== $model->image) {
+                deleteImage($oldImage);
+            }
+        });
     }
 }

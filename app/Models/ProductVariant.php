@@ -19,6 +19,7 @@ class ProductVariant extends Model
         'discount_start',
         'discount_end',
         'stock_status',
+        'stock'
     ];
 
     protected $casts = [

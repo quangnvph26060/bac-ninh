@@ -31,7 +31,6 @@ class ProductService  extends BaseService
 
     public function getProductAll()
     {
-
         $columns = [
             'id',
             'name',
@@ -41,7 +40,9 @@ class ProductService  extends BaseService
             'product_unit',
             'sale_price',
             'stock',
-            'status'
+            'status',
+            'type',
+            'stock_status'
         ];
 
         $relations = ['company', 'brand', 'category'];
@@ -70,18 +71,18 @@ class ProductService  extends BaseService
                 ->implode(' - ');
 
             return [
-                'variant_name' => $variantName,
-                'sku' => $variant->sku,
-                'sale_price' => $variant->sale_price,
-                'discount_price' => $variant->discount_price,
-                'discount_start' => !empty($variant->discount_start) ? $variant->discount_start->format('d-m-Y') : null,
-                'discount_end' => !empty($variant->discount_end) ? $variant->discount_end->format('d-m-Y') : null,
-                'product_unit' => $variant->product_unit,
-                'stock_status' => $variant->stock_status,
-                'status' => $variant->status,
-                'id' => $variant->id,
-                'attribute_value_combine' => $variant->attribute_value_combine,
-                // 'stock' => $variant->stock,
+                'variant_name'              => $variantName,
+                'sku'                       => $variant->sku,
+                'sale_price'                => $variant->sale_price,
+                'discount_price'            => $variant->discount_price,
+                'discount_start'            => !empty($variant->discount_start) ? $variant->discount_start->format('d-m-Y') : null,
+                'discount_end'              => !empty($variant->discount_end) ? $variant->discount_end->format('d-m-Y') : null,
+                'product_unit'              => $variant->product_unit,
+                'stock_status'              => $variant->stock_status,
+                'status'                    => $variant->status,
+                'id'                        => $variant->id,
+                'attribute_value_combine'   => $variant->attribute_value_combine,
+                'stock'                     => $variant->stock,
             ];
         });
     }
@@ -89,9 +90,16 @@ class ProductService  extends BaseService
     public function getProductCrossSell($product)
     {
         $crossSellIds = array_map('intval', explode(',', $product->cross_sell));
-
         $products = $this->all(['id', 'name', 'image'], [], [], [], ['In' => ['id', $crossSellIds]]);
         return $products;
+    }
+
+    public function getProductImages($product)
+    {
+        return $product->images->map(fn($image) => [
+            'id' => $image->id,
+            'src' => showImage($image->image),
+        ]);
     }
 
     public function attributesWithValues($product)
@@ -133,7 +141,6 @@ class ProductService  extends BaseService
         });
     }
 
-
     public function getProductAll_Staff(): \Illuminate\Database\Eloquent\Collection
     {
         try {
@@ -159,7 +166,6 @@ class ProductService  extends BaseService
 
     public function store(array $payload)
     {
-        // dd($payload);
         $uploadedImage = null;
         $uploadedImages = null;
         return transaction(function () use ($payload, &$uploadedImage, &$uploadedImages) {
@@ -177,27 +183,25 @@ class ProductService  extends BaseService
                 // Giải mã chuỗi JSON thành mảng
                 $tagsArray = json_decode($payload['tags'], true);
 
-                $tags = array_map(function ($tag) {
-                    return $tag['value'];
-                }, $tagsArray);
+                $tags = array_map(fn($tag) => $tag['value'], $tagsArray);
 
                 $payload['tags'] = $tags;
+            }
+
+            if ($payload['type'] == 'variant') {
+                unset($payload['sale_price']);
+                unset($payload['discount_price']);
+                unset($payload['discount_start']);
+                unset($payload['discount_end']);
+                unset($payload['product_unit']);
+                unset($payload['stock']);
             }
 
             if (! $product = $this->create($payload)) {
                 return errorResponse('Có lỗi xảy ra. Vui lòng thử lại sau!');
             }
 
-            if (hasFile('images')) {
-                $uploadedImages = uploadImages('images', 'thumnails', false, 0, 0, true);
-
-                foreach ($uploadedImages as $image) {
-                    $product->images()->create([
-                        'product_id' => $product->id,
-                        'image' => $image,
-                    ]);
-                }
-            }
+            $this->productImage($product, $payload);
 
             if (!empty($payload['attributes'])) {
                 $this->productAttributes($product, $payload);
@@ -223,67 +227,163 @@ class ProductService  extends BaseService
         });
     }
 
+    public function update(string $id, array $payload)
+    {
+        $uploadedImage = null;
+        $uploadedImages = null;
+        return transaction(function () use ($id, $payload, &$uploadedImage, &$uploadedImages) {
+            if (!isset($payload['slug']) || !$payload['slug']) {
+                $payload['slug'] = generateSlug($payload['name']);
+            }
+
+            if (hasFile('image')) {
+                $uploadedImage = uploadImages('image', 'products');
+                $payload['image'] = $uploadedImage;
+            }
+
+            if (!empty($payload['tags'])) {
+                $tagsArray = json_decode($payload['tags'], true);
+
+                $tags = array_map(fn($tag) => $tag['value'], $tagsArray);
+
+                $payload['tags'] = $tags;
+            }
+
+            if ($payload['type'] == 'variant') {
+                unset($payload['sale_price']);
+                unset($payload['discount_price']);
+                unset($payload['discount_start']);
+                unset($payload['discount_end']);
+                unset($payload['product_unit']);
+                unset($payload['stock']);
+            }
+
+            if (!$product = $this->updateData($id, $payload)) {
+                return errorResponse('Có lỗi xảy ra. Vui lòng thử lại sau!');
+            }
+
+            $this->productImage($product, $payload);
+
+            if (!empty($payload['attributes'])) {
+                $this->productAttributes($product, $payload);
+            }
+
+            if (!empty($payload['variants'])) {
+                $this->productVariants($product, $payload);
+            }
+
+            return successResponse('Lưu thay đổi thành công', [], 201);
+        }, function () use ($uploadedImage, $uploadedImages) {
+            if ($uploadedImage) {
+                deleteImage($uploadedImage);
+            }
+            if ($uploadedImages) {
+                foreach ($uploadedImages as $image) {
+                    deleteImage($image);
+                }
+            }
+            return errorResponse('Có lỗi xảy ra. Vui lòng thử lại sau!');
+        });
+    }
+
+    public function productImage($product, $payload)
+    {
+        $oldImages = $product->images()->whereNotIn('id', $payload['old'] ?? [])->get();
+        if ($oldImages->isNotEmpty()) {
+            foreach ($oldImages as $oldImage) {
+                // Xóa ảnh từ storage
+                deleteImage($oldImage->image);
+                // Xóa bản ghi trong cơ sở dữ liệu
+                $oldImage->delete();
+            }
+        };
+
+        if (hasFile('images')) {
+            $uploadedImages = uploadImages('images', 'thumnails', false, 0, 0, true);
+
+            foreach ($uploadedImages as $image) {
+                $product->images()->create([
+                    'product_id' => $product->id,
+                    'image' => $image,
+                ]);
+            }
+        }
+    }
+
     protected function productVariants($product, $payload)
     {
-        $variants = collect($payload['variants'])->map(fn($variant, $key) => [
-            'sku'                       => $variant['sku'],
-            'sale_price'                => $variant['sale_price'],
-            'attribute_value_combine'   => $key,
-            'discount_price'            => $variant['discount_price'] ?? null,
-            'product_unit'              => $variant['product_unit'] ?? null,
-            'discount_start'            => $variant['discount_start'] ?? null,
-            'discount_end'              => $variant['discount_end'] ?? null,
-            'stock_status'              => $variant['stock_status'],
-            'status'                    =>  $variant['status'] ?? 2,
-        ]);
+        $newVariants = collect($payload['variants']);
+        $newKeys = $newVariants->keys()->toArray();
 
-        $product->variants()->createMany($variants);
+        $existingVariants = $product->variants()->get()->keyBy('attribute_value_combine');
+
+        $variantsToCreate = [];
+
+        foreach ($newVariants as $key => $variant) {
+
+            $data = [
+                'sku'                     => $variant['sku'],
+                'sale_price'              => $variant['sale_price'],
+                'discount_price'          => $variant['discount_price'] ?? null,
+                'product_unit'            => $variant['product_unit'] ?? null,
+                'attribute_value_combine' => $key,
+                'discount_start'          => $variant['discount_start'] ?? null,
+                'discount_end'            => $variant['discount_end'] ?? null,
+                'stock_status'            => $variant['stock_status'],
+                'stock'                   => $variant['stock'],
+                'status'                  => $variant['status'] ?? 2,
+            ];
+
+            if ($existingVariants->has($key)) {
+                // Cập nhật nếu đã có
+                $existingVariants[$key]->update($data);
+            } else {
+                // Thêm mới
+                $variantsToCreate[] = array_merge($data, ['attribute_value_combine' => $key]);
+            }
+        }
+
+        if (!empty($variantsToCreate)) {
+            $product->variants()->createMany($variantsToCreate);
+        }
+
+        // Xóa các biến thể không còn
+        $variantsToDelete = $existingVariants->keys()->diff($newKeys);
+
+        if ($variantsToDelete->isNotEmpty()) {
+            $product->variants()->whereIn('attribute_value_combine', $variantsToDelete)->delete();
+        }
     }
 
     public function productAttributes($product, $payload)
     {
-        // Lấy các attribute_ids từ payload (danh sách các thuộc tính)
-        $attributeIds = array_keys($payload['attributes']);  // Lấy danh sách các attribute_id (ví dụ: 15, 2)
+        // Lấy danh sách attribute_id từ payload
+        $newAttributes = $payload['attributes']; // [15 => ["51-Xanh", "52-Đỏ"], 2 => ["6-S", "7-M"]]
+        $newAttributeIds = array_keys($newAttributes);
 
-        // Duyệt qua các thuộc tính và giá trị đã chọn
-        $pivotData = [];
-        foreach ($payload['attributes'] as $attributeId => $values) {
-            // Chỉ lưu các giá trị được chọn cho mỗi thuộc tính
+        // Lấy các bản ghi hiện tại từ bảng trung gian
+        $existingAttributes = $product->attributes()->get()->keyBy('id'); // keyBy attribute_id
+
+        $syncData = [];
+
+        foreach ($newAttributes as $attributeId => $values) {
             $valueIds = [];
 
             foreach ($values as $value) {
-                // Tách "51-Xanh" thành mảng [51, 'Xanh']
-                list($valueId, $valueName) = explode('-', $value);
-
-                // Thêm giá trị vào mảng valueIds
-                $valueIds[] = (int)$valueId;  // Store the value ID as an integer
+                [$valueId, $valueName] = explode('-', $value);
+                $valueIds[] = (int) $valueId;
             }
 
-            // Gắn thông tin giá trị vào bảng trung gian, bao gồm các giá trị được chọn cho mỗi thuộc tính
-            $pivotData[] = [
-                'attribute_id' => $attributeId,  // Lấy ID thuộc tính
-                'attribute_values_ids' => json_encode($valueIds),  // Store the value IDs directly as an array
-                'product_id' => $product->id
+            // Thêm vào dữ liệu cần sync
+            $syncData[$attributeId] = [
+                'attribute_values_ids' => json_encode($valueIds)
             ];
         }
 
-        // Đồng bộ các thuộc tính vào bảng trung gian (tránh đồng bộ nhiều lần)
-        if (count($pivotData)) {
-            $product->attributes()->syncWithoutDetaching($pivotData);
-        }
+        // Đồng bộ: sẽ tự động xóa các attribute_id không còn trong $syncData, cập nhật cái có và thêm cái mới
+        $product->attributes()->sync($syncData);
     }
 
-    public function productByNameStaff($name)
-    {
-        try {
-            $products = $this->product->where('name', 'LIKE', '%' . $name . '%')->orderByDesc('created_at')->get();
-            // dd($products);
-            return $products;
-        } catch (Exception $e) {
-            Log::error("Failed to search products: {$e->getMessage()}");
-            throw new Exception('Failed to search products');
-        }
-    }
 
     public function productByNameInStorageStaff($name, $storage_id)
     {

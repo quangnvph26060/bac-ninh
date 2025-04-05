@@ -50,6 +50,17 @@ function updateCharCount(inputSelector, maxLength) {
 //     // });
 // }
 
+function convertToSKU(str) {
+    return str
+        .replace(/đ/g, "d")   // xử lý thường
+        .replace(/Đ/g, "D")   // xử lý hoa
+        .normalize("NFD")     // tách dấu
+        .replace(/[\u0300-\u036f]/g, "") // xóa dấu
+        .replace(/[^a-zA-Z0-9\-]/g, "")  // chỉ giữ chữ, số và dấu -
+        .toUpperCase();
+}
+
+
 function updateCKEditorCharCount(id, maxLength) {
     let content = CKEDITOR.instances[id].document.getBody().getText(); // Lấy nội dung chỉ có text
     let charCount = content.length;

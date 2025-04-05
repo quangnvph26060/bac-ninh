@@ -18,7 +18,12 @@ class AuthController extends Controller
     {
         $this->userService = $userService;
     }
-    public function login(Request $request)
+
+    public function login()
+    {
+        return view('auth.login');
+    }
+    public function authenticate(Request $request)
     {
 
         $credentials = $request->validate(
@@ -30,9 +35,9 @@ class AuthController extends Controller
 
         $remember = $request->has('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
+        if (Auth::guard('admin')->attempt($credentials, $remember)) {
 
-            $user = Auth::user();
+            $user = Auth::guard('admin')->user();
 
             toastr()->success('Đăng nhập thành công.');
             return match ($user->role_id) {
@@ -49,8 +54,8 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('admin')->logout();
         $request->session()->flush();
-        return redirect()->route('formlogin');
+        return redirect()->route('admin.login');
     }
 }
