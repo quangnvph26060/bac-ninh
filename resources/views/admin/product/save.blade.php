@@ -95,7 +95,7 @@
                                 </li>
                                 <li class="nav-item" role="presentation" style="display: none" id="tabs-attribute">
                                     <a class="nav-link" id="attribute-tab" data-bs-toggle="tab" href="#attribute"
-                                        role="tab" aria-controls="attribute" aria-selected="false">thuộc tính</a>
+                                        role="tab" aria-controls="attribute" aria-selected="false">Thuộc tính</a>
                                 </li>
                                 <li class="nav-item" role="presentation" style="display: none" id="tabs-variant">
                                     <a class="nav-link" id="variant-tab" data-bs-toggle="tab" href="#variant"
@@ -171,32 +171,21 @@
                                 <div class="tab-pane fade" id="inventory" role="tabpanel"
                                     aria-labelledby="inventory-tab">
                                     <div class="row">
-                                        <div class="mb-3 position-relative col-md-12 mt-3">
+                                        <div class="mb-3 position-relative col-md-6 mt-3">
                                             <label for="sku" class="form-label">SKU</label>
                                             <input type="text" class="form-control" name="sku" id="sku"
                                                 value="{{ optional($product)->sku }}">
                                         </div>
-                                        <div class="mb-3 position-relative col-md-12 mt-3">
-                                            <label for="stock_status" class="form-label d-inline">Trạng thái kho
+                                        <div class="mb-3 position-relative col-md-6 mt-3">
+                                            <label for="stock_status" class="form-label">Trạng thái kho
                                                 hàng:</label>
 
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="stock_status"
-                                                    id="in_stock" value="in_stock" checked>
-                                                <label class="form-check-label" for="in_stock">Còn hàng</label>
-                                            </div>
-
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="stock_status"
-                                                    id="out_of_stock" value="opout_of_stocktion1">
-                                                <label class="form-check-label" for="out_of_stock">Hết hàng</label>
-                                            </div>
-
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="stock_status"
-                                                    id="waiting_for_goods" value="waiting_for_goods">
-                                                <label class="form-check-label" for="waiting_for_goods">Chờ hàng</label>
-                                            </div>
+                                            <select name="stock_status" id="stock_status"
+                                                class="form-control form-select">
+                                                <option value="in_stock">Còn hàng</option>
+                                                <option value="out_of_stock">Hết hàng hàng</option>
+                                                <option value="waiting_for_goods">Chờ hàng</option>
+                                            </select>
                                         </div>
                                     </div>
 
@@ -264,50 +253,54 @@
 
                                     <div class="accordion" id="variantAccordion">
                                         @foreach ($variants ?? [] as $variantItem)
-                                            <div class="accordion-item">
+                                            <div class="accordion-item"
+                                                data-variant-id="{{ $variantItem['attribute_value_combine'] }}">
                                                 <h2 class="accordion-header">
                                                     <button type="button"
                                                         class="accordion-button collapsed position-relative"
                                                         data-bs-toggle="collapse"
-                                                        data-bs-target="#v{{ $variantItem['id'] }}">
+                                                        data-bs-target="#v{{ $variantItem['attribute_value_combine'] }}">
                                                         <span>{{ $variantItem['variant_name'] }}</span>
                                                         <span class="ms-2 delete-variant text-danger position-absolute"
-                                                            data-index="{{ $variantItem['id'] }}">Xóa</span>
+                                                            data-index="{{ $variantItem['attribute_value_combine'] }}">Xóa</span>
                                                     </button>
                                                 </h2>
-                                                <div id="v{{ $variantItem['id'] }}" class="accordion-collapse collapse">
+                                                <div id="v{{ $variantItem['attribute_value_combine'] }}"
+                                                    class="accordion-collapse collapse">
                                                     <div class="accordion-body">
                                                         <div class="row">
                                                             <div class="mb-3 position-relative col-md-3">
-                                                                <label for="variants-{{ $variantItem['id'] }}-sku"
+                                                                <label
+                                                                    for="variants-{{ $variantItem['attribute_value_combine'] }}-sku"
                                                                     class="form-label required">Mã sản phẩm</label>
                                                                 <input type="text" class="form-control"
-                                                                    id="variants-{{ $variantItem['id'] }}-sku"
-                                                                    name="variants[{{ $variantItem['id'] }}][sku]"
+                                                                    id="variants-{{ $variantItem['attribute_value_combine'] }}-sku"
+                                                                    name="variants[{{ $variantItem['attribute_value_combine'] }}][sku]"
                                                                     aria-required="true" required="required"
                                                                     value="{{ $variantItem['sku'] }}">
                                                             </div>
                                                             <div class="mb-3 position-relative col-md-3">
-                                                                <label for="variants-{{ $variantItem['id'] }}-sale-price"
+                                                                <label
+                                                                    for="variants-{{ $variantItem['attribute_value_combine'] }}-sale-price"
                                                                     class="form-label required">Giá</label>
                                                                 <input type="text" class="form-control"
-                                                                    id="variants-{{ $variantItem['id'] }}-sale-price"
-                                                                    name="variants[{{ $variantItem['id'] }}][sale_price]"
+                                                                    id="variants-{{ $variantItem['attribute_value_combine'] }}-sale-price"
+                                                                    name="variants[{{ $variantItem['attribute_value_combine'] }}][sale_price]"
                                                                     aria-required="true" required="required"
                                                                     value="{{ $variantItem['sale_price'] }}">
                                                             </div>
                                                             <div class="mb-3 position-relative col-md-3">
                                                                 <label
-                                                                    for="variants-{{ $variantItem['id'] }}-product-unit"
+                                                                    for="variants-{{ $variantItem['attribute_value_combine'] }}-product-unit"
                                                                     class="form-label">Đơn vị</label>
                                                                 <input type="text" class="form-control"
-                                                                    id="variants-{{ $variantItem['id'] }}-product-unit"
-                                                                    name="variants[{{ $variantItem['id'] }}][product_unit]"
+                                                                    id="variants-{{ $variantItem['attribute_value_combine'] }}-product-unit"
+                                                                    name="variants[{{ $variantItem['attribute_value_combine'] }}][product_unit]"
                                                                     value="{{ $variantItem['product_unit'] }}">
                                                             </div>
                                                             <div class="mb-3 position-relative col-md-3">
                                                                 <label
-                                                                    for="variants-{{ $variantItem['id'] }}-discount-price"
+                                                                    for="variants-{{ $variantItem['attribute_value_combine'] }}-discount-price"
                                                                     class="form-label">Giá ưu đãi
                                                                     <span class="form-label-description">
                                                                         <a href="javascript:void(0)"
@@ -321,21 +314,21 @@
                                                                 </label>
 
                                                                 <input type="text" class="form-control"
-                                                                    name="variants[{{ $variantItem['id'] }}][discount_price]"
-                                                                    id="variants-{{ $variantItem['id'] }}-discount-price"
+                                                                    name="variants[{{ $variantItem['attribute_value_combine'] }}][discount_price]"
+                                                                    id="variants-{{ $variantItem['attribute_value_combine'] }}-discount-price"
                                                                     value="{{ $variantItem['discount_price'] }}">
                                                             </div>
                                                             <div class="col-md-6 variant-scheduled-time"
                                                                 style="display: none;">
                                                                 <div class="mb-3 position-relative">
                                                                     <label class="form-label"
-                                                                        for="variants-{{ $variantItem['id'] }}-discount-start">
+                                                                        for="variants-{{ $variantItem['attribute_value_combine'] }}-discount-start">
                                                                         Từ ngày
                                                                     </label>
                                                                     <input class="form-control form-date-time"
                                                                         type="text"
-                                                                        name="variants[{{ $variantItem['id'] }}][discount_start]"
-                                                                        id="variants-{{ $variantItem['id'] }}-discount-start"
+                                                                        name="variants[{{ $variantItem['attribute_value_combine'] }}][discount_start]"
+                                                                        id="variants-{{ $variantItem['attribute_value_combine'] }}-discount-start"
                                                                         value="{{ $variantItem['discount_start'] }}">
                                                                 </div>
                                                             </div>
@@ -343,24 +336,34 @@
                                                                 style="display: none;">
                                                                 <div class="mb-3 position-relative">
                                                                     <label class="form-label"
-                                                                        for="variants-{{ $variantItem['id'] }}-discount-end">
+                                                                        for="variants-{{ $variantItem['attribute_value_combine'] }}-discount-end">
                                                                         Đến ngày
                                                                     </label>
                                                                     <input class="form-control form-date-time"
                                                                         type="text"
-                                                                        name="variants[{{ $variantItem['id'] }}][discount_end]"
-                                                                        id="variants-{{ $variantItem['id'] }}-discount-end"
+                                                                        name="variants[{{ $variantItem['attribute_value_combine'] }}][discount_end]"
+                                                                        id="variants-{{ $variantItem['attribute_value_combine'] }}-discount-end"
                                                                         value="{{ $variantItem['discount_end'] }}">
                                                                 </div>
                                                             </div>
-                                                            <div class="mb-3 position-relative col-md-12">
+                                                            <div class="mb-3 position-relative col-md-3">
                                                                 <label
-                                                                    for="variants-{{ $variantItem['id'] }}-stock-status"
+                                                                    for="variants-{{ $variantItem['attribute_value_combine'] }}-stock"
+                                                                    class="form-label">Số
+                                                                    lượng</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="variants-{{ $variantItem['attribute_value_combine'] }}-stock"
+                                                                    name="variants[{{ $variantItem['attribute_value_combine'] }}][stock]"
+                                                                    value="{{ $variantItem['stock'] }}">
+                                                            </div>
+                                                            <div class="mb-3 position-relative col-md-9">
+                                                                <label
+                                                                    for="variants-{{ $variantItem['attribute_value_combine'] }}-stock-status"
                                                                     class="form-label">Trạng thái kho hàng</label>
 
                                                                 <select
-                                                                    name="variants[{{ $variantItem['id'] }}][stock_status]"
-                                                                    id="variants-{{ $variantItem['id'] }}-stock-status"
+                                                                    name="variants[{{ $variantItem['attribute_value_combine'] }}][stock_status]"
+                                                                    id="variants-{{ $variantItem['attribute_value_combine'] }}-stock-status"
                                                                     class="form-control form-select">
                                                                     <option value="in_stock" @selected($variantItem['stock_status'] == 'in_stock')>
                                                                         Còn hàng</option>
@@ -374,10 +377,10 @@
                                                                 <div class="form-check">
                                                                     <input class="form-check-input" type="checkbox"
                                                                         value="1"
-                                                                        id="variants-{{ $variantItem['id'] }}-status"
+                                                                        id="variants-{{ $variantItem['attribute_value_combine'] }}-status"
                                                                         @checked($variantItem['status'] == 2)>
                                                                     <label class="form-check-label mb-0"
-                                                                        for="variants-{{ $variantItem['id'] }}-status">
+                                                                        for="variants-{{ $variantItem['attribute_value_combine'] }}-status">
                                                                         Ẩn trên giao diện
                                                                     </label>
                                                                 </div>
@@ -394,7 +397,8 @@
                                 <div class="tab-pane fade" id="cross-selling" role="tabpanel"
                                     aria-labelledby="cross-selling-tab">
 
-                                    <input name="cross_sell" type="hidden" value="">
+                                    <input name="cross_sell" type="hidden"
+                                        value="{{ optional($product)->cross_sell }}">
 
                                     <div class="mb-3 mt-3 position-relative">
                                         <input class="form-control" type="text" name="search_input" id="searchInput"
@@ -909,7 +913,8 @@
 
             $('#type').trigger('change');
 
-            let preloaded = [];
+            let preloaded = @json($preloadedImages ?? []);
+
 
             $('.input-images').imageUploader({
                 preloaded: preloaded,
@@ -1056,6 +1061,28 @@
                 }
             }
 
+            $(document).ready(function() {
+                $('.select-all').each(function() {
+                    // Lấy ra ID từ phần tử accordion cha gần nhất
+                    let accordionItem = $(this).closest('.accordion-item');
+                    let attributeId = accordionItem.attr('id').replace('accordion-', '');
+
+                    // Gán sự kiện click cho từng nút "Chọn tất cả"
+                    $(this).on('click', function() {
+                        let selectElement = $('#select-' + attributeId);
+                        selectElement.find('option').prop('selected', true);
+                        selectElement.trigger('change'); // Cập nhật lại Select2
+                    });
+
+                    // Gán sự kiện khi thay đổi select
+                    $('#select-' + attributeId).on('change', function() {
+                        checkIfAnyValueSelected
+                            (); // Hàm kiểm tra để kích hoạt nút "Lưu thuộc tính"
+                    });
+                });
+            });
+
+
             $('#save-attributes').on('click', function() {
                 let selectedAttributesData = {}; // Để lưu dữ liệu thuộc tính đã chọn
 
@@ -1104,93 +1131,114 @@
                         combine([...prefix, name], [...prefixIds, id], index + 1);
                     }
                 }
+
                 combine([], [], 0);
 
-                // Hiển thị biến thể trong Bootstrap Accordion
-                let accordionHtml = '';
+                // Lấy danh sách ID hợp lệ sau khi combine
+                const validVariantIds = result.map(v => v.id);
+
+                // Xóa các DOM biến thể không còn hợp lệ
+                $('#variantAccordion .accordion-item').each(function() {
+                    const variantId = $(this).data('variant-id');
+                    if (!validVariantIds.includes(variantId)) {
+                        $(this).remove();
+                    }
+                });
+
+                // Hiển thị hoặc cập nhật biến thể
                 result.forEach((variant, index) => {
-                    accordionHtml += `
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button type="button" class="accordion-button collapsed position-relative" data-bs-toggle="collapse" data-bs-target="#v${index}">
-                                    <span>${variant.name}</span>
-                                    <span class="ms-2 delete-variant text-danger position-absolute" data-index="${index}">Xóa</span>
-                                </button>
-                            </h2>
-                            <div id="v${index}" class="accordion-collapse collapse">
-                                <div class="accordion-body">
-                                    <div class="row">
-                                        <div class="mb-3 position-relative col-md-3">
-                                            <label for="variants-${index}-sku" class="form-label required">Mã sản phẩm</label>
-                                            <input type="text" class="form-control" id="variants-${index}-sku" name="variants[${variant.id}][sku]"
-                                                aria-required="true" required="required">
-                                        </div>
-                                        <div class="mb-3 position-relative col-md-3">
-                                            <label for="variants-${index}-sale-price" class="form-label required">Giá</label>
-                                            <input type="text" class="form-control" id="variants-${index}-sale-price" name="variants[${variant.id}][sale_price]"
-                                                aria-required="true" required="required">
-                                        </div>
-                                        <div class="mb-3 position-relative col-md-3">
-                                            <label for="variants-${index}-product-unit" class="form-label">Đơn vị</label>
-                                            <input type="text" class="form-control" id="variants-${index}-product-unit" name="variants[${variant.id}][product_unit]">
-                                        </div>
-                                        <div class="mb-3 position-relative col-md-3">
-                                            <label for="variants-${index}-discount-price" class="form-label">Giá ưu đãi
-                                                <span class="form-label-description">
-                                                    <a href="javascript:void(0)" class="variant-turn-on-schedule">Lên lịch</a>
-                                                    <a class="variant-turn-off-schedule" style="display: none"
-                                                        href="javascript:void(0)">
-                                                        Hủy
-                                                    </a>
-                                                </span>
-                                            </label>
-
-                                            <input type="text" class="form-control"
-                                                name="variants[${variant.id}][discount_price]" id="variants-${index}-discount-price">
-                                        </div>
-                                        <div class="col-md-6 variant-scheduled-time" style="display: none;">
-                                            <div class="mb-3 position-relative">
-                                                <label class="form-label" for="variants-${index}-discount-start">
-                                                    Từ ngày
-                                                </label>
-                                                <input class="form-control form-date-time" type="text"
-                                                    name="variants[${variant.id}][discount_start]" id="variants-${index}-discount-start">
+                    if ($(`#variantAccordion [data-variant-id="${variant.id}"]`).length > 0) {
+                        $(`#variantAccordion [data-variant-id="${variant.id}"] .accordion-button span:first-child`)
+                            .text(variant.name);
+                    } else {
+                        let newHtml = `
+                    <div class="accordion-item" data-variant-id="${variant.id}">
+                        <h2 class="accordion-header">
+                            <button type="button" class="accordion-button collapsed position-relative" data-bs-toggle="collapse" data-bs-target="#v${index}">
+                                <span>${variant.name}</span>
+                                <span class="ms-2 delete-variant text-danger position-absolute" data-index="${index}">Xóa</span>
+                            </button>
+                        </h2>
+                        <div id="v${index}" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="mb-3 position-relative col-md-3">
+                                        <label for="variants-${index}-sku" class="form-label required">Mã sản phẩm</label>
+                                        <input type="text" class="form-control" id="variants-${index}-sku" name="variants[${variant.id}][sku]"
+                                            aria-required="true" required="required" value="${convertToSKU(variant.name)}">
+                                    </div>
+                                    <div class="mb-3 position-relative col-md-3">
+                                        <label for="variants-${index}-sale-price" class="form-label required">Giá</label>
+                                        <input type="text" class="form-control" id="variants-${index}-sale-price" name="variants[${variant.id}][sale_price]"
+                                            aria-required="true" required="required">
+                                    </div>
+                                            <div class="mb-3 position-relative col-md-3">
+                                                <label for="variants-${index}-product-unit" class="form-label required">Đơn vị</label>
+                                                <input type="text" class="form-control" id="variants-${index}-product-unit" name="variants[${variant.id}][product_unit]">
                                             </div>
-                                        </div>
-                                        <div class="col-md-6 variant-scheduled-time" style="display: none;">
-                                            <div class="mb-3 position-relative">
-                                                <label class="form-label" for="variants-${index}-discount-end">
-                                                    Đến ngày
+                                            <div class="mb-3 position-relative col-md-3">
+                                                <label for="variants-${index}-discount-price" class="form-label">Giá ưu đãi
+                                                    <span class="form-label-description">
+                                                        <a href="javascript:void(0)" class="variant-turn-on-schedule">Lên lịch</a>
+                                                        <a class="variant-turn-off-schedule" style="display: none"
+                                                            href="javascript:void(0)">
+                                                            Hủy
+                                                        </a>
+                                                    </span>
                                                 </label>
-                                                <input class="form-control form-date-time" type="text"
-                                                    name="variants[${variant.id}][discount_end]" id="variants-${index}-discount-end">
-                                            </div>
-                                        </div>
-                                        <div class="mb-3 position-relative col-md-12">
-                                            <label for="variants-${index}-stock-status" class="form-label">Trạng thái kho hàng</label>
 
-                                            <select name="variants[${variant.id}][stock_status]" id="variants-${index}-stock-status" class="form-control form-select">
-                                                <option value="in_stock" selected>Còn hàng</option>
-                                                <option value="out_of_stock">Hết hàng</option>
-                                                <option value="waiting_for_goods">Chờ hàng</option>
-                                            </select>
-                                        </div>
-                                        <div class="position-relative col-md-12">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="1" id="variants-${index}-status">
-                                                <label class="form-check-label mb-0" for="variants-${index}-status">
-                                                    Ẩn trên giao diện
-                                                </label>
+                                                <input type="text" class="form-control"
+                                                    name="variants[${variant.id}][discount_price]" id="variants-${index}-discount-price">
+                                            </div>
+                                            <div class="col-md-6 variant-scheduled-time" style="display: none;">
+                                                <div class="mb-3 position-relative">
+                                                    <label class="form-label" for="variants-${index}-discount-start">
+                                                        Từ ngày
+                                                    </label>
+                                                    <input class="form-control form-date-time" type="text"
+                                                        name="variants[${variant.id}][discount_start]" id="variants-${index}-discount-start">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 variant-scheduled-time" style="display: none;">
+                                                <div class="mb-3 position-relative">
+                                                    <label class="form-label" for="variants-${index}-discount-end">
+                                                        Đến ngày
+                                                    </label>
+                                                    <input class="form-control form-date-time" type="text"
+                                                        name="variants[${variant.id}][discount_end]" id="variants-${index}-discount-end">
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 position-relative col-md-3">
+                                                    <label for="variants-${index}-stock" class="form-label">Số lượng</label>
+                                                    <input type="text" class="form-control"
+                                                        id="variants-${index}-stock"
+                                                        name="variants[${variant.id}][stock]">
+                                            </div>
+                                            <div class="mb-3 position-relative col-md-9">
+                                                <label for="variants-${index}-stock-status" class="form-label">Trạng thái kho hàng</label>
+
+                                                <select name="variants[${variant.id}][stock_status]" id="variants-${index}-stock-status" class="form-control form-select">
+                                                    <option value="in_stock" selected>Còn hàng</option>
+                                                    <option value="out_of_stock">Hết hàng</option>
+                                                    <option value="waiting_for_goods">Chờ hàng</option>
+                                                </select>
+                                            </div>
+                                            <div class="position-relative col-md-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" value="1" id="variants-${index}-status">
+                                                    <label class="form-check-label mb-0" for="variants-${index}-status">
+                                                        Ẩn trên giao diện
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                        $('#variantAccordion').append(newHtml);
+                    }
                 });
-
-                $('#variantAccordion').html(accordionHtml);
             });
 
             $(document).on('click', '.delete-variant', function() {
@@ -1249,8 +1297,7 @@
             }
 
             submitForm('#myForm', function(response) {
-                console.log(response);
-
+                window.location.href = "{{ route('admin.products.index') }}"
             })
 
             flatpickr(".form-date-time", {

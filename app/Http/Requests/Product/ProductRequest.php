@@ -29,6 +29,7 @@ class ProductRequest extends FormRequest
             'images' => 'nullable|array',
             'is_featured' => 'nullable|boolean',  // Featured flag is optional but should be a boolean (1 or 0)
             'images.*' => 'image|mimes:png,jpg,jpeg,gif,webp|max:2048',  // Images are optional but must be an array of image files
+            'old' => 'nullable|array',
             'description' => 'nullable|string',  // Description is optional, but if provided, it must be a string
             'content' => 'nullable|string',  // Content is optional, but if provided, it must be a string
             'type' => 'required|string|in:variant,simple',  // Type should be 'variant'
@@ -47,6 +48,7 @@ class ProductRequest extends FormRequest
             'variants.*.discount_start' => 'nullable|date_format:d-m-Y',  // Discount start date for each variant
             'variants.*.discount_end' => 'nullable|date_format:d-m-Y',  // Discount end date for each variant
             'variants.*.stock_status' => 'required|string|in:out_of_stock,waiting_for_goods,in_stock',  // Variant stock status should be one of the defined values
+            'variants.*.stock' => 'required|numeric|min:0',  // Variant stock status should be one of the defined values
             'variants.*.status' => 'nullable|numeric|in:1',  // Variant stock status should be one of the defined values
             'cross_sell' => 'nullable',  // Cross-sell products are optional
             'status' => 'required|numeric|in:1,2',  // Status should be a boolean (1 or 0)

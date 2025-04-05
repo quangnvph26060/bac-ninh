@@ -407,6 +407,10 @@ table.dataTable td.dt-type-date {
     right: 20px;
 }
 
+#myTab .nav-item {
+    font-weight: 600;
+}
+
 @media (min-width: 768px) {
     .mb-md-0 {
         margin-bottom: 0 !important;

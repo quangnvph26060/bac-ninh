@@ -38,17 +38,31 @@ const columns = [
         data: "sale_price",
         name: "sale_price",
         title: "giá bán",
-        width: "12%",
+        width: "10%",
         render(data, type, row) {
             return formatCurrency(data);
         },
         searchable: false,
     },
     {
-        data: "company_name",
-        name: "company_name",
-        title: "nhà cung cấp",
-        orderable: false,
+        data: "stock_status",
+        name: "stock_status",
+        title: "tttk",
+        render(data) {
+            if (data == "in_stock") {
+                return `<span class="badge" style="background-color: rgb(47, 179, 68);">Còn hàng</span>`;
+            } else if (data == "out_of_stock") {
+                return `<span class="badge" style="background-color: rgb(247, 103, 7);">Hết hàng</span>`;
+            } else {
+                return `<span class="badge" style="background-color: rgb(247, 103, 7);">Sắp có hàng</span>`;
+            }
+        },
+        searchable: false,
+    },
+    {
+        data: "type",
+        name: "type",
+        title: "loại",
         searchable: false,
     },
     {

@@ -42,10 +42,7 @@ class ProductController extends Controller
                 $dataTable
                     ->editColumn('brand_id', fn($row) => $row->brand->name ?? '-----')
                     ->editColumn('category_id', fn($row) => $row->category->name ?? '-----')
-                    ->editColumn('company_name',  fn($row) => $row->company->name ?? '-----')
-                    ->addColumn('operations', function ($row) {
-                        return view('admin.components.operation', compact('row'));
-                    }),
+                    ->addColumn('operations', fn($row) => view('admin.components.operation', compact('row'))),
                 ['operations']
             );
         }
@@ -85,15 +82,17 @@ class ProductController extends Controller
         $selectedAttributes =   $product->attributes->pluck('id')->toArray();
         $attributesWithValues = $this->productService->attributesWithValues($product);
         $productCrossSell = $this->productService->getProductCrossSell($product);
+        $preloadedImages = $this->productService->getProductImages($product);
+        // dd($productImages);
 
-        return view('admin.product.save', compact('product', 'brands', 'categories', 'attributesWithValues', 'title', 'selectedAttributes', 'attributes', 'variants', 'productCrossSell'));
+        return view('admin.product.save', compact('product', 'brands', 'categories', 'attributesWithValues', 'title', 'selectedAttributes', 'attributes', 'variants', 'productCrossSell', 'preloadedImages'));
     }
 
-    public function update($id, Request $request)
+    public function update(string $id, ProductRequest $request)
     {
-        dd($request->toArray());
-        $product = $this->productService->updateProduct($id, $request);
-        return redirect()->route('admin.product.store')->with('success', 'Cập nhật sản phẩm thành công');
+        $payload = $request->validated();
+        $response = $this->productService->update($id, $payload);
+        return handleResponse($response['message'], $response['success'], $response['code']);
     }
 
     public function import(Request $request)
