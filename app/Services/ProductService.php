@@ -80,6 +80,7 @@ class ProductService  extends BaseService
                 'stock_status' => $variant->stock_status,
                 'status' => $variant->status,
                 'id' => $variant->id,
+                'attribute_value_combine' => $variant->attribute_value_combine,
                 // 'stock' => $variant->stock,
             ];
         });
