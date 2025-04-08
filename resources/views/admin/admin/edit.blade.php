@@ -222,7 +222,7 @@
                                     <div class="form-group">
                                         <label for="email" class="form-label">Email</label>
                                         <input id="email" class="form-control @error('email') is-invalid @enderror"
-                                            name="email" type="email" value="{{ old('email', $admin->email) }}"
+                                            name="email" type="email" value="{{ old('email', auth()->guard('admin')->user()->email) }}"
                                             required>
                                         @error('email')
                                             <span class="invalid-feedback" role="alert">
@@ -246,7 +246,7 @@
                                     </div>
                                     <div class="form-group">
                                         <img id="profileImage"
-                                            src="{{showImage(auth()->user()->img_url) }}"
+                                            src="{{ showImage(auth()->guard('admin')->user()->img_url) }}"
                                             alt="image profile" class="avatar">
                                     </div>
                                 </div>

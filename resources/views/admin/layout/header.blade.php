@@ -35,7 +35,7 @@
                     <a class="dropdown-toggle profile-pic" target="_blank"
                         href="{{ route('admin.transaction.payment') }}" aria-expanded="false">
                         <i style="font-size: 18px; padding: 0px 5px; color: rgb(138, 135, 135)"
-                            class="fa-solid fa-wallet"></i> Ví: {{ auth()->user()->wallet }} đ
+                            class="fa-solid fa-wallet"></i> Ví: {{ auth()->guard('admin')->user()->wallet }} đ
 
                     </a>
                 </li>
@@ -121,12 +121,12 @@
                     <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#"
                         aria-expanded="false">
                         <div class="avatar-sm">
-                            <img src="{{ showImage(auth()->user()->img_url) }}" alt="{{ auth()->user()->name }}"
+                            <img src="{{ showImage(auth()->guard('admin')->user()->img_url) }}" alt="{{ auth()->guard('admin')->user()->name }}"
                                 class="avatar-img rounded-circle">
                         </div>
                         <span class="profile-username">
                             <span class="op-7">Hi,</span>
-                            <span class="fw-bold">{{ auth()->user()->name }}</span>
+                            <span class="fw-bold">{{ auth()->guard('admin')->user()->name }}</span>
                         </span>
                     </a>
                     <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -136,14 +136,14 @@
                                 <li>
                                     <div class="user-box">
                                         <div class="avatar-lg">
-                                            <img src="{{ showImage(auth()->user()->img_url) }}" alt="image profile"
+                                            <img src="{{ showImage(auth()->guard('admin')->user()->img_url) }}" alt="image profile"
                                                 class="avatar-img rounded-circle">
                                         </div>
                                         <div class="u-text">
-                                            <h4>{{ auth()->user()->name }}</h4>
-                                            <p class="text-muted">{{ auth()->user()->email }}</p>
+                                            <h4>{{ auth()->guard('admin')->user()->name }}</h4>
+                                            <p class="text-muted">{{ auth()->guard('admin')->user()->email }}</p>
                                             <div style="display: flex">
-                                                <a href="{{ route('admin.detail', ['id' => auth()->id()]) }}"
+                                                <a href="{{ route('admin.detail', ['id' => auth()->guard('admin')->id()]) }}"
                                                     class="btn btn-xs btn-secondary btn-sm p-1">Trang cá nhân</a>
                                                 <a href="#" class="btn btn-xs btn-sm p-1"
                                                     style="background: red; color: #ffff; margin-left: 10px"

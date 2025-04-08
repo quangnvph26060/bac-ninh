@@ -33,7 +33,7 @@ class ProductRequest extends FormRequest
             'description' => 'nullable|string',  // Description is optional, but if provided, it must be a string
             'content' => 'nullable|string',  // Content is optional, but if provided, it must be a string
             'type' => 'required|string|in:variant,simple',  // Type should be 'variant'
-            'sale_price' => ($this->input('type') == 'variant' ? 'nullable' : 'required') . '|numeric|min:0',  // Sale price should be a number and can be null, but if present, it should be >= 0
+            'sale_price' => ($this->input('type') == 'variant' ? 'nullable' : 'required') . '|numeric|min:1',  // Sale price should be a number and can be null, but if present, it should be >= 0
             'discount_price' => 'nullable|numeric|min:0',  // Discount price should be a number and can be null, but if present, it should be >= 0
             'discount_start' => 'nullable|date_format:d-m-Y',  // Discount start date, optional but if present, it should be in 'd-m-Y' format
             'discount_end' => 'nullable|date_format:d-m-Y|after_or_equal:discount_start',  // Discount end date, optional but if present, it should be in 'd-m-Y' format
@@ -41,7 +41,7 @@ class ProductRequest extends FormRequest
             'stock_status' => 'required|string|in:out_of_stock,waiting_for_goods,in_stock',  // Stock should be a number and can be null, but if present, it should be >= 0
             'product_unit' => 'nullable|string|max:255',  // Product unit is optional, but if provided, it should be a string
             'sku' => 'nullable|string|max:255',  // SKU is optional, but if provided, it should be a string
-            'variants' => ($this->input('type') == 'variant' ? 'nullable' : 'required') . '|array',  // Variants are optional but should be an array if present
+            'variants' => ($this->input('type') == 'variant' ? 'required' : 'nullable') . '|array',  // Variants are optional but should be an array if present
             'variants.*.sku' => 'required|string|max:255',  // Each variant must have a SKU (string)
             'variants.*.sale_price' => 'required|numeric|min:0',  // Each variant must have a sale price (numeric, >= 0)
             'variants.*.product_unit' => 'nullable|string|min:0|max:100',  // Each variant must have a sale price (numeric, >= 0)
@@ -67,7 +67,7 @@ class ProductRequest extends FormRequest
         $validator->after(function ($validator) {
             $variants = $this->input('variants');
 
-            foreach ($variants as $key => $variant) {
+            foreach ($variants ?? [] as $key => $variant) {
                 // Kiểm tra nếu cả discount_price và sale_price đều có giá trị
                 if (isset($variant['discount_price']) && isset($variant['sale_price'])) {
                     // Kiểm tra discount_price phải nhỏ hơn sale_price

@@ -52,14 +52,19 @@ function updateCharCount(inputSelector, maxLength) {
 
 function convertToSKU(str) {
     return str
-        .replace(/đ/g, "d")   // xử lý thường
-        .replace(/Đ/g, "D")   // xử lý hoa
-        .normalize("NFD")     // tách dấu
+        .replace(/đ/g, "d") // xử lý thường
+        .replace(/Đ/g, "D") // xử lý hoa
+        .normalize("NFD") // tách dấu
         .replace(/[\u0300-\u036f]/g, "") // xóa dấu
-        .replace(/[^a-zA-Z0-9\-]/g, "")  // chỉ giữ chữ, số và dấu -
+        .replace(/[^a-zA-Z0-9\-]/g, "") // chỉ giữ chữ, số và dấu -
         .toUpperCase();
 }
 
+$(".money-input").on("input", function () {
+    let input = $(this).val().replace(/\D/g, ""); // Bỏ tất cả ký tự không phải số
+    let formatted = input.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    $(this).val(formatted);
+});
 
 function updateCKEditorCharCount(id, maxLength) {
     let content = CKEDITOR.instances[id].document.getBody().getText(); // Lấy nội dung chỉ có text
@@ -123,6 +128,11 @@ function submitForm(formId, successCallback) {
                 // Nếu CKEditor đã được khởi tạo, cập nhật giá trị của nó
                 CKEDITOR.instances[editorId].updateElement();
             }
+        });
+
+        $(".money-input").each(function () {
+            let raw = $(this).val().replace(/\./g, "");
+            $(this).val(raw);
         });
 
         var formData = new FormData(this);

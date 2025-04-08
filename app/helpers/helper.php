@@ -195,8 +195,8 @@ function isOnSale($record)
             $now = Carbon::now(); // Thời gian hiện tại
 
             // Kiểm tra điều kiện giảm giá hợp lệ
-            if ($discountStart->gt($now) && $discountEnd->lt($now)) {
-                return true; // Giảm giá trong khoảng thời gian hợp lệ
+            if ($discountStart->lte($now) && $discountEnd->gte($now)) {
+                return true;
             }
         }
 
