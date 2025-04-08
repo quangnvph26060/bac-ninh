@@ -35,7 +35,7 @@
                     <a class="dropdown-toggle profile-pic" target="_blank"
                         href="{{ route('admin.transaction.payment') }}" aria-expanded="false">
                         <i style="font-size: 18px; padding: 0px 5px; color: rgb(138, 135, 135)"
-                            class="fa-solid fa-wallet"></i> Ví: {{ auth()->user()->wallet }} đ
+                            class="fa-solid fa-wallet"></i> Ví: {{ auth()->guard('admin')->user()->wallet }} đ
 
                     </a>
                 </li>

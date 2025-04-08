@@ -114,7 +114,7 @@
                                     <div class="row mt-3">
                                         <div class="mb-3 position-relative col-md-3">
                                             <label for="sale_price" class="form-label required">Giá bán</label>
-                                            <input type="text" placeholder="Giá bán" class="form-control"
+                                            <input type="text" placeholder="Giá bán" class="form-control money-input"
                                                 name="sale_price" id="sale_price"
                                                 value="{{ $product ? formatNumber(optional($product)->sale_price) : '' }}">
                                         </div>
@@ -140,7 +140,7 @@
                                                 </span>
                                             </label>
 
-                                            <input type="text" placeholder="Giá bán" class="form-control"
+                                            <input type="text" placeholder="Giá ưu đãi" class="form-control money-input"
                                                 name="discount_price" id="discount_price"
                                                 value="{{ $product ? formatNumber(optional($product)->discount_price) : '' }}">
                                         </div>

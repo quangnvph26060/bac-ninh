@@ -1,0 +1,399 @@
+.read_m_chienda b::before {
+  content: "Xem thêm";
+  font-size: 16px;
+  color: #fff;
+}
+.toggle_readm::before {
+  content: "Thu gọn" !important;
+}
+.search_domain .add_field_link b::before {
+  content: "Thêm lĩnh vực khác";
+  font-size: 15px;
+  line-height: 30px;
+  color: #0087f4;
+  font-weight: 400;
+}
+/*CSS SHOW MENU*/
+.show_test_menu{
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  color: #fff;
+  width: 50px;
+  height: 50px;
+  background: #0066b2;
+  line-height: 50px;
+  text-align: center;
+  cursor: pointer;
+  z-index: 9;
+  border-radius: 50%;
+}
+.qb_test_menu{
+  position: fixed;
+  right: 70px;
+  top: 0px;
+  z-index: 99999;
+  margin: 0px auto;
+  width: 100%;
+  background: #0066b2;
+  max-width: 1000px;
+  display: none;
+  padding: 0px 20px;
+}
+.qb_test_menu h3{
+  text-align: center;
+  color: #fff;
+  margin: 20px 0px;
+}
+.qb_test_menu ul li{
+  width: 25%;
+  float: left;
+  margin: 0px 0px 0px 0px;
+}
+.qb_test_menu ul li a{
+  color: #fff;
+  font-size: 14px;
+}
+.qb_tit_mob{
+  display: none !important;
+}
+@-webkit-keyframes fadeUptd {
+ from {
+   opacity: 0;
+ }
+ to {
+   opacity:1;
+ }
+}
+/*END CSS SHOW MENU*/
+.re_back{
+  color: #fff !important;
+  background: #1E87D7 !important;
+}
+@media (max-width:1500px){
+  .qb_ttdh_page .ttdh_cgdv .ttdh_cgdv_detailds .ttdh_tdv:before{
+    content: "Tên dịch vụ:";
+    font-family: 'rbt_bold';
+    font-size: 13px;
+    line-height: 21px;
+    float: left;
+  }
+  .qb_ttdh_page .ttdh_cgdv .ttdh_cgdv_detailds .ttdh_thdk:before{
+    content: "Thời hạn đăng ký:";
+    font-family: 'rbt_bold';
+    font-size: 13px;
+    line-height: 21px;
+    float: left;
+  }
+  .qb_ttdh_page .ttdh_cgdv .ttdh_cgdv_detailds .ttdh_money:before{
+    content: "Số tiền (chưa VAT):";
+    font-family: 'rbt_bold';
+    font-size: 13px;
+    line-height: 21px;
+    float: left;
+  }
+}
+@media(max-width: 1024px){
+  .qb_dkdvhosting_page .register_service_info .list_domain .slick-slide{
+    padding: 0px 10px !important;
+  }
+  .qb_dkdvhosting_page .register_service_info .list_domain .space .slick-list,
+  .qb_dkdvhosting_page .register_service_info .list_domain .slick-list{
+    padding: 0px 12% 0px 0px !important;
+    margin: 0px -10px !important;
+  }
+/*  .qb_dkdvhosting_page .register_service_info .list_domain ul li a{
+   background: #1E87D7 !important;
+   color: #fff !important;
+ }*/
+ .qb_dkdvcloud_server_page .list_domain{
+  flex-direction: column;
+}
+.qb_dkdvcloud_server_page .list_domain .space,
+.qb_dkdvcloud_server_page .list_domain .setting{
+  width: 100% !important;
+  margin: 0px 0px 20px 0px !important;
+}
+.qb_dkdvhosting_page .register_service_info .list_domain ul{
+  display: initial !important;
+}
+.tg_kh_create_nd .textwidget{
+  word-break: break-all !important;
+}
+.tg_kh_create_nd{
+  padding: 0px 0px 20px 0px !important;
+}
+.tg_request_details_ft{
+  padding: 15px !important;
+}
+.tg_text_suggestions_nsx ul li label{
+  font-size: 13px !important;
+  line-height: 21px !important;
+  margin: 0px 0px 20px 0px !important;
+}
+.tg_text_suggestions_nsx ul li{
+  padding: 0px !important;
+}
+.tg_text_request_details_nd .tg_support_wp_nsx ul>li:last-child strong{
+  width: 100% !important;
+}
+.tg_request_details_ft .text_choose_parts_nsx .tox.tox-tinymce{
+  width: 100% !important;
+}
+.tg_text_request_details_nd .tg_support_wp_nsx ul li span,
+.tg_text_request_details_nd .tg_support_wp_nsx ul li strong{
+  width: 50% !important;
+}
+.dvshh_get_text{
+  display: inline-block !important;
+}
+.qb_tit_mob{
+  display: inline-block !important;
+  float: left;
+  min-width: 90px;
+  text-align: left !important;
+  background: transparent !important;
+  width: initial !important;
+  height: initial !important;
+  color: #333333 !important;
+  text-align: left !important;
+  border: none !important;
+  border-radius: none !important;
+  padding: 0px !important;
+  vertical-align: middle !important;
+}
+.qb_qldvtm_page .domain_name_service_management_ct table tbody tr>td:nth-child(2) .qb_tit_mob{
+  color: #fff !important;
+}
+.qb_tit_mob p{
+  margin: 0px;
+}
+.qb_tit_mob:before,
+.qb_tit_mob:after{
+  display: none;
+}
+.editCarret::after {
+ content: "\f0d8" !important;
+}
+.service_use_page .tg_navi_2021 tbody tr>td:nth-child(1):after,
+.qb_cg_mo  .tg_navi_2021 tbody tr>td:nth-child(2):after,
+.qb_dhdtt_mb .tg_navi_2021 tbody>tr>td:nth-child(2):after,
+.qb_dkmgdv_mb .tg_navi_2021 tbody>tr>td:nth-child(1):after,
+.qb_input_mb .tg_navi_2021 .tg_navi_2021 tbody>tr>td:nth-child(1):after,
+.tg_domain_extension_ft  .tg_navi_2021 tbody tr>td:nth-child(1):after,
+.qb_dgdvdmdd_page  .tg_navi_2021 tbody tr>td:nth-child(2):after,
+.qb_qlycdg_page  .tg_navi_2021 tbody tr>td:nth-child(2):after,
+.qb_qldvtm_page.qb_cnttkh_page  .tg_navi_2021 tbody tr>td:nth-child(2):after,
+.qb_input_mb  .tg_navi_2021 tbody tr>td:nth-child(1):after,
+.qb_bgtm_page .tg_navi_2021 tbody>tr>td:nth-child(1):after,
+.ad_navi_2021 tbody>tr>td:nth-child(2):after,
+.qb_lsdn_page .tg_navi_2021 tbody>tr>td:nth-child(1):after,
+.qb_cshh_page .tg_navi_2021 tbody>tr>td:nth-child(2):after{
+  position: absolute;
+  content: "\f0d7";
+  font: normal normal normal 14px/1 FontAwesome;
+  right: 9px;
+  top: 10px;
+  font-size: 20px;
+  color: #fff;
+}
+.qb_dhdtt_mb .tg_navi_2021 tbody>tr:nth-child(1),
+.qb_dkmgdv_mb .tg_navi_2021 tbody>tr:nth-child(1),
+.qb_bgtm_page .tg_navi_2021 tbody>tr:nth-child(1),
+.ad_navi_2021 thead tr th,
+.tg_navi_2021 thead tr th{
+  display: none;
+}
+.ad_navi_2021 tbody tr td,
+.tg_navi_2021 tbody tr td{
+  display: block;
+}
+.service_use_page .tg_navi_2021 tbody>tr>td:not(:nth-child(1)),
+.qb_cg_mo .tg_navi_2021 tbody>tr>td:not(:nth-child(2)),
+.qb_dhdtt_mb  .tg_navi_2021 tbody>tr>td:not(:nth-child(2)),
+.qb_input_mb .tg_navi_2021 thead>tr>th:not(:nth-child(1)),
+.qb_input_mb .tg_navi_2021 tbody>tr>td:not(:nth-child(1)),
+.qb_dkmgdv_mb  .tg_navi_2021 tbody>tr>td:not(:nth-child(1)),
+.tg_domain_extension_ft .tg_navi_2021  tbody>tr>td:not(:nth-child(1)),
+.qb_dgdvdmdd_page .tg_navi_2021  tbody>tr>td:not(:nth-child(2)),
+.qb_qlycdg_page .tg_navi_2021  tbody>tr>td:not(:nth-child(2)),
+.qb_qldvtm_page.qb_cnttkh_page .tg_navi_2021  tbody>tr>td:not(:nth-child(2)),
+.qb_bgtm_page .tg_navi_2021 tbody>tr>td:not(:nth-child(1)),
+.ad_navi_2021 tbody>tr>td:not(:nth-child(2)),
+.qb_lsdn_page .tg_navi_2021 tbody>tr>td:not(:nth-child(1)),
+.qb_cshh_page .tg_navi_2021 tbody>tr>td:not(:nth-child(2)){
+  display: none;
+}
+.qb_cg_mo .tg_navi_2021 tbody tr>td:nth-child(1),
+.qb_dhdtt_mb .tg_navi_2021 tbody>tr>td:nth-child(1),
+.qb_input_mb  .tg_navi_2021 tbody>tr>td:nth-child(2),
+.qb_input_mb  .tg_navi_2021 tbody>tr>td:nth-child(3),
+.qb_dgdvdmdd_page .tg_navi_2021 tbody tr>td:nth-child(1),
+.qb_qlycdg_page table tbody tr>td:nth-child(1),
+.qb_qldvtm_page.qb_cnttkh_page .tg_navi_2021 table thead,
+.qb_qldvtm_page.qb_cnttkh_page .tg_navi_2021 table tbody>tr>td:nth-child(1),
+.ad_navi_2021 tbody>tr>td:nth-child(1),
+.qb_cshh_page .tg_navi_2021 tbody tr>td:nth-child(1),
+.reward_page_nv2021 .tg_navi_2021 tbody tr>td:nth-child(1){
+  display: none !important;
+}
+.tg_navi_2021 tr td.show_td,
+.ad_navi_2021 tr td.show_td{
+ display: block !important;
+ z-index: 99;
+ position: relative;
+ animation: fadeUptd 1s ease 0s forwards;
+ width: initial !important;
+}
+.service_use_page .service_use_ct .service_use_box_ct tbody tr>td:nth-child(1)~td{
+  text-align: right !important;
+  margin: 0px 10px 0px 10px;
+  border-bottom: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 21px;
+  padding: 10px 0px;
+}
+.qb_cg_mo .tg_navi_2021  tbody tr>td:nth-child(2)~td,
+.qb_dhdtt_mb tbody>tr>td:nth-child(2)~td,
+.qb_dkmgdv_mb tbody>tr>td:nth-child(1)~td,
+.qb_input_mb .tg_navi_2021 tbody>tr>td:nth-child(1)~td,
+.tg_domain_extension_ft .qb_ghtm_dv tbody>tr>td:nth-child(1)~td,
+.qb_dgdvdmdd_page .dgdvdmdd_detailds tbody>tr>td:nth-child(2)~td,
+.qb_qlycdg_page  .tg_navi_2021 tbody>tr>td:nth-child(2)~td,
+.qb_bgtm_page .tg_navi_2021 tbody>tr>td:nth-child(1)~td,
+.ad_navi_2021 tbody>tr>td:nth-child(2)~td,
+.qb_lsdn_page .tg_navi_2021 tbody>tr>td:nth-child(1)~td,
+.qb_cshh_page .tg_navi_2021 tbody>tr>td:nth-child(2)~td{
+  text-align: right !important;
+  border-bottom: 1px solid #ccc;
+}
+.service_use_page .tg_navi_2021 tbody>tr>td:nth-child(1),
+.qb_dhdtt_mb .tg_navi_2021 tbody>tr>td:nth-child(2),
+.qb_dkmgdv_mb tbody>tr>td:nth-child(1),
+.qb_input_mb .tg_navi_2021 tbody>tr>td:nth-child(1),
+.tg_domain_extension_ft .tg_navi_2021 tbody>tr>td:nth-child(1),
+.qb_dgdvdmdd_page .dgdvdmdd_detailds tbody>tr>td:nth-child(2),
+.qb_qlycdg_page .tg_navi_2021 tbody>tr>td:nth-child(2),
+.qb_bgtm_page .tg_navi_2021 tbody>tr>td:nth-child(1),
+.ad_navi_2021 tbody>tr>td:nth-child(2),
+.qb_lsdn_page .tg_navi_2021 tbody>tr>td:nth-child(1),
+.qb_cshh_page  .tg_navi_2021 tbody>tr>td:nth-child(2),
+.qb_cg_mo .tg_navi_2021  tbody tr>td:nth-child(2){
+  width: initial !important;
+  font-size: 13px !important;
+  line-height: 21px !important;
+  position: relative;
+  padding: 10px !important;
+  background: #0066b2 !important;
+  color: #fff !important;
+  text-align: left !important;
+  z-index: 0;
+}
+.qb_dkmgdv_mb .register_service_hosting_box .register_service_hosting_detailds tbody tr td{
+  width: 100% !important;
+}
+.service_use_page .stg_navi_2021 tbody tr>td:nth-child(1){
+  padding: 10px;
+} 
+.qb_dkmgdv_mb #qb-register-service-5 table tbody tr td,
+.qb_dkmgdv_mb .register_service_hosting_detailds tbody tr td.qb_tb_ip_class_c,
+.qb_dkmgdv_mb .register_service_hosting_detailds tbody tr td.qb_tb_ip_class_a,
+.qb_dkmgdv_mb  .register_service_hosting_detailds tbody tr td.qb_tb_dl,
+.qb_dkmgdv_mb  .register_service_hosting_detailds tbody tr td.qb_tb_website,
+.qb_dkdvhosting_page .register_service_hosting_detailds tbody tr td.qb_tb_email_account,
+.qb_dkdvhosting_page .register_service_hosting_detailds tbody tr td.qb_tb_sl_gmail_yahoo_hotmail
+.qb_dkmgdv_mb table tr td.qb_tb_gtt,
+.qb_dkdvhosting_page .register_service_hosting_detailds tbody tr td.qb_tb_dcemail,
+.qb_dkdvhosting_page .register_service_hosting_detailds tbody tr td.qb_tb_mail_group,
+.qb_dkdvhosting_page .register_service_hosting_detailds tbody tr td.qb_tb_safe_cloud,
+.qb_dkdvhosting_page .register_service_hosting_detailds tbody tr td.qb_tb_office_high_class,
+.tg_domain_extension_ft .qb_ghtm_dv tbody tr td,
+.tg_domain_extension_ft .qb_ghtm_dv tr td p,
+.qb_dgdvdmdd_page table  tbody tr td,
+.qb_qlycdg_page .tg_navi_2021  tbody tr td,
+.qb_dkdvcloud_server_page .register_service_hosting_detailds tbody tr td.qb_tb_dt_internet,
+.qb_dkdvssl_page  .register_service_hosting_detailds tbody tr td,
+.qb_bgtm_page .tg_navi_2021 tbody tr td,
+.qb_cg_mo .tg_navi_2021  tbody tr td{
+  text-align: right !important;
+}
+#qb-register-email-server-4 .qb_tb_safe_cloud  .qb_tit_mob,
+#qb-register-email-server-4 .qb_tb_office_high_class .qb_tit_mob{
+ padding: 20px 0px 0px 0px !important;
+}
+#qb-register-email-server-4 tbody>tr:nth-child(2) .qb_tb_office_high_class .qb_tit_mob,
+#qb-register-email-server-4 tbody>tr:nth-child(5) .qb_tb_office_high_class .qb_tit_mob,
+#qb-register-email-server-4 tbody>tr:nth-child(5) .qb_tb_safe_cloud .qb_tit_mob{
+  padding: 0px !important;
+}
+.tg_domain_extension_ft .qb_ghtm_dv tr td select{
+  display: inline-block;
+  vertical-align: middle;
+} 
+.tg_domain_extension_ft .qb_ghtm_dv tr td p{
+  float: none;
+}
+.qb_dgdvdmdd_page .dgdvdmdd_detailds .star_flo{
+  float: right;
+}
+.qb_dgdvdmdd_page .star_flo_bg{
+  display: table;
+  width: 100%;
+}
+.qb_cg_mo .tg_navi_2021 tbody tr>td:nth-child(2):before,
+.qb_dhdtt_mb  tbody tr>td:nth-child(2):before,
+.qb_dkmgdv_mb  tbody tr td.qb_tb_tg:before,
+.tg_domain_extension_ft .qb_ghtm_dv tbody tr>td:nth-child(1):before,
+.qb_dgdvdmdd_page table  tbody>tr>td:nth-child(2):before,
+.qb_qlycdg_page table  tbody>tr>td:nth-child(2):before,
+.qb_dgdvdmdd_page table  tbody>tr>td:nth-child(2):before,
+.qb_qldvtm_page.qb_cnttkh_page table  tbody>tr>td:nth-child(2):before,
+.qb_hckh_page .tg_navi_2021 tbody>tr>td:nth-child(2):before,
+.ad_navi_2021 tbody>tr>td:nth-child(2):before,
+.qb_lsdn_page .tg_navi_2021 tbody>tr>td:nth-child(1):before,
+.qb_cshh_page .tg_navi_2021 tbody>tr>td:nth-child(2):before{
+  color: #fff;
+  font-family: rbt_bold;
+  margin: 0px 8px 0px 0px;
+}
+.qb_input_mb  .tg_navi_2021 thead>tr>th:nth-child(1):before{
+  content: "Click chọn toàn bộ";
+}
+.qb_dsbk_page .ad_navi_2021 tbody tr>td:nth-child(2):before{
+  content: "Mã bản khai:";
+}
+.qb_dhctt_mb  .ad_navi_2021 tbody tr>td:nth-child(2):before{
+  content: "Mã đơn hàng:";  
+}
+.qb_dhdtt_mb  .tg_navi_2021 tbody tr>td:nth-child(2):before{
+  content: "Loại đơn hàng:";
+}
+.qb_dkmgdv_mb  .tg_navi_2021 tbody tr td.qb_tb_tg:before{
+  content: "Tên gói: ";
+}
+.tg_domain_extension_ft  .tg_navi_2021 tbody tr>td:nth-child(1):before{
+  content: "Dịch vụ gia hạn: ";
+}
+.qb_dgdvdmdd_page   .tg_navi_2021 tbody>tr>td:nth-child(2):before{
+  content: "Tên dịch vụ: ";
+}
+.qb_qlycdg_page   .tg_navi_2021 tbody>tr>td:nth-child(2):before{
+  content: "Mã yêu cầu: ";
+}
+.qb_url_aff_page .ad_navi_2021 tbody>tr>td:nth-child(2):before{
+  content: "URL:";
+}
+.qb_lsdn_page .tg_navi_2021 tbody>tr>td:nth-child(1):before{
+  content: "Thời gian hoạt động: ";
+}
+.qb_url_aff_page .ad_navi_2021 tbody>tr>td:nth-child(2){
+  padding: 10px 30px 10px 10px;
+}
+.qb_cshh_page .tg_navi_2021 tbody>tr>td:nth-child(2):before{
+  content: "Loại dịch vụ: ";
+}
+.qb_lsdn_page .tg_navi_2021 tbody>tr>td:nth-child(3){
+  word-break: break-word;
+}
+}
+

@@ -57,9 +57,11 @@ Route::post('/register_account', [SignUpController::class, 'store'])->name('regi
 
 
 Route::middleware(['auth'])->group(function () {
+
     Route::get('/home', function () {
         return view('home');
     })->name('home');
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/payment', [PaymentController::class, 'showPaymentForm'])->name('payment.form');
     Route::post('/payment', [PaymentController::class, 'processPayment'])->name('payment.process');
