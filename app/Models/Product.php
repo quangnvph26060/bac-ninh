@@ -34,7 +34,8 @@ class Product extends Model
         'sku',
         'seo_title',
         'seo_description',
-        'tags'
+        'tags',
+        'stock_status'
     ];
 
     protected $casts = [
@@ -44,6 +45,16 @@ class Product extends Model
         'discount_start' => 'date',
         'discount_end'  => 'date',
     ];
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 1);
+    }
+
+    public function scopeHome($query)
+    {
+        return $query->where('is_show_home', 1);
+    }
 
     public function attributes()
     {

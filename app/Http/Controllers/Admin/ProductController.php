@@ -83,13 +83,13 @@ class ProductController extends Controller
         $attributesWithValues = $this->productService->attributesWithValues($product);
         $productCrossSell = $this->productService->getProductCrossSell($product);
         $preloadedImages = $this->productService->getProductImages($product);
-        // dd($productImages);
 
         return view('admin.product.save', compact('product', 'brands', 'categories', 'attributesWithValues', 'title', 'selectedAttributes', 'attributes', 'variants', 'productCrossSell', 'preloadedImages'));
     }
 
     public function update(string $id, ProductRequest $request)
     {
+
         $payload = $request->validated();
         $response = $this->productService->update($id, $payload);
         return handleResponse($response['message'], $response['success'], $response['code']);

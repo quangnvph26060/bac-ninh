@@ -61,78 +61,44 @@
                     <!-- Slider chính -->
                     <div class="swiper main-slider">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide">
-                                <img src="{{ asset('frontend/assets/img/s1.png') }}" alt="Image 1" />
-                                <div class="px-4 d-flex flex-column gap-2 text-center bg-white">
-                                    <span class="text-dark fw-bold text-truncate fs-6">Wooden Picture Frame
-                                        Magnet</span>
-                                    <p class="text-dark fs-6">Start from $5.49</p>
+
+                            @foreach ($products as $product)
+                                <div class="swiper-slide">
+                                    <img src="{{ showImage($product->image) }}" alt="{{ $product->name }}" />
+                                    <div class="px-4 d-flex flex-column gap-2 text-center bg-white">
+                                        <span class="text-dark fw-bold text-truncate fs-6">{{ $product->name }}</span>
+                                        <p class="price-product">
+
+                                            @php
+                                                $record = $product->variants->isNotEmpty()
+                                                    ? $product->variants->first()
+                                                    : $product;
+                                            @endphp
+
+                                            @if (isOnSale($record))
+                                                <span
+                                                    class="text-danger fs-6">{{ finalPrice($record->sale_price, $record->discount_price) }}</span>
+                                                <del class="ms-2 text-muted">{{ formatPrice($record->sale_price) }}</del>
+                                            @else
+                                                <span class="text-danger fs-6">{{ formatPrice($record->sale_price) }}</span>
+                                            @endif
+
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="{{ asset('frontend/assets/img/s2.png') }}" alt="Image 2" />
-                                <div class="px-4 d-flex flex-column gap-2 text-center bg-white">
-                                    <span class="text-dark fw-bold text-truncate fs-6">Wooden Picture Frame
-                                        Magnet</span>
-                                    <p class="text-dark fs-6">Start from $6.49</p>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="{{ asset('frontend/assets/img/s3.png') }}" alt="Image 3" />
-                                <div class="px-4 d-flex flex-column gap-2 text-center bg-white">
-                                    <span class="text-dark fw-bold text-truncate fs-6">Wooden Picture Frame
-                                        Magnet</span>
-                                    <p class="text-dark fs-6">Start from $7.49</p>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="{{ asset('frontend/assets/img/s4.png') }}" alt="Image 4" />
-                                <div class="px-4 d-flex flex-column gap-2 text-center bg-white">
-                                    <span class="text-dark fw-bold text-truncate fs-6">Wooden Picture Frame
-                                        Magnet</span>
-                                    <p class="text-dark fs-6">Start from $8.49</p>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="{{ asset('frontend/assets/img/s5.png') }}" alt="Image 4" />
-                                <div class="px-4 d-flex flex-column gap-2 text-center bg-white">
-                                    <span class="text-dark fw-bold text-truncate fs-6">Wooden Picture Frame
-                                        Magnet</span>
-                                    <p class="text-dark fs-6">Start from $9.49</p>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="{{ asset('frontend/assets/img/s6.png') }}" alt="Image 4" />
-                                <div class="px-4 d-flex flex-column gap-2 text-center bg-white">
-                                    <span class="text-dark fw-bold text-truncate fs-6">Wooden Picture Frame
-                                        Magnet</span>
-                                    <p class="text-dark fs-6">Start from $10.49</p>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
                     </div>
 
                     <!-- Thumbnail (ảnh nhỏ bên phải) -->
                     <div class="swiper thumb-slider">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide">
-                                <img src="{{ asset('frontend/assets/img/s1.png') }}" alt="Thumb 1" />
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="{{ asset('frontend/assets/img/s2.png') }}" alt="Thumb 1" />
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="{{ asset('frontend/assets/img/s3.png') }}" alt="Thumb 1" />
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="{{ asset('frontend/assets/img/s4.png') }}" alt="Thumb 1" />
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="{{ asset('frontend/assets/img/s5.png') }}" alt="Thumb 1" />
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="{{ asset('frontend/assets/img/s6.png') }}" alt="Thumb 1" />
-                            </div>
+                            @foreach ($products as $product)
+                                <div class="swiper-slide">
+                                    <img src="{{ showImage($product->image) }}" alt="{{ $product->name }}" />
+                                </div>
+                            @endforeach
+
                         </div>
                     </div>
                 </div>
