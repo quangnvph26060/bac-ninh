@@ -7,6 +7,7 @@ use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 if (!function_exists('uploadImages')) {
     function uploadImages($flieName, string $directory = 'images', $resize = false, $width = 150, $height = 150, $isArray = false)
@@ -174,4 +175,59 @@ if (!class_exists('formatNumber')) {
         if (!$number) return 0;
         return number_format($number, 0, ',', '.');
     }
+}
+
+
+function isOnSale($record)
+{
+    // Kiểm tra xem có discount_price không
+    if ($record->discount_price > 0) {
+        // Nếu không có discount_start và discount_end, có nghĩa là giảm giá vô thời gian
+        if (empty($record->discount_start) && empty($record->discount_end)) {
+            return true; // Giảm giá vô thời gian
+        }
+
+        // Nếu có discount_start và discount_end, kiểm tra theo thời gian
+        if ($record->discount_start && $record->discount_end) {
+            // Chuyển đổi discount_start và discount_end thành định dạng Carbon (d-m-Y)
+            $discountStart = $record->discount_start;
+            $discountEnd =  $record->discount_end;
+            $now = Carbon::now(); // Thời gian hiện tại
+
+            // Kiểm tra điều kiện giảm giá hợp lệ
+            if ($discountStart->gt($now) && $discountEnd->lt($now)) {
+                return true; // Giảm giá trong khoảng thời gian hợp lệ
+            }
+        }
+
+        if ($record->discount_start && empty($record->discount_end)) {
+            $discountStart = $record->discount_start;
+            $now = Carbon::now(); // Thời gian hiện tại
+            if ($discountStart->gt($now)) {
+                return true; // Giảm giá bắt đầu trong tương lai
+            }
+        }
+
+        // Nếu chỉ có discount_end và không có discount_start, kiểm tra discount_end < thời gian hiện tại
+        if (empty($record->discount_start) && $record->discount_end) {
+            $discountEnd = $record->discount_end;
+            $now = Carbon::now(); // Thời gian hiện tại
+            if ($discountEnd->lt($now)) {
+                return true; // Giảm giá đã kết thúc
+            }
+        }
+    }
+
+    // Trả về false nếu không thỏa mãn điều kiện giảm giá
+    return false;
+}
+
+function finalPrice($price, $discountPrice)
+{
+    return formatPrice($price - $discountPrice);
+}
+
+function formatPrice($price)
+{
+    return '₫' . number_format($price, 0, ',', '.');
 }

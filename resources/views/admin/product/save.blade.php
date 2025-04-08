@@ -39,14 +39,14 @@
                                     <div class="mb-3 position-relative col-md-12">
                                         <label for="slug" class="form-label">Liên kết</label>
                                         <div class="input-group">
-                                            <span class="input-group-text" id="basic-addon3">{{ env('APP_URL') }}</span>
+                                            <span class="input-group-text" id="basic-addon3">{{ config('app.url') }}</span>
                                             <input type="text" class="form-control" name="slug" id="slug"
                                                 aria-describedby="basic-addon3" value="{{ optional($product)->slug }}">
                                         </div>
                                         <small class="form-hint mt-n2 text-truncate">Xem trước:
-                                            <a href=" {{ env('APP_URL') . '/' . ($product && $product->category ? $product->category->slug . '/' : '') . optional($product)->slug }}"
+                                            <a href=" {{ config('app.url') . '/' . ($product && $product->category ? $product->category->slug . '/' : '') . optional($product)->slug }}"
                                                 target="_blank">
-                                                {{ env('APP_URL') . '/' . ($product && $product->category ? $product->category->slug . '/' : '') . optional($product)->slug }}</a></small>
+                                                {{ config('app.url') . '/' . ($product && $product->category ? $product->category->slug . '/' : '') . optional($product)->slug }}</a></small>
                                     </div>
 
                                     <div class="mb-3 position-relative col-md-12">
@@ -486,7 +486,7 @@
 
                                     <div class="page-url-seo">
                                         <p>
-                                            {{ env('APP_URL') . '/' . ($product && $product->category ? $product->category->slug . '/' : '') . optional($product)->slug }}
+                                            {{ config('app.url') . '/' . ($product && $product->category ? $product->category->slug . '/' : '') . optional($product)->slug }}
                                         </p>
                                     </div>
 
@@ -533,7 +533,7 @@
                         </div>
                         <div class="card-body">
                             <label class="switch">
-                                <input type="checkbox" value="1" @checked(optional($product)->is_featured)>
+                                <input name="is_featured" type="checkbox" value="1" @checked(optional($product)->is_featured)>
                                 <span class="slider round"></span>
                             </label>
                         </div>
@@ -640,7 +640,8 @@
                         </div>
                         <div class="card-body">
                             <input type="text" class="form-control" name="tags" id="tags"
-                                placeholder="tags sản phẩm" value="{{ $product ? implode(', ', $product->tags) : '' }}">
+                                placeholder="tags sản phẩm"
+                                value="{{ $product ? implode(', ', $product->tags ?? []) : '' }}">
                         </div>
                     </div>
                 </div>
@@ -712,7 +713,7 @@
 
             // Hiển thị sản phẩm tìm thấy
             products.forEach(function(product) {
-                let path = "{{ env('APP_URL') }}/storage/" + product.image
+                let path = "{{ config('app.url') }}/storage/" + product.image
 
                 resultList.append(`
                 <a href="javascript:void(0);" class="list-group-item list-group-item-action selectable-item"
