@@ -173,6 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function moveFilterForm() {
         const filterForm = document.getElementById("filter-form");
+
         const showFilterForm = document.getElementById("show-filter-form");
         const listProducts = document.querySelector(".list-products");
 

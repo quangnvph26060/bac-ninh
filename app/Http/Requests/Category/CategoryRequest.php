@@ -32,7 +32,8 @@ class CategoryRequest extends FormRequest
             'seo_title' => 'nullable|string|max:250',
             'seo_description' => 'nullable|string|max:250',
             'image' => 'nullable|image|mimes:png,jpg,jpeg,gif,webp|max:2048',
-            'collection_id' => 'nullable|exists:collections,id'
+            'collection_id' => 'nullable|exists:collections,id',
+            'is_show_home' => 'nullable|in:0,1'
         ];
     }
 

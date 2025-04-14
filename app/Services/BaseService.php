@@ -92,19 +92,18 @@ class BaseService
             }
         }
 
-        foreach ($whereHasConditions as $relation => $column) {
-            $query->when(!empty($conditions[$column]), function ($q) use ($relation, $column, $conditions) {
-                $q->whereHas($relation, function ($query) use ($column, $conditions) {
-                    $query->where($column, $conditions[$column]);
-                });
+        foreach ($whereHasConditions as $relation => $data) {
+            $query->whereHas($relation, function ($q) use ($data) {
+                $q->where($data['column'], $data['value']);
             });
         }
 
-        if ($order) {
-            $query->orderBy($order[0], $order[1]);
-        }
 
-        $query->when(empty($conditions['order']), fn($q) => $q->latest('id'));
+        $query->when(!empty($order), function ($q) use ($order) {
+            $q->orderBy($order[0], $order[1]);
+        }, function ($q) {
+            $q->latest('id');
+        });
 
         Log::info($query->toRawSql());
 

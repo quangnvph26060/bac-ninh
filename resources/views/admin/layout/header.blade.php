@@ -60,14 +60,14 @@
                     <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button"
                         data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fa fa-bell"></i>
-                        @if ($notifications->count() > 0)
+                        {{-- @if ($notifications->count() > 0)
                             <span class="notification">{{ $notifications->count() ?? '0' }}</span>
-                        @endif
+                        @endif --}}
                     </a>
                     <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
                         <li>
                             <div class="dropdown-title">
-                                You have {{ $notifications->count() }} new notification
+                                {{-- You have {{ $notifications->count() }} new notification --}}
                             </div>
                         </li>
                         <li>
@@ -75,7 +75,7 @@
                                 <div class="notif-scroll scrollbar-outer scroll-content"
                                     style="height: auto; margin-bottom: 0px; margin-right: 0px; max-height: 0px;">
                                     <div class="notif-center">
-                                        @foreach ($notifications as $item)
+                                        {{-- @foreach ($notifications as $item)
                                             @php
                                                 $createdAt = $item->created_at;
                                                 $timeElapsed = Carbon\Carbon::parse($createdAt)
@@ -93,7 +93,7 @@
                                                     <span class="time">{{ $timeElapsed }}</span>
                                                 </div>
                                             </a>
-                                        @endforeach
+                                        @endforeach --}}
 
                                     </div>
                                 </div>

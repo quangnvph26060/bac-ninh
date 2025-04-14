@@ -1,4 +1,4 @@
-@extends('frontend.layouts.master')
+@extends('frontend.master')
 
 @section('content')
     <div class="banner-homepage">
@@ -77,7 +77,7 @@
 
                                             @if (isOnSale($record))
                                                 <span
-                                                    class="text-danger fs-6">{{ finalPrice($record->sale_price, $record->discount_price) }}</span>
+                                                    class="text-danger fs-6">{{ finalPrice($record->discount_price) }}</span>
                                                 <del class="ms-2 text-muted">{{ formatPrice($record->sale_price) }}</del>
                                             @else
                                                 <span class="text-danger fs-6">{{ formatPrice($record->sale_price) }}</span>
@@ -265,45 +265,33 @@
             <div class="categories">
                 <div class="list_categories">
                     <div class="row text-center">
-                        <div class="col-md-3 col-6">
-                            <div class="category-card shadow">
-                                <img src="https://cdn.printway.io/lzi/666c0e896f96e33ccef7c815_800x800.jpeg"
-                                    alt="Women's Clothing" />
-                                <h5 class="mt-3 title_name">Women's Clothing</h5>
-                                <p class="quantity_text">43 Products</p>
+                        {{-- @foreach ($categories as $category)
+                            <div class="col-md-3 col-6">
+                                @php
+                                    if ($category->parent) {
+                                        $prefix = $category->parent->slug;
+                                        $suffix = $category->slug;
+                                    } else {
+                                        $prefix = $category->slug;
+                                        $suffix = null;
+                                    }
+                                @endphp
+                                <a href="{{ route('products.list', [$prefix, $suffix]) }}">
+                                    <div class="category-card shadow">
+                                        <img src="{{ showImage($category->image) }}" alt="{{ $category->name }}" />
+                                        <h5 class="mt-3 title_name">{{ $category->name }}</h5>
+                                        <p class="quantity_text">{{ $category->products_count }} sản phẩm </p>
+                                    </div>
+                                </a>
                             </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="category-card shadow">
-                                <img src="https://cdn.printway.io/lzi/666c00e33dea86065a84db26_800x800.jpeg"
-                                    alt="Men's Clothing" />
-                                <h5 class="mt-3 title_name">Men's Clothing</h5>
-                                <p class="quantity_text">45 Products</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="category-card shadow">
-                                <img src="https://cdn.printway.io/lzi/666bf7e8e9f8ecbc0656be49_800x800.jpeg"
-                                    alt="Accessories" />
-                                <h5 class="mt-3 title_name">Accessories</h5>
-                                <p class="quantity_text">67 Products</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="category-card shadow">
-                                <img src="https://cdn.printway.io/lzi/666bc61b7ecd3a7dbd7c4624_800x800.jpeg"
-                                    alt="Home and Living" />
-                                <h5 class="mt-3 title_name">Home and Living</h5>
-                                <p class="quantity_text">212 Products</p>
-                            </div>
-                        </div>
+                        @endforeach --}}
                     </div>
                 </div>
             </div>
             <div class="d-flex align-items-center justify-content-center w-100 mt-2">
                 <a href="#">
                     <button type="button" class="ant-btn-primary">
-                        <span> View all products</span>
+                        <span>Xem tất cả</span>
                     </button></a>
             </div>
         </div>

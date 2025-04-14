@@ -21,30 +21,30 @@ class DashboardController extends Controller
     }
     public function dashboard()
     {
-        try {
-            $title = "Dashboard";
-            $topProducts = DB::table('order_details')
-            ->select('order_details.product_id', 'products.name', 'products.import_price', 'products.sku', 'products.sale_price', DB::raw('SUM(order_details.quantity) as total_quantity'))
-            ->join('products', 'order_details.product_id', '=', 'products.id')
-            ->groupBy('order_details.product_id', 'products.name', 'products.import_price', 'products.sku', 'products.sale_price')
-            ->orderByDesc('total_quantity')
-            ->limit(5)
-            ->get();
-            $getMonth = $this->orderService->getMonthlyRevenue();
-            $getMonthlyRevenue = $getMonth['monthlyRevenue'];
-            $totalAnnualRevenue = $getMonth['totalAnnualRevenue'];
-            $clientnumber = $this->dashboardService->getClientNumber();
-            $ordernumber = $this->dashboardService->getOrderNumber();
-            $amount = $this->dashboardService->getAmountNumber();
-            $daily = $this->dashboardService->getDailySale();
-            $newClient = $this->dashboardService->getNewestClient();
-            $newOrder = $this->dashboardService->getNewestOrder();
-            $newStaff = $this->dashboardService->getNewestStaff();
-            return view('welcome', compact('clientnumber', 'ordernumber', 'amount', 'daily', 'newClient', 'newOrder', 'newStaff', 'getMonthlyRevenue', 'totalAnnualRevenue', 'title', 'topProducts'));
-        } catch (Exception $e) {
-            Log::error('Failed to get statistic this year: ' . $e->getMessage());
-            return ApiResponse::error('Failed to get statistic this year', 500);
-        }
+        // try {
+        //     $title = "Dashboard";
+        //     $topProducts = DB::table('order_details')
+        //     ->select('order_details.product_id', 'products.name', 'products.import_price', 'products.sku', 'products.sale_price', DB::raw('SUM(order_details.quantity) as total_quantity'))
+        //     ->join('products', 'order_details.product_id', '=', 'products.id')
+        //     ->groupBy('order_details.product_id', 'products.name', 'products.import_price', 'products.sku', 'products.sale_price')
+        //     ->orderByDesc('total_quantity')
+        //     ->limit(5)
+        //     ->get();
+        //     $getMonth = $this->orderService->getMonthlyRevenue();
+        //     $getMonthlyRevenue = $getMonth['monthlyRevenue'];
+        //     $totalAnnualRevenue = $getMonth['totalAnnualRevenue'];
+        //     $clientnumber = $this->dashboardService->getClientNumber();
+        //     $ordernumber = $this->dashboardService->getOrderNumber();
+        //     $amount = $this->dashboardService->getAmountNumber();
+        //     $daily = $this->dashboardService->getDailySale();
+        //     $newClient = $this->dashboardService->getNewestClient();
+        //     $newOrder = $this->dashboardService->getNewestOrder();
+        //     $newStaff = $this->dashboardService->getNewestStaff();
+        //     return view('welcome', compact('clientnumber', 'ordernumber', 'amount', 'daily', 'newClient', 'newOrder', 'newStaff', 'getMonthlyRevenue', 'totalAnnualRevenue', 'title', 'topProducts'));
+        // } catch (Exception $e) {
+        //     Log::error('Failed to get statistic this year: ' . $e->getMessage());
+        //     return ApiResponse::error('Failed to get statistic this year', 500);
+        // }
     }
 
     public function StatisticsByDay()

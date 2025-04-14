@@ -222,12 +222,13 @@ function isOnSale($record)
     return false;
 }
 
-function finalPrice($price, $discountPrice)
+function finalPrice($discountPrice)
 {
-    return formatPrice($price - $discountPrice);
+    return formatPrice($discountPrice);
 }
 
 function formatPrice($price)
 {
-    return '₫' . number_format($price, 0, ',', '.');
+    if (!empty($price)) return number_format($price, 0, ',', '') .'$';
+    return 0;
 }

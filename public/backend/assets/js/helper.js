@@ -1,5 +1,25 @@
 function formatCurrency(amount) {
-    return "₫" + Math.round(amount).toLocaleString("vi-VN");
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(amount);
+}
+
+function convertToAsciiUpper(inputId) {
+    $(inputId).on("input", function () {
+        let value = $(this).val();
+
+        // Chuyển thành chữ IN HOA, loại bỏ dấu tiếng Việt và khoảng trắng
+        value = value
+            .toUpperCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // Bỏ dấu tiếng Việt
+            .replace(/\s+/g, ""); // Bỏ tất cả khoảng trắng
+
+        $(this).val(value);
+    });
 }
 
 function updateCharCount(inputSelector, maxLength) {

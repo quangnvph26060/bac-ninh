@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 <div class="col-md-3 gap-3 d-flex flex-column-reverse flex-md-column mb-md-0 mb-5">
-                    @include('admin.components.button', ['redirect' => route('admin.categories.index')])
+                    @include('admin.components.button', ['redirect' => route('admin.collections.index')])
 
                     <x-status :status="optional($collection)->status" />
 
@@ -121,4 +121,9 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('backend/assets/css/select2.min.css') }}">
+    <style>
+        .select2-selection__rendered {
+            white-space: nowrap;
+        }
+    </style>
 @endpush

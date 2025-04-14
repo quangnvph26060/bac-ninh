@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CheckInventoryController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\CompanyController;
+use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
@@ -156,8 +157,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get("edit/{id}", 'edit')->name('edit');
             Route::put("edit/{id}", 'update')->name('update');
         });
+
+        Route::prefix('coupons')->name('coupons.')->controller(CouponController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+        });
     });
 
+    // Auth Router
     Route::middleware('admin.guest')->group(function () {
         Route::controller(AuthController::class)->group(function () {
             Route::get('login', 'login')->name('login');
@@ -167,7 +177,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
-
+    // Transaction Router
     Route::prefix('transaction')->name('transaction.')->group(function () {
         Route::get('', [TransactionController::class, 'index'])->name('index');
         Route::get('search', [TransactionController::class, 'search'])->name('search');
@@ -177,6 +187,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('generateQR', [TransactionController::class, 'generateQrCode'])->name('generate');
     });
 
+    // Company Router
     Route::prefix('company')->name('company.')->group(function () {
         Route::get("/", [CompanyController::class, 'index'])->name('index');
         Route::get('findByName', [CompanyController::class, 'findByName'])->name('findByName');

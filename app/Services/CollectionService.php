@@ -30,7 +30,7 @@ class CollectionService extends BaseService
 
     public function getPluckCollection()
     {
-        return $this->pluck(['name', 'id']);
+        return $this->pluck(['id', 'name'], [], [], ['name', 'asc']);
     }
 
     public function getSelectedCategories(string $id)

@@ -16,9 +16,14 @@ class Category extends Model
         'description',
         'seo_title',
         'seo_description',
+        'is_show_home',
         'status',
         'parent_id',
         'depth'
+    ];
+
+    protected $casts = [
+        'is_show_home' => 'boolean',
     ];
 
     public function parent()
@@ -39,6 +44,11 @@ class Category extends Model
     public function collections()
     {
         return $this->belongsToMany(Collection::class, 'collection_category');
+    }
+
+    public function scopeHome($query)
+    {
+        return $query->where('is_show_home', 1);
     }
     public static function boot()
     {
