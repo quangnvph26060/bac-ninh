@@ -12,28 +12,38 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     use HasFactory;
-    protected $table = 'orders';
+
     protected $fillable = [
-        "total_money",
-        "status",
-        "note",
-        "receive_address",
-        "user_id",
-        'client_id',
-        'name',
-        'phone',
-        'zip_code',
-        'notification',
+        'user_id',
+        'order_code',
+        'order_name',
+        'status',
+        'total',
+        'payment_method',
+        'phone_number',
+        'shipping_address',
+        'note',
+        'discount',
+        'shipping_fee'
     ];
 
-    protected $appends = ['orderdetail'];
-
-    public function getOrderdetailAttribute(){
-        return OrderDetail::where('order_id',$this->attributes['id'])->get();
+    public function getOrderdetailAttribute()
+    {
+        return OrderDetail::where('order_id', $this->attributes['id'])->get();
     }
     public function orderDetails()
     {
         return $this->hasMany(OrderDetail::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function products()
+    {
+        return $this->hasManyThrough(Product::class, OrderItem::class, 'order_id', 'id', 'id', 'product_id');
     }
 
     public function user()

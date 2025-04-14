@@ -14,4 +14,5 @@ class AttributeValue extends Model
         'value',
         'status'
     ];
+
 }

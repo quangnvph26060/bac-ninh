@@ -51,12 +51,12 @@
 
                                     <div class="mb-3 position-relative col-md-12">
                                         <label for="description" class="form-label">Mô tả</label>
-                                        <textarea rows="3" name="description" class="form-control" id="description" placeholder="Mô tả ngắn">{!! optional($product)->description !!}</textarea>
+                                        <textarea rows="3" name="description" class="form-control ckeditor" id="description" placeholder="Mô tả ngắn">{!! optional($product)->description !!}</textarea>
                                     </div>
 
                                     <div class="mb-3 position-relative col-md-12">
                                         <label for="content" class="form-label">Nội dung</label>
-                                        <textarea name="content" class="ckeditor" id="content">{!! optional($product)->description !!}</textarea>
+                                        <textarea name="content" class="ckeditor" id="content">{!! optional($product)->content !!}</textarea>
                                     </div>
 
                                     <div class="mb-3 position-relative col-md-12">
@@ -140,8 +140,9 @@
                                                 </span>
                                             </label>
 
-                                            <input type="text" placeholder="Giá ưu đãi" class="form-control money-input"
-                                                name="discount_price" id="discount_price"
+                                            <input type="text" placeholder="Giá ưu đãi"
+                                                class="form-control money-input" name="discount_price"
+                                                id="discount_price"
                                                 value="{{ $product ? formatNumber(optional($product)->discount_price) : '' }}">
                                         </div>
                                         <div class="col-md-6 scheduled-time" style="display: none;">
@@ -254,53 +255,53 @@
                                     <div class="accordion" id="variantAccordion">
                                         @foreach ($variants ?? [] as $variantItem)
                                             <div class="accordion-item"
-                                                data-variant-id="{{ $variantItem['attribute_value_combine'] }}">
+                                                data-variant-id="{{ $variantItem['attribute_value_ids'] }}">
                                                 <h2 class="accordion-header">
                                                     <button type="button"
                                                         class="accordion-button collapsed position-relative"
                                                         data-bs-toggle="collapse"
-                                                        data-bs-target="#v{{ $variantItem['attribute_value_combine'] }}">
+                                                        data-bs-target="#v{{ $variantItem['attribute_value_ids'] }}">
                                                         <span>{{ $variantItem['variant_name'] }}</span>
                                                         <span class="ms-2 delete-variant text-danger position-absolute"
-                                                            data-index="{{ $variantItem['attribute_value_combine'] }}">Xóa</span>
+                                                            data-index="{{ $variantItem['attribute_value_ids'] }}">Xóa</span>
                                                     </button>
                                                 </h2>
-                                                <div id="v{{ $variantItem['attribute_value_combine'] }}"
+                                                <div id="v{{ $variantItem['attribute_value_ids'] }}"
                                                     class="accordion-collapse collapse">
                                                     <div class="accordion-body">
                                                         <div class="row">
                                                             <div class="mb-3 position-relative col-md-3">
                                                                 <label
-                                                                    for="variants-{{ $variantItem['attribute_value_combine'] }}-sku"
+                                                                    for="variants-{{ $variantItem['attribute_value_ids'] }}-sku"
                                                                     class="form-label required">Mã sản phẩm</label>
                                                                 <input type="text" class="form-control"
-                                                                    id="variants-{{ $variantItem['attribute_value_combine'] }}-sku"
-                                                                    name="variants[{{ $variantItem['attribute_value_combine'] }}][sku]"
+                                                                    id="variants-{{ $variantItem['attribute_value_ids'] }}-sku"
+                                                                    name="variants[{{ $variantItem['attribute_value_ids'] }}][sku]"
                                                                     aria-required="true" required="required"
                                                                     value="{{ $variantItem['sku'] }}">
                                                             </div>
                                                             <div class="mb-3 position-relative col-md-3">
                                                                 <label
-                                                                    for="variants-{{ $variantItem['attribute_value_combine'] }}-sale-price"
+                                                                    for="variants-{{ $variantItem['attribute_value_ids'] }}-sale-price"
                                                                     class="form-label required">Giá</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="variants-{{ $variantItem['attribute_value_combine'] }}-sale-price"
-                                                                    name="variants[{{ $variantItem['attribute_value_combine'] }}][sale_price]"
+                                                                <input type="text" class="form-control money-input"
+                                                                    id="variants-{{ $variantItem['attribute_value_ids'] }}-sale-price"
+                                                                    name="variants[{{ $variantItem['attribute_value_ids'] }}][sale_price]"
                                                                     aria-required="true" required="required"
-                                                                    value="{{ $variantItem['sale_price'] }}">
+                                                                    value="{{ formatNumber($variantItem['sale_price']) }}">
                                                             </div>
                                                             <div class="mb-3 position-relative col-md-3">
                                                                 <label
-                                                                    for="variants-{{ $variantItem['attribute_value_combine'] }}-product-unit"
+                                                                    for="variants-{{ $variantItem['attribute_value_ids'] }}-product-unit"
                                                                     class="form-label">Đơn vị</label>
                                                                 <input type="text" class="form-control"
-                                                                    id="variants-{{ $variantItem['attribute_value_combine'] }}-product-unit"
-                                                                    name="variants[{{ $variantItem['attribute_value_combine'] }}][product_unit]"
+                                                                    id="variants-{{ $variantItem['attribute_value_ids'] }}-product-unit"
+                                                                    name="variants[{{ $variantItem['attribute_value_ids'] }}][product_unit]"
                                                                     value="{{ $variantItem['product_unit'] }}">
                                                             </div>
                                                             <div class="mb-3 position-relative col-md-3">
                                                                 <label
-                                                                    for="variants-{{ $variantItem['attribute_value_combine'] }}-discount-price"
+                                                                    for="variants-{{ $variantItem['attribute_value_ids'] }}-discount-price"
                                                                     class="form-label">Giá ưu đãi
                                                                     <span class="form-label-description">
                                                                         <a href="javascript:void(0)"
@@ -313,22 +314,22 @@
                                                                     </span>
                                                                 </label>
 
-                                                                <input type="text" class="form-control"
-                                                                    name="variants[{{ $variantItem['attribute_value_combine'] }}][discount_price]"
-                                                                    id="variants-{{ $variantItem['attribute_value_combine'] }}-discount-price"
-                                                                    value="{{ $variantItem['discount_price'] }}">
+                                                                <input type="text" class="form-control money-input"
+                                                                    name="variants[{{ $variantItem['attribute_value_ids'] }}][discount_price]"
+                                                                    id="variants-{{ $variantItem['attribute_value_ids'] }}-discount-price"
+                                                                    value="{{ formatNumber($variantItem['discount_price']) }}">
                                                             </div>
                                                             <div class="col-md-6 variant-scheduled-time"
                                                                 style="display: none;">
                                                                 <div class="mb-3 position-relative">
                                                                     <label class="form-label"
-                                                                        for="variants-{{ $variantItem['attribute_value_combine'] }}-discount-start">
+                                                                        for="variants-{{ $variantItem['attribute_value_ids'] }}-discount-start">
                                                                         Từ ngày
                                                                     </label>
                                                                     <input class="form-control form-date-time"
                                                                         type="text"
-                                                                        name="variants[{{ $variantItem['attribute_value_combine'] }}][discount_start]"
-                                                                        id="variants-{{ $variantItem['attribute_value_combine'] }}-discount-start"
+                                                                        name="variants[{{ $variantItem['attribute_value_ids'] }}][discount_start]"
+                                                                        id="variants-{{ $variantItem['attribute_value_ids'] }}-discount-start"
                                                                         value="{{ $variantItem['discount_start'] }}">
                                                                 </div>
                                                             </div>
@@ -336,34 +337,34 @@
                                                                 style="display: none;">
                                                                 <div class="mb-3 position-relative">
                                                                     <label class="form-label"
-                                                                        for="variants-{{ $variantItem['attribute_value_combine'] }}-discount-end">
+                                                                        for="variants-{{ $variantItem['attribute_value_ids'] }}-discount-end">
                                                                         Đến ngày
                                                                     </label>
                                                                     <input class="form-control form-date-time"
                                                                         type="text"
-                                                                        name="variants[{{ $variantItem['attribute_value_combine'] }}][discount_end]"
-                                                                        id="variants-{{ $variantItem['attribute_value_combine'] }}-discount-end"
+                                                                        name="variants[{{ $variantItem['attribute_value_ids'] }}][discount_end]"
+                                                                        id="variants-{{ $variantItem['attribute_value_ids'] }}-discount-end"
                                                                         value="{{ $variantItem['discount_end'] }}">
                                                                 </div>
                                                             </div>
                                                             <div class="mb-3 position-relative col-md-3">
                                                                 <label
-                                                                    for="variants-{{ $variantItem['attribute_value_combine'] }}-stock"
+                                                                    for="variants-{{ $variantItem['attribute_value_ids'] }}-stock"
                                                                     class="form-label">Số
                                                                     lượng</label>
                                                                 <input type="text" class="form-control"
-                                                                    id="variants-{{ $variantItem['attribute_value_combine'] }}-stock"
-                                                                    name="variants[{{ $variantItem['attribute_value_combine'] }}][stock]"
+                                                                    id="variants-{{ $variantItem['attribute_value_ids'] }}-stock"
+                                                                    name="variants[{{ $variantItem['attribute_value_ids'] }}][stock]"
                                                                     value="{{ $variantItem['stock'] }}">
                                                             </div>
                                                             <div class="mb-3 position-relative col-md-9">
                                                                 <label
-                                                                    for="variants-{{ $variantItem['attribute_value_combine'] }}-stock-status"
+                                                                    for="variants-{{ $variantItem['attribute_value_ids'] }}-stock-status"
                                                                     class="form-label">Trạng thái kho hàng</label>
 
                                                                 <select
-                                                                    name="variants[{{ $variantItem['attribute_value_combine'] }}][stock_status]"
-                                                                    id="variants-{{ $variantItem['attribute_value_combine'] }}-stock-status"
+                                                                    name="variants[{{ $variantItem['attribute_value_ids'] }}][stock_status]"
+                                                                    id="variants-{{ $variantItem['attribute_value_ids'] }}-stock-status"
                                                                     class="form-control form-select">
                                                                     <option value="in_stock" @selected($variantItem['stock_status'] == 'in_stock')>
                                                                         Còn hàng</option>
@@ -377,10 +378,10 @@
                                                                 <div class="form-check">
                                                                     <input class="form-check-input" type="checkbox"
                                                                         value="1"
-                                                                        id="variants-{{ $variantItem['attribute_value_combine'] }}-status"
+                                                                        id="variants-{{ $variantItem['attribute_value_ids'] }}-status"
                                                                         @checked($variantItem['status'] == 2)>
                                                                     <label class="form-check-label mb-0"
-                                                                        for="variants-{{ $variantItem['attribute_value_combine'] }}-status">
+                                                                        for="variants-{{ $variantItem['attribute_value_ids'] }}-status">
                                                                         Ẩn trên giao diện
                                                                     </label>
                                                                 </div>
@@ -398,7 +399,7 @@
                                     aria-labelledby="cross-selling-tab">
 
                                     <input name="cross_sell" type="hidden"
-                                        value="{{ optional($product)->cross_sell }}">
+                                        value="{{ $product && $product->cross_sell ? implode(',', $product->cross_sell) : '' }}">
 
                                     <div class="mb-3 mt-3 position-relative">
                                         <input class="form-control" type="text" name="search_input" id="searchInput"
@@ -832,10 +833,6 @@
                 maxLength: 400
             },
             {
-                id: 'description',
-                maxLength: 400
-            },
-            {
                 id: 'sku',
                 maxLength: 50
             },
@@ -1107,6 +1104,7 @@
             });
 
             $('#generateVariants').on('click', function() {
+
                 let storedAttributes = JSON.parse(localStorage.getItem('selectedAttributes') || '{}');
                 let keys = Object.keys(storedAttributes);
                 let values = Object.values(storedAttributes);
@@ -1140,19 +1138,25 @@
 
                 // Xóa các DOM biến thể không còn hợp lệ
                 $('#variantAccordion .accordion-item').each(function() {
-                    const variantId = $(this).data('variant-id');
+                    const variantId = String($(this).data('variant-id'));
+
                     if (!validVariantIds.includes(variantId)) {
+
                         $(this).remove();
                     }
                 });
 
                 // Hiển thị hoặc cập nhật biến thể
                 result.forEach((variant, index) => {
+
+
                     if ($(`#variantAccordion [data-variant-id="${variant.id}"]`).length > 0) {
-                        $(`#variantAccordion [data-variant-id="${variant.id}"] .accordion-button span:first-child`)
-                            .text(variant.name);
-                    } else {
-                        let newHtml = `
+                        return;
+                    }
+
+
+
+                    let newHtml = `
                     <div class="accordion-item" data-variant-id="${variant.id}">
                         <h2 class="accordion-header">
                             <button type="button" class="accordion-button collapsed position-relative" data-bs-toggle="collapse" data-bs-target="#v${index}">
@@ -1170,7 +1174,7 @@
                                     </div>
                                     <div class="mb-3 position-relative col-md-3">
                                         <label for="variants-${index}-sale-price" class="form-label required">Giá</label>
-                                        <input type="text" class="form-control" id="variants-${index}-sale-price" name="variants[${variant.id}][sale_price]"
+                                        <input type="text" class="form-control money-input" id="variants-${index}-sale-price" name="variants[${variant.id}][sale_price]"
                                             aria-required="true" required="required">
                                     </div>
                                             <div class="mb-3 position-relative col-md-3">
@@ -1188,7 +1192,7 @@
                                                     </span>
                                                 </label>
 
-                                                <input type="text" class="form-control"
+                                                <input type="text" class="form-control money-input"
                                                     name="variants[${variant.id}][discount_price]" id="variants-${index}-discount-price">
                                             </div>
                                             <div class="col-md-6 variant-scheduled-time" style="display: none;">
@@ -1237,9 +1241,16 @@
                                 </div>
                             </div>
                         `;
-                        $('#variantAccordion').append(newHtml);
-                    }
+                    $('#variantAccordion').append(newHtml);
+
                 });
+
+                $(".money-input").on("input", function() {
+                    let input = $(this).val().replace(/\D/g, ""); // Bỏ tất cả ký tự không phải số
+                    let formatted = input.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                    $(this).val(formatted);
+                });
+
             });
 
             $(document).on('click', '.delete-variant', function() {
@@ -1306,6 +1317,7 @@
                 dateFormat: "d-m-Y", // Định dạng YYYY-MM-DD
                 locale: "vn" // Dùng tiếng Việt
             });
+
         });
     </script>
 @endpush

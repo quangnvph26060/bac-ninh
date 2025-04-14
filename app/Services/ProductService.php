@@ -57,16 +57,16 @@ class ProductService  extends BaseService
 
     public function show(string $id)
     {
-        return $this->findById($id, ['*'], ['category', 'brand', 'company', 'attributes', 'variants']);
+        return $this->findById($id, ['*'], ['category', 'brand', 'company', 'attributes', 'variants.attributeValues']);
     }
 
     public function getVariants($product)
     {
+        // Load sẵn attributeValues nếu chưa có
+        $product->loadMissing('variants.attributeValues');
+
         return $product->variants->map(function ($variant) {
-            $attributeValues = explode('-', $variant->attribute_value_combine);
-            $variantName = $this->attributeValue
-                ->whereIn('id', $attributeValues)
-                ->get()
+            $variantName = $variant->attributeValues
                 ->pluck('value')
                 ->implode(' - ');
 
@@ -75,13 +75,13 @@ class ProductService  extends BaseService
                 'sku'                       => $variant->sku,
                 'sale_price'                => $variant->sale_price,
                 'discount_price'            => $variant->discount_price,
-                'discount_start'            => !empty($variant->discount_start) ? $variant->discount_start->format('d-m-Y') : null,
-                'discount_end'              => !empty($variant->discount_end) ? $variant->discount_end->format('d-m-Y') : null,
+                'discount_start'            => optional($variant->discount_start)->format('d-m-Y'),
+                'discount_end'              => optional($variant->discount_end)->format('d-m-Y'),
                 'product_unit'              => $variant->product_unit,
                 'stock_status'              => $variant->stock_status,
                 'status'                    => $variant->status,
                 'id'                        => $variant->id,
-                'attribute_value_combine'   => $variant->attribute_value_combine,
+                'attribute_value_ids'       => $variant->attributeValues->pluck('id')->implode('-'), // nếu bạn muốn dùng lại key
                 'stock'                     => $variant->stock,
             ];
         });
@@ -89,7 +89,7 @@ class ProductService  extends BaseService
 
     public function getProductCrossSell($product)
     {
-        $crossSellIds = array_map('intval', explode(',', $product->cross_sell));
+        $crossSellIds = array_map('intval', $product->cross_sell ?? []);
         $products = $this->all(['id', 'name', 'image'], [], [], [], ['In' => ['id', $crossSellIds]]);
         return $products;
     }
@@ -179,6 +179,10 @@ class ProductService  extends BaseService
                 $payload['image'] = $uploadedImage;
             }
 
+            if (!empty($payload['cross_sell'])) {
+                $payload['cross_sell'] = array_map('intval', explode(',', $payload['cross_sell']));
+            }
+
             if (!empty($payload['tags'])) {
                 // Giải mã chuỗi JSON thành mảng
                 $tagsArray = json_decode($payload['tags'], true);
@@ -249,6 +253,10 @@ class ProductService  extends BaseService
                 $payload['tags'] = $tags;
             }
 
+            if (!empty($payload['cross_sell'])) {
+                $payload['cross_sell'] = array_map('intval', explode(',', $payload['cross_sell']));
+            }
+
             if ($payload['type'] == 'variant') {
                 unset($payload['sale_price']);
                 unset($payload['discount_price']);
@@ -315,45 +323,51 @@ class ProductService  extends BaseService
         $newVariants = collect($payload['variants']);
         $newKeys = $newVariants->keys()->toArray();
 
+        // Lấy các biến thể hiện tại
         $existingVariants = $product->variants()->get()->keyBy('attribute_value_combine');
 
         $variantsToCreate = [];
+        $newVariantIds = [];
 
-        foreach ($newVariants as $key => $variant) {
+        foreach ($newVariants as $key => $variantData) {
+            $valueIds = explode('-', $key); // Lấy ra mảng attribute_value_id
+            sort($valueIds); // Sort để đồng bộ so sánh
+
+            $combineKey = implode('-', $valueIds);
 
             $data = [
-                'sku'                     => $variant['sku'],
-                'sale_price'              => $variant['sale_price'],
-                'discount_price'          => $variant['discount_price'] ?? null,
-                'product_unit'            => $variant['product_unit'] ?? null,
-                'attribute_value_combine' => $key,
-                'discount_start'          => $variant['discount_start'] ?? null,
-                'discount_end'            => $variant['discount_end'] ?? null,
-                'stock_status'            => $variant['stock_status'],
-                'stock'                   => $variant['stock'],
-                'status'                  => $variant['status'] ?? 2,
+                'sku'            => $variantData['sku'],
+                'sale_price'     => $variantData['sale_price'],
+                'discount_price' => $variantData['discount_price'] ?? null,
+                'product_unit'   => $variantData['product_unit'] ?? null,
+                'discount_start' => $variantData['discount_start'] ?? null,
+                'discount_end'   => $variantData['discount_end'] ?? null,
+                'stock_status'   => $variantData['stock_status'],
+                'stock'          => $variantData['stock'] ?? 0,
+                'status'         => $variantData['status'] ?? 2,
+                'attribute_value_combine' => $combineKey // Có thể giữ để hiển thị, nhưng không xử lý logic bằng nó
             ];
 
-            if ($existingVariants->has($key)) {
-                // Cập nhật nếu đã có
-                $existingVariants[$key]->update($data);
+            if ($existingVariants->has($combineKey)) {
+                $variant = $existingVariants[$combineKey];
+                $variant->update($data);
             } else {
-                // Thêm mới
-                $variantsToCreate[] = array_merge($data, ['attribute_value_combine' => $key]);
+                $variant = $product->variants()->create($data);
             }
-        }
 
-        if (!empty($variantsToCreate)) {
-            $product->variants()->createMany($variantsToCreate);
+            // Sync các giá trị attribute_value cho variant
+            $variant->attributeValues()->sync($valueIds);
+            $newVariantIds[] = $variant->id;
         }
 
         // Xóa các biến thể không còn
-        $variantsToDelete = $existingVariants->keys()->diff($newKeys);
-
-        if ($variantsToDelete->isNotEmpty()) {
-            $product->variants()->whereIn('attribute_value_combine', $variantsToDelete)->delete();
+        $variantsToDelete = $product->variants()->whereNotIn('id', $newVariantIds)->get();
+        foreach ($variantsToDelete as $variant) {
+            $variant->attributeValues()->detach();
+            $variant->delete();
         }
     }
+
 
     public function productAttributes($product, $payload)
     {

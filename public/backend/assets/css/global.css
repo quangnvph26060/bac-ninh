@@ -136,8 +136,8 @@ div.dt-container select.dt-input {
 
 .form-select {
     border-radius: 4px;
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
 }
 
 #resetFilters {

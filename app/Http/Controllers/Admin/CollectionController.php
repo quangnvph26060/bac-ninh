@@ -43,7 +43,9 @@ class CollectionController extends Controller
 
         $collection = null;
 
-        return view('admin.collection.save', compact('title', 'collection'));
+        $categories = $this->categoryService->loadCategoriesWithParent();
+
+        return view('admin.collection.save', compact('title', 'collection', 'categories'));
     }
 
     /**
@@ -85,5 +87,4 @@ class CollectionController extends Controller
 
         return handleResponse($response['message'], $response['success'], $response['code']);
     }
-
 }

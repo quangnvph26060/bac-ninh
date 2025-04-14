@@ -26,7 +26,7 @@ class CategoryService extends BaseService
 
     public function loadCategoriesWithParent()
     {
-        return $this->pluck(['name', 'id'], [], [['parent_id', '<>', null]]);
+        return $this->pluck(['id', 'name']);
     }
 
     private function sortCategories($categories, $parentId = null)
@@ -56,6 +56,20 @@ class CategoryService extends BaseService
             'depth' => $category->depth,
         ]);
     }
+
+    public function getAllCategoryIsParent()
+    {
+        return $this->all(
+            ['*'],
+            ['parent', 'children' => fn($q) => $q->where('is_show_home', 1)],
+            [['parent_id', null], ['is_show_home', 1]],
+            [], // có con is_show_home = 1
+            [], // hoặc chính nó có is_show_home = 1
+            [],
+            ['id', 'asc']
+        );
+    }
+
     public function getCategoryAll()
     {
         return $this->pluck(['id', 'name'], [], [], ['name', 'asc'], ['products']);
@@ -127,7 +141,16 @@ class CategoryService extends BaseService
         $uploadedImage = null;
 
         return transaction(function () use ($id, $credentials, &$uploadedImage) {
+
             $category = $this->findById($id);
+
+            if (isset($credentials['parent_id'])) {
+                if ($category->id == $credentials['parent_id']) {
+                    return errorResponse("Không thể chọn danh mục cha là chính nó!");
+                }
+            }
+
+
 
             if (!$credentials['slug']) {
                 $credentials['slug'] = generateSlug($credentials['name']);
@@ -144,12 +167,16 @@ class CategoryService extends BaseService
 
             $category->collections()->sync($credentials['collection_id'] ?? []);
 
-            if (!$credentials['parent_id']) {
+            if (!isset($credentials['parent_id']) || !$credentials['parent_id']) {
                 $category->saveAsRoot();
             } else {
                 $parent = $this->firstdByWhere(['*'], [['id', $credentials['parent_id']]], ['parent']);
+                if (!$parent) {
+                    errorResponse("Không tìm thấy danh mục cha!");
+                }
+
                 $depth = $parent->depth + 1;
-                $this->updateData($id, ['depth' => $depth]);
+                $this->updateData($category->id, ['depth' => $depth]);
                 $parent->appendNode($category);
             }
 

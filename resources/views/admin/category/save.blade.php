@@ -109,6 +109,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-3 gap-3 d-flex flex-column-reverse flex-md-column mb-md-0 mb-5">
                     @include('admin.components.button', ['redirect' => route('admin.categories.index')])
 
@@ -144,7 +145,19 @@
                                     </label>
                                 </div>
                             @endforeach
+                        </div>
+                    </div>
 
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Hiển thị trang chủ?</h4>
+                        </div>
+
+                        <div class="card-body">
+                            <select name="is_show_home" class="form-control form-select" id="is_show_home">
+                                <option value="1" @selected(optional($category)->is_show_home == 1)>Có</option>
+                                <option value="0" @selected(optional($category)->is_show_home == 0)>Không</option>
+                            </select>
                         </div>
                     </div>
 
@@ -175,7 +188,8 @@
     <script>
         $("#parent_id").select2({
             placeholder: "Tìm kiếm danh mục cha...",
-            allowClear: true
+            allowClear: true,
+            width: '100%'
         });
 
         $(document).ready(function() {

@@ -27,6 +27,7 @@ class Product extends Model
         'product_unit',
         'stock',
         'description',
+        'content',
         'is_featured',
         'is_show_home',
         'cross_sell',
@@ -40,6 +41,7 @@ class Product extends Model
 
     protected $casts = [
         'tags' => 'array',
+        'cross_sell' => 'array',
         'is_featured' => 'boolean',
         'is_show_home' => 'boolean',
         'discount_start' => 'date',
