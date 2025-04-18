@@ -7,7 +7,7 @@
 
         <!-- Logo (Giữa màn hình mobile) -->
         <a class="navbar-brand" href="#">
-            <img src="{{ asset('frontend/assets/img/logo_header.jpg') }}" alt="Logo" />
+            <img src="{{ asset('frontend/assets/img/art-logo.png') }}" alt="Logo" />
         </a>
 
         <!-- Navbar Links -->

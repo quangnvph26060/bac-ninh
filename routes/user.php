@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Frontend\App\DashboardController;
 use App\Http\Controllers\Frontend\App\OrderController;
+use App\Http\Controllers\Frontend\Auth\AuthController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductController;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 // Route::prefix('app')->name('app.')->group(function () {
 
 // });
+
+Route::get('login', [AuthController::class, 'login'])->name('login');
 
 Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 
