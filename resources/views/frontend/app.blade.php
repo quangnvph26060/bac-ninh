@@ -46,7 +46,7 @@
         </div>
         <div class="logo-header">
             <a href="">
-                <img src="	https://printway.io/static/media/logo.d9a25dfa058a5be1eae9f8bf8345fb48.svg" alt="" />
+                <img src="{{ asset('frontend/assets/img/art-logo.png') }}" alt="" />
             </a>
         </div>
         <div class="content_header">
@@ -86,12 +86,13 @@
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path
                                             d="M18 13V8C18 6.14348 17.2625 4.36301 15.9497 3.05025C14.637 1.7375 12.8565 1 11 1C9.14348 1 7.36301 1.7375 6.05025 3.05025C4.7375 4.36301 4 6.14348 4 8V13C3.97026 15.47 3.27968 17.8871 2 20H20C18.7203 17.8871 18.0297 15.47 18 13Z"
-                                            stroke="#2E3A59" stroke-width="2" stroke-miterlimit="10"
+                                            stroke="white" stroke-width="2" stroke-miterlimit="10"
                                             stroke-linecap="square"></path>
                                         <path
                                             d="M8.17383 22C8.38162 22.5832 8.76478 23.0879 9.27074 23.4447C9.7767 23.8016 10.3807 23.9932 10.9998 23.9932C11.619 23.9932 12.223 23.8016 12.7289 23.4447C13.2349 23.0879 13.618 22.5832 13.8258 22H8.17383Z"
-                                            fill="#2E3A59"></path>
+                                            fill="white"></path>
                                     </svg>
+
                                 </span>
                             </button>
                         </div>
@@ -183,14 +184,14 @@
                 <div class="menu_side_bar">
                     <div class="menu_main">
                         <ul class="nav flex-column">
-                            <li class="nav-item {{ request()->routeIs('app.dashboard') ? 'active' : '' }}">
-                                <a href="{{ route('app.dashboard') }}" class="nav-link">
+                            <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                                <a href="{{ route('dashboard') }}" class="nav-link">
                                     <i class="bi bi-speedometer2"></i>
                                     <span>Bảng tin</span>
                                 </a>
                             </li>
-                            <li class="nav-item {{ request()->routeIs('app.orders.index') ? 'active' : '' }}">
-                                <a href="{{ route('app.orders.index') }}" class="nav-link">
+                            <li class="nav-item {{ request()->routeIs('orders.index') ? 'active' : '' }}">
+                                <a href="{{ route('orders.index') }}" class="nav-link">
                                     <i class="bi bi-bag"></i>
                                     <span>Đơn hàng</span>
                                 </a>

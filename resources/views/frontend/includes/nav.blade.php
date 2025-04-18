@@ -61,12 +61,12 @@
             </ul>
         </div>
 
-        <a href="#" class="position-relative ms-3 cart-icon">
+        {{-- <a href="#" class="position-relative ms-3 cart-icon">
             <i class="bi bi-cart3 fs-4"></i>
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                 {{ Cart::instance('shopping')->count() }}
             </span>
-        </a>
+        </a> --}}
 
         <!-- Login Button (Chữ login sẽ đổi thành icon trên mobile) -->
         <a href="#" class="login-btn ms-3">

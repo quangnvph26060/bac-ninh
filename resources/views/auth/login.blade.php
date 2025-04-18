@@ -255,8 +255,8 @@
                                     </div>
                                 </div>
 
-                                {!! NoCaptcha::renderJs() !!}
-                                {!! NoCaptcha::display() !!}
+                                {{-- {!! NoCaptcha::renderJs() !!}
+                                {!! NoCaptcha::display() !!} --}}
 
                                 @error('g-recaptcha-response')
                                     <small class="text-danger">{{ $message }}</small>

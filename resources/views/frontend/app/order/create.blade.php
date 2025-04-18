@@ -597,7 +597,7 @@
 
                 if (countryId) {
                     $.ajax({
-                        url: '{{ route('app.orders.get.states', '__id__') }}'.replace('__id__',
+                        url: '{{ route('orders.get.states', '__id__') }}'.replace('__id__',
                             countryId),
                         type: 'GET',
                         success: function(response) {
@@ -642,7 +642,7 @@
 
                 if (stateId) {
                     $.ajax({
-                        url: '{{ route('app.orders.get.cities', '__id__') }}'.replace('__id__',
+                        url: '{{ route('orders.get.cities', '__id__') }}'.replace('__id__',
                             stateId),
                         type: 'GET',
                         success: function(response) {
@@ -1114,7 +1114,7 @@
 
                 // Gửi Ajax kiểm tra tồn kho
                 $.ajax({
-                    url: '{{ route('app.orders.check-stock') }}',
+                    url: '{{ route('orders.check-stock') }}',
                     method: 'POST',
                     data: {
                         product_id: productId,
@@ -1181,7 +1181,7 @@
             function fetchConfirmedProductDetails(confirmedOrders, callback) {
 
                 $.ajax({
-                    url: '{{ route('app.orders.get.products') }}',
+                    url: '{{ route('orders.get.products') }}',
                     method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({

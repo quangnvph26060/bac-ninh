@@ -21,6 +21,8 @@ class DashboardController extends Controller
     }
     public function dashboard()
     {
+        return view('welcome');
+
         // try {
         //     $title = "Dashboard";
         //     $topProducts = DB::table('order_details')
