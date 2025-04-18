@@ -1204,6 +1204,17 @@ header {
 .h-10 {
     height: 2.5rem;
 }
+
+.avata_image:hover {
+    cursor: pointer;
+}
+.avata_image img {
+    border: 1px solid #0000;
+    border-radius: 50%;
+    height: 40px;
+    object-fit: cover;
+    width: 40px;
+}
 /* Ẩn chữ Login và hiển thị icon trên mobile */
 @media (max-width: 992px) {
     .navbar-toggler {

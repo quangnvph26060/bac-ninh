@@ -140,13 +140,13 @@ if (!function_exists('successResponse')) {
 }
 
 if (!function_exists('handleResponse')) {
-    function handleResponse($message, $success, $code = 200)
+    function handleResponse($message, $success, $code = 200, $data = [])
     {
         $type = $success ? 'success' : 'error';
 
         if ($type == 'success') sessionFlash('success', $message);
 
-        return response()->json(['success' => $success, 'message' => $message], $code);
+        return response()->json(['success' => $success, 'message' => $message, 'data' => $data], $code);
     }
 }
 
@@ -229,6 +229,6 @@ function finalPrice($discountPrice)
 
 function formatPrice($price)
 {
-    if (!empty($price)) return number_format($price, 0, ',', '') .'$';
+    if (!empty($price)) return number_format($price, 0, ',', '') . '$';
     return 0;
 }
