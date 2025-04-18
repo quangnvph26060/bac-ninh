@@ -257,7 +257,7 @@
                             <div class="col col-stats ms-3 ms-sm-0">
                                 <div class="numbers">
                                     <p class="card-category">Khách hàng mới</p>
-                                    <h4 class="card-title">{{ $clientnumber }}</h4>
+                                    {{-- <h4 class="card-title">{{ $clientnumber }}</h4> --}}
                                 </div>
                             </div>
                         </div>
@@ -277,7 +277,7 @@
                             <div class="col col-stats ms-3 ms-sm-0">
                                 <div class="numbers">
                                     <p class="card-category">Đơn hàng năm nay</p>
-                                    <h4 class="card-title">{{ $ordernumber }}</h4>
+                                    {{-- <h4 class="card-title">{{ $ordernumber }}</h4> --}}
                                 </div>
                             </div>
                         </div>
@@ -297,7 +297,7 @@
                             <div class="col col-stats ms-3 ms-sm-0">
                                 <div class="numbers">
                                     <p class="card-category">Thu nhập năm nay</p>
-                                    <h4 class="card-title">{{ number_format($amount) }} VND</h4>
+                                    {{-- <h4 class="card-title">{{ number_format($amount) }} VND</h4> --}}
                                 </div>
                             </div>
                         </div>
@@ -353,7 +353,7 @@
                         </div>
                         <div class="card-category" id="day_month_year">{{ date('d/m/Y') }}</div>
                     </div>
-                    <div class="card-body" id="income-card-body">
+                    {{-- <div class="card-body" id="income-card-body">
                         <div class="info">
                             <p id="income">{{ $daily['income'] }}</p>
                             <p><u id="amount">{{ $daily['amount'] }} Đơn</u></p>
@@ -362,7 +362,7 @@
                             <p id="interest">Lợi nhuận: {{ $daily['interest'] }}</p>
                             <p id="moneyinterest">{{ $daily['moneyinterest'] }}</p>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
 
                 <div class="your-slider" style="margin: 0px">
@@ -464,7 +464,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($newOrder as $item)
+                        {{-- @foreach ($newOrder as $item)
                             <tr>
                                 <td class="text-center"><a
                                         href="{{ route('admin.order.detail', ['id' => $item->id]) }}">{{ $item->id }}</a>
@@ -482,7 +482,7 @@
                                     </td>
                                 @endif
                             </tr>
-                        @endforeach
+                        @endforeach --}}
                     </tbody>
                 </table>
             </div>
@@ -631,7 +631,7 @@
         });
     </script>
 
-    <script>
+    {{-- <script>
         document.addEventListener("DOMContentLoaded", function() {
             var ctx = document.getElementById('columnChart').getContext('2d');
             var months = {!! json_encode(range(1, 12)) !!};
@@ -679,5 +679,5 @@
                 }
             });
         });
-    </script>
+    </script> --}}
 @endsection

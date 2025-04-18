@@ -12,7 +12,6 @@
         "ckfinder/ckfinder-laravel-package": "^5.0",
         "endroid/qr-code": "^5.1",
         "guzzlehttp/guzzle": "^7.2",
-        "hardevine/shoppingcart": "^3.4",
         "intervention/image": "2.7",
         "kalnoy/nestedset": "^6.0",
         "kavenegar/laravel": "^1.3",

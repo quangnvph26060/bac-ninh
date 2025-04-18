@@ -9,19 +9,28 @@ class City extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'country_id',
-        'name',
+        'state_id',
+        'name'
     ];
 
-    public function district(){
-        return $this->hasMany(Districts::class);
+    public function state()
+    {
+        return $this->belongsTo(State::class);
     }
 
-    public function user(){
-        return $this->hasOne(User::class);
-    }
 
-    public function company(){
-        return $this->hasMany(Company::class, 'city_id');
-    }
+    // public function district()
+    // {
+    //     return $this->hasMany(Districts::class);
+    // }
+
+    // public function user()
+    // {
+    //     return $this->hasOne(User::class);
+    // }
+
+    // public function company()
+    // {
+    //     return $this->hasMany(Company::class, 'city_id');
+    // }
 }

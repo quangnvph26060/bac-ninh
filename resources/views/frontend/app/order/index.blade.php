@@ -123,7 +123,7 @@
             $('#order-loading').show(); // Hiện loading
 
             $.ajax({
-                url: "{{ route('app.orders.index') }}",
+                url: "{{ route('orders.index') }}",
                 method: 'GET',
                 data: {
                     status: status,
