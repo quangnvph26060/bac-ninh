@@ -106,7 +106,7 @@
                         </div>
 
                         <div class="d-flex flex-column flex-md-row gap-3">
-                            <button type="button" class="ant-btn-primary w-50 d-inline" id="btnAddToCart">
+                            <button type="button" class="ant-btn-primary w-50 d-inline" id="btnOrderCreate">
                                 Start new order
                             </button>
 
@@ -295,7 +295,7 @@
         $(document).ready(function() {
             $('.attribute-radio').on('change', function() {
                 const selectedRadios = $('.attribute-radio:checked');
-
+                $('#btnOrderCreate').prop('disabled', true)
                 // Disable những radio không được chọn
                 $('.attribute-radio').each(function() {
                     const input = $(this);
@@ -320,6 +320,8 @@
                     },
                     success: function(response) {
                         $('.attribute-radio').prop('disabled', false);
+                        $('#btnOrderCreate').prop('disabled', false)
+
                         $('.form-check').removeClass('disabled-option');
 
                         if (response.ids && Array.isArray(response.ids)) {
@@ -366,9 +368,7 @@
             });
 
 
-
-
-            $('#btnAddToCart').on('click', function() {
+            $('#btnOrderCreate').on('click', function() {
                 const selectedAttributes = {};
                 let allSelected = true;
                 let qty = $('#quantity').val();
@@ -394,29 +394,47 @@
                     return;
                 }
 
-                // Chuẩn bị dữ liệu gửi lên
-                const selectedValues = Object.values(selectedAttributes);
+                const orderItem = {
+                    id: parseInt('{{ $product->id }}'),
+                    image: '{{ config('app.url') }}/storage/{{ $product->image }}',
+                    time: Date.now()
+                };
 
-                $.ajax({
-                    url: '{{ route('carts.add.to.cart') }}',
-                    method: 'POST',
-                    data: {
-                        productId: PRODUCT_ID,
-                        valueIds: selectedValues,
-                        qty
-                    },
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        notyf.success(response.message);
-                        $('.cart-icon span').text(response.count)
-                    },
-                    error: function(xhr) {
-                        notyf.error(xhr.responseJSON.message ||
-                            "Đã xảy ra lỗi khi thêm vào giỏ hàng.");
-                    }
-                });
+                // Lấy confirmedOrders từ localStorage
+                let existing = localStorage.getItem('confirmedOrders');
+                let confirmedOrders = existing ? JSON.parse(existing) : [];
+
+                // Thêm vào mảng
+                confirmedOrders.push(orderItem);
+
+                // Lưu lại vào localStorage
+                localStorage.setItem('confirmedOrders', JSON.stringify(confirmedOrders));
+
+                window.location.href = '{{ route('orders.create') }}'
+
+                // Chuẩn bị dữ liệu gửi lên
+                // const selectedValues = Object.values(selectedAttributes);
+
+                // $.ajax({
+                //     url: '{{ route('carts.add.to.cart') }}',
+                //     method: 'POST',
+                //     data: {
+                //         productId: PRODUCT_ID,
+                //         valueIds: selectedValues,
+                //         qty
+                //     },
+                //     headers: {
+                //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                //     },
+                //     success: function(response) {
+                //         notyf.success(response.message);
+                //         $('.cart-icon span').text(response.count)
+                //     },
+                //     error: function(xhr) {
+                //         notyf.error(xhr.responseJSON.message ||
+                //             "Đã xảy ra lỗi khi thêm vào giỏ hàng.");
+                //     }
+                // });
             });
 
             $(document).on('click', '.btn-quantity', function() {
