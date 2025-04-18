@@ -20,14 +20,16 @@ return new class extends Migration
             $table->string('order_code')->unique();
             $table->string('order_name');
             $table->enum('status', ['pending', 'processing', 'completed', 'cancelled'])->default('pending');
-            $table->decimal('total', 12,2);
+            $table->decimal('total', 12, 2);
             $table->enum('payment_method', ['cod', 'bank_transfer', 'paypal']);
             $table->string('phone_number', 15);
+            $table->string('zip_code', 20)->nullable();
+            $table->string('tax_code', 50)->nullable();
             $table->string('shipping_address');
             $table->text('note')->nullable();
 
-            $table->decimal('discount', 10,2)->default(0);
-            $table->decimal('shipping_fee', 10,2)->default(0);
+            $table->decimal('discount', 10, 2)->default(0);
+            $table->decimal('shipping_fee', 10, 2)->default(0);
             $table->timestamps();
         });
     }

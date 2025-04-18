@@ -34,7 +34,7 @@
                         </span>
                         <div class="d-flex gap-3">
                             <p class="fw-bold text-center " style="color: #42526E; font-size: 14px;">
-                                $ <span class="final-price">0</span>
+                                <span class="final-price">$0.00</span>
                             </p>
                         </div>
                     </div>
@@ -93,7 +93,8 @@
                             <p class="fw-bold" style="color: #42526E; font-size: 14px;">
                                 Tổng phụ (<span id="qty-order-item"></span> cái)
                             </p>
-                            <p class="fw-bold" style="color: #42526E; font-size: 14px;">$ <span class="final-price">0</span>
+                            <p class="fw-bold" style="color: #42526E; font-size: 14px;"><span
+                                    class="final-price">$0.00</span>
                             </p>
                         </div>
                     </div>
@@ -105,6 +106,7 @@
                             chuyển</span></button>
                 </div>
             </div>
+
         </div>
 
         <div class="tab-pane" id="tab-transport" style="display: none;">
@@ -126,12 +128,15 @@
 
                             <div class="form-group mb-3 col-lg-6">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="text" id="email" class="form-control" placeholder="Email">
+                                <input type="text" name="email" id="email" class="form-control"
+                                    placeholder="Email">
                             </div>
+
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="phone_number" class="form-label">Số điện thoại</label>
-                                <input type="text" class="form-control" id="phone_number"
-                                    placeholder="Số điện thoại">
+                                <label for="phone_number" class="form-label required">Số điện thoại</label>
+                                <input type="text" name="phone_number" class="form-control" id="phone_number"
+                                    required="" aria-required="true" placeholder="Số điện thoại" pattern="^\d{8,15}$"
+                                    title="Số điện thoại phải chứa từ 8 đến 15 chữ số, không bao gồm dấu cách hoặc ký tự đặc biệt.">
                             </div>
 
                             <hr class="my-3">
@@ -140,33 +145,63 @@
 
                             <div class="form-group mb-3 col-lg-6">
                                 <label for="" class="required form-label">Quốc gia</label>
-                                <select name="" id="" class="form-select" required=""
-                                    aria-required="true"></select>
+                                <select name="country_id" id="country_id" class="form-select" required
+                                    aria-required="true">
+                                    <option value="" selected disabled>Quốc gia</option>
+                                    @foreach ($countries as $country)
+                                        <option value="{{ $country->id }}">{{ $country->code . '-' . $country->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="" class="required form-label">Tiểu bang</label>
-                                <select name="" id="" class="form-select" required=""
-                                    aria-required="true"></select>
+                                <label for="state_id" class="form-label required">Tiểu bang</label>
+                                <select id="state_id" name="state_id" class="form-control" disabled required
+                                    aria-required="true">
+                                    <option value="">-- Chọn tiểu bang --</option>
+                                </select>
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="city" class="required form-label">Thành phố</label>
-                                <select name="" id="city" class="form-select" required=""
-                                    aria-required="true"></select>
+                                <label for="city_id" class="form-label">Thành phố</label>
+                                <select id="city_id" name="city_id" class="form-control" disabled required
+                                    aria-required="true">
+                                    <option value="">-- Chọn thành phố --</option>
+                                </select>
                             </div>
+
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="phone_number" class="required form-label">Mã zip</label>
-                                <input type="text" class="form-control" id="phone_number"
-                                    placeholder="Số điện thoại">
+                                <label for="zip_code" class="required form-label">Mã zip</label>
+                                <input type="text" name="zip_code" class="form-control" id="zip_code"
+                                    placeholder="Mã zip">
                             </div>
                             <div class="form-group mb-3 col-lg-12">
-                                <label for="phone_number" class="required form-label">Địa chỉ chi tiết</label>
-                                <textarea name="" id="" class="form-control" required="" aria-required="true"></textarea>
+                                <label for="shipping_address" class="required form-label">Địa chỉ chi tiết</label>
+                                <textarea name="shipping_address" id="shipping_address" class="form-control" required="" aria-required="true"></textarea>
                             </div>
                             <div class="form-group mb-3 col-lg-12">
-                                <label for="tax_number" class=" form-label">Mã số thuế</label>
-                                <input type="text" class="form-control" id="tax_number" placeholder="Mã số thuế">
+                                <label for="tax_code" class=" form-label">Mã số thuế</label>
+                                <input type="text" name="tax_code" class="form-control" id="tax_code"
+                                    placeholder="Mã số thuế">
+                            </div>
+
+                            <hr class="my-3">
+
+                            <h1 class="fw-bold text-base mb-4" style="color: #091E42">Phương thức giao hàng</h1>
+
+                            <div style="padding: 0 0.85rem" id="shipping-methods-wrapper">
+                                @foreach ($shippingMethods as $shippingMethod)
+                                    <div class="form-check">
+                                        <input class="form-check-input" data-fee="{{ $shippingMethod->fee }}"
+                                            type="radio" name="shipping_method_id" id="{{ $shippingMethod->id }}"
+                                            @checked($loop->first)>
+                                        <label class="form-check-label fw-bold text-muted"
+                                            for="{{ $shippingMethod->id }}">
+                                            {{ $shippingMethod->name }}
+                                        </label>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -183,6 +218,107 @@
         <div class="tab-pane" id="tab-review" style="display: none;">
             <div class="header_step_create_order_inner">
 
+                <div class="card px-3 pt-3 mb-3">
+                    <div class="card-header">
+                        <h5 class="fs-6 fw-bold">Sản phẩm</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="review-product-list">
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card px-3 pt-3 mb-3">
+                    <div class="card-header">
+                        <h5 class="fw-bold fs-6">Giao hàng đến</h5>
+                    </div>
+                    <div class="card-body card-shipping">
+
+                    </div>
+                </div>
+
+                <div class="card px-3 pt-3 mb-3">
+                    <div class="card-header">
+                        <h5 class="fw-bold fs-6">Phương thức thanh toán</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-payment">
+                            <div class="form-check d-flex align-items-center">
+                                <input class="form-check-input me-2" type="radio" name="paymentMethod"
+                                    id="paymentWallet" value="wallet" onclick="showWalletBalance()">
+                                <label class="form-check-label" for="paymentWallet">
+                                    Thanh toán ví
+                                </label>
+                            </div>
+                            <div id="walletBalance" class="ms-4" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center border px-3 py-2 rounded">
+                                    <div class="">
+                                        <p class="mb-0 fw-bold">Số dư</p>
+                                        <p class="mb-0 fw-bold">$0.00</p>
+                                    </div>
+                                    <button type="button" class="ant-btn-primary text-white px-3 py-1">Nạp tiền</button>
+                                </div>
+                                <div class="alert alert-danger mt-2" role="alert">
+                                    Số dư của bạn không đủ, nạp tiền ngay hoặc chọn phương thức thanh toán khác.
+                                </div>
+                            </div>
+
+                            <div class="form-check d-flex align-items-center mt-2">
+                                <input class="form-check-input me-2" type="radio" name="paymentMethod"
+                                    id="paymentLater" value="later" onclick="hideWalletBalance()" checked>
+                                <label class="form-check-label" for="paymentLater">
+                                    Thanh toán sau
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card px-3 pt-3 mb-3">
+                    <div class="card-header">
+                        <h5 class="fw-bold fs-6">Mã giảm giá</h5>
+                    </div>
+                    <div class="card-body">
+                        <label for="input_coupon" class="form-label">Nhập mã giảm giá của bạn</label>
+                        <div class="input-group gap-2">
+                            <input type="text" id="input_coupon" placeholder="Nhập mã giảm giá của bạn"
+                                class="form-control rounded-start">
+                            <button type="button" class="ant-btn-primary text-white px-3 py-1 rounded-end">Áp
+                                dụng</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card px-3 pt-3 mb-3">
+                    <div class="card-header">
+                        <h5 class="fw-bold fs-6">Phân tích đơn hàng</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Giá sản phẩm</span>
+                            <span class="final-price">$0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Phí vận chuyển</span>
+                            <span id="shipping-method-fee">$0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Thuế</span>
+                            <span id="tax-amount">$0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tổng phụ phí</span>
+                            <span id="extra-fee">$0.00</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between fw-bold">
+                            <span>Tổng</span>
+                            <span id="order-total-amount">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="d-flex flex-column justify-content-center align-items-center my-3 mt-5 gap-3">
                     <div class="d-flex gap-3">
                         <button type="button" class="ant-btn ant-btn-default py-2 px-4 h-auto"><span>Thanh toán
@@ -193,13 +329,10 @@
 
                     <a href="#" class="fw-bold" id="back-step-2">Quay lại</a>
                 </div>
-                <!-- Nội dung đánh giá -->
             </div>
         </div>
 
     </div>
-
-
 
     <!-- Offcanvas Fullscreen -->
     <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottom" aria-labelledby="offcanvasBottomLabel"
@@ -230,6 +363,65 @@
 
 @push('scripts')
     <script>
+        function cleanCurrency(value) {
+            return parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
+        }
+
+        function calculateOrderTotal() {
+            const productPrice = cleanCurrency($('.final-price').first().text());
+            const shippingFee = cleanCurrency($('#shipping-method-fee').text());
+            const tax = cleanCurrency($('#tax-amount').text());
+            const extraFee = cleanCurrency($('#extra-fee').text());
+
+            const total = productPrice + shippingFee + tax + extraFee;
+
+            console.log(productPrice +
+                '-' + shippingFee +
+                '-' + tax +
+                '-' + extraFee);
+
+            $('#order-total-amount').text(`$${total.toFixed(2)}`);
+        }
+
+
+
+        function showWalletBalance() {
+            document.getElementById('walletBalance').style.display = 'block';
+        }
+
+        function hideWalletBalance() {
+            document.getElementById('walletBalance').style.display = 'none';
+        }
+
+        function renderReviewProducts(products) {
+            const container = $('#review-product-list');
+            container.html(''); // clear trước
+
+            products.forEach((product, index) => {
+                const html = `
+                    <div class="row g-2 align-items-center mb-3">
+                        <div class="col-auto">
+                            <img src="${product.image}" alt="Product" class="img-thumbnail"
+                                style="width: 100px; height: auto;">
+                        </div>
+                        <div class="col">
+                            <h6 class="mb-1 fw-bold">${product.name}</h6>
+                            <div class="text-muted small">${product.attributes_text}</div>
+                            <div class="text-muted small">${product.sku}</div>
+                            <div class="fw-semibold mt-2">
+                                Giá sản phẩm: <span class="text-primary">USD ${product.price}</span>
+                                <small class="text-muted">(USD ${product.price} x ${product.quantity})</small>
+                            </div>
+                        </div>
+                    </div>
+
+            ${index < products.length - 1 ? '<hr class="my-3">' : ''}
+        `;
+                container.append(html);
+            });
+        }
+
+
         function updateStepStatus(currentStep, nextStep) {
             // Ẩn tất cả tab
             $('.tab-pane').hide();
@@ -252,14 +444,61 @@
             }
         }
 
-
         // Sang bước 2
         $(document).on('click', '.btn-to-shipping', function() {
+            const products = [];
+
+            $('#confirmed-products-wrapper .custom-form').each(function() {
+                const productEl = $(this);
+                const productId = parseInt(productEl.attr('data-id'));
+                const time = productEl.attr('data-time');
+                const name = productEl.find('.product-title').text().trim();
+                const sku = productEl.find('.product-sku').text().trim();
+                const image = productEl.find('img').attr('src');
+                const price = productEl.find('.variant-price span').text().trim();
+                const totalPrice = productEl.find('.total-price span').text().trim();
+                const quantity = productEl.find('.step_product_input').val();
+
+                // Lấy các giá trị attribute đã chọn (nếu là variant)
+                const attributes = [];
+                productEl.find('select.product-attr-select').each(function() {
+                    const attrName = $(this).find('option:selected').text();
+                    const attrValueId = $(this).val();
+                    if (attrValueId) {
+                        attributes.push({
+                            name: attrName,
+                            value_id: attrValueId
+                        });
+                    }
+                });
+
+                const attributesText = attributes.map(attr => attr.name).join(' - ');
+
+                products.push({
+                    id: productId,
+                    time: time,
+                    name: name,
+                    sku: sku,
+                    image: image,
+                    price: parseFloat(price),
+                    total_price: parseFloat(totalPrice),
+                    quantity: parseInt(quantity),
+                    attributes: attributes,
+                    attributes_text: attributesText // thêm chuỗi dạng 'S - Đỏ'
+                });
+            });
+
+            console.log('Dữ liệu sản phẩm đã chọn:', products);
+
+            renderReviewProducts(products)
+
+            // Sau khi lấy được dữ liệu, bạn có thể gọi updateStepStatus như bình thường
             updateStepStatus(1, {
                 step: 2,
-                tabId: 'tab-transport'
+                tabId: 'tab-transport',
             });
         });
+
 
         // Quay lại bước 1
         $(document).on('click', '#back-step-1', function(e) {
@@ -282,16 +521,56 @@
                 return;
             }
 
+            const formDataArray = $(form).serializeArray();
+
+            // Chuyển mảng thành object: {first_name: "A", last_name: "B", ...}
+            const formData = {};
+            formDataArray.forEach(field => {
+                formData[field.name] = field.value;
+            });
+
+            // Gộp họ và tên
+            const fullName = (formData.first_name || '') + ' ' + (formData.last_name || '');
+            const cityName = $('#city_id option:selected').text();
+            const stateName = $('#state_id option:selected').text();
+            const countryName = $('#country_id option:selected').text();
+            const selectedShipping = $('input[name="shipping_method_id"]:checked');
+            const shippingName = selectedShipping.closest('.form-check').find('label').text().trim();
+            const shippingFee = selectedShipping.data('fee') || 0;
+
+            const addressParts = [
+                countryName?.trim(),
+                stateName?.trim(),
+                cityName?.trim(),
+                formData.shipping_address?.trim()
+            ].filter(Boolean); // Xoá các phần tử rỗng, null, undefined
+
+            const fullAddress = addressParts.join(', ') + (formData.zip_code ? ' - ' + formData.zip_code : '');
+
+            // Hiển thị dữ liệu lên tab-review
+            const shippingInfoHTML = `
+                <p>Họ tên: ${fullName}</p>
+                <p>Email: ${formData.email || ''}</p>
+                <p>Số điện thoại: ${formData.phone_number || ''}</p>
+                <p>Địa chỉ giao hàng: ${fullAddress}</p>
+                <p>Phương thức vận chuyển: ${shippingName}</p>
+            `;
+
+            $('#shipping-method-fee').text(`$${shippingFee}`)
+
+            $('.card-shipping').find('p').remove(); // Xoá thông tin cũ nếu có
+            $('.card-shipping').append(shippingInfoHTML); // Thêm mới
+
             updateStepStatus(2, {
                 step: 3,
                 tabId: 'tab-review'
             });
 
+            calculateOrderTotal()
+
             $('.step[data-step="2"] .step-number').html('&#10003;');
             $('.step[data-step="3"]').addClass('active');
         });
-
-
 
         // Quay lại bước 2
         $(document).on('click', '#back-step-2', function(e) {
@@ -309,6 +588,77 @@
 
 
         $(function() {
+            $('#country_id').on('change', function() {
+                let countryId = $(this).val();
+
+                $('#state_id').html('<option value="">-- Chọn tiểu bang --</option>').prop('disabled',
+                    true);
+                $('#city_id').html('<option value="">-- Chọn thành phố --</option>').prop('disabled', true);
+
+                if (countryId) {
+                    $.ajax({
+                        url: '{{ route('app.orders.get.states', '__id__') }}'.replace('__id__',
+                            countryId),
+                        type: 'GET',
+                        success: function(response) {
+                            if (response.states.length > 0) {
+                                $('#state_id').prop('disabled', false);
+                                $.each(response.states, function(key, state) {
+                                    $('#state_id').append(
+                                        `<option value="${state.id}">${state.name}</option>`
+                                    );
+                                });
+
+                                if (response.msg != "") {
+                                    notyf.error(xhr.responseJSON?.msg || "Đã xảy ra lỗi.");
+                                    return;
+                                }
+
+                                let html = '';
+                                $.each(response.shipping_methods, function(index, method) {
+                                    html += `
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="shipping_method_id"
+                                                id="shipping_${method.id}" data-fee="${method.fee}" value="${method.id}" ${index === 0 ? 'checked' : ''}>
+                                            <label class="form-check-label fw-bold text-muted"
+                                                for="shipping_${method.id}">
+                                                ${method.name}
+                                            </label>
+                                        </div>
+                                    `;
+                                });
+
+                                $('#shipping-methods-wrapper').html(html);
+                            }
+                        }
+                    });
+                }
+            });
+
+            $('#state_id').on('change', function() {
+                let stateId = $(this).val();
+
+                $('#city_id').html('<option value="">-- Chọn thành phố --</option>').prop('disabled', true);
+
+                if (stateId) {
+                    $.ajax({
+                        url: '{{ route('app.orders.get.cities', '__id__') }}'.replace('__id__',
+                            stateId),
+                        type: 'GET',
+                        success: function(response) {
+                            if (response.cities.length > 0) {
+                                $('#city_id').prop('disabled', false);
+                                $.each(response.cities, function(key, city) {
+                                    $('#city_id').append(
+                                        `<option value="${city.id}">${city.name}</option>`
+                                    );
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+
             const confirmed = getConfirmedOrders();
 
             $('#qty-order-item').text(confirmed.length)
@@ -450,8 +800,13 @@
                 return allSelected;
             }
 
+            $('.input_order_name').on('input', function() {
+                toggleShippingButton()
+            })
+
             function toggleShippingButton() {
-                if (checkAllProductsSelected()) {
+
+                if (checkAllProductsSelected() && $('.input_order_name').val() != "") {
                     $('.btn-to-shipping').prop('disabled', false).removeClass('ant-btn-default').addClass(
                         'ant-btn-primary');
                 } else {
@@ -506,7 +861,13 @@
                                 <div class="d-flex align-items-center mb-3 justify-content-between">
                                     <div class="d-flex align-items-center">
                                         <img src="${product.image}" alt="${product.name}" class="me-3" style="width: 60px; height: auto;">
-                                        <h2 class="product-title mb-0 fs-5">${product.name}</h2>
+                                        <div class="lh-1">
+                                            <h2 class="product-title mb-0 fs-5">${product.name}</h2>
+                                            <span class="text-muted product-sku" id="sku_${product.id}_${product.time}">
+                                                ${isVariant ? '' : product.sku}
+                                            </span>
+                                        </div>
+
                                     </div>
                                     <div class="btn-action">
                                         ${isVariant ? `<button type="button" class="btn btn-outline-primary btn-sm btn-clone-product" data-id="${product.id}">Nhân bản</button>` : ''}
@@ -656,6 +1017,8 @@
                         if (isUsedElsewhere) {
                             notyf.error('Biến thể bạn chọn đã được sử dụng!');
 
+                            $(`#sku_${productId}_${time}`).text('');
+
                             // Đóng info_variant lại
                             info_variant.removeAttr('data-variant-id');
 
@@ -678,6 +1041,9 @@
 
                         // Nếu chưa trùng, tiến hành xử lý như bình thường
                         info_variant.attr('data-variant-id', response.variant_id);
+
+                        // Cập nhật SKU sau khi fetch thành công
+                        $(`#sku_${productId}_${time}`).text(response.sku);
 
                         // Cập nhật giá
                         $(`.variant-price[data-product-id="${productId}"][data-time="${time}"] span`)
@@ -707,6 +1073,8 @@
 
                         $(`.custom-form[data-id="${productId}"][data-time="${time}"] input`).val(1);
 
+                        $(`#sku_${productId}_${time}`).text('');
+
                         const form = $(`.custom-form[data-id="${productId}"][data-time="${time}"]`);
                         form.find('.d-flex.align-items-stretch').removeClass('d-flex').addClass(
                             'd-none');
@@ -725,7 +1093,7 @@
                         total += value;
                     }
                 });
-                $('.final-price').text(total.toFixed(0));
+                $('.final-price').text(`$${total.toFixed(0)}`);
             }
 
             $(document).on('blur', '.step_product_input', function() {
@@ -806,6 +1174,7 @@
                 $('#qty-order-item').text(confirmed.length)
 
                 updateSubtotal();
+                toggleShippingButton()
             });
 
 

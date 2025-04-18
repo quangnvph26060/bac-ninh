@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Frontend\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\AttributeValue;
+use App\Models\City;
+use App\Models\Country;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\ShippingMethod;
+use App\Models\State;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -66,7 +70,43 @@ class OrderController extends Controller
             return view('frontend.app.order._product_list', compact('products'))->render();
         }
 
-        return view('frontend.app.order.create', compact('products'));
+        $shippingMethods = ShippingMethod::query()->latest()->get();
+
+        $countries = Country::query()->orderBy('name', 'asc')->get();
+
+        return view('frontend.app.order.create', compact('products', 'countries', 'shippingMethods'));
+    }
+
+    public function getStates($country_id)
+    {
+        $states = State::where('country_id', $country_id)->get(['id', 'name']);
+        if (!$country = Country::query()->with('shippingMethods')->find($country_id)) {
+            $msg = "Quốc gia không hợp lệ!";
+        }
+
+        if ($country->shippingMethods->isEmpty()) {
+            $msg = "Quốc gia {$country->name} không được hỗ trợ vận chuyển.";
+        }
+
+        $shippingMethods = $country->shippingMethods->map(fn($method) => [
+            'id'   => $method->id,
+            'name' => $method->name,
+            'fee'  => number_format($method->pivot->fee, 0),
+        ]);
+
+        return response()->json([
+            'states' => $states,
+            'msg' => $msg ?? '',
+            'shipping_methods' => $shippingMethods
+        ]);
+    }
+
+    public function getCities($state_id)
+    {
+        $cities = City::where('state_id', $state_id)->get(['id', 'name']);
+        return response()->json([
+            'cities' => $cities
+        ]);
     }
 
     public function getProducts(Request $request)
@@ -74,7 +114,7 @@ class OrderController extends Controller
         $ids = $request->input('product_ids');
 
         $products = Product::query()
-            ->select('id', 'image', 'name', 'type', 'sale_price', 'discount_price', 'stock', 'stock_status')
+            ->select('id', 'image', 'name', 'sku',  'type', 'sale_price', 'discount_price', 'stock', 'stock_status')
             ->whereIn('id', $ids)
             ->get();
 
@@ -101,7 +141,7 @@ class OrderController extends Controller
                     'image' => showImage($product->image),
                     'name' => $product->name,
                     'attributes' => $attributesFormatted,
-                    'type' => $product->type
+                    'type' => $product->type,
                 ];
             } else {
                 // Nếu sản phẩm có type là simple, trả về giá sản phẩm và không có attributes
@@ -113,7 +153,8 @@ class OrderController extends Controller
                     'name' => $product->name,
                     'attributes' => [],
                     'price' => number_format($price, 0, ',', ''),
-                    'type' => $product->type
+                    'type' => $product->type,
+                    'sku' => $product->sku
                 ];
             }
         }
@@ -166,7 +207,8 @@ class OrderController extends Controller
 
         return response()->json([
             'price' => number_format($price, 0, ',', ''),
-            'variant_id' => $variant->id
+            'variant_id' => $variant->id,
+            'sku' =>  $variant->sku
         ]);
     }
 

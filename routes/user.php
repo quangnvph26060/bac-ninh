@@ -18,6 +18,8 @@ Route::prefix('app')->name('app.')->group(function () {
         Route::post('check-stock', 'checkStock')->name('check-stock');
         Route::get('create', 'create')->name('create');
         Route::get('filter', 'filter')->name('filter');
+        Route::get('states/{country_id}', 'getStates')->name('get.states');
+        Route::get('cities/{state_id}', 'getCities')->name('get.cities');
     });
 });
 
