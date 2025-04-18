@@ -10,7 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ asset('frontend/auth/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('frontend/assets/css/notyf.min.css') }}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ asset('frontend/assets/css/auth.css') }}">
 </head>
 
 <body>
@@ -20,7 +24,8 @@
             <div class="relative flex flex-col items-center w-full tablet-w-500px lg-w-300px"><a href="/"><img
                         class="w-210px h-10 object-scale-down" src="{{ asset('frontend/assets/img/art-logo.png') }}"
                         alt="Printway.io"></a>
-                <form class="flex flex-col w-full pt-48px">
+                <form class="flex flex-col w-full pt-48px" id="form-login">
+                    @csrf
                     <p class="font-bold sm-text-xl text-lg">Chào mừng trở lại!</p>
                     <p class="font-medium mt-28px">Email</p><label
                         class="border-none rounded-t border-inherit mt-8px h-38px rounded">
@@ -37,17 +42,20 @@
                                     class="ant-input p-2 w-full h-full border rounded font-normal ">
                             </div>
                         </div>
-                        <div class="absolute top-1 right-3 show__pwd__icon"><span role="img" aria-label="eye"
-                                tabindex="-1" class="anticon anticon-eye"><svg viewBox="64 64 896 896"
-                                    focusable="false" data-icon="eye" width="1em" height="1em" fill="currentColor"
-                                    aria-hidden="true">
-                                    <path
-                                        d="M942.2 486.2C847.4 286.5 704.1 186 512 186c-192.2 0-335.4 100.5-430.2 300.3a60.3 60.3 0 000 51.5C176.6 737.5 319.9 838 512 838c192.2 0 335.4-100.5 430.2-300.3 7.7-16.2 7.7-35 0-51.5zM512 766c-161.3 0-279.4-81.8-362.7-254C232.6 339.8 350.7 258 512 258c161.3 0 279.4 81.8 362.7 254C791.5 684.2 673.4 766 512 766zm-4-430c-97.2 0-176 78.8-176 176s78.8 176 176 176 176-78.8 176-176-78.8-176-176-176zm0 288c-61.9 0-112-50.1-112-112s50.1-112 112-112 112 50.1 112 112-50.1 112-112 112z">
-                                    </path>
-                                </svg></span></div>
+                        <div class="absolute right-3 show__pwd__icon" style="top: .4rem; cursor: pointer;"><span
+                                role="img" aria-label="eye" tabindex="-1" class="anticon anticon-eye">
+                                <i class="fa-regular fa-eye"></i>
+                                <i class="far fa-eye-slash" style="display: none"></i>
+                            </span>
+                        </div>
                     </div>
 
-                    <button type="button" class="ant-btn ant-btn-primary font-medium h-40px mt-4"><span>Đăng
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" name="remember" class="mr-2 w-4 h-4">
+                        <label for="remember" class="text-sm font-medium text-gray-700">Ghi nhớ đăng nhập</label>
+                    </div>
+
+                    <button type="submit" class="ant-btn ant-btn-primary font-medium h-40px mt-4"><span>Đăng
                             nhập</span></button>
                     <div class="my-24px text-center">
                         <p class="font-normal text-base">hoặc</p>
@@ -182,6 +190,10 @@
             </div>
         </main>
     </main>
+
+    <script src="{{ asset('frontend/assets/js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ asset('frontend/assets/js/notyf.min.js') }}"></script>
+    <script src="{{ asset('frontend/assets/js/auth.js') }}"></script>
 </body>
 
 </html>

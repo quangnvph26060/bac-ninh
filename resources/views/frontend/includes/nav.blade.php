@@ -69,9 +69,18 @@
         </a> --}}
 
         <!-- Login Button (Chữ login sẽ đổi thành icon trên mobile) -->
-        <a href="#" class="login-btn ms-3">
-            <span>Login</span>
-            <i class="bi bi-person"></i>
-        </a>
+
+        @if (Auth::check())
+            <a href="{{ route('dashboard') }}">
+                <div class="avata_image">
+                    <img src="{{ showImage(Auth::user()->img_url) }}" alt="" class="avatar">
+                </div>
+            </a>
+        @else
+            <a href="{{ route('login') }}" class="login-btn ms-3">
+                <span>Login</span>
+                <i class="bi bi-person"></i>
+            </a>
+        @endif
     </div>
 </nav>

@@ -119,15 +119,14 @@
                     <div class="avatar__info__wrapper">
                         <div class="avatar__info cursor-pointer">
                             <div class="avata_image">
-                                <img src="	https://lh3.googleusercontent.com/a/ACg8ocL12UwrTny-NmNPESsFIthTKHhmZ00RM7Zri5nqMqg2MtnLIEc6Dg=s96-c"
-                                    alt="" class="avatar" />
+                                <img src="{{ showImage(Auth::user()->img_url) }}" alt="" class="avatar" />
                             </div>
 
                             <!-- User Info -->
                             <div class="user__info__content d-none d-lg-flex">
                                 <div class="user__info_name">
                                     <span class="name__user truncate">
-                                        <span>Đạt Nguyễn Tiến</span>
+                                        <span>{{ Auth::user()->name }}</span>
                                         <span class="dropdown_menu">
                                             <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">
@@ -145,7 +144,7 @@
                                     <li><a href="/">🏠 Trở về trang chủ</a></li>
                                     <li><a href="/account">👤 Tài khoản của tôi</a></li>
                                     <li><a href="/settings">⚙️ Cài đặt</a></li>
-                                    <li><a href="/logout">🚪 Đăng xuất</a></li>
+                                    <li><a href="{{ route('logout') }}">🚪 Đăng xuất</a></li>
                                 </ul>
                             </div>
                         </div>

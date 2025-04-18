@@ -695,3 +695,14 @@ video {
     border: 1px solid #dfe1e6 !important;
     border-radius: 4px !important;
 }
+
+.ant-btn-primary {
+    background: #f06022 !important;
+    border-radius: 4px !important;
+    color: #fff;
+    text-shadow: 0 -1px 0 #0000001f;
+}
+
+.mr-2 {
+    margin-right: 0.5rem;
+}

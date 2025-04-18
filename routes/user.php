@@ -9,24 +9,27 @@ use App\Http\Controllers\Frontend\ProductController;
 use Illuminate\Support\Facades\Route;
 
 
-// Route::prefix('app')->name('app.')->group(function () {
+Route::middleware('guest')->group(function () {
+    Route::get('login', [AuthController::class, 'login'])->name('login');
+    Route::post('login', [AuthController::class, 'authenticate']);
+});
 
-// });
+Route::middleware('auth')->group(function () {
+    Route::prefix('orders')->name('orders.')->controller(OrderController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('get-products', 'getProducts')->name('get.products');
+        Route::post('get-variant-price', 'getVariantPrice')->name('get-variant-price');
+        Route::post('check-stock', 'checkStock')->name('check-stock');
+        Route::get('create', 'create')->name('create');
+        Route::get('filter', 'filter')->name('filter');
+        Route::get('states/{country_id}', 'getStates')->name('get.states');
+        Route::get('cities/{state_id}', 'getCities')->name('get.cities');
+    });
 
-Route::get('login', [AuthController::class, 'login'])->name('login');
+    Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+});
 
 Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
-
-Route::prefix('orders')->name('orders.')->controller(OrderController::class)->group(function () {
-    Route::get('/', 'index')->name('index');
-    Route::post('get-products', 'getProducts')->name('get.products');
-    Route::post('get-variant-price', 'getVariantPrice')->name('get-variant-price');
-    Route::post('check-stock', 'checkStock')->name('check-stock');
-    Route::get('create', 'create')->name('create');
-    Route::get('filter', 'filter')->name('filter');
-    Route::get('states/{country_id}', 'getStates')->name('get.states');
-    Route::get('cities/{state_id}', 'getCities')->name('get.cities');
-});
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
 

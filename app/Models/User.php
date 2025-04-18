@@ -54,6 +54,11 @@ class User extends Authenticatable
         return UserInfo::where('user_id', $this->attributes['id'])->first();
     }
 
+    public function isAdmin()
+    {
+        return $this->role_id == 1;
+    }
+
     // Relationship with City
     public function city()
     {
