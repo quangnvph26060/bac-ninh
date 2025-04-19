@@ -26,9 +26,17 @@
                         alt="Printway.io"></a>
                 <form class="flex flex-col w-full pt-48px" id="form-login">
                     @csrf
-                    <p class="font-bold sm-text-xl text-lg">Chào mừng trở lại!</p>
-                    <p class="font-medium mt-28px">Email</p><label
-                        class="border-none rounded-t border-inherit mt-8px h-38px rounded">
+                    <p class="font-bold sm-text-xl text-lg">Đăng kí và bắt đầu mua hàng</p>
+                    <p class="font-medium mt-28px">Tên</p>
+                    <label class="border-none rounded-t border-inherit mt-8px h-38px rounded">
+                        <div>
+                            <div><input type="text" placeholder="Tên" name="name" autocomplete="off"
+                                    class="ant-input p-2 w-full h-full border rounded font-normal" value="">
+                            </div>
+                        </div>
+                    </label>
+                    <p class="font-medium mt-28px">Email</p>
+                    <label class="border-none rounded-t border-inherit mt-8px h-38px rounded">
                         <div>
                             <div><input type="text" placeholder="Email" name="email" autocomplete="off"
                                     class="ant-input p-2 w-full h-full border rounded font-normal " value="">
@@ -36,7 +44,7 @@
                         </div>
                     </label>
                     <p class="text-14px leading-22px font-medium mt-22px">Mật khẩu</p>
-                    <div class="border-none rounded-t border-inherit mt-8px mb-4 rounded relative pwd__field">
+                    <div class="border-none rounded-t border-inherit mt-8px rounded relative pwd__field">
                         <div>
                             <div><input placeholder="Mật khẩu" type="password" name="password" autocomplete="off"
                                     class="ant-input p-2 w-full h-full border rounded font-normal ">
@@ -50,13 +58,21 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center">
-                        <input type="checkbox" id="remember" name="remember" class="mr-2 w-4 h-4">
-                        <label for="remember" class="text-sm font-medium text-gray-700">Ghi nhớ đăng nhập</label>
-                    </div>
+                    <p class="font-medium mt-28px">Số điện thoại</p>
+                    <label class="border-none rounded-t mb-4 border-inherit mt-8px h-38px rounded">
+                        <div>
+                            <div><input type="text" placeholder="Số điện thoại" name="phone"
+                                    autocomplete="off" class="ant-input p-2 w-full h-full border rounded font-normal"
+                                    value="">
+                            </div>
+                        </div>
+                    </label>
+
+                    {!! NoCaptcha::renderJs() !!}
+                    {!! NoCaptcha::display() !!}
 
                     <button type="submit" class="ant-btn ant-btn-primary font-medium h-40px mt-4"><span>Đăng
-                            nhập</span></button>
+                            ký</span></button>
                     <div class="my-24px text-center">
                         <p class="font-normal text-base">hoặc</p>
                     </div>
@@ -70,8 +86,8 @@
                             </div>
                         </button></div>
                     <div class="flex flex-row items-center justify-center lg-justify-start"><a
-                            class="text-12px xs-text-14px leading-22px font-normal mr-16px " href="{{ route('register') }}">Đăng
-                            ký</a><span
+                            class="text-12px xs-text-14px leading-22px font-normal mr-16px " href="{{ route('login') }}">Đăng
+                            nhập</a><span
                             class="xs-border-3px border-2px border-nature-80 rounded-full flex items-center justify-center"></span><a
                             class="text-12px xs-text-14px leading-22px font-normal ml-16px "
                             href="/app/forgot-password">Quên mật khẩu?</a></div>

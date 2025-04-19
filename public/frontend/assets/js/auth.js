@@ -19,7 +19,7 @@ $(document).ready(function () {
     });
 
     const notyf = new Notyf({
-        duration: 5000,
+        duration: 500000,
         ripple: true,
         types: [
             {
