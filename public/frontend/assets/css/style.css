@@ -41,6 +41,8 @@ header {
     /* background-color: rgb(251, 249, 248); */
     background-color: rgb(0, 0, 0);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transform: translateZ(0); /* thêm dòng này */
+    will-change: transform; /* gợi ý trình duyệt tối ưu hiệu ứng */
 }
 
 .navbar {
