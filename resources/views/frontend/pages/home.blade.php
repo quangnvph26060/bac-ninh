@@ -299,7 +299,7 @@
 
     <div class="pw_different_part_wrapper position-relative">
         <div class="pw_help_you_wrapper">
-            <div data-aos="zoom-out" data-aos-once="true" data-aos-delay="350"
+            <div data-aos="fade-down" data-aos-easing="linear" data-aos-duration="1500"
                 class="w-100 d-flex align-items-center justify-content-center position-absolute z-3" style="top: -55px">
                 <img loading="lazy" src="https://printway.io/images/logo_line.png" alt="printway.io" />
             </div>
