@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Đặt lại mật khẩu</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
@@ -21,48 +22,25 @@
     <main class="flex items-center justify-center w-full flex-1 h-screen bg-white xl-min-h-865px">
         <div
             class="px-6 xs-px-10 sm-px-16 md-px-97px w-full h-full flex items-center justify-center relative lg-w-1-2 lg-p-0">
-            <div class="relative flex flex-col items-center w-full tablet-w-500px lg-w-300px"><a href="/"><img
-                        class="w-210px h-10 object-scale-down" src="{{ asset('frontend/assets/img/art-logo.png') }}"
-                        alt="Printway.io"></a>
-                <form class="flex flex-col w-full pt-48px" id="form-login">
+            <div class="relative flex flex-col items-center w-full tablet-w-500px lg-w-300px">
+                <a href="/">
+                    <img class="w-210px h-10 object-scale-down" src="{{ asset('frontend/assets/img/art-logo.png') }}"
+                        alt="Printway.io">
+                </a>
+
+                <form class="flex flex-col w-full pt-48px" id="form-forgot-password">
                     @csrf
-                    <p class="font-bold sm-text-xl text-lg">Đăng kí và bắt đầu mua hàng</p>
-                    <p class="font-medium mt-28px">Tên</p>
-                    <label class="border-none rounded-t border-inherit mt-8px h-38px rounded">
-                        <div>
-                            <div><input type="text" placeholder="Tên" name="name" autocomplete="off"
-                                    class="ant-input p-2 w-full h-full border rounded font-normal" value="">
-                            </div>
-                        </div>
-                    </label>
+                    <p class="font-bold sm-text-xl text-lg">Đặt lại mật khẩu</p>
+
+                    <p class="text-14px leading-22px font-normal mb-48px">Nhập email của bạn và chúng tôi sẽ gửi
+                        cho bạn mã đến email mà bạn có thể nhập mã để đặt lại mật khẩu của mình. Có thể sẽ mất vài phút!
+                    </p>
+
                     <p class="font-medium mt-28px">Email</p>
-                    <label class="border-none rounded-t border-inherit mt-8px h-38px rounded">
+                    <label class="border-none rounded-t border-inherit mt-8px h-38px rounded mb-16px">
                         <div>
                             <div><input type="text" placeholder="Email" name="email" autocomplete="off"
                                     class="ant-input p-2 w-full h-full border rounded font-normal " value="">
-                            </div>
-                        </div>
-                    </label>
-                    <p class="text-14px leading-22px font-medium mt-22px">Mật khẩu</p>
-                    <div class="border-none rounded-t border-inherit mt-8px rounded relative pwd__field">
-                        <div>
-                            <div><input placeholder="Mật khẩu" type="password" name="password" autocomplete="off"
-                                    class="ant-input p-2 w-full h-full border rounded font-normal ">
-                            </div>
-                        </div>
-                        <div class="absolute right-3 show__pwd__icon" style="top: .4rem; cursor: pointer;"><span
-                                role="img" aria-label="eye" tabindex="-1" class="anticon anticon-eye">
-                                <i class="fa-regular fa-eye"></i>
-                                <i class="far fa-eye-slash" style="display: none"></i>
-                            </span>
-                        </div>
-                    </div>
-
-                    <p class="font-medium mt-28px">Số điện thoại</p>
-                    <label class="border-none rounded-t mb-4 border-inherit mt-8px h-38px rounded">
-                        <div>
-                            <div><input type="text" placeholder="Số điện thoại" name="phone" autocomplete="off"
-                                    class="ant-input p-2 w-full h-full border rounded font-normal" value="">
                             </div>
                         </div>
                     </label>
@@ -70,28 +48,20 @@
                     {!! NoCaptcha::renderJs() !!}
                     {!! NoCaptcha::display() !!}
 
-                    <button type="submit" class="ant-btn ant-btn-primary font-medium h-40px mt-4"><span>Đăng
-                            ký</span></button>
-                    <div class="my-24px text-center">
-                        <p class="font-normal text-base">hoặc</p>
+                    <button type="submit" class="ant-btn ant-btn-primary font-medium h-40px mt-4">
+                        <span>Gửi mã OTP</span>
+                    </button>
+
+                    <div class="flex flex-row items-center justify-center lg-justify-start mt-40px tablet-mt-32px">
+                        <a class="text-14px leading-22px font-normal mr-16px " href="{{ route('register') }}">Đăng
+                            ký</a>
+                        <span
+                            class="xs-border-3px border-2px border-nature-80 rounded-full flex items-center justify-center">
+                        </span>
+                        <a class="text-14px leading-22px font-normal ml-16px" href="{{ route('login') }}">Đăng nhập</a>
                     </div>
-                    <div class="w-100 relative mb-16px h-2\.625rem" id="login_google_wrapper"> <a
-                            href="{{ route('google.redirect') }}" class="ant-btn ant-btn-default w-full h-2\.625rem">
-                            <div
-                                class="font-medium text-42526E flex items-center gap-4 justify-center w-full text-12px sm-text-14px leading-22px xs-leading-22px">
-                                <div><img src="{{ asset('frontend/assets/img/google-icon-logo.jpg') }}"
-                                        alt="Google Icon" class="w-6 h-6 bg-transparent"></div>
-                                <div>Tiếp tục với google</div>
-                            </div>
-                        </a></div>
-                    <div class="flex flex-row items-center justify-center lg-justify-start"><a
-                            class="text-12px xs-text-14px leading-22px font-normal mr-16px "
-                            href="{{ route('login') }}">Đăng
-                            nhập</a><span
-                            class="xs-border-3px border-2px border-nature-80 rounded-full flex items-center justify-center"></span><a
-                            class="text-12px xs-text-14px leading-22px font-normal ml-16px "
-                            href="{{ route('forgot.password') }}">Quên mật khẩu?</a></div>
                 </form>
+
             </div>
         </div>
         <main
@@ -210,6 +180,172 @@
     <script src="{{ asset('frontend/assets/js/jquery-3.3.1.min.js') }}"></script>
     <script src="{{ asset('frontend/assets/js/notyf.min.js') }}"></script>
     <script src="{{ asset('frontend/assets/js/auth.js') }}"></script>
+
+    <script>
+        $(document).ready(function() {
+
+            $(document).on("click", ".show__pwd__icon", function() {
+                const $icon = $(this);
+                const $input = $icon.siblings("input");
+
+                const isPassword = $input.attr("type") === "password";
+                $input.attr("type", isPassword ? "text" : "password");
+
+                $icon.find(".fa-eye").toggle(!isPassword);
+                $icon.find(".fa-eye-slash").toggle(isPassword);
+            });
+
+
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+            const getEmailFromForm = ($formData) => {
+                return $formData.find(f => f.name === "email")?.value;
+            };
+
+            const sendOtp = ($formData) => {
+                const email = getEmailFromForm($formData);
+                if (email) localStorage.setItem("reset_password_email", email);
+
+                $.ajax({
+                    url: window.location.href,
+                    method: "POST",
+                    data: $formData,
+                    success(response) {
+                        notyf.success(response.message || "Gửi mã OTP thành công!");
+                        renderOtpForm();
+                    },
+                    error(xhr) {
+                        notyf.error(xhr.responseJSON?.message || "Lỗi khi gửi OTP.");
+                    }
+                });
+            };
+
+            const renderOtpForm = () => {
+                const html = `
+                        <p class="font-bold sm-text-xl text-lg">Đặt lại mật khẩu</p>
+                        <p class="text-14px leading-22px font-normal mb-48px">Nhập mã OTP từ email của bạn</p>
+
+                        <p class="font-medium mt-28px">Mã OTP</p>
+                        <label class="mt-8px mb-16px">
+                            <input type="text" name="otp_code" placeholder="Nhập mã OTP" class="p-2 w-full border rounded" />
+                            <div class="text-sm text-blue-600 mt-2 cursor-pointer underline" id="resend-otp">Resend OTP?</div>
+                        </label>
+
+                        <p class="font-medium">Mật khẩu mới</p>
+                        <div class="border-none rounded-t border-inherit mt-8px rounded relative pwd__field mb-16px">
+                            <input type="password" name="password" placeholder="Mật khẩu mới" class="p-2 w-full border rounded font-normal" autocomplete="off" />
+                            <div class="absolute right-3 show__pwd__icon" style="top: .4rem; cursor: pointer;">
+                                <i class="fa-regular fa-eye"></i>
+                                <i class="far fa-eye-slash" style="display: none"></i>
+                            </div>
+                        </div>
+
+                        <p class="font-medium">Xác nhận mật khẩu mới</p>
+                        <div class="border-none rounded-t border-inherit mt-8px rounded relative pwd__field mb-16px">
+                            <input type="password" name="password_confirmation" placeholder="Xác nhận mật khẩu mới" class="p-2 w-full border rounded font-normal" autocomplete="off" />
+                            <div class="absolute right-3 show__pwd__icon" style="top: .4rem; cursor: pointer;">
+                                <i class="fa-regular fa-eye"></i>
+                                <i class="far fa-eye-slash" style="display: none"></i>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="ant-btn ant-btn-primary font-medium h-40px mt-4 w-full">
+                            <span>Đổi mật khẩu</span>
+                        </button>
+
+                        <div class="flex flex-row items-center justify-center lg-justify-start mt-40px tablet-mt-32px">
+                            <a class="text-14px leading-22px font-normal mr-16px " href="{{ route('register') }}">Đăng ký</a>
+                            <span
+                                class="xs-border-3px border-2px border-nature-80 rounded-full flex items-center justify-center">
+                            </span>
+                            <a class="text-14px leading-22px font-normal ml-16px" href="{{ route('login') }}">Đăng nhập</a>
+                        </div>
+                `;
+                $("#form-forgot-password").html(html);
+            };
+
+
+            const resendOtp = () => {
+                const $this = $("#resend-otp");
+                if ($this.hasClass("disabled")) return;
+
+                const email = localStorage.getItem("reset_password_email");
+                if (!email) return notyf.error("Không tìm thấy email để gửi lại mã OTP!");
+
+                $.ajax({
+                    url: "{{ route('resend.otp') }}",
+                    method: "POST",
+                    data: {
+                        _token: csrfToken,
+                        email
+                    },
+                    success(response) {
+                        notyf.success(response.message || "Đã gửi lại mã OTP!");
+
+                        let timeLeft = 60;
+                        $this.addClass("disabled text-gray-500").removeClass("text-blue-600").text(
+                            `Gửi lại sau ${timeLeft}s`);
+
+                        const interval = setInterval(() => {
+                            timeLeft--;
+                            $this.text(`Gửi lại sau ${timeLeft}s`);
+                            if (timeLeft <= 0) {
+                                clearInterval(interval);
+                                $this.removeClass("disabled text-gray-500").addClass(
+                                    "text-blue-600").text("Resend OTP?");
+                            }
+                        }, 1000);
+                    },
+                    error(xhr) {
+                        notyf.error(xhr.responseJSON?.message || "Lỗi khi gửi lại mã OTP!");
+                    }
+                });
+            };
+
+            const resetPassword = ($formData) => {
+                const otpCode = $formData.find(f => f.name === "otp_code")?.value;
+                const password = $formData.find(f => f.name === "password")?.value;
+                const passwordConfirmation = $formData.find(f => f.name === "password_confirmation")?.value;
+                const email = localStorage.getItem("reset_password_email");
+
+                if (!otpCode || !password || !passwordConfirmation || !email) return;
+
+                $.ajax({
+                    url: "{{ route('reset.password') }}",
+                    method: "POST",
+                    data: {
+                        _token: csrfToken,
+                        otpCode,
+                        password,
+                        passwordConfirmation,
+                        email,
+                    },
+                    success(response) {
+                        notyf.success(response.message || "Đổi mật khẩu thành công!");
+                        localStorage.removeItem("reset_password_email");
+                        setTimeout(() => window.location.href = "{{ route('home') }}", 2000);
+                    },
+                    error(xhr) {
+                        notyf.error(xhr.responseJSON?.message || "Lỗi khi đổi mật khẩu.");
+                    }
+                });
+            };
+
+            // Form submit
+            $(document).on("submit", "#form-forgot-password", function(e) {
+                e.preventDefault();
+                const $formData = $(this).serializeArray();
+
+                const hasOtpCode = $formData.find(f => f.name === "otp_code");
+                hasOtpCode ? resetPassword($formData) : sendOtp($formData);
+            });
+
+            // Resend OTP click
+            $(document).on("click", "#resend-otp", resendOtp);
+        });
+    </script>
+
+
 </body>
 
 </html>

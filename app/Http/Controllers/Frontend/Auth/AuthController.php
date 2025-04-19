@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendOtpEmail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -87,6 +88,120 @@ class AuthController extends Controller
         return handleResponse('Đăng ký tài khoản thành công!', true, 200, [
             'redirect' => redirect()->intended()->getTargetUrl()
         ]);
+    }
+
+    public function forgotPassword()
+    {
+        return view('frontend.pages.auth.forgot-password');
+    }
+
+    public function sendResetLinkEmail(Request $request)
+    {
+        $payloads = $request->validate(
+            [
+                'email' => 'required|email|exists:users,email',
+                'g-recaptcha-response' => 'required',
+            ],
+            __('request.messages'),
+            [
+                'email' => 'Email',
+                'g-recaptcha-response' => 'reCAPTCHA',
+            ]
+        );
+
+        $user = User::where('email', $payloads['email'])->first();
+
+        // Kiểm tra nếu đã gửi trong vòng 5 phút
+        // if ($user->last_otp_sent_at && $user->last_otp_sent_at->diffInMinutes(now()) < 5) {
+        //     $remaining = 5 - $user->last_otp_sent_at->diffInMinutes(now());
+        //     return errorResponse("Bạn chỉ có thể yêu cầu lại sau {$remaining} phút.", true, 429);
+        // }
+
+        $otp = rand(100000, 999999);
+
+        $user->update([
+            'otp_code' => $otp,
+            'otp_expires_at' => now()->addMinutes(5),
+            'last_otp_sent_at' => now(),
+        ]);
+
+        SendOtpEmail::dispatch($user, $otp);
+
+        return successResponse('Đã gửi email khôi phục mật khẩu!', [], 200, true);
+    }
+
+    public function resendOtp(Request $request)
+    {
+        $payloads = $request->validate(
+            [
+                'email' => 'required|email|exists:users,email',
+            ],
+            __('request.messages'),
+            [
+                'email' => 'Email',
+            ]
+        );
+
+        $user = User::where('email', $payloads['email'])->first();
+
+        $otp = rand(100000, 999999);
+
+        $user->update([
+            'otp_code' => $otp,
+            'otp_expires_at' => now()->addMinutes(1),
+            'last_otp_sent_at' => now(),
+        ]);
+
+        SendOtpEmail::dispatch($user, $otp);
+
+        return successResponse('Đã gửi email xác thực OTP!', [], 200, true);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $payloads = $request->validate(
+            [
+                'email' => 'required|email|exists:users,email',
+                'otpCode' => 'required|digits:6',
+                'password' => ['required', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
+                'passwordConfirmation' => 'required|same:password',
+            ],
+            __('request.messages'),
+            [
+                'email' => 'Email',
+                'otpCode' => 'Mã OTP',
+                'password' => 'Mật khẩu mới',
+                'passwordConfirmation' => 'Mật khẩu mới',
+            ]
+        );
+
+        $user = User::where(
+            'email',
+            $payloads['email']
+        )->first();
+
+        if (!$user) {
+            return errorResponse('Người dùng không tồn tại!', true, 404);
+        }
+
+        if ($payloads['otpCode'] != $user->otp_code) {
+            return errorResponse('Mã OTP không chính xác!', true, 400);
+        }
+
+        if ($user->otp_expires_at < now()) {
+            return errorResponse('Mã OTP đã hết hạn!', true, 400);
+        }
+
+        $user->update([
+            'password' => Hash::make($payloads['password']),
+            'otp_code' => null,
+            'otp_expires_at' => null,
+            'last_otp_sent_at' => null,
+        ]);
+
+        Auth::login($user);
+
+        return successResponse('Đặt lại mật khẩu thành công!', [], 200, true);
     }
 
     public function redirectToGoogle()

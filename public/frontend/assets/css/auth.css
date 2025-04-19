@@ -706,3 +706,34 @@ video {
 .mr-2 {
     margin-right: 0.5rem;
 }
+
+.mt-40px {
+    margin-top: 40px;
+}
+
+.border-nature-80 {
+    border-color: #42526e;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.text-sm {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem; /* 20px */
+}
+
+.text-blue-600 {
+    color: #2563eb; /* Màu xanh blue-600 */
+}
+
+.mt-2 {
+    margin-top: 0.5rem; /* 8px */
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.underline {
+    text-decoration: underline;
+}
