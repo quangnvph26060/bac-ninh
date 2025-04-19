@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -48,6 +49,43 @@ class AuthController extends Controller
         };
 
         return errorResponse('Mật khẩu không chính xác!', true, 400);
+    }
+
+    public function register()
+    {
+        return view('frontend.pages.auth.register');
+    }
+
+    public function storeRegister(Request $request)
+    {
+        $payloads = $request->validate(
+            [
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email',
+                'password' => ['required', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
+                'phone' => 'required|string|max:20|unique:users,phone',
+                'g-recaptcha-response' => 'required',
+            ],
+            __('request.messages'),
+            [
+                'name' => 'Họ tên',
+                'email' => 'Email',
+                'password' => 'Mật khẩu',
+                'phone' => 'Số điện thoại',
+                'g-recaptcha-response' => 'reCAPTCHA',
+            ]
+        );
+
+        $payloads['password'] = Hash::make($payloads['password']);
+        $payloads['role_id'] = 2; // ROLE USER
+
+        $user = User::create($payloads);
+
+        Auth::login($user);
+
+        return handleResponse('Đăng ký tài khoản thành công!', true, 200, [
+            'redirect' => redirect()->intended()->getTargetUrl()
+        ]);
     }
 
     public function logout()

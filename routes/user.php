@@ -9,9 +9,11 @@ use App\Http\Controllers\Frontend\ProductController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::middleware('guest')->group(function () {
-    Route::get('login', [AuthController::class, 'login'])->name('login');
-    Route::post('login', [AuthController::class, 'authenticate']);
+Route::middleware('guest')->controller(AuthController::class)->group(function () {
+    Route::get('login', 'login')->name('login');
+    Route::post('login', 'authenticate');
+    Route::get('register', 'register')->name('register');
+    Route::post('register', 'storeRegister');
 });
 
 Route::middleware('auth')->group(function () {
