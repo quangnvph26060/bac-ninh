@@ -24,6 +24,7 @@ class User extends Authenticatable
         'dob',
         'status',
         'role_id',
+        'google_id',
         'city_id',
         'tax_code',
         'store_name',

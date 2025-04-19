@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -87,6 +88,38 @@ class AuthController extends Controller
             'redirect' => redirect()->intended()->getTargetUrl()
         ]);
     }
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback()
+    {
+        $googleUser = Socialite::driver('google')->user();
+
+        $user = User::where('email', $googleUser->getEmail())->first();
+
+        if (!$user) {
+            $user = User::create([
+                'name' => $googleUser->getName(),
+                'email' => $googleUser->getEmail(),
+                'google_id' => $googleUser->getId(), // thêm dòng này
+                'password' => Hash::make(uniqid()),
+                'role_id' => 2, // ROLE USER
+            ]);
+        } else {
+            // Nếu người dùng đã tồn tại, có thể cập nhật google_id nếu cần
+            if (!$user->google_id) {
+                $user->update(['google_id' => $googleUser->getId()]);
+            }
+        }
+
+        Auth::login($user);
+
+        return redirect()->route('home');
+    }
+
 
     public function logout()
     {

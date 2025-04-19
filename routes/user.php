@@ -14,6 +14,8 @@ Route::middleware('guest')->controller(AuthController::class)->group(function ()
     Route::post('login', 'authenticate');
     Route::get('register', 'register')->name('register');
     Route::post('register', 'storeRegister');
+    Route::get('google', 'redirectToGoogle')->name('google.redirect');
+    Route::get('auth/google/callback', 'handleGoogleCallback')->name('google.callback');
 });
 
 Route::middleware('auth')->group(function () {

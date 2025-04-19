@@ -60,17 +60,19 @@
                     <div class="my-24px text-center">
                         <p class="font-normal text-base">hoặc</p>
                     </div>
-                    <div class="w-100 relative mb-16px h-2\.625rem" id="login_google_wrapper"><button type="button"
-                            class="ant-btn ant-btn-default w-full h-2\.625rem">
+                    <div class="w-100 relative mb-16px h-2\.625rem" id="login_google_wrapper">
+                        <a href="{{ route('google.redirect') }}" class="ant-btn ant-btn-default w-full h-2\.625rem">
                             <div
                                 class="font-medium text-42526E flex items-center gap-4 justify-center w-full text-12px sm-text-14px leading-22px xs-leading-22px">
                                 <div><img src="{{ asset('frontend/assets/img/google-icon-logo.jpg') }}"
                                         alt="Google Icon" class="w-6 h-6 bg-transparent"></div>
                                 <div>Tiếp tục với google</div>
                             </div>
-                        </button></div>
+                        </a>
+                    </div>
                     <div class="flex flex-row items-center justify-center lg-justify-start"><a
-                            class="text-12px xs-text-14px leading-22px font-normal mr-16px " href="{{ route('register') }}">Đăng
+                            class="text-12px xs-text-14px leading-22px font-normal mr-16px "
+                            href="{{ route('register') }}">Đăng
                             ký</a><span
                             class="xs-border-3px border-2px border-nature-80 rounded-full flex items-center justify-center"></span><a
                             class="text-12px xs-text-14px leading-22px font-normal ml-16px "
