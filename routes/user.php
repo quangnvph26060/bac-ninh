@@ -14,6 +14,12 @@ Route::middleware('guest')->controller(AuthController::class)->group(function ()
     Route::post('login', 'authenticate');
     Route::get('register', 'register')->name('register');
     Route::post('register', 'storeRegister');
+
+    Route::get('forgot-password', 'forgotPassword')->name('forgot.password');
+    Route::post('forgot-password', 'sendResetLinkEmail');
+    Route::post('resend-otp', 'resendOtp')->name('resend.otp');
+    Route::post('reset-password', 'resetPassword')->name('reset.password');
+
     Route::get('google', 'redirectToGoogle')->name('google.redirect');
     Route::get('auth/google/callback', 'handleGoogleCallback')->name('google.callback');
 });

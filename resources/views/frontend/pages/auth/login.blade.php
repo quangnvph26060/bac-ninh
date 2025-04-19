@@ -76,7 +76,7 @@
                             ký</a><span
                             class="xs-border-3px border-2px border-nature-80 rounded-full flex items-center justify-center"></span><a
                             class="text-12px xs-text-14px leading-22px font-normal ml-16px "
-                            href="/app/forgot-password">Quên mật khẩu?</a></div>
+                            href="{{ route('forgot.password') }}">Quên mật khẩu?</a></div>
                 </form>
             </div>
         </div>

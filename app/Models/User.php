@@ -34,7 +34,10 @@ class User extends Authenticatable
         'storage_id',
         'wallet',
         'img_url',
-        'remember_token'
+        'remember_token',
+        'otp_code',
+        'otp_expires_at',
+        'last_otp_sent_at'
     ];
 
     protected $hidden = [
@@ -45,6 +48,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'otp_expires_at' => 'datetime',
+        'last_otp_sent_at' => 'datetime',
     ];
 
     protected $appends = ['user_info'];
