@@ -62,10 +62,10 @@
                     </a>
                     <div class="collapse" id="warehouse">
                         <ul class="nav nav-collapse">
-                            <li><a href="{{ route('admin.storage.index') }}"><span class="sub-item">Kho</span></a></li>
-                            <li><a href="{{ route('admin.importproduct.index') }}"><span class="sub-item">Nhập
-                                        hàng</span></a></li>
-                            <li><a href="#"><span class="sub-item">Xuất kho</span></a></li>
+                            <li><a href="{{ route('admin.storage.index') }}"><span class="sub-item">Nguyên vật liệu</span></a></li>
+                            <li><a href="{{ route('admin.importproduct.index') }}"><span class="sub-item">Nhập hàng</span></a></li>
+                            <li><a href="#"><span class="sub-item">Lượng đã xuất kho</span></a></li>
+                            <li><a href="#"><span class="sub-item">Nhà cung cấp</span></a></li>
                             <li><a href="#"><span class="sub-item">Chuyển kho</span></a></li>
                             <li><a href="{{ route('admin.check.index') }}"><span class="sub-item">Phiếu kiểm
                                         kho</span></a></li>
