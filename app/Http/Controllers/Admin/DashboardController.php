@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
 use App\Services\DashboardService;
 use App\Services\OrderService;
 use Exception;
@@ -21,55 +24,28 @@ class DashboardController extends Controller
     }
     public function dashboard()
     {
-        return view('welcome');
+        $total = Order::where('status', 'completed')->sum('total');
+        $order_processing = Order::where('status', 'processing')->orderBy('updated_at', 'desc')->take(6)->get();
+        $order_list =  Order::count();
+        $product_list =  Product::count();
+        $bestSellingProducts = OrderItem::select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(price) as total_price'))
+            ->groupBy('product_id')
+            ->orderByDesc('total_quantity')
+            ->with('product')->take(6)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'product' => $item->product,
+                    'sold_quantity' => $item->total_quantity,
+                    'total_price' => $item->total_price
+                ];
+            });
 
-        // try {
-        //     $title = "Dashboard";
-        //     $topProducts = DB::table('order_details')
-        //     ->select('order_details.product_id', 'products.name', 'products.import_price', 'products.sku', 'products.sale_price', DB::raw('SUM(order_details.quantity) as total_quantity'))
-        //     ->join('products', 'order_details.product_id', '=', 'products.id')
-        //     ->groupBy('order_details.product_id', 'products.name', 'products.import_price', 'products.sku', 'products.sale_price')
-        //     ->orderByDesc('total_quantity')
-        //     ->limit(5)
-        //     ->get();
-        //     $getMonth = $this->orderService->getMonthlyRevenue();
-        //     $getMonthlyRevenue = $getMonth['monthlyRevenue'];
-        //     $totalAnnualRevenue = $getMonth['totalAnnualRevenue'];
-        //     $clientnumber = $this->dashboardService->getClientNumber();
-        //     $ordernumber = $this->dashboardService->getOrderNumber();
-        //     $amount = $this->dashboardService->getAmountNumber();
-        //     $daily = $this->dashboardService->getDailySale();
-        //     $newClient = $this->dashboardService->getNewestClient();
-        //     $newOrder = $this->dashboardService->getNewestOrder();
-        //     $newStaff = $this->dashboardService->getNewestStaff();
-        //     return view('welcome', compact('clientnumber', 'ordernumber', 'amount', 'daily', 'newClient', 'newOrder', 'newStaff', 'getMonthlyRevenue', 'totalAnnualRevenue', 'title', 'topProducts'));
-        // } catch (Exception $e) {
-        //     Log::error('Failed to get statistic this year: ' . $e->getMessage());
-        //     return ApiResponse::error('Failed to get statistic this year', 500);
-        // }
-    }
+        $products = Product::orderBy('updated_at', 'desc')->take(6)->get();
 
-    public function StatisticsByDay()
-    {
-        $daily = $this->dashboardService->getDailySale();
-        return response()->json([
-            'daily' => $daily
-        ]);
-    }
+            // dd($bestSellingProducts);
 
-    public function StatisticsByMonth()
-    {
-        $daily = $this->dashboardService->StatisticsByMonth();
-        return response()->json([
-            'daily' => $daily
-        ]);
-    }
 
-    public function StatisticsByYear()
-    {
-        $daily = $this->dashboardService->StatisticsByYear();
-        return response()->json([
-            'daily' => $daily
-        ]);
+        return view('welcome', compact('total', 'order_processing', 'order_list', 'product_list', 'bestSellingProducts', 'products'));
     }
 }
