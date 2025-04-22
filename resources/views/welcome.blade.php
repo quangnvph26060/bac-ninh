@@ -134,7 +134,7 @@
             </div> --}}
         </div>
 
-        <div class="col-xxl-3 mb-3">
+        <div class=" mb-3">
             <div class="row">
                 <div class="col-xl-6">
                     <div class="card custom-card">
@@ -242,7 +242,7 @@
             </div>
         </div>
 
-        <div class="col-xxl-9">
+        <div class="">
             <div class="card custom-card">
                 <div class="card-header d-flex justify-content-between">
                     <div class="card-title">
