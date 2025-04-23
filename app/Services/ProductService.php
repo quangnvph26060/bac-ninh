@@ -70,8 +70,8 @@ class ProductService  extends BaseService
                 'sku'                       => $variant->sku,
                 'sale_price'                => $variant->sale_price,
                 'discount_price'            => $variant->discount_price,
-                'discount_start'            => optional($variant->discount_start)->format('d-m-Y'),
-                'discount_end'              => optional($variant->discount_end)->format('d-m-Y'),
+                'discount_start'            => optional($variant->discount_start)->format('d-m-Y H:i'),
+                'discount_end'              => optional($variant->discount_end)->format('d-m-Y H:i'),
                 'product_unit'              => $variant->product_unit,
                 'stock_status'              => $variant->stock_status,
                 'status'                    => $variant->status,
@@ -336,8 +336,14 @@ class ProductService  extends BaseService
             $qty += $variantData['stock'] ?? 0;
         }
 
+        $minSalePriceVariant = $this->getMinSalePriceVariant($product);
+
         $product->update([
             'stock' => $qty,
+            'sale_price' => $minSalePriceVariant->sale_price,
+            'discount_price' => $minSalePriceVariant->discount_price,
+            'discount_start' => $minSalePriceVariant->discount_start,
+            'discount_end' => $minSalePriceVariant->discount_end,
         ]);
 
         // Xóa các biến thể không còn
@@ -348,6 +354,21 @@ class ProductService  extends BaseService
         }
     }
 
+    protected function getMinSalePriceVariant($product)
+    {
+        // Lấy tất cả các biến thể của sản phẩm và lọc theo điều kiện stock > 0 và status = 1
+        $variants = $product->variants()->where('status', 1)->get();
+
+        // Kiểm tra nếu không có biến thể hợp lệ
+        if ($variants->isEmpty()) {
+            return null; // Nếu không có biến thể hợp lệ, trả về null
+        }
+
+        // Tìm biến thể có giá sale_price nhỏ nhất
+        $minSalePriceVariant = $variants->sortBy('sale_price')->first();
+
+        return $minSalePriceVariant;
+    }
 
     public function productAttributes($product, $payload)
     {
@@ -376,45 +397,5 @@ class ProductService  extends BaseService
 
         // Đồng bộ: sẽ tự động xóa các attribute_id không còn trong $syncData, cập nhật cái có và thêm cái mới
         $product->attributes()->sync($syncData);
-    }
-
-
-    public function productByNameInStorageStaff($name, $storage_id)
-    {
-        try {
-            $products = $this->productStorage
-                ->whereHas('product', function ($query) use ($name) {
-                    $query->where('name', 'LIKE', '%' . $name . '%');
-                })
-                ->where('storage_id', $storage_id)
-                ->with('product') // Ensure eager loading of related products
-                ->get()
-                ->pluck('product'); // Pluck only the product details
-
-            return $products;
-        } catch (Exception $e) {
-            Log::error('Failed to find products in storage: ' . $e->getMessage());
-            throw new Exception('Failed to find products in storage');
-        }
-    }
-
-    public function productFilter($name, $company_id)
-    {
-        try {
-            $query = $this->product->query();
-            if ($company_id) {
-                $query->whereHas('company', function ($q) use ($company_id) {
-                    $q->where('company_id', $company_id);
-                });
-            }
-            if ($name) {
-                $query->where('name', 'LIKE', "%{$name}%");
-            }
-            $products = $query->orderByDesc('created_at')->paginate(10);
-            return $products;
-        } catch (Exception $e) {
-            Log::error("Failed to find products");
-            throw new Exception("Failed to find products");
-        }
     }
 }

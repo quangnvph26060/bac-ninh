@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Collection;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use Carbon\Carbon;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -48,35 +49,49 @@ class ProductController extends Controller
                         // Truy xuất giá trị thuộc tính từ collection đã eager load
                         $value = $attributeValues->get($valueId);
                         if ($value) {
-                            $attributeMap[$attrName][$valueId] = $value->value;
+                            $attributeMap[$attrName][$valueId] = [
+                                'value' => $value->value,
+                                'count' => 0 // Khởi tạo số lượng sản phẩm có giá trị thuộc tính này
+                            ];
                         }
                     }
+
+                    // Cộng dồn số lượng sản phẩm có giá trị thuộc tính này
+                    $attributeMap[$attrName][$valueId]['count']++;
                 }
             }
         }
 
         return $attributeMap;
     }
-
     protected function getProductList($categoryIds, $request, &$attributes = [])
     {
         $perPage = $request->input('per_page', 10);
 
-        $query = Product::whereIn('category_id', $categoryIds)
+        $query = Product::query()
             ->with(['variants', 'attributes', 'category'])
             ->active();
+
+        if (!empty($categoryIds)) {
+            $query->whereIn('category_id', $categoryIds);
+        }
 
         $this->applySearch($query, $request);
         $this->applySorting($query, $request);
         $this->applyAttributeFilters($query, $request);
+        $this->applyPriceRangeFilter($query, $request);
 
+        // Lấy tất cả sản phẩm để dùng cho lọc thuộc tính (filter UI)
         $attributes = $this->getProductAttributesForFilter($query->get());
 
-        Log::info('SQL Query: ' . $query->toRawSql());
+        $products = $query->paginate($perPage)->appends(request()->query());
 
-        return $query->paginate($perPage)->appends(request()->query());
+        // Trả về cả sản phẩm và tổng số
+        return [
+            'products' => $products,
+            'total' => $products->total(),
+        ];
     }
-
     protected function applySearch(&$query, Request $request)
     {
         if ($request->filled('search')) {
@@ -84,23 +99,38 @@ class ProductController extends Controller
             $query->where('name', 'like', '%' . $keyword . '%');
         }
     }
-
     protected function applySorting(&$query, Request $request)
     {
         $sort = $request->input('sort');
+        $now = now()->toDateTimeString();
+        $rawPrice = "
+            IF(
+                discount_price > 0 AND
+                (
+                    (discount_start IS NULL AND discount_end IS NULL)
+                    OR
+                    (discount_start IS NOT NULL AND discount_end IS NOT NULL AND discount_start <= '$now' AND discount_end >= '$now')
+                    OR
+                    (discount_start IS NOT NULL AND discount_end IS NULL AND discount_start <= '$now')
+                    OR
+                    (discount_start IS NULL AND discount_end IS NOT NULL AND discount_end >= '$now')
+                ),
+                discount_price,
+                sale_price
+            )
+        ";
 
         switch ($sort) {
             case 'price_high':
-                $query->orderBy('sale_price', 'desc');
+                $query->orderByRaw("$rawPrice DESC");
                 break;
             case 'price_low':
-                $query->orderBy('sale_price', 'asc');
+                $query->orderByRaw("$rawPrice ASC");
                 break;
             default:
                 $query->orderBy('created_at', 'desc');
         }
     }
-
     protected function applyAttributeFilters(&$query, Request $request)
     {
         if ($request->filled('av')) {
@@ -118,7 +148,37 @@ class ProductController extends Controller
             });
         }
     }
+    protected function applyPriceRangeFilter(&$query, Request $request)
+    {
+        $now = now()->toDateTimeString();
+        $minPrice = $request->input('min_price');
+        $maxPrice = $request->input('max_price');
 
+        $rawPrice = "
+        IF(
+            discount_price > 0 AND
+            (
+                (discount_start IS NULL AND discount_end IS NULL)
+                OR
+                (discount_start IS NOT NULL AND discount_end IS NOT NULL AND discount_start <= '$now' AND discount_end >= '$now')
+                OR
+                (discount_start IS NOT NULL AND discount_end IS NULL AND discount_start <= '$now')
+                OR
+                (discount_start IS NULL AND discount_end IS NOT NULL AND discount_end >= '$now')
+            ),
+            discount_price,
+            sale_price
+        )
+    ";
+
+        if (!empty($minPrice)) {
+            $query->whereRaw("$rawPrice >= ?", [$minPrice]);
+        }
+
+        if (!empty($maxPrice)) {
+            $query->whereRaw("$rawPrice <= ?", [$maxPrice]);
+        }
+    }
     protected function getCategoryBreadcrumb(Category $category): array
     {
         $items = [
@@ -141,13 +201,16 @@ class ProductController extends Controller
 
         return $items;
     }
-
     protected function renderProductListView($categories, $products, $pageName, $items, $attributes)
     {
+        $total = $products['total'];
+        $products = $products['products'];
+
         if (request()->ajax()) {
             return response()->json([
                 'html' => view('frontend.pages.products._product-list', compact('products'))->render(),
-                'pagination' =>  $products->links('vendor.pagination.custom')->render()
+                'pagination' =>  $products->links('vendor.pagination.custom')->render(),
+                'total' => $total,
             ]);
         }
 
@@ -156,10 +219,37 @@ class ProductController extends Controller
             'products',
             'pageName',
             'items',
-            'attributes'
+            'attributes',
+            'total'
         ));
     }
 
+    public function category(Request $request, $parent, $children = null)
+    {
+        $attributes = [];
+        $total = 0;
+        $slug = $children ?? $parent;
+
+        $category = Category::where('slug', $slug)->firstOrFail();
+
+        // ✅ Tối ưu: Lấy toàn bộ categories và group theo parent_id
+        $allCategories = Category::all()->groupBy('parent_id');
+
+        // ✅ Lấy danh sách ID của category và các con cháu của nó
+        $categoryIds = $this->getAllCategoryIdsRecursive($category, $allCategories);
+
+        // ✅ Lấy danh sách con trực tiếp của category hiện tại (dùng để hiển thị danh mục con)
+        $categories = $allCategories[$category->id] ?? collect();
+
+        // ✅ Lấy sản phẩm
+        $products = $this->getProductList($categoryIds, $request, $attributes);
+
+        $pageName = $category->name;
+
+        $items = $this->getCategoryBreadcrumb($category);
+
+        return $this->renderProductListView($categories, $products, $pageName, $items, $attributes, $total);
+    }
 
     public function collection(Request $request, $slug)
     {
@@ -184,50 +274,17 @@ class ProductController extends Controller
         return $this->renderProductListView($categories, $products, $pageName, $items, $attributes);
     }
 
-    public function category(Request $request, $parent, $children = null)
-    {
-        $attributes = [];
-        $slug = $children ?? $parent;
-
-        $category = Category::where('slug', $slug)->firstOrFail();
-
-        // ✅ Tối ưu: Lấy toàn bộ categories và group theo parent_id
-        $allCategories = Category::all()->groupBy('parent_id');
-
-        // ✅ Lấy danh sách ID của category và các con cháu của nó
-        $categoryIds = $this->getAllCategoryIdsRecursive($category, $allCategories);
-
-        // ✅ Lấy danh sách con trực tiếp của category hiện tại (dùng để hiển thị danh mục con)
-        $categories = $allCategories[$category->id] ?? collect();
-
-        // ✅ Lấy sản phẩm
-        $products = $this->getProductList($categoryIds, $request, $attributes);
-
-        $pageName = $category->name;
-        $items = $this->getCategoryBreadcrumb($category);
-
-        return $this->renderProductListView($categories, $products, $pageName, $items, $attributes);
-    }
-
-
     public function all(Request $request)
     {
         $attributes = [];
         $categories = Category::query()->whereNull('parent_id')->get();
-        $query = Product::query()->active();
         $pageName = 'All Products';
 
         $items = [
             ['label' => 'Catalog'],
         ];
 
-        $this->applySearch($query, $request);
-
-        $attributes = $this->getProductAttributesForFilter($query->get());
-
-        $perPage = $request->input('per_page', 10);
-
-        $products = $query->paginate($perPage);
+        $products = $this->getProductList([], $request, $attributes);
 
         return $this->renderProductListView($categories, $products, $pageName, $items, $attributes);
     }

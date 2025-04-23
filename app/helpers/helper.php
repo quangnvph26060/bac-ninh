@@ -172,8 +172,10 @@ if (!class_exists('sessionFlash')) {
 if (!class_exists('formatNumber')) {
     function formatNumber($number)
     {
-        if (!$number) return 0;
-        return number_format($number, 0, ',', '.');
+        if (!empty($number)) {
+            return  number_format((float)$number, 2, '.', ',');
+        }
+        return 0.00;
     }
 }
 
@@ -227,8 +229,16 @@ function finalPrice($discountPrice)
     return formatPrice($discountPrice);
 }
 
+// function formatPrice($price)
+// {
+//     if (!empty($price)) return '$' . number_format($price, 0, ',', '');
+//     return 0;
+// }
+
 function formatPrice($price)
 {
-    if (!empty($price)) return number_format($price, 0, ',', '') . '$';
-    return 0;
+    if (!empty($price)) {
+        return  number_format((float)$price, 2, '.', ',');
+    }
+    return 0.00;
 }
