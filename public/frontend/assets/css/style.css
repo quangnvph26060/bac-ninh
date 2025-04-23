@@ -45,6 +45,10 @@ header {
     will-change: transform; /* gợi ý trình duyệt tối ưu hiệu ứng */
 }
 
+.form-select {
+    border-radius: 3px;
+}
+
 .navbar {
     padding: 10px 0;
 }
@@ -400,8 +404,10 @@ header {
 }
 
 .homepage_benifit {
+    width: 100%;
     top: 68%;
-    left: 17.5%;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .homepage_benifit .pw_home_benifit {
@@ -809,6 +815,7 @@ header {
 }
 
 .box_product_item {
+    /* border-radius: 7px; */
     display: flex;
     flex-direction: column;
     height: 100%; /* Cần để nội dung con chiếm toàn bộ chiều cao */
@@ -1217,6 +1224,36 @@ header {
     object-fit: cover;
     width: 40px;
 }
+
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #ccc;
+    border-top-color: #ff4d4f;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
 /* Ẩn chữ Login và hiển thị icon trên mobile */
 @media (max-width: 992px) {
     .navbar-toggler {
@@ -1290,6 +1327,7 @@ header {
     .homepage_benifit {
         position: static !important;
         margin-bottom: 10px;
+        transform: translateX(0%);
     }
 
     .banner_discount_container {
@@ -1380,7 +1418,8 @@ header {
 
 @media screen and (min-width: 768px) {
     .list_prd_catalogs .mockup_prd_wrapper {
-        width: 218px;
+        /* width: 218px; */
+        width: 100%;
         max-height: 100%;
     }
     .pw_help_you_wrapper .pw_help_you_content {

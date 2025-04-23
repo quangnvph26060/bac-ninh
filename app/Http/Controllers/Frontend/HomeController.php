@@ -16,7 +16,7 @@ class HomeController extends Controller
     {
         // Category::fixTree();
 
-        $products = Product::query()->select('id', 'name', 'sale_price', 'type', 'image', 'slug', 'discount_price', 'discount_start', 'discount_end', 'stock_status')->with('variants')->home()->active()->get();
+        $products = Product::query()->select('id', 'name', 'slug', 'sale_price', 'type', 'image', 'slug', 'discount_price', 'discount_start', 'discount_end', 'stock_status', 'category_id')->with('variants', 'category')->home()->active()->get();
 
         return view('frontend.pages.home', compact('products'));
     }

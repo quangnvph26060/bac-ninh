@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     overlay.addEventListener("click", () => {
-        filterPopup.classList.remove("show");
+        filterPopup?.classList.remove("show");
         overlay.classList.remove("active");
     });
 

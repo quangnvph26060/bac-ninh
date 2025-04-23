@@ -48,6 +48,10 @@ Route::controller(CartController::class)->name('carts.')->group(function () {
 });
 
 Route::controller(ProductController::class)->name('products.')->group(function () {
+    Route::get('all-product', 'all')->name('all');
+    Route::get('collection/{slug}', 'collection')->name('collection');
+    Route::get('product-category/{parent}/{children?}', 'category')->name('category');
+
     Route::post('select-attribute', 'selectAttribute')->name('select.attribute');
     Route::post('find-variant', 'findVariant')->name('find-variant');
     Route::get('{prefix}/{suffix?}', 'list')->name('list');

@@ -2,7 +2,7 @@
     <div class="container-fluid">
         <!-- Navbar toggler (Đưa sang trái) -->
         <button class="navbar-toggler" type="button" id="openMenu">
-            <span class="navbar-toggler-icon"></span>
+            <i class="bi bi-list text-white fs-3"></i>
         </button>
 
         <!-- Logo (Giữa màn hình mobile) -->
@@ -17,7 +17,8 @@
                     <a class="nav-link active" href="{{ url('/') }}">Home</a>
                 </li>
                 <li class="nav-item" id="catalogDropdown">
-                    <a class="nav-link" href="#">Catalog <i class="bi bi-chevron-down arrow-icon"></i></a>
+                    <a class="nav-link" href="{{ route('products.all') }}">Catalog <i
+                            class="bi bi-chevron-down arrow-icon"></i></a>
 
                     <ul class="dropdown-menu full-screen-dropdown">
                         <div class="dropdown-grid px-5">
@@ -25,7 +26,7 @@
                             <div class="category-column">
                                 @foreach ($collections as $collection)
                                     <a class="dropdown-item fw-bold"
-                                        href="{{ route('products.list', $collection->slug) }}">{{ $collection->name }}</a>
+                                        href="{{ route('products.collection', $collection->slug) }}">{{ $collection->name }}</a>
                                 @endforeach
                             </div>
 
@@ -35,11 +36,11 @@
                                 @foreach ($categories as $category)
                                     <div class="subcategory-column">
                                         <a class="fw-bold"
-                                            href="{{ route('products.list', $category->slug) }}">{{ $category->name }}</a>
+                                            href="{{ route('products.category', $category->slug) }}">{{ $category->name }}</a>
                                         @if ($category->children->isNotEmpty())
                                             @foreach ($category->children as $child)
                                                 <a class="dropdown-item"
-                                                    href="{{ route('products.list', [$category->slug, $child->slug]) }}">{{ $child->name }}</a>
+                                                    href="{{ route('products.category', [$category->slug, $child->slug]) }}">{{ $child->name }}</a>
                                             @endforeach
                                         @endif
                                     </div>

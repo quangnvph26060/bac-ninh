@@ -18,11 +18,6 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductService  extends BaseService
 {
-    // public function __construct(Product $product, ProductStorage $productStorage)
-    // {
-    //     $this->product = $product;
-    //     $this->productStorage = $productStorage;
-    // }
 
     public function __construct(Product $product, public AttributeValue $attributeValue)
     {
@@ -141,28 +136,6 @@ class ProductService  extends BaseService
         });
     }
 
-    public function getProductAll_Staff(): \Illuminate\Database\Eloquent\Collection
-    {
-        try {
-            Log::info('Fetching all products');
-            $product = $this->product->orderBy('created_at', 'desc')->get();
-            // dd($product[0]->images[0]->image_path);
-            return $product;
-        } catch (Exception $e) {
-            Log::error('Failed to fetch products: ' . $e->getMessage());
-            throw new Exception('Failed to fetch products');
-        }
-    }
-
-    public function getPRoductInStorage_Staff($id)
-    {
-        try {
-            return $this->productStorage->orderByDesc('created_at')->where('storage_id', $id)->get();
-        } catch (Exception $e) {
-            Log::error('Failed to fetch product in storage: ' . $e->getMessage());
-            throw new Exception('Failed to fetch product in storage');
-        }
-    }
 
     public function store(array $payload)
     {
@@ -322,6 +295,7 @@ class ProductService  extends BaseService
     {
         $newVariants = collect($payload['variants']);
         $newKeys = $newVariants->keys()->toArray();
+        $qty = 0;
 
         // Lấy các biến thể hiện tại
         $existingVariants = $product->variants()->get()->keyBy('attribute_value_combine');
@@ -330,7 +304,7 @@ class ProductService  extends BaseService
         $newVariantIds = [];
 
         foreach ($newVariants as $key => $variantData) {
-            $valueIds = explode('-', $key); // Lấy ra mảng attribute_value_id
+            $valueIds = explode('-', string: $key); // Lấy ra mảng attribute_value_id
             sort($valueIds); // Sort để đồng bộ so sánh
 
             $combineKey = implode('-', $valueIds);
@@ -358,7 +332,13 @@ class ProductService  extends BaseService
             // Sync các giá trị attribute_value cho variant
             $variant->attributeValues()->sync($valueIds);
             $newVariantIds[] = $variant->id;
+
+            $qty += $variantData['stock'] ?? 0;
         }
+
+        $product->update([
+            'stock' => $qty,
+        ]);
 
         // Xóa các biến thể không còn
         $variantsToDelete = $product->variants()->whereNotIn('id', $newVariantIds)->get();
