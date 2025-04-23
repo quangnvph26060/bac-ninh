@@ -44,8 +44,8 @@ class Product extends Model
         'cross_sell' => 'array',
         'is_featured' => 'boolean',
         'is_show_home' => 'boolean',
-        'discount_start' => 'date',
-        'discount_end'  => 'date',
+        'discount_start' => 'datetime',
+        'discount_end'  => 'datetime',
     ];
 
     public function scopeActive($query)

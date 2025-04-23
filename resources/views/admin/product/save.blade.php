@@ -114,9 +114,9 @@
                                     <div class="row mt-3">
                                         <div class="mb-3 position-relative col-md-3">
                                             <label for="sale_price" class="form-label required">Giá bán</label>
-                                            <input type="text" placeholder="Giá bán" class="form-control money-input"
+                                            <input type="text" placeholder="Giá bán" class="form-control format-price"
                                                 name="sale_price" id="sale_price"
-                                                value="{{ $product ? formatNumber(optional($product)->sale_price) : '' }}">
+                                                value="{{ $product ? optional($product)->sale_price : '' }}">
                                         </div>
                                         <div class="mb-3 position-relative col-md-3">
                                             <label for="stock" class="form-label">Tồn kho</label>
@@ -140,10 +140,9 @@
                                                 </span>
                                             </label>
 
-                                            <input type="text" placeholder="Giá ưu đãi"
-                                                class="form-control money-input" name="discount_price"
-                                                id="discount_price"
-                                                value="{{ $product ? formatNumber(optional($product)->discount_price) : '' }}">
+                                            <input type="text" placeholder="Giá ưu đãi" class="form-control format-price"
+                                                name="discount_price" id="discount_price"
+                                                value="{{ $product ? optional($product)->discount_price : '' }}">
                                         </div>
                                         <div class="col-md-6 scheduled-time" style="display: none;">
                                             <div class="mb-3 position-relative">
@@ -151,7 +150,7 @@
                                                     Từ ngày
                                                 </label>
                                                 <input class="form-control form-date-time" type="text"
-                                                    name="discount_start" id="discount_start" placeholder="d-m-Y"
+                                                    name="discount_start" id="discount_start" placeholder="d-m-Y H:i"
                                                     value="{{ $product && $product->discount_start ? $product->discount_start->format('d-m-Y') : '' }}">
                                             </div>
                                         </div>
@@ -161,7 +160,7 @@
                                                     Đến ngày
                                                 </label>
                                                 <input class="form-control form-date-time" type="text"
-                                                    name="discount_end" id="discount_end" placeholder="d-m-Y"
+                                                    name="discount_end" id="discount_end" placeholder="d-m-Y H:i"
                                                     value="{{ $product && $product->discount_end ? $product->discount_end->format('d-m-Y') : '' }}">
                                             </div>
                                         </div>
@@ -284,7 +283,7 @@
                                                                 <label
                                                                     for="variants-{{ $variantItem['attribute_value_ids'] }}-sale-price"
                                                                     class="form-label required">Giá</label>
-                                                                <input type="text" class="form-control money-input"
+                                                                <input type="text" class="form-control format-price"
                                                                     id="variants-{{ $variantItem['attribute_value_ids'] }}-sale-price"
                                                                     name="variants[{{ $variantItem['attribute_value_ids'] }}][sale_price]"
                                                                     aria-required="true" required="required"
@@ -314,7 +313,7 @@
                                                                     </span>
                                                                 </label>
 
-                                                                <input type="text" class="form-control money-input"
+                                                                <input type="text" class="form-control format-price"
                                                                     name="variants[{{ $variantItem['attribute_value_ids'] }}][discount_price]"
                                                                     id="variants-{{ $variantItem['attribute_value_ids'] }}-discount-price"
                                                                     value="{{ formatNumber($variantItem['discount_price']) }}">
@@ -657,9 +656,6 @@
     <script src="{{ asset('backend/assets/js/plugin/tagify/tagify.js') }}"></script>
     <script src="{{ asset('backend/assets/js/plugin/flatpickr/flatpickr.min.js') }}"></script>
     <script>
-
-
-
         let ids = [];
 
         let debounceTimer;
@@ -1163,8 +1159,6 @@
                         return;
                     }
 
-
-
                     let newHtml = `
                     <div class="accordion-item" data-variant-id="${variant.id}">
                         <h2 class="accordion-header">
@@ -1183,7 +1177,7 @@
                                     </div>
                                     <div class="mb-3 position-relative col-md-3">
                                         <label for="variants-${index}-sale-price" class="form-label required">Giá</label>
-                                        <input type="text" class="form-control money-input" id="variants-${index}-sale-price" name="variants[${variant.id}][sale_price]"
+                                        <input type="text" class="form-control format-price" id="variants-${index}-sale-price" name="variants[${variant.id}][sale_price]"
                                             aria-required="true" required="required">
                                     </div>
                                             <div class="mb-3 position-relative col-md-3">
@@ -1201,7 +1195,7 @@
                                                     </span>
                                                 </label>
 
-                                                <input type="text" class="form-control money-input"
+                                                <input type="text" class="form-control format-price"
                                                     name="variants[${variant.id}][discount_price]" id="variants-${index}-discount-price">
                                             </div>
                                             <div class="col-md-6 variant-scheduled-time" style="display: none;">
@@ -1254,11 +1248,11 @@
 
                 });
 
-                $(".money-input").on("input", function() {
-                    let input = $(this).val().replace(/\D/g, ""); // Bỏ tất cả ký tự không phải số
-                    let formatted = input.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                    $(this).val(formatted);
-                });
+                // $(".money-input").on("input", function() {
+                //     let input = $(this).val().replace(/\D/g, ""); // Bỏ tất cả ký tự không phải số
+                //     let formatted = input.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                //     $(this).val(formatted);
+                // });
 
             });
 
@@ -1274,8 +1268,10 @@
                 parent.find('.variant-turn-off-schedule').show(); // Hiển thị nút "Hủy"
 
                 parent.find('.form-date-time').flatpickr({
-                    enableTime: false,
-                    dateFormat: "d-m-Y",
+                    enableTime: true,
+                    dateFormat: "d-m-Y H:i",
+                    altInput: true,
+                    altFormat: "d-m-Y H:i",
                     locale: "vn"
                 });
             });
@@ -1322,9 +1318,11 @@
             })
 
             flatpickr(".form-date-time", {
-                enableTime: false, // Ẩn giờ
-                dateFormat: "d-m-Y", // Định dạng YYYY-MM-DD
-                locale: "vn" // Dùng tiếng Việt
+                enableTime: true,
+                dateFormat: "d-m-Y H:i",
+                altInput: true,
+                altFormat: "d-m-Y H:i",
+                locale: "vn"
             });
 
         });

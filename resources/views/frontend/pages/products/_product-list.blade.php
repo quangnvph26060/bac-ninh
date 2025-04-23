@@ -9,24 +9,22 @@
                 <h3 class="name_prd">{{ $product->name }}</h3>
 
                 <p class="price-product pb-0">
-                    @php
+                    {{-- @php
                         $record = $product->variants->isNotEmpty() ? $product->variants->first() : $product;
-                    @endphp
+                    @endphp --}}
 
-                    @if (isOnSale($record))
-                        <span
-                            class="text_color text-sm mb-2">{{ finalPrice($record->sale_price, $record->discount_price) }}</span>
+                    @if (isOnSale($product))
+                        <span class="text_color text-sm mb-2">Start from {{ finalPrice($product->discount_price) }}</span>
 
                         <small class="text-muted"> <del
-                                class="ms-2">{{ formatPrice($record->sale_price) }}</del></small>
+                                class="ms-2">{{ formatPrice($product->sale_price) }}</del></small>
                     @else
-                        <span class="text_color text-sm mb-2">{{ formatPrice($record->sale_price) }}</span>
+                        <span class="text_color text-sm mb-2">{{ formatPrice($product->sale_price) }}</span>
                     @endif
                 </p>
 
                 @if ($product->attributes->isNotEmpty())
-
-                    <div class="d-flex flex-wrap gap-2 align-items-start ">
+                    <div class="d-flex flex-wrap gap-2 align-items-start">
 
                         @foreach ($product->attributes as $attribute)
                             @php

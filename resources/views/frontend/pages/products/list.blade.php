@@ -62,41 +62,59 @@
         </div>
 
         <div class="list-products d-flex mb-4 pt-3">
-            <div id="filter-form">
+            <div id="filter-form" style="margin-top: 55px">
                 <form action="">
                     @foreach ($attributes as $attributeName => $attributeValue)
                         <div class="mt-2 mb-4">
                             <div class="d-md-flex flex-column position-relative" style="min-width: 235px">
                                 <h4 class="fw-bold text-base">{{ $attributeName }}</h4>
                                 <div class="pb-4">
-                                    <ul class="list-unstyled">
+                                    <ul class="list-unstyled pe-3">
                                         @foreach ($attributeValue as $id => $value)
-                                            <li class="form-check">
-                                                <input class="form-check-input" name="av[]" type="checkbox"
-                                                    value="{{ $id }}" id="{{ "$value-$id" }}" />
-                                                <label class="form-check-label"
-                                                    for="{{ "$value-$id" }}">{{ $value }}</label>
+                                            <li class="form-check d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <input class="form-check-input" name="av[]" type="checkbox"
+                                                        value="{{ $id }}"
+                                                        id="{{ $value['value'] . '-' . $id }}" />
+                                                    <label class="form-check-label ms-1"
+                                                        for="{{ $value['value'] . '-' . $id }}">{{ $value['value'] }}</label>
+                                                </div>
+                                                <small>({{ $value['count'] }})</small>
                                             </li>
                                         @endforeach
-
                                     </ul>
                                 </div>
                             </div>
                         </div>
                     @endforeach
+
+                    <div class="mt-2 mb-4">
+                        <div class="d-md-flex flex-column position-relative">
+                            <h4 class="fw-bold text-base mb-5">Chọn khoảng giá</h4>
+
+                            <div class="pe-3 pb-4">
+                                <div id="slider"></div>
+                                <div class="d-flex mt-3 info-range gap-1 justify-content-between">
+                                    <input type="number" class="" id="min-price" value="0" />
+                                    <input type="number" id="max-price" value="1000" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </form>
+
             </div>
 
             <div class="w-100">
                 <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
                     <p class="mb-0 text-sm" style="color: #97a0af">
-                        Tổng {{ $products->total() }} sản phẩm
+                        Tổng <span class="product-total">{{ $total }}</span> sản phẩm
                     </p>
                     <select id="sortSelect" class="form-select w-25">
                         <option value="all">Tất cả</option>
                         <option value="latest">Mới nhất</option>
-                        <option value="price_high">Giá cao</option>
-                        <option value="price_low">Giá thấp</option>
+                        <option value="price_high">Giá cao đến thấp</option>
+                        <option value="price_low">Giá thấp đến cao</option>
                     </select>
                 </div>
 
@@ -126,8 +144,77 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.0/nouislider.min.js"></script>
     <script>
         $(function() {
+            var slider = document.getElementById("slider");
+            var priceRange = document.getElementById("price-range");
+            var minPriceInput = document.getElementById("min-price");
+            var maxPriceInput = document.getElementById("max-price");
+
+            noUiSlider.create(slider, {
+                start: [0, 5000], // Giá trị mặc định
+                connect: true, // Kết nối giữa hai thanh trượt
+                range: {
+                    min: 0,
+                    max: 5000,
+                },
+                step: 10, // Bước nhảy
+                tooltips: [true, true], // Hiển thị tooltip trên thanh trượt
+                format: {
+                    to: function(value) {
+                        return Math.round(value); // Làm tròn giá trị
+                    },
+                    from: function(value) {
+                        return Number(value);
+                    },
+                },
+            });
+
+            // Cập nhật giá trị hiển thị và ô input khi kéo thanh trượt
+            slider.noUiSlider.on("update", function(values, handle) {
+                minPriceInput.value = values[0];
+                maxPriceInput.value = values[1];
+            });
+
+            let previousValue = null; // Lưu giá trị trước của thanh trượt
+
+            slider.noUiSlider.on('change', function() {
+                let currentValue = slider.noUiSlider.get(); // Lấy giá trị hiện tại của thanh trượt
+
+                // Giả sử currentValue là mảng với 2 phần tử (min và max)
+                let currentMinValue = currentValue[0];
+                let currentMaxValue = currentValue[1];
+
+                // So sánh với giá trị trước
+                if (previousValue === null || currentMinValue !== previousValue[0] || currentMaxValue !==
+                    previousValue[1]) {
+                    fetchProducts(1); // Gọi API nếu giá trị thay đổi
+                    previousValue = [currentMinValue, currentMaxValue]; // Cập nhật giá trị trước
+                }
+            });
+
+            // Cập nhật thanh trượt khi người dùng nhập giá trị vào ô input
+            minPriceInput.addEventListener("change", function() {
+                var minValue = Number(minPriceInput.value);
+                var maxValue = Number(maxPriceInput.value);
+                if (minValue >= 0 && minValue < maxValue && minValue <= 1000) {
+                    slider.noUiSlider.set([minValue, null]);
+                } else {
+                    minPriceInput.value = slider.noUiSlider.get()[0]; // Reset nếu giá trị không hợp lệ
+                }
+            });
+
+            maxPriceInput.addEventListener("change", function() {
+                var minValue = Number(minPriceInput.value);
+                var maxValue = Number(maxPriceInput.value);
+                if (maxValue <= 1000 && maxValue > minValue && maxValue >= 0) {
+                    slider.noUiSlider.set([null, maxValue]);
+                } else {
+                    maxPriceInput.value = slider.noUiSlider.get()[1]; // Reset nếu giá trị không hợp lệ
+                }
+            });
+
             let debounceTimer;
 
             function fetchProducts(page = 1) {
@@ -144,6 +231,9 @@
                     params.append('av[]', this.value);
                 });
 
+                params.append('min_price', $('#min-price').val());
+                params.append('max_price', $('#max-price').val());
+
                 $.ajax({
                     url: window.location.pathname + '?' + params.toString(),
                     method: 'GET',
@@ -151,7 +241,7 @@
                         $('#loadingSpinner').fadeIn();
                     },
                     success: function(response) {
-
+                        $('.product-total').text(' ' + response.total + ' ');
                         $('.list_prd_catalogs').html(response.html);
                         $('.pagination').html(response.pagination);
                     },
@@ -181,9 +271,58 @@
                 fetchProducts();
             });
 
+            $('#min-price, #max-price').on('change', function() {
+                fetchProducts(); // Load lại từ trang 1 khi thay đổi giá
+            });
+
         })
     </script>
 @endpush
 
 @push('styles')
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.0/nouislider.min.css" rel="stylesheet" />
+
+    <style>
+        .noUi-connect {
+            background: #007bff;
+        }
+
+        .noUi-handle {
+            background: #007bff;
+            border: 2px solid #fff;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-range input {
+            padding: 0 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 50%;
+        }
+
+        #slider {
+            width: calc(100% - 30px);
+            /* Giảm chiều rộng của thanh trượt một chút */
+            margin: 0 auto;
+            /* Căn giữa thanh trượt */
+        }
+
+        .info-range input {
+            width: 45%;
+            /* Đảm bảo các ô input không quá rộng */
+            padding: 5px;
+        }
+
+        .d-md-flex {
+            max-width: 100%;
+            /* Đảm bảo các phần tử không vượt quá chiều rộng của container */
+        }
+
+        .noUi-touch-area {
+            margin-left: 10px;
+            /* Điều chỉnh khoảng cách ở bên trái */
+            margin-right: 10px;
+            /* Điều chỉnh khoảng cách ở bên phải */
+        }
+    </style>
 @endpush

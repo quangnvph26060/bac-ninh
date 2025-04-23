@@ -169,8 +169,8 @@ function submitForm(formId, successCallback) {
             }
         });
 
-        $(".money-input").each(function () {
-            let raw = $(this).val().replace(/\./g, "");
+        $(".format-price").each(function () {
+            let raw = $(this).val().replace(/,/g, "");
             $(this).val(raw);
         });
 
