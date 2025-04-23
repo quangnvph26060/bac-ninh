@@ -50,8 +50,8 @@
                                     </div>
 
                                     <div class="mb-3 position-relative col-md-12">
-                                        <label for="description" class="form-label">Mô tả</label>
-                                        <textarea rows="3" name="description" class="form-control ckeditor" id="description" placeholder="Mô tả ngắn">{!! optional($product)->description !!}</textarea>
+                                        <label for="description" class="form-label">Mô tả ngắn</label>
+                                        <textarea rows="3" name="description" class="form-control" id="description" placeholder="Mô tả ngắn">{!! optional($product)->description !!}</textarea>
                                     </div>
 
                                     <div class="mb-3 position-relative col-md-12">
@@ -657,6 +657,9 @@
     <script src="{{ asset('backend/assets/js/plugin/tagify/tagify.js') }}"></script>
     <script src="{{ asset('backend/assets/js/plugin/flatpickr/flatpickr.min.js') }}"></script>
     <script>
+
+
+
         let ids = [];
 
         let debounceTimer;
@@ -829,6 +832,10 @@
                 maxLength: 250
             },
             {
+                id: 'description',
+                maxLength: 160
+            },
+            {
                 id: 'seo_description',
                 maxLength: 400
             },
@@ -845,6 +852,8 @@
         $.each(inputIds, function(index, value) {
             updateCharCount(`#${value.id}`, value.maxLength);
         });
+
+        autoGenerateSlug('#name', '#slug')
 
         let on = $('.turn-on-schedule')
         let off = $('.turn-off-schedule')

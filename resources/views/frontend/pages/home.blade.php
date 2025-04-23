@@ -63,29 +63,33 @@
                         <div class="swiper-wrapper">
 
                             @foreach ($products as $product)
-                                <div class="swiper-slide">
-                                    <img src="{{ showImage($product->image) }}" alt="{{ $product->name }}" />
-                                    <div class="px-4 d-flex flex-column gap-2 text-center bg-white">
-                                        <span class="text-dark fw-bold text-truncate fs-6">{{ $product->name }}</span>
-                                        <p class="price-product">
+                            <div class="swiper-slide">
+                                        <a href="{{ route('products.list', [$product->category->slug, $product->slug]) }}">
+                                        <img src="{{ showImage($product->image) }}" alt="{{ $product->name }}" />
+                                        <div class="px-4 d-flex flex-column gap-2 text-center bg-white">
+                                            <span class="text-dark fw-bold text-truncate fs-6">{{ $product->name }}</span>
+                                            <p class="price-product">
 
-                                            @php
-                                                $record = $product->variants->isNotEmpty()
-                                                    ? $product->variants->first()
-                                                    : $product;
-                                            @endphp
+                                                @php
+                                                    $record = $product->variants->isNotEmpty()
+                                                        ? $product->variants->first()
+                                                        : $product;
+                                                @endphp
 
-                                            @if (isOnSale($record))
-                                                <span
-                                                    class="text-danger fs-6">{{ finalPrice($record->discount_price) }}</span>
-                                                <del class="ms-2 text-muted">{{ formatPrice($record->sale_price) }}</del>
-                                            @else
-                                                <span class="text-danger fs-6">{{ formatPrice($record->sale_price) }}</span>
-                                            @endif
+                                                @if (isOnSale($record))
+                                                    <span
+                                                        class="text-danger fs-6">{{ finalPrice($record->discount_price) }}</span>
+                                                    <del
+                                                        class="ms-2 text-muted">{{ formatPrice($record->sale_price) }}</del>
+                                                @else
+                                                    <span
+                                                        class="text-danger fs-6">{{ formatPrice($record->sale_price) }}</span>
+                                                @endif
 
-                                        </p>
+                                            </p>
+                                        </div>
+                                    </a>
                                     </div>
-                                </div>
                             @endforeach
                         </div>
                     </div>
@@ -261,11 +265,11 @@
                 </p>
             </div>
         </div>
-        <div data-aos="fade-down" data-aos-once="true" data-aos-delay="600" class="category_home">
+        {{-- <div data-aos="fade-down" data-aos-once="true" data-aos-delay="600" class="category_home">
             <div class="categories">
                 <div class="list_categories">
                     <div class="row text-center">
-                        {{-- @foreach ($categories as $category)
+                        @foreach ($categories as $category)
                             <div class="col-md-3 col-6">
                                 @php
                                     if ($category->parent) {
@@ -284,17 +288,17 @@
                                     </div>
                                 </a>
                             </div>
-                        @endforeach --}}
+                        @endforeach
                     </div>
                 </div>
-            </div>
-            <div class="d-flex align-items-center justify-content-center w-100 mt-2">
-                <a href="#">
-                    <button type="button" class="ant-btn-primary">
-                        <span>Xem tất cả</span>
-                    </button></a>
-            </div>
+            </div> --}}
+        <div class="d-flex align-items-center justify-content-center w-100 mt-2">
+            <a href="#">
+                <button type="button" class="ant-btn-primary">
+                    <span>Xem tất cả</span>
+                </button></a>
         </div>
+    </div>
     </div>
 
     <div class="pw_different_part_wrapper position-relative">
@@ -316,7 +320,7 @@
 
                 <div class="pw_help_you_content">
                     <div class="list_different_boxes row g-4">
-                        <div class="col-12 col-sm-6 col-lg-4" data-aos="flip-up" data-aos-once="true"
+                        <div class="col-12 col-sm-6 col-lg-4" data-aos="flip-left" data-aos-once="true"
                             data-aos-delay="400">
                             <div class="box_different_item d-flex flex-column h-100">
                                 <div class="image_different">
@@ -332,7 +336,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-sm-6 col-lg-4" data-aos="flip-up" data-aos-once="true"
+                        <div class="col-12 col-sm-6 col-lg-4" data-aos="flip-left" data-aos-once="true"
                             data-aos-delay="450">
                             <div class="box_different_item d-flex flex-column h-100">
                                 <div class="image_different">
@@ -348,7 +352,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-sm-6 col-lg-4" data-aos="flip-up" data-aos-once="true"
+                        <div class="col-12 col-sm-6 col-lg-4" data-aos="flip-left" data-aos-once="true"
                             data-aos-delay="500">
                             <div class="box_different_item d-flex flex-column h-100">
                                 <div class="image_different">
@@ -364,7 +368,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-sm-6 col-lg-4" data-aos="flip-up" data-aos-once="true"
+                        <div class="col-12 col-sm-6 col-lg-4" data-aos="flip-left" data-aos-once="true"
                             data-aos-delay="550">
                             <div class="box_different_item d-flex flex-column h-100">
                                 <div class="image_different">
@@ -380,7 +384,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-sm-6 col-lg-4" data-aos="flip-up" data-aos-once="true"
+                        <div class="col-12 col-sm-6 col-lg-4" data-aos="flip-left" data-aos-once="true"
                             data-aos-delay="600">
                             <div class="box_different_item d-flex flex-column h-100">
                                 <div class="image_different">
@@ -396,7 +400,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-sm-6 col-lg-4" data-aos="flip-up" data-aos-once="true"
+                        <div class="col-12 col-sm-6 col-lg-4" data-aos="flip-left" data-aos-once="true"
                             data-aos-delay="650">
                             <div class="box_different_item d-flex flex-column h-100">
                                 <div class="image_different">

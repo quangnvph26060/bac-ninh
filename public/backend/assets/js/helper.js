@@ -126,6 +126,25 @@ function generateSlug(text) {
         .trim(); // Xóa khoảng trắng đầu cuối
 }
 
+function autoGenerateSlug(fromSelector, toSelector) {
+    $(fromSelector).on("input", function () {
+        const text = $(this).val();
+        const slug = text
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d")
+            .replace(/Đ/g, "d")
+            .replace(/[^a-z0-9 -]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "")
+            .trim();
+
+        $(toSelector).val(slug).trigger("input"); // ✅ cập nhật rồi trigger input để char count update
+    });
+}
+
 function submitForm(formId, successCallback) {
     $(formId).on("submit", function (e) {
         e.preventDefault();

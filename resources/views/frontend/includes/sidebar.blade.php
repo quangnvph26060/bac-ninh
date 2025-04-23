@@ -7,12 +7,20 @@
 
     <!-- Menu chính -->
     <ul class="menu active" data-level="0">
-        <li><a href="#" class="fw-bold">Home</a></li>
+        <li><a href="{{ route('home') }}" class="fw-bold">Home</a></li>
         <li class="has-children">
             <a href="#">Catalogue</a>
             <i class="bi bi-chevron-right arrow-icon"></i>
         </li>
-        <li><a href="#">Blog</a></li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">Help Center</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">Blog</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">About Us</a>
+        </li>
     </ul>
 
     <!-- Menu Catalogue -->
@@ -21,32 +29,37 @@
             <i class="bi bi-chevron-left arrow-icon back-btn"></i>
             <span class="menu-title">Catalogue</span>
         </li>
-        <li class="has-children">
-            <a href="#">Danh mục 1</a>
-            <i class="bi bi-chevron-right arrow-icon"></i>
-        </li>
-        <li class="has-children">
-            <a href="#">Danh mục 2</a>
-            <i class="bi bi-chevron-right arrow-icon"></i>
-        </li>
+
+        {{-- Các danh mục không có con (collections) --}}
+        @foreach ($collections as $collection)
+            <li>
+                <a href="{{ route('products.list', $collection->slug) }}">{{ $collection->name }}</a>
+            </li>
+        @endforeach
+
+        {{-- Các danh mục có con (categories) --}}
+        @foreach ($categories as $category)
+            <li class="has-children">
+                <a href="{{ route('products.list', $category->slug) }}">{{ $category->name }}</a>
+                <i class="bi bi-chevron-right arrow-icon"></i>
+            </li>
+        @endforeach
     </ul>
 
-    <!-- Menu Danh mục 1 -->
-    <ul class="menu" data-level="2">
-        <li class="menu-header">
-            <i class="bi bi-chevron-left arrow-icon back-btn"></i>
-            <span class="menu-title">Danh mục 1</span>
-        </li>
-        <li><a href="#">Danh mục 1.1</a></li>
-        <li><a href="#">Danh mục 1.2</a></li>
-    </ul>
-
-    <!-- Menu Danh mục 2 -->
-    <ul class="menu" data-level="2">
-        <li class="menu-header">
-            <i class="bi bi-chevron-left arrow-icon back-btn"></i>
-            <span class="menu-title">Danh mục 2</span>
-        </li>
-        <li><a href="#">Danh mục 2.1</a></li>
-    </ul>
+    {{-- Menu con cho từng category có children --}}
+    @foreach ($categories as $category)
+        @if ($category->children->isNotEmpty())
+            <ul class="menu" data-level="2">
+                <li class="menu-header">
+                    <i class="bi bi-chevron-left arrow-icon back-btn"></i>
+                    <span class="menu-title">{{ $category->name }}</span>
+                </li>
+                @foreach ($category->children as $child)
+                    <li>
+                        <a href="{{ route('products.list', [$category->slug, $child->slug]) }}">{{ $child->name }}</a>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    @endforeach
 </div>

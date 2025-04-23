@@ -23,15 +23,10 @@ class CouponRequest extends FormRequest
     {
         $id = $this->route('id');
 
-        $valueRules = ['required', 'numeric'];
-        if ($this->input('type') === 'percent') {
-            $valueRules[] = 'max:100';
-        }
-
         return [
             'code' => 'required|unique:coupons,code,' . $id,
-            'value' => $valueRules,
-            'type' => 'required|in:fixed,percent',
+            'value' => 'required|numeric|max:100',
+            'type' => 'required|in:order,product',
             'max_discount' => 'nullable|numeric',
             'min_order_value' => 'nullable|numeric',
             'start_date' => 'nullable|date|date_format:d-m-Y H:i',

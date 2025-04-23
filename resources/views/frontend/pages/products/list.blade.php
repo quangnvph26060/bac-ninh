@@ -4,7 +4,7 @@
 @section('content')
     <div class="pw_catalog_wrapper">
         <div class="position-sticky top-0 bg-white z-3 pb-3" style="padding-top: 38px">
-            <input type="text" placeholder="Search product..." />
+            <input type="text" placeholder="Search product..." id="searchInput" />
             <div class="cursor-pointer position-absolute">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -20,90 +20,24 @@
             <div class="d-flex align-items-center mx-auto mt-2 mb-4">
                 <div>
 
-                    @php
-                        $items = [];
-
-                        if (isset($collection)) {
-                            $items[] = [
-                                'label' => $collection->name,
-                                'url' => route('products.list', $collection->slug),
-                            ];
-
-                            if ($category) {
-                                $items[] = [
-                                    'label' => $category->name,
-                                ];
-                            }
-                        } elseif (isset($category)) {
-                            if ($category->parent) {
-                                $items[] = [
-                                    'label' => $category->parent->name,
-                                    'url' => route('products.list', $category->parent->slug),
-                                ];
-                            }
-
-                            $items[] = [
-                                'label' => $category->name,
-                            ];
-                        } elseif (isset($brand)) {
-                            $items[] = [
-                                'label' => $brand->name,
-                                'url' => url('/'),
-                            ];
-                        }
-                    @endphp
-
                     @include('frontend.includes.breadcrumb', ['items' => $items])
 
-                    @php
-                        $title = 'Tất cả sản phẩm';
-                        if (!empty($collection)) {
-                            $title = $collection->name;
-                            if (!empty($category)) {
-                                $title = $category->name;
-                            }
-                        } elseif (!empty($category)) {
-                            $title = $category->name;
-                        }
-                    @endphp
-
-                    <h1 class="fw-bold mt-3"> {{ $title }} </h1>
+                    <h1 class="fw-bold mt-3"> {{ $pageName }} </h1>
                 </div>
             </div>
         </div>
 
-        @php
-
-            if (!empty($collection)) {
-                $datas = $collection->categories;
-                if (!empty($category)) {
-                    $datas = $category->children;
-                }
-            } elseif (!empty($category)) {
-                $datas = $category->children;
-            }
-
-        @endphp
-
-        @php
-            if (!empty($collection)) {
-                $prefix = $collection->slug;
-            } elseif (!empty($category)) {
-                $prefix = $category->slug;
-            }
-        @endphp
-
-        @if ($datas->isNotEmpty())
+        @if ($categories->isNotEmpty())
             <div class="position-relative py-4" style="background-color: #f4f8f9">
                 <div class="swiper my-catalog">
                     <div class="swiper-wrapper">
 
-                        @foreach ($datas as $data)
+                        @foreach ($categories as $category)
                             <div class="swiper-slide text-center">
-                                <a href="{{ route('products.list', [$prefix, $data->slug]) }}">
-                                    <img src="{{ showImage($data->image) }}" class="category-img img-fluid d-block mx-auto"
-                                        alt="{{ $data->name }}" />
-                                    <h2 class="category-name">{{ $data->name }}</h2>
+                                <a href="{{ route('products.category', $category->slug) }}">
+                                    <img src="{{ showImage($category->image) }}"
+                                        class="category-img img-fluid d-block mx-auto" alt="{{ $category->name }}" />
+                                    <h2 class="category-name">{{ $category->name }}</h2>
                                 </a>
                             </div>
                         @endforeach
@@ -130,86 +64,46 @@
         <div class="list-products d-flex mb-4 pt-3">
             <div id="filter-form">
                 <form action="">
-                    <div class="mt-2 mb-4">
-                        <div class="d-md-flex flex-column position-relative" style="min-width: 235px">
-                            <h4 class="fw-bold text-base">Fulfillment Location</h4>
-                            <div class="pb-4">
-                                <ul class="list-unstyled">
-                                    <li class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="EU" id="locationEU" />
-                                        <label class="form-check-label" for="locationEU">European</label>
-                                    </li>
-                                    <li class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="AU" id="locationAU" />
-                                        <label class="form-check-label" for="locationAU">Australia</label>
-                                    </li>
-                                </ul>
+                    @foreach ($attributes as $attributeName => $attributeValue)
+                        <div class="mt-2 mb-4">
+                            <div class="d-md-flex flex-column position-relative" style="min-width: 235px">
+                                <h4 class="fw-bold text-base">{{ $attributeName }}</h4>
+                                <div class="pb-4">
+                                    <ul class="list-unstyled">
+                                        @foreach ($attributeValue as $id => $value)
+                                            <li class="form-check">
+                                                <input class="form-check-input" name="av[]" type="checkbox"
+                                                    value="{{ $id }}" id="{{ "$value-$id" }}" />
+                                                <label class="form-check-label"
+                                                    for="{{ "$value-$id" }}">{{ $value }}</label>
+                                            </li>
+                                        @endforeach
+
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endforeach
                 </form>
             </div>
 
             <div class="w-100">
-                <p class="mb-4 mt-2 text-sm" style="color: #97a0af">
-                    Tổng {{ $products->total() }} sản phẩm
-                </p>
+                <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+                    <p class="mb-0 text-sm" style="color: #97a0af">
+                        Tổng {{ $products->total() }} sản phẩm
+                    </p>
+                    <select id="sortSelect" class="form-select w-25">
+                        <option value="all">Tất cả</option>
+                        <option value="latest">Mới nhất</option>
+                        <option value="price_high">Giá cao</option>
+                        <option value="price_low">Giá thấp</option>
+                    </select>
+                </div>
+
                 <div class="list_prd_catalogs w-100">
 
-                    @foreach ($products as $product)
-                        <div class="box_product_item border">
-                            <a href="{{ route('products.list', [$product->category->slug, $product->slug]) }}">
-                                <div class="mockup_prd_wrapper rounded">
-                                    <img loading="lazy" class="img-fluid w-100 rounded-top"
-                                        src="{{ showImage($product->image) }}" alt="Table Mat"
-                                        style="border-radius: 4px 4px 0px 0px" />
-                                </div>
-                                <div class="content_prd_card rounded-bottom" style="border-radius: 0px 0px 4px 4px">
-                                    <h3 class="name_prd">{{ $product->name }}</h3>
+                    @include('frontend.pages.products._product-list', ['products' => $products])
 
-                                    <p class="price-product pb-0">
-                                        @php
-                                            $record = $product->variants->isNotEmpty()
-                                                ? $product->variants->first()
-                                                : $product;
-                                        @endphp
-
-                                        @if (isOnSale($record))
-                                            <span
-                                                class="text_color text-sm mb-2">{{ finalPrice($record->sale_price, $record->discount_price) }}</span>
-
-                                            <small class="text-muted"> <del
-                                                    class="ms-2">{{ formatPrice($record->sale_price) }}</del></small>
-                                        @else
-                                            <span
-                                                class="text_color text-sm mb-2">{{ formatPrice($record->sale_price) }}</span>
-                                        @endif
-                                    </p>
-
-                                    @if ($product->attributes->isNotEmpty())
-                                        <div class="d-flex flex-wrap gap-2 align-items-start h-10">
-
-                                            @foreach ($product->attributes as $attribute)
-                                                @php
-                                                    $valueIds = json_decode(
-                                                        $attribute->pivot->attribute_values_ids,
-                                                        true,
-                                                    );
-                                                    $count = is_array($valueIds) ? count($valueIds) : 0;
-                                                @endphp
-
-                                                @if ($count > 0)
-                                                    <p class="title text-muted small">{{ $count }}
-                                                        {{ $attribute->name }}</p>
-                                                @endif
-                                            @endforeach
-                                        </div>
-                                    @endif
-
-                                </div>
-                            </a>
-                        </div>
-                    @endforeach
                 </div>
 
                 {{ $products->links('vendor.pagination.custom') }}
@@ -225,7 +119,71 @@
         </div>
         <div class="px-3" id="show-filter-form"></div>
     </div>
+
+    <div id="loadingSpinner" style="display: none;" class="spinner-overlay">
+        <div class="spinner"></div>
+    </div>
 @endsection
 
 @push('scripts')
+    <script>
+        $(function() {
+            let debounceTimer;
+
+            function fetchProducts(page = 1) {
+
+                let params = new URLSearchParams();
+
+                params.append('search', $('#searchInput').val());
+                params.append('sort', $('#sortSelect').val());
+                params.append('per_page', $('.per-page-selector').val() || 10);
+                params.append('page', page);
+
+                // Bắt buộc dùng av[] để Laravel hiểu là mảng
+                $('input[name="av[]"]:checked').each(function() {
+                    params.append('av[]', this.value);
+                });
+
+                $.ajax({
+                    url: window.location.pathname + '?' + params.toString(),
+                    method: 'GET',
+                    beforeSend: function() {
+                        $('#loadingSpinner').fadeIn();
+                    },
+                    success: function(response) {
+
+                        $('.list_prd_catalogs').html(response.html);
+                        $('.pagination').html(response.pagination);
+                    },
+                    complete: function() {
+                        $('#loadingSpinner').fadeOut();
+                    }
+                });
+            }
+
+            $('#searchInput').on('input', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => fetchProducts(), 500);
+            });
+
+            $(document).on('change', '#sortSelect, .per-page-selector', function() {
+                fetchProducts();
+            });
+
+            $(document).on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                const url = new URL($(this).attr('href'), window.location.origin);
+                const page = url.searchParams.get('page');
+                fetchProducts(page);
+            });
+
+            $('input[name="av[]"]').on('change', function() {
+                fetchProducts();
+            });
+
+        })
+    </script>
+@endpush
+
+@push('styles')
 @endpush

@@ -118,12 +118,13 @@
                             <div class="form-group mb-3 col-lg-6">
                                 <label for="first_name" class="required form-label">Họ</label>
                                 <input type="text" class="form-control" name="first_name" id="first_name"
-                                    placeholder="Họ" required="" aria-required="true">
+                                    placeholder="Họ" data-required="true">
                             </div>
+
                             <div class="form-group mb-3 col-lg-6">
                                 <label for="last_name" class="required form-label">Tên</label>
                                 <input type="text" class="form-control" name="last_name" id="last_name"
-                                    placeholder="Tên" required="" aria-required="true">
+                                    placeholder="Tên" data-required="true">
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
@@ -135,7 +136,7 @@
                             <div class="form-group mb-3 col-lg-6">
                                 <label for="phone_number" class="form-label required">Số điện thoại</label>
                                 <input type="text" name="phone_number" class="form-control" id="phone_number"
-                                    required="" aria-required="true" placeholder="Số điện thoại" pattern="^\d{8,15}$"
+                                    data-required="true" placeholder="Số điện thoại" pattern="^\d{8,15}$"
                                     title="Số điện thoại phải chứa từ 8 đến 15 chữ số, không bao gồm dấu cách hoặc ký tự đặc biệt.">
                             </div>
 
@@ -145,8 +146,7 @@
 
                             <div class="form-group mb-3 col-lg-6">
                                 <label for="" class="required form-label">Quốc gia</label>
-                                <select name="country_id" id="country_id" class="form-select" required
-                                    aria-required="true">
+                                <select name="country_id" id="country_id" class="form-select" data-required="true">
                                     <option value="" selected disabled>Quốc gia</option>
                                     @foreach ($countries as $country)
                                         <option value="{{ $country->id }}">{{ $country->code . '-' . $country->name }}
@@ -157,16 +157,16 @@
 
                             <div class="form-group mb-3 col-lg-6">
                                 <label for="state_id" class="form-label required">Tiểu bang</label>
-                                <select id="state_id" name="state_id" class="form-control" disabled required
-                                    aria-required="true">
+                                <select id="state_id" name="state_id" class="form-control" disabled
+                                    data-required="true">
                                     <option value="">-- Chọn tiểu bang --</option>
                                 </select>
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
                                 <label for="city_id" class="form-label">Thành phố</label>
-                                <select id="city_id" name="city_id" class="form-control" disabled required
-                                    aria-required="true">
+                                <select id="city_id" name="city_id" class="form-control" disabled
+                                    data-required="true">
                                     <option value="">-- Chọn thành phố --</option>
                                 </select>
                             </div>
@@ -178,7 +178,7 @@
                             </div>
                             <div class="form-group mb-3 col-lg-12">
                                 <label for="shipping_address" class="required form-label">Địa chỉ chi tiết</label>
-                                <textarea name="shipping_address" id="shipping_address" class="form-control" required="" aria-required="true"></textarea>
+                                <textarea name="shipping_address" id="shipping_address" class="form-control" data-required="true"></textarea>
                             </div>
                             <div class="form-group mb-3 col-lg-12">
                                 <label for="tax_code" class=" form-label">Mã số thuế</label>
@@ -375,15 +375,8 @@
 
             const total = productPrice + shippingFee + tax + extraFee;
 
-            console.log(productPrice +
-                '-' + shippingFee +
-                '-' + tax +
-                '-' + extraFee);
-
             $('#order-total-amount').text(`$${total.toFixed(2)}`);
         }
-
-
 
         function showWalletBalance() {
             document.getElementById('walletBalance').style.display = 'block';
@@ -406,8 +399,8 @@
                         </div>
                         <div class="col">
                             <h6 class="mb-1 fw-bold">${product.name}</h6>
-                            <div class="text-muted small">${product.attributes_text}</div>
-                            <div class="text-muted small">${product.sku}</div>
+                            <div class="text-muted small">sản phẩm: ${product.attributes_text}</div>
+                            <div class="text-muted small">sku: ${product.sku}</div>
                             <div class="fw-semibold mt-2">
                                 Giá sản phẩm: <span class="text-primary">USD ${product.price}</span>
                                 <small class="text-muted">(USD ${product.price} x ${product.quantity})</small>
@@ -421,6 +414,32 @@
             });
         }
 
+        function checkAllProductsSelected() {
+            let allSelected = true;
+
+            // Kiểm tra tất cả các sản phẩm đã chọn
+            $('.custom-form').each(function() {
+                const productId = $(this).data('id');
+                const time = $(this).data('time');
+
+                // Nếu sản phẩm là biến thể, kiểm tra xem tất cả các select đã được chọn
+                const selects = $(
+                    `.product-attr-select[data-product-id="${productId}"][data-time="${time}"]`);
+                selects.each(function() {
+                    if (!$(this).val()) {
+                        allSelected = false;
+                    }
+                });
+
+                // Kiểm tra số lượng hợp lệ
+                const quantity = $(this).find('.step_product_input').val();
+                if (!quantity || isNaN(quantity) || parseInt(quantity) < 1) {
+                    allSelected = false;
+                }
+            });
+
+            return allSelected;
+        }
 
         function updateStepStatus(currentStep, nextStep) {
             // Ẩn tất cả tab
@@ -446,6 +465,12 @@
 
         // Sang bước 2
         $(document).on('click', '.btn-to-shipping', function() {
+
+            if (!checkAllProductsSelected()) {
+                notyf.error('Vui lòng chọn đầy đủ các thuộc tính.');
+                return
+            }
+
             const products = [];
 
             $('#confirmed-products-wrapper .custom-form').each(function() {
@@ -488,8 +513,6 @@
                 });
             });
 
-            console.log('Dữ liệu sản phẩm đã chọn:', products);
-
             renderReviewProducts(products)
 
             // Sau khi lấy được dữ liệu, bạn có thể gọi updateStepStatus như bình thường
@@ -514,10 +537,29 @@
 
         // Sang bước 3
         $(document).on('click', '#btn-to-review-order', function() {
+
             const form = $(this).closest("form")[0];
 
             if (!form.checkValidity()) {
                 form.reportValidity(); // Hiển thị lỗi input
+                return;
+            }
+
+            let isValid = true;
+            $('[data-required="true"]').each(function() {
+                const $field = $(this);
+                const value = $field.val();
+
+                if (!value || value.toString().trim() === '') {
+                    $field.addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $field.removeClass('is-invalid');
+                }
+            });
+
+            if (!isValid) {
+                notyf.error("Vui lòng điền đầy đủ thông tin bắt buộc.");
                 return;
             }
 
@@ -969,6 +1011,7 @@
             }
 
             $(document).on('change', '.product-attr-select', function() {
+
                 const productId = $(this).data('product-id');
                 const time = $(this).data('time'); // Lấy time để phân biệt
 
