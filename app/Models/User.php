@@ -54,12 +54,6 @@ class User extends Authenticatable
 
     protected $appends = ['user_info'];
 
-    // Accessor for user info
-    public function getUserInfoAttribute()
-    {
-        return UserInfo::where('user_id', $this->attributes['id'])->first();
-    }
-
     public function isAdmin()
     {
         return $this->role_id == 1;
@@ -87,25 +81,6 @@ class User extends Authenticatable
     public function storage()
     {
         return $this->belongsTo(Storage::class);
-    }
-
-    // Relationship with CampaignDetail
-    public function campaignDetails()
-    {
-        return $this->hasMany(CampaignDetail::class, 'user_id');
-    }
-
-    // Access Campaigns through CampaignDetail
-    public function campaigns()
-    {
-        return $this->hasManyThrough(
-            Campaign::class,          // Target model
-            CampaignDetail::class,    // Intermediate model
-            'user_id',                // Foreign key on CampaignDetail table
-            'id',                     // Foreign key on Campaign table (assumes campaign_id)
-            'id',                     // Local key on User table
-            'campaign_id'             // Local key on CampaignDetail table
-        );
     }
 
     public function transaction()

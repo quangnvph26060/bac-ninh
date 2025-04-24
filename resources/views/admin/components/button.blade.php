@@ -1,6 +1,6 @@
 <div class="card">
     <div class="card-header">
-        <h4 class="card-title">Xuất bản</h4>
+        <h4 class="card-title fs-6 fw-bold">Xuất bản</h4>
     </div>
     <div class="card-body">
         <button type="submit" class="btn btn-primary btn-sm fs-6">

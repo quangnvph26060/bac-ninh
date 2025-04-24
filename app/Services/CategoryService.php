@@ -80,17 +80,7 @@ class CategoryService extends BaseService
         $category = $this->show($id);
         return $category->collections()->pluck('collections.id')->toArray();
     }
-
-    public function getCategoryAllStaff()
-    {
-        try {
-            Log::info('Fetching all categories');
-            return $this->categories->all();
-        } catch (Exception $e) {
-            Log::error('Failed to fetch categories: ' . $e->getMessage());
-            throw new Exception('Failed to fetch categories');
-        }
-    }
+    
     public function store(array $payload)
     {
         $uploadedImage = null;

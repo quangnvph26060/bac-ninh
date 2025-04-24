@@ -135,8 +135,8 @@ const dataTables = (
             },
         },
         language: {
-            search: "",
-        },
+            url: '/backend/assets/js/plugin/datatables/vi.json'
+        }
     });
 
     $(document).on("click", ".btn-operation-destroy", function () {

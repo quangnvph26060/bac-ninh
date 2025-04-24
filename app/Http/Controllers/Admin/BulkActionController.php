@@ -19,7 +19,9 @@ class BulkActionController extends Controller
             'ids' => 'Danh sách ID',
         ]);
 
-        $modelClass = 'App\\Models\\' . $validatedData['model'];
+        $isModelRole = $validatedData['model'] == 'Role';
+
+        $modelClass = ($isModelRole ? 'Spatie\\Permission\\Models\\' : 'App\\Models\\') . $validatedData['model'];
 
         // Kiểm tra xem class có tồn tại hay không
         if (!class_exists($modelClass)) {

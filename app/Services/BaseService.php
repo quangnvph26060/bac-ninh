@@ -28,6 +28,20 @@ class BaseService
         return false;
     }
 
+    public function deleteById(string $id)
+    {
+        $record = $this->findById($id);
+        if ($record->delete()) return true;
+        return false;
+    }
+
+    public function updateOrCreate(array $attributes, array $values)
+    {
+        if ($record = $this->model->updateOrCreate($attributes, $values)) return $record;
+
+        return false;
+    }
+
     public function getSelected(string $id, string $relation, string $column)
     {
         $record = $this->findById($id, ['*'], [$relation]);
@@ -138,6 +152,8 @@ class BaseService
         return request()->toArray();
     }
 
+
+
     public function pluck(array $columns = [], array $relations = [], array $wheres = [], array $order = [], array $withCounts = [])
     {
         $query = $this->model->query();
@@ -238,7 +254,6 @@ class BaseService
         }
 
         $query->when(empty($conditions['order']), fn($q) => $q->latest('id'));
-
         Log::info($query->toRawSql());
 
         return $all ? $query->get() : $query;

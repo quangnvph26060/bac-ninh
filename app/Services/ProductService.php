@@ -148,7 +148,7 @@ class ProductService  extends BaseService
             }
 
             if (hasFile('image')) {
-                $uploadedImage = uploadImages('image', 'products');
+                $uploadedImage = uploadImages('image', 'products', true, 800, 800);
                 $payload['image'] = $uploadedImage;
             }
 
@@ -214,7 +214,7 @@ class ProductService  extends BaseService
             }
 
             if (hasFile('image')) {
-                $uploadedImage = uploadImages('image', 'products');
+                $uploadedImage = uploadImages('image', 'products', true, 800, 800);
                 $payload['image'] = $uploadedImage;
             }
 

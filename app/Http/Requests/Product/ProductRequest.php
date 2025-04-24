@@ -25,10 +25,10 @@ class ProductRequest extends FormRequest
         return [
             'name' => 'required|string|max:255|unique:products,name,' . $id,  // Product name is required, string, and max length 255
             'slug' => 'nullable|string|max:255|unique:products,slug,' . $id,  // Slug is optional, but if present it must be a string
-            'image' => ($id ? 'nullable' : 'required') . '|image|mimes:png,jpg,jpeg,gif,webp|max:2048',  // Image is required for new products, optional for updates, must be an image file
+            'image' => ($id ? 'nullable' : 'required') . '|image|mimes:png,jpg,jpeg,gif,webp|max:10240',  // Image is required for new products, optional for updates, must be an image file
             'images' => 'nullable|array',
             'is_featured' => 'nullable|boolean',  // Featured flag is optional but should be a boolean (1 or 0)
-            'images.*' => 'image|mimes:png,jpg,jpeg,gif,webp|max:2048',  // Images are optional but must be an array of image files
+            'images.*' => 'image|mimes:png,jpg,jpeg,gif,webp|max:10240',  // Images are optional but must be an array of image files
             'old' => 'nullable|array',
             'description' => 'nullable|string',  // Description is optional, but if provided, it must be a string
             'content' => 'nullable|string',  // Content is optional, but if provided, it must be a string

@@ -124,12 +124,12 @@
                 </li>
 
                 {{-- Hỗ trợ --}}
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a href="{{ route('admin.support.lienhe') }}">
                         <i class="fas fa-headset"></i>
                         <p>Hỗ trợ</p>
                     </a>
-                </li>
+                </li> --}}
 
                 {{-- Báo cáo --}}
                 <li class="nav-item">
@@ -185,6 +185,25 @@
                     </div>
                 </li>
 
+                {{-- Phân quyền --}}
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#permission">
+                        <i class="fas fa-user-shield"></i>
+                        <p>Phân quyền</p>
+                        <span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="permission">
+                        <ul class="nav nav-collapse">
+                            <li><a href="{{ route('admin.employees.index') }}"><span class="sub-item">Quản lý nhân
+                                        viên</span></a></li>
+                            <li><a href="{{ route('admin.roles.index') }}"><span class="sub-item">Quản lý vai
+                                        trò</span></a></li>
+                            <li><a href="{{ route('admin.permissions.index') }}"><span class="sub-item">Quản lý
+                                        quyền</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+
                 {{-- Cấu hình --}}
                 <li class="nav-item">
                     <a data-bs-toggle="collapse" href="#config">
@@ -194,22 +213,7 @@
                     </a>
                     <div class="collapse" id="config">
                         <ul class="nav nav-collapse">
-                            {{-- Nhân viên --}}
-                            <li>
-                                <a data-bs-toggle="collapse" href="#nhanvien">
-                                    <i class="fas fa-user-tie"></i>
-                                    <p>Nhân viên</p>
-                                    <span class="caret"></span>
-                                </a>
-                                <div class="collapse" id="nhanvien">
-                                    <ul class="nav nav-collapse">
-                                        <li><a href="{{ route('admin.staff.store') }}"><span class="sub-item">Danh
-                                                    sách</span></a></li>
-                                        <li><a href="{{ route('admin.staff.addForm') }}"><span class="sub-item">Thêm
-                                                    mới</span></a></li>
-                                    </ul>
-                                </div>
-                            </li>
+
                         </ul>
                     </div>
                 </li>

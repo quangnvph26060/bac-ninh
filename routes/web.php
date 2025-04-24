@@ -11,8 +11,11 @@ use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PaymentController;
@@ -64,10 +67,6 @@ Route::middleware(['auth'])->group(function () {
     })->name('home');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/payment', [PaymentController::class, 'showPaymentForm'])->name('payment.form');
-    Route::post('/payment', [PaymentController::class, 'processPayment'])->name('payment.process');
-    Route::get('/payment-success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
-    Route::post('/payment-notify', [PaymentController::class, 'paymentNotify'])->name('payment.notify');
 });
 Route::get('forget-password', function () {
     return view('auth.forget-password');
@@ -165,6 +164,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('edit/{id}', 'edit')->name('edit');
             Route::put('edit/{id}', 'update')->name('update');
         });
+
+        Route::group(['prefix' => 'employees', 'controller' => EmployeeController::class, 'as' => 'employees.'], function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+        });
+
+        Route::group(['prefix' => 'roles', 'controller' => RoleController::class, 'as' => 'roles.'], function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+        });
+
+        Route::group(['prefix' => 'permissions', 'controller' => PermissionController::class, 'as' => 'permissions.'], function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('save/{id?}', 'save')->name('save');
+            Route::delete('destroy/{id}', 'destroy')->name('destroy');
+        });
     });
 
     // Auth Router
@@ -221,17 +242,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
 
-
-    Route::prefix('user')->name('staff.')->group(function () {
-        Route::get('', [UserController::class, 'index'])->name('store');
-        Route::get('update/{id}', [UserController::class, 'edit'])->name('edit');
-        Route::post('update/{id}', [UserController::class, 'update'])->name('update');
-        Route::get('add', [UserController::class, 'addForm'])->name('addForm');
-        Route::post('add', [UserController::class, 'add'])->name('add');
-        Route::delete('delete/{id}', [UserController::class, 'delete'])->name('delete');
-        Route::post('updateAdmin/{id}', [UserController::class, 'updateadmin'])->name('updateAdmin');
-        Route::get('search/phone', [UserController::class, 'findByPhone'])->name('findByPhone');
-    });
+    // Route::prefix('user')->name('staff.')->group(function () {
+    //     Route::get('', [UserController::class, 'index'])->name('store');
+    //     Route::get('update/{id}', [UserController::class, 'edit'])->name('edit');
+    //     Route::post('update/{id}', [UserController::class, 'update'])->name('update');
+    //     Route::get('add', [UserController::class, 'addForm'])->name('addForm');
+    //     Route::post('add', [UserController::class, 'add'])->name('add');
+    //     Route::delete('delete/{id}', [UserController::class, 'delete'])->name('delete');
+    //     Route::post('updateAdmin/{id}', [UserController::class, 'updateadmin'])->name('updateAdmin');
+    //     Route::get('search/phone', [UserController::class, 'findByPhone'])->name('findByPhone');
+    // });
 
 
 
@@ -329,81 +349,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', [DailyReportController::class, 'getDailyImport'])->name('getDailyImport');
             Route::get('get-daily-import-data', [DailyReportController::class, 'getDailyImportData'])->name('getDailyImportData');
         });
-    });
-});
-
-Route::middleware([CheckLogin::class])->prefix('ban-hang')->name('staff.')->group(function () {
-    Route::get('product/search', [StaffProductController::class, 'search'])->name('product.search');
-    Route::get('', [StaffProductController::class, 'index'])->name('index');
-    Route::post('/cart/add', [StaffProductController::class, 'addToCart'])->name('cart.add');
-    Route::post('/cart/update', [StaffProductController::class, 'updateCart'])->name('cart.update');
-    Route::post('/cart/update_price', [StaffProductController::class, 'updatePriceCart'])->name('cart.update.price');
-    Route::post('/cart/remove', [StaffProductController::class, 'removeFromCart'])->name('cart.remove');
-    Route::post('/client/add', [StaffClientController::class, 'addClient'])->name('client.add');
-    Route::post('pay', [StaffClientController::class, 'pay'])->name('pay');
-    Route::get('cart', [StaffClientController::class, 'cart'])->name('cart.data');
-    Route::get('order', [StaffOrderController::class, 'index'])->name('order');
-    Route::get('order/fetch', [StaffOrderController::class, 'orderFetch'])->name('orderFetch');
-    Route::get('product', [StaffProductController::class, 'product'])->name('product.get');
-    //checkInventory
-
-    Route::get('checkInventory', [staffcheckController::class, 'index'])->name('Inventory.get');
-    Route::get('checkInventory/add', [staffcheckController::class, 'add'])->name('Inventory.add');
-    Route::post('checkInventory/add', [staffcheckController::class, 'submitadd'])->name('Inventory.add.submit');
-    // warehome
-    Route::get('warehome', [WareHomeController::class, 'index'])->name('warehome.get');
-    Route::post('warehome/add', [WareHomeController::class, 'add'])->name('warehome.add');
-    Route::post('warehome/update', [WareHomeController::class, 'update'])->name('warehome.update');
-    Route::get('warehome/delete', [WareHomeController::class, 'delete'])->name('warehome.delete');
-    Route::post('warehome/addByCategory', [WareHomeController::class, 'addByCategory'])->name('warehome.addByCategory');
-    Route::get('warehome/check', [WareHomeController::class, 'checkwerehouse'])->name('warehome.check');
-});
-
-
-
-// Route::middleware(['checkRole:3', CheckLogin::class])->prefix('sa')->name('sa.')->group(function () {
-//     Route::get('/detail/{id}', [SuperAdminController::class, 'getSuperAdminInfor'])->name('detail');
-//     Route::post('/update/{id}', [SuperAdminController::class, 'updateSuperAdminInfo'])->name('update');
-//     Route::prefix('store')->name('store.')->group(function () {
-//         Route::get('/index', [StoreController::class, 'index'])->name('index');
-//         Route::get('/detail/{id}', [StoreController::class, 'detail'])->name('detail');
-//         Route::get('/findByPhone', [StoreController::class, 'findByPhone'])->name('findByPhone');
-//     });
-// });
-Route::get('super-dang-nhap', [SuperAdminController::class, 'loginForm'])->name('super.dang.nhap');
-Route::post('super-dang-nhap', [SuperAdminController::class, 'login'])->name('super.login.submit');
-Route::middleware(CheckLoginSuperAdmin::class)->prefix('super-admin')->name('super.')->group(function () {
-    Route::prefix('campaign')->name('campaign.')->group(function () {
-        Route::get('add', [CampaignController::class, 'add'])->name('add');
-        Route::get('', [CampaignController::class, 'index'])->name('index');
-        Route::get('fetch', [CampaignController::class, 'fetch'])->name('fetch');
-        Route::post('store', [CampaignController::class, 'store'])->name('store');
-        Route::get('detail/{id}', [CampaignController::class, 'edit'])->name('detail');
-        Route::post('update/{id}', [CampaignController::class, 'update'])->name('update');
-        Route::delete('delete/{id}', [CampaignController::class, 'delete'])->name('delete');
-        Route::post('update-status/{id}', [CampaignController::class, 'updateStatus'])->name('updateStatus');
-    });
-    Route::prefix('zalo')->name('zalo.')->group(function () {
-        Route::get('zns', [ZaloController::class, 'index'])->name('zns');
-        Route::get('/get-active-oa-name', [ZaloController::class, 'getActiveOaName'])->name('getActiveOaName');
-        Route::post('/update-oa-status/{oaId}', [ZaloController::class, 'updateOaStatus'])->name('updateOaStatus');
-        Route::post('/refresh-access-token', [ZaloController::class, 'refreshAccessToken'])->name('refreshAccessToken');
-    });
-    Route::prefix('message')->name('message.')->group(function () {
-        Route::get('', [ZnsMessageController::class, 'znsMessage'])->name('znsMessage');
-        Route::get('/quota', [ZnsMessageController::class, 'znsQuota'])->name('znsQuota');
-        Route::get('template', [ZnsMessageController::class, 'templateIndex'])->name('znsTemplate');
-        Route::get('refresh', [ZnsMessageController::class, 'refreshTemplates'])->name('znsTemplateRefresh');
-        Route::get('detail', [ZnsMessageController::class, 'getTemplateDetail'])->name('znsTemplateDetail');
-        Route::get('test', [ZnsMessageController::class, 'test'])->name('test');
-    });
-    Route::get('/detail/{id}', [SuperAdminController::class, 'getSuperAdminInfor'])->name('detail');
-    Route::post('/update/{id}', [SuperAdminController::class, 'updateSuperAdminInfo'])->name('update');
-    Route::post('logout', [SuperAdminController::class, 'logout'])->name('logout');
-    Route::prefix('store')->name('store.')->group(function () {
-        Route::get('/index', [StoreController::class, 'index'])->name('index');
-        Route::get('/detail/{id}', [StoreController::class, 'detail'])->name('detail');
-        Route::get('/findByPhone', [StoreController::class, 'findByPhone'])->name('findByPhone');
-        Route::get('/delete/{id}', [StoreController::class, 'delete'])->name('delete');
     });
 });
