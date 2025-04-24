@@ -145,14 +145,9 @@ function autoGenerateSlug(fromSelector, toSelector) {
     });
 }
 
-function submitForm(formId, successCallback) {
+function submitForm(formId, successCallback, url = null) {
     $(formId).on("submit", function (e) {
         e.preventDefault();
-
-        var submitBtn = $("#submitBtn");
-        var spinner = submitBtn.find(".spinner-border");
-
-        spinner.removeClass("d-none");
 
         // Kiểm tra xem CKEditor đã được khởi tạo trên textarea chưa
         $("textarea.ckeditor").each(function () {
@@ -177,11 +172,14 @@ function submitForm(formId, successCallback) {
         var formData = new FormData(this);
 
         $.ajax({
-            url: window.location.href,
+            url: url || window.location.href,
             type: "POST",
             data: formData,
             processData: false,
             contentType: false,
+            beforeSend: function () {
+                $("#loadingSpinner").fadeIn();
+            },
             success: function (response) {
                 console.log("Dữ liệu đã được gửi thành công", response);
                 if (typeof successCallback === "function") {
@@ -193,9 +191,7 @@ function submitForm(formId, successCallback) {
                 console.log("Lỗi khi gửi dữ liệu: ", xhr);
             },
             complete: function () {
-                // Khôi phục trạng thái nút sau khi API hoàn tất (thành công hoặc lỗi)
-                submitBtn.prop("disabled", false);
-                spinner.addClass("d-none");
+                $("#loadingSpinner").fadeOut();
             },
         });
     });

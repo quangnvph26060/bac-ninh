@@ -32,9 +32,11 @@
 
     </div>
 
+    <div id="loadingSpinner" style="display: none;" class="spinner-overlay">
+        <div class="spinner"></div>
+    </div>
+
     @include('admin.layout.includes.script')
-
-
 
 </body>
 

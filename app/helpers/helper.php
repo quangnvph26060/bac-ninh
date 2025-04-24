@@ -10,7 +10,43 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 if (!function_exists('uploadImages')) {
-    function uploadImages($flieName, string $directory = 'images', $resize = false, $width = 150, $height = 150, $isArray = false)
+    // function uploadImages($flieName, string $directory = 'images', $resize = false, $width = 150, $height = 150, $isArray = false)
+    // {
+    //     $paths = [];
+
+    //     $images = request()->file($flieName);
+    //     if (!is_array($images)) {
+    //         $images = [$images];
+    //     }
+
+    //     $manager = new ImageManager(['driver' => 'gd']);
+    //     $storagePath = storage_path('app/public/' . trim($directory, '/'));
+
+    //     if (!file_exists($storagePath)) {
+    //         mkdir($storagePath, 0777, true);
+    //     }
+
+    //     foreach ($images as $key => $image) {
+
+    //         if ($image instanceof \Illuminate\Http\UploadedFile) {
+    //             $img = $manager->make($image->getRealPath());
+
+    //             // Resize nếu $resize = true
+    //             if ($resize) {
+    //                 $img->resize($width, $height);
+    //             }
+
+    //             $filename = time() . uniqid() . '.' . 'webp';
+
+    //             Storage::disk('public')->put($directory . '/' . $filename, $img->encode());
+
+    //             $paths[$key] = $directory . '/' . $filename;
+    //         }
+    //     }
+    //     return $isArray ? $paths : $paths[0] ?? null;
+    // }
+
+    function uploadImages($flieName, string $directory = 'images', $resize = false, $width = 150, $height = 150, $isArray = false, $quality = 80)
     {
         $paths = [];
 
@@ -27,22 +63,27 @@ if (!function_exists('uploadImages')) {
         }
 
         foreach ($images as $key => $image) {
-
             if ($image instanceof \Illuminate\Http\UploadedFile) {
                 $img = $manager->make($image->getRealPath());
 
-                // Resize nếu $resize = true
+                // Resize nếu $resize = true, giữ tỷ lệ
                 if ($resize) {
-                    $img->resize($width, $height);
+                    logger("Before resize: " . $img->width() . "x" . $img->height());
+                    $img->resize($width, $height, function ($constraint) {
+                        $constraint->aspectRatio();
+                        $constraint->upsize(); // Không phóng to ảnh nhỏ
+                    });
                 }
 
-                $filename = time() . uniqid() . '.' . 'webp';
+                $filename = time() . uniqid() . '.webp';
 
-                Storage::disk('public')->put($directory . '/' . $filename, $img->encode());
+                // Encode với chất lượng 80 (bạn có thể chỉnh từ 60 đến 90)
+                Storage::disk('public')->put($directory . '/' . $filename, $img->encode('webp', $quality));
 
                 $paths[$key] = $directory . '/' . $filename;
             }
         }
+
         return $isArray ? $paths : $paths[0] ?? null;
     }
 }
@@ -64,7 +105,7 @@ if (!function_exists('showImage')) {
             return $storage->url($image);
         }
 
-        return asset('backend/assets/img/image-default.jpg');
+        return asset('images/image-default.png');
     }
 }
 
@@ -144,7 +185,7 @@ if (!function_exists('handleResponse')) {
     {
         $type = $success ? 'success' : 'error';
 
-        if ($type == 'success') sessionFlash('success', $message);
+        if ($type == 'success') sessionFlash($type, $message);
 
         return response()->json(['success' => $success, 'message' => $message, 'data' => $data], $code);
     }
@@ -241,4 +282,22 @@ function formatPrice($price)
         return  number_format((float)$price, 2, '.', ',');
     }
     return 0.00;
+}
+
+
+function generateEmployeeCode($table = 'employees', $column = 'employee_code', $prefix = 'PH', $length = 5)
+{
+    // Lấy bản ghi có ID lớn nhất
+    $latestRecord = DB::table($table)->orderByDesc('id')->first();
+
+    if ($latestRecord && isset($latestRecord->$column)) {
+        // Tách phần số từ mã (VD: PH03668 -> 3668)
+        $number = (int) substr($latestRecord->$column, strlen($prefix));
+        $number++;
+    } else {
+        $number = 1;
+    }
+
+    // Tạo mã mới: PH03669
+    return $prefix . str_pad($number, $length, '0', STR_PAD_LEFT);
 }

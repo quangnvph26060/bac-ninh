@@ -1,6 +1,6 @@
 <div class="card">
     <div class="card-header">
-        <h4 class="card-title"><label for="" class="form-label  required">Trạng thái</label>
+        <h4 class="card-title fs-6 fw-bold required">Trạng thái
         </h4>
     </div>
     <div class="card-body">

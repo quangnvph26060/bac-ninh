@@ -98,7 +98,8 @@ div.dt-container select.dt-input {
 }
 
 .col-form-label.required:after,
-.form-label.required:after {
+.form-label.required:after,
+.card-title.required:after {
     color: #d63939;
     content: "*";
     margin-left: 0.25rem;
@@ -175,7 +176,7 @@ a.form-hint {
 }
 
 .card-title {
-    font-weight: 500 !important;
+    /* font-weight: 500 !important; */
     font-size: 1.1rem;
     line-height: 1.5rem;
     color: inherit !important;
@@ -192,6 +193,38 @@ a.form-hint {
     opacity: 0;
     width: 0;
     height: 0;
+}
+
+.cursor {
+    cursor: pointer;
+}
+
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #ccc;
+    border-top-color: #ff4d4f;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .slider {
