@@ -219,10 +219,10 @@
                                     <span>Hóa đơn</span>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="bi bi-shop-window"></i>
-                                    <span>Cửa hàng</span>
+                            <li class="nav-item {{ request()->routeIs('coupons.index') ? 'active' : '' }}">
+                                <a href="{{ route('coupons.index') }}" class="nav-link ">
+                                    <i class="bi-tags"></i>
+                                    <span>Giảm giá</span>
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -281,27 +281,8 @@
         });
 
         const notyf = new Notyf({
-            duration: 5000,
+            duration: 50000,
             ripple: true,
-            types: [{
-                    type: 'success',
-                    background: '#198754',
-                    icon: {
-                        className: 'bi bi-check-circle-fill',
-                        tagName: 'i',
-                        color: 'white'
-                    }
-                },
-                {
-                    type: 'error',
-                    background: '#dc3545',
-                    icon: {
-                        className: 'bi bi-x-circle-fill',
-                        tagName: 'i',
-                        color: 'white'
-                    }
-                }
-            ]
         });
     </script>
     @stack('scripts')

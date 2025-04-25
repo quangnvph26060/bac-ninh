@@ -284,8 +284,11 @@
                         <div class="input-group gap-2">
                             <input type="text" id="input_coupon" placeholder="Nhập mã giảm giá của bạn"
                                 class="form-control rounded-start">
-                            <button type="button" class="ant-btn-primary text-white px-3 py-1 rounded-end">Áp
+                            <button type="button" onclick="applyCoupon()"
+                                class="ant-btn-primary text-white px-3 py-1 rounded-end">Áp
                                 dụng</button>
+                            <button type="button" id="remove_coupon" style="display: none;">Hủy mã</button>
+
                         </div>
                     </div>
                 </div>
@@ -304,12 +307,12 @@
                             <span id="shipping-method-fee">$0.00</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Thuế</span>
-                            <span id="tax-amount">$0.00</span>
+                            <span>Giảm giá</span>
+                            <span id="discount">$0.00</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Tổng phụ phí</span>
-                            <span id="extra-fee">$0.00</span>
+                            <span>Thuế</span>
+                            <span id="tax-amount">$0.00</span>
                         </div>
                         <hr class="my-2">
                         <div class="d-flex justify-content-between fw-bold">
@@ -357,12 +360,97 @@
                 </div>
             </div>
         </div>
+
+        <div id="loading" style="display: none; text-align: center; padding: 50px;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
     </div>
 @endsection
 
 
 @push('scripts')
     <script>
+        let originalTotal = null;
+        let originalShippingFee = null;
+        let oldCoupon = null;
+
+        function applyCoupon() {
+            let $input_coupon = $('#input_coupon');
+            let couponVal = $input_coupon.val().trim();
+
+            // Nếu không nhập gì hoặc trùng với coupon cũ thì không làm gì cả
+            if (couponVal === '' || couponVal === oldCoupon) return;
+
+            let result = [];
+            let shipping = $('input[name="shipping_method_id"]:checked').attr('data-fee');
+
+            $('.custom-form.mb-3').each(function() {
+                let $form = $(this);
+                let productId = $form.data('id');
+                let variantId = $form.find('[id^="info_variant_"]').data('variant-id');
+                let qty = $form.find('.step_product_input').val();
+
+                let item = {
+                    productId: productId,
+                    qty
+                };
+
+                if (variantId !== undefined) {
+                    item.variant_id = variantId;
+                }
+
+                result.push(item);
+            });
+
+            $.ajax({
+                url: '{{ route('orders.apply.coupon') }}',
+                method: 'POST',
+                data: {
+                    coupon: couponVal,
+                    options: result,
+                    shipping
+                },
+                success: function(response) {
+                    $('#remove_coupon').show();
+                    $('#discount').show().text(`-$${response.discount}`);
+                    $('#order-total-amount, .header_step_order .final-price').text(`$${response.grand_total}`);
+
+                    // Lưu lại originalTotal nếu chưa lưu
+                    if (originalTotal === null && originalShippingFee === null && oldCoupon === null) {
+                        originalTotal = $('#order-total-amount').text().replace('$', '').trim();
+                        originalShippingFee = $('#discount').text().replace(/[$-]/g, '').trim();
+                    }
+
+                    // Cập nhật oldCoupon
+                    oldCoupon = couponVal;
+                },
+                error: function(xhr) {
+                    notyf.error(xhr.responseJSON.message);
+
+                    $input_coupon.val('');
+
+                    // Khôi phục lại giá trị trước khi giảm
+                    if (originalTotal !== null && originalShippingFee !== null && oldCoupon !== null) {
+                        $('#order-total-amount, .header_step_order .final-price').text(`$${originalTotal}`);
+                        $('#discount').text(`-$${originalShippingFee}`);
+                        $input_coupon.val(oldCoupon);
+                    }
+                }
+            });
+        }
+
+        $('#remove_coupon').on('click', function() {
+            // Khôi phục lại tổng tiền ban đầu
+            if (originalTotal !== null) {
+                $('#order-total-amount, .header_step_order .final-price').text(`$${originalTotal}`);
+            }
+
+            $('#input_coupon').val(''); // Xóa mã
+            $('#remove_coupon').hide(); // Ẩn nút Hủy mã
+        });
+
         function cleanCurrency(value) {
             return parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
         }
@@ -744,6 +832,7 @@
             function fetchProducts(url) {
                 const searchText = $('input[name="search_text"]').val();
                 const perPage = $('select[name="per_page"]').val();
+                $('#loading').show();
 
                 $.ajax({
                     url: url,
@@ -755,8 +844,10 @@
                     success: function(data) {
                         $('.result-product').html(data);
                         highlightSelectedProducts();
+                        $('#loading').hide();
                     },
                     error: function() {
+                        $('#loading').hide();
                         alert('Đã xảy ra lỗi khi tải dữ liệu.');
                     }
                 });
@@ -796,9 +887,6 @@
 
                 // Gộp lại
                 confirmed = confirmed.concat(newItems);
-
-                console.log(confirmed);
-
 
                 setConfirmedOrders(confirmed);
                 localStorage.removeItem('selectedProducts');
@@ -899,7 +987,7 @@
                         const isVariant = product.type === 'variant';
 
                         return `
-                            <div class="custom-form mb-3" data-id="${product.id}" data-time="${product.time}">
+                            <div class="custom-form mb-3" data-id="${product.id}" data-time="${product.time}" data-type="${product.type}">
                                 <div class="d-flex align-items-center mb-3 justify-content-between">
                                     <div class="d-flex align-items-center">
                                         <img src="${product.image}" alt="${product.name}" class="me-3" style="width: 60px; height: auto;">
@@ -1276,6 +1364,7 @@
                 setSelectedProducts(selection)
 
                 renderSelectedProducts();
+
                 highlightSelectedProducts();
             });
 
@@ -1322,8 +1411,8 @@
                 $(`.product_item[data-id="${id}"] .product_card`).removeClass('selected');
             });
 
-
             function renderSelectedProducts() {
+
                 const selected = getSelectedProducts();
 
                 if (selected.length === 0) {
@@ -1352,7 +1441,6 @@
             }
 
             highlightSelectedProducts();
-            renderSelectedProducts()
         })
     </script>
 @endpush

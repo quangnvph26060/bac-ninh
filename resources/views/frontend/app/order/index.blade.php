@@ -7,7 +7,8 @@
                 <h1 class="billing__title__content">Đơn hàng</h1>
 
                 <div class="d-flex gap-2 align-items-center">
-                    <a href="{{ route('app.orders.create') }}" id="headerOrder__createOrder_btn" class="ant-btn ant-btn-primary px-2 ">
+                    <a href="{{ route('orders.create') }}" id="headerOrder__createOrder_btn"
+                        class="ant-btn ant-btn-primary px-2 ">
                         Tạo đơn hàng <i class="bi bi-plus-circle ms-2"></i>
                     </a>
                 </div>
@@ -47,7 +48,7 @@
                 @include('frontend.components.order-table', ['orders' => $orders])
             </div>
 
-            <div id="order-loading" style="display: none; text-align: center; padding: 50px;">
+            <div id="loading" style="display: none; text-align: center; padding: 50px;">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
@@ -120,7 +121,7 @@
             const date_range = $('input[name="date_range"]').val();
 
             $('#order-content').hide(); // Ẩn content cũ
-            $('#order-loading').show(); // Hiện loading
+            $('#loading').show(); // Hiện loading
 
             $.ajax({
                 url: "{{ route('orders.index') }}",
@@ -133,11 +134,11 @@
                 },
                 success: function(response) {
                     $('#order-content').html(response.html).fadeIn(200);
-                    $('#order-loading').hide();
+                    $('#loading').hide();
                 },
                 error: function(xhr) {
                     console.error("Lỗi khi lọc:", xhr);
-                    $('#order-loading').hide();
+                    $('#loading').hide();
                     $('#order-content').show();
                 }
             });
@@ -150,7 +151,7 @@
             const date_range = $('input[name="date_range"]').val();
 
             $('#order-content').hide();
-            $('#order-loading').show();
+            $('#loading').show();
 
             $.ajax({
                 url: url,
@@ -162,11 +163,11 @@
                 },
                 success: function(response) {
                     $('#order-content').html(response.html).fadeIn(200);
-                    $('#order-loading').hide();
+                    $('#loading').hide();
                 },
                 error: function(xhr) {
                     console.error("Lỗi khi phân trang:", xhr);
-                    $('#order-loading').hide();
+                    $('#loading').hide();
                     $('#order-content').show();
                 }
             });

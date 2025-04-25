@@ -71,9 +71,14 @@ class CouponController extends Controller
     public function update(CouponRequest $request, string $id)
     {
         $payload = $request->validated();
+
         $response = $this->couponService->update($id, $payload);
         return handleResponse($response['message'], $response['success'], $response['code']);
     }
+
+    // if (!empty($payload['cross_sell'])) {
+    //     $payload['cross_sell'] = array_map('intval', explode(',', $payload['cross_sell']));
+    // }
 
     /**
      * Remove the specified resource from storage.

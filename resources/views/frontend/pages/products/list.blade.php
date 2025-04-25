@@ -118,10 +118,8 @@
                     </select>
                 </div>
 
-                <div class="list_prd_catalogs w-100">
-
+                <div class="result-response">
                     @include('frontend.pages.products._product-list', ['products' => $products])
-
                 </div>
 
                 {{ $products->links('vendor.pagination.custom') }}
@@ -242,7 +240,7 @@
                     },
                     success: function(response) {
                         $('.product-total').text(' ' + response.total + ' ');
-                        $('.list_prd_catalogs').html(response.html);
+                        $('.result-response').html(response.html);
                         $('.pagination').html(response.pagination);
                     },
                     complete: function() {

@@ -64,7 +64,7 @@
 
                             @foreach ($products as $product)
                             <div class="swiper-slide">
-                                        <a href="{{ route('products.list', [$product->category->slug, $product->slug]) }}">
+                                        <a href="{{ route('products.detail', [$product->category->slug, $product->slug]) }}">
                                         <img src="{{ showImage($product->image) }}" alt="{{ $product->name }}" />
                                         <div class="px-4 d-flex flex-column gap-2 text-center bg-white">
                                             <span class="text-dark fw-bold text-truncate fs-6">{{ $product->name }}</span>

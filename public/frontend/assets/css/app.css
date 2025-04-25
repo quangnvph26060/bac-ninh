@@ -323,6 +323,7 @@ video {
     line-height: 1;
     list-style: none;
     position: relative;
+    color: white !important;
 }
 
 .avatar__info__wrapper {
@@ -1129,13 +1130,27 @@ main::-webkit-scrollbar-thumb:hover {
     cursor: default;
 }
 
-#order-loading {
+/* #loading {
     position: absolute;
     width: 100%;
     top: 50%;
     left: 0;
     transform: translateY(-50%);
-    z-index: 10;
+    z-index: 9999;
+} */
+
+#loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7); /* mờ trắng */
+    z-index: 9999; /* cao nhất */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: all; /* chặn click */
 }
 
 .custom-pagination .page-item.active:hover {
@@ -1414,6 +1429,14 @@ main::-webkit-scrollbar-thumb:hover {
 }
 .btn-custom {
     margin-right: 10px;
+}
+
+table tbody tr td,
+table tbody tr td p,
+table tbody tr td span {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #42526e !important;
 }
 
 @media screen and (min-width: 1024px) {
@@ -1797,7 +1820,7 @@ h2 {
 }
 
 .per-page-selector {
-    padding: 6px 12px;
+    padding: 6px 0px;
     border-radius: 6px;
     border: 1px solid #ddd;
     font-size: 14px;
@@ -1847,10 +1870,6 @@ h2 {
     border: 1px solid #ff4d4f;
     height: 30px !important;
     border-radius: 3px;
-}
-
-.notyf__toast {
-    max-width: 100% !important;
 }
 
 .step_shipping {

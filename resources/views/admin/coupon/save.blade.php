@@ -39,14 +39,14 @@
                                     <div class="mb-3 position-relative col-md-3">
                                         <label for="type" class="form-label required">Loại</label>
                                         <select name="type" id="type" class="form-select">
-                                            <option value="order">Giảm theo đơn hàng</option>
-                                            <option value="product">Giảm theo sản phẩm</option>
+                                            <option value="order" @selected(($coupon->type ?? '') == 'order')>Giảm theo đơn hàng</option>
+                                            <option value="product" @selected(($coupon->type ?? '') == 'product')>Giảm theo sản phẩm</option>
                                         </select>
                                     </div>
 
                                     <div class="mb-3 col-md-4">
                                         <label for="value" class="form-label required">Giá trị giảm
-                                            <code>($)</code></label>
+                                            <code>(%)</code></label>
                                         <div class="input-group">
                                             <input type="text" class="form-control" name="value"
                                                 placeholder="Nhập giá trị giảm"
@@ -118,7 +118,8 @@
                     </div>
 
                     <div class="card" style="display: none" id="search-product">
-                        <input name="product_id[]" type="hidden" value="">
+                        <input name="product_id[]" type="hidden"
+                            value="{{ $coupon->products->pluck('id')->implode(',') }}">
 
                         <div class="card-body">
                             <div class="mb-3 mt-3 position-relative">
@@ -145,44 +146,45 @@
                             </div>
 
                             <div class="list-group list-group-flush list-group-hoverable list-selected-products"
-                                style="display: none">
+                                style="@if (isset($coupon) && $coupon->products->isNotEmpty()) display:block; @else display:none @endif">
                                 <label class="form-label">Sản phẩm đã chọn</label>
 
-                                <div class="list-group-item" data-id="">
-                                    <div class="row align-items-center">
-                                        <div class="col-auto">
-                                            <span class="avatar" style="background-image: url('')"></span>
-                                        </div>
-                                        <div class="col text-truncate">
-                                            <a href="javascript:void(0);"
-                                                class="text-body d-block text-truncate fs-6">aaaa</a>
-                                        </div>
-                                        <div class="col-auto">
-                                            <a href="javascript:void(0)" data-bb-toggle="product-delete-item"
-                                                data-bb-target="1"
-                                                class="text-decoration-none list-group-item-actions btn-trigger-remove-selected-product"
-                                                title="Xóa bỏ">
-                                                <svg class="icon text-secondary svg-icon-ti-ti-x"
-                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none">
-                                                    </path>
-                                                    <path d="M18 6l-12 12"></path>
-                                                    <path d="M6 6l12 12"></path>
-                                                </svg>
-                                            </a>
+                                @foreach ($coupon->products as $product)
+                                    <div class="list-group-item" data-id="{{ $product->id }}">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="avatar"
+                                                    style="background-image: url('{{ showImage($product->image) }}')"></span>
+                                            </div>
+                                            <div class="col text-truncate">
+                                                <a href="javascript:void(0);"
+                                                    class="text-body d-block text-truncate fs-6">{{ $product->name }}</a>
+                                            </div>
+                                            <div class="col-auto">
+                                                <a href="javascript:void(0)" data-bb-toggle="product-delete-item"
+                                                    data-bb-target="1"
+                                                    class="text-decoration-none list-group-item-actions btn-trigger-remove-selected-product"
+                                                    title="Xóa bỏ">
+                                                    <svg class="icon text-secondary svg-icon-ti-ti-x"
+                                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                        <path d="M18 6l-12 12"></path>
+                                                        <path d="M6 6l12 12"></path>
+                                                    </svg>
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-
+                                @endforeach
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-3 gap-3 d-flex flex-column-reverse flex-md-column mb-md-0 mb-5">
-                    @include('admin.components.button', ['redirect' => route('admin.categories.index')])
+                    @include('admin.components.button', ['redirect' => route('admin.coupons.index')])
 
                     <x-status :status="optional($coupon)->status" />
                 </div>
@@ -195,6 +197,88 @@
     <script src="{{ asset('backend/assets/js/plugin/flatpickr/flatpickr.min.js') }}"></script>
 
     <script>
+        let ids = @json(isset($coupon) ? $coupon->products->pluck('id')->toArray() : []);
+
+        let debounceTimer;
+
+        function loadPage(page) {
+            let query = $('#searchInput').val();
+            fetchSearchResults(query, page);
+        };
+
+        function fetchSearchResults(query, page = 1) {
+            $.ajax({
+                url: '{{ route('admin.products.search.products') }}', // Địa chỉ API của bạn
+                method: 'GET',
+                data: {
+                    query: query,
+                    page: page,
+                    per_page: 10 // Giới hạn 10 sản phẩm mỗi trang
+                },
+                success: function(response) {
+                    displaySearchResults(response.data, response.pagination);
+                },
+                error: function() {
+                    console.log("Lỗi khi gọi API tìm kiếm.");
+                }
+            });
+        }
+
+        function displaySearchResults(products, pagination) {
+            let resultList = $('.list-search-data .list-group');
+            resultList.empty(); // Xóa nội dung cũ
+
+            // Hiển thị sản phẩm tìm thấy
+            products.forEach(function(product) {
+                let path = "{{ config('app.url') }}/storage/" + product.image;
+
+                resultList.append(`
+                        <a href="javascript:void(0);" class="list-group-item list-group-item-action selectable-item"
+                            data-id="${product.id}" data-name="${product.name}" data-image="${path}" data-price="${product.price}">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <span class="avatar" style="background-image: url('${path}')"></span>
+                                </div>
+                                <div class="col text-truncate">
+                                    <h4 class="text-body d-block mb-0">${product.name}</h4>
+                                </div>
+                            </div>
+                        </a>
+                    `);
+            });
+
+            // Hiển thị phân trang
+            let paginationList = $('.pagination');
+            paginationList.empty();
+
+            if (pagination.prev_page_url) {
+                paginationList.append(
+                    `<li class="page-item"><a class="page-link" href="javascript:void(0);" onclick="loadPage(${pagination.current_page - 1})">Trước</a></li>`
+                );
+            } else {
+                paginationList.append(
+                    '<li class="page-item disabled"><span class="page-link">Trước</span></li>');
+            }
+
+            if (pagination.next_page_url) {
+                paginationList.append(
+                    `<li class="page-item"><a class="page-link" href="javascript:void(0);" onclick="loadPage(${pagination.current_page + 1})">Kế tiếp</a></li>`
+                );
+            } else {
+                paginationList.append(
+                    '<li class="page-item disabled"><span class="page-link">Kế tiếp</span></li>');
+            }
+
+        }
+
+        function checkListSelected() {
+            if ($('.list-selected-products .list-group-item').length > 0) {
+                $('.list-selected-products').css('display', 'block');
+            } else {
+                $('.list-selected-products').css('display', 'none');
+            }
+        }
+
         $(document).ready(function() {
 
             let dropdownHeight = 0;
@@ -203,21 +287,102 @@
                 let value = $(this).val();
 
                 if (value == 'product') {
-                    $('#search-product').show()
+                    $('#search-product').show();
+                } else {
+                    $('#search-product').hide();
                 }
-            })
+            }).trigger('change');
+
 
             $('#searchInput').on('focus', function() {
-                $('#popup-dropdown').show();
+                let input = $(this);
+                let popup = $('#popup-dropdown');
+
+                // Hiển thị popup tạm thời để đo kích thước
+                popup.show();
+
+                let inputOffset = input.offset();
+                let inputHeight = input.outerHeight();
+                let popupHeight = popup.outerHeight();
+                let windowHeight = $(window).height();
+                let spaceBelow = windowHeight - (inputOffset.top + inputHeight);
+                let spaceAbove = inputOffset.top;
+
+                // Xác định nên hiển thị bên dưới hay bên trên
+                if (spaceBelow < popupHeight && spaceAbove > popupHeight) {
+                    popup.css({
+                        top: 'auto',
+                        bottom: inputHeight + 'px'
+                    });
+                } else {
+                    popup.css({
+                        top: inputHeight + 'px',
+                        bottom: 'auto'
+                    });
+                }
 
                 if (!$('.selectable-item').length > 0) {
                     fetchSearchResults('');
-                } else {
-                    setMarginBottomImportant('#search-product', dropdownHeight);
                 }
             });
 
+            $(document).on('click', '.btn-trigger-remove-selected-product', function() {
+                let item = $(this).closest('.list-group-item');
+                let productId = item.data('id');
+                item.remove();
 
+                ids = ids.filter(id => id !== productId);
+
+                // Cập nhật lại input ẩn
+                $('input[name="product_id[]"]').val(ids.join(','));
+
+                checkListSelected()
+            });
+
+            $(document).on('click', '.selectable-item', function() {
+                let productId = $(this).data('id');
+                let productName = $(this).data('name');
+                let productImage = $(this).data('image');
+                let productPrice = $(this).data('price');
+
+                if (ids.includes(productId)) {
+                    // Nếu sản phẩm đã tồn tại, xóa nó khỏi danh sách
+                    $('.list-selected-products .list-group-item[data-id="' + productId + '"]').remove();
+
+                    // Loại bỏ productId khỏi mảng ids
+                    ids = ids.filter(id => id !== productId);
+
+                } else {
+                    ids.push(productId);
+                    // Cập nhật danh sách sản phẩm đã chọn
+                    $('.list-selected-products').append(`
+                    <div class="list-group-item" data-id="${productId}">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar" style="background-image: url('${productImage}')"></span>
+                            </div>
+                            <div class="col text-truncate">
+                                <a href="javascript:void(0);" class="text-body d-block text-truncate fs-6">${productName}</a>
+                            </div>
+                            <div class="col-auto">
+                                <a href="javascript:void(0)" data-bb-toggle="product-delete-item" data-bb-target="1" class="text-decoration-none list-group-item-actions btn-trigger-remove-selected-product" title="Xóa bỏ">
+                                    <svg class="icon text-secondary svg-icon-ti-ti-x" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M18 6l-12 12"></path>
+                                        <path d="M6 6l12 12"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                }
+
+                checkListSelected()
+
+                $('input[name="product_id[]"]').val(ids)
+
+            });
 
             $('#searchInput').on('input', function() {
                 let query = $(this).val();
@@ -236,87 +401,6 @@
                     $('#search-product').css('margin-bottom', '0');
                 }
             });
-
-
-            function loadPage(page) {
-                let query = $('#searchInput').val();
-                fetchSearchResults(query, page);
-            };
-
-            function fetchSearchResults(query, page = 1) {
-                $.ajax({
-                    url: '{{ route('admin.products.search.products') }}', // Địa chỉ API của bạn
-                    method: 'GET',
-                    data: {
-                        query: query,
-                        page: page,
-                        per_page: 10 // Giới hạn 10 sản phẩm mỗi trang
-                    },
-                    success: function(response) {
-                        displaySearchResults(response.data, response.pagination);
-                    },
-                    error: function() {
-                        console.log("Lỗi khi gọi API tìm kiếm.");
-                    }
-                });
-            }
-
-            function setMarginBottomImportant(selector, value) {
-                let currentStyle = $(selector).attr('style') || '';
-                let updatedStyle = currentStyle.replace(/margin-bottom\s*:\s*[^;]+;?/gi, '');
-                updatedStyle += `margin-bottom: ${value}px !important;`;
-                $(selector).attr('style', updatedStyle);
-            }
-
-            function displaySearchResults(products, pagination) {
-                let resultList = $('.list-search-data .list-group');
-                resultList.empty(); // Xóa nội dung cũ
-
-                // Hiển thị sản phẩm tìm thấy
-                products.forEach(function(product) {
-                    let path = "{{ config('app.url') }}/storage/" + product.image;
-
-                    resultList.append(`
-                        <a href="javascript:void(0);" class="list-group-item list-group-item-action selectable-item"
-                            data-id="${product.id}" data-name="${product.name}" data-image="${path}" data-price="${product.price}">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <span class="avatar" style="background-image: url('${path}')"></span>
-                                </div>
-                                <div class="col text-truncate">
-                                    <h4 class="text-body d-block mb-0">${product.name}</h4>
-                                </div>
-                            </div>
-                        </a>
-                    `);
-                });
-
-                // Hiển thị phân trang
-                let paginationList = $('.pagination');
-                paginationList.empty();
-
-                if (pagination.prev_page_url) {
-                    paginationList.append(
-                        `<li class="page-item"><a class="page-link" href="javascript:void(0);" onclick="loadPage(${pagination.current_page - 1})">Trước</a></li>`
-                    );
-                } else {
-                    paginationList.append(
-                        '<li class="page-item disabled"><span class="page-link">Trước</span></li>');
-                }
-
-                if (pagination.next_page_url) {
-                    paginationList.append(
-                        `<li class="page-item"><a class="page-link" href="javascript:void(0);" onclick="loadPage(${pagination.current_page + 1})">Kế tiếp</a></li>`
-                    );
-                } else {
-                    paginationList.append(
-                        '<li class="page-item disabled"><span class="page-link">Kế tiếp</span></li>');
-                }
-
-                // Cập nhật khoảng cách khi dropdown hiển thị
-                dropdownHeight = $('#popup-dropdown').outerHeight(true);
-                setMarginBottomImportant('#search-product', dropdownHeight);
-            }
 
             flatpickr(".form-date-time", {
                 enableTime: true, // Bật chọn giờ
@@ -342,6 +426,13 @@
     <style>
         .list-group-item {
             display: block !important;
+        }
+
+        #popup-dropdown {
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            /* đảm bảo nằm trên các phần tử khác */
         }
     </style>
 @endpush

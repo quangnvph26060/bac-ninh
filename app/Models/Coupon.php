@@ -27,4 +27,14 @@ class Coupon extends Model
         'start_date' => 'datetime',
         'end_date' => 'datetime',
     ];
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'coupon_user_usages');
+    }
 }

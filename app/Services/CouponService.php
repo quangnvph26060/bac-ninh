@@ -34,9 +34,15 @@ class CouponService extends BaseService
     {
         return transaction(function () use ($payload) {
 
-            if (! $this->create($payload)) {
+            if (!$coupon = $this->create($payload)) {
                 errorResponse('Mã giảm giá thất bại!');
             }
+
+            $productIds = collect(explode(',', is_array($payload['product_id']) ? $payload['product_id'][0] : $payload['product_id']))
+                ->map(fn($id) => (int) $id)
+                ->toArray();
+
+            $coupon->products()->sync($productIds);
 
             return successResponse('Mã giảm giá thành công.', [], 201);
         });
@@ -44,15 +50,22 @@ class CouponService extends BaseService
 
     public function show(string $id)
     {
-        return $this->findById($id);
+        return $this->findById($id, ['*'], ['products']);
     }
 
     public function update(string $id, array $payload)
     {
         return transaction(function () use ($id, $payload) {
-            if (! $this->updateData($id, $payload)) {
+
+            if (!$coupon = $this->updateData($id, $payload)) {
                 errorResponse('Mã giảm giá thất bại!');
             }
+
+            $productIds = collect(explode(',', is_array($payload['product_id']) ? $payload['product_id'][0] : $payload['product_id']))
+                ->map(fn($id) => (int) $id)
+                ->toArray();
+
+            $coupon->products()->sync($productIds);
 
             return successResponse('Lưu thay đổi thành công.', [], 200);
         });

@@ -16,7 +16,19 @@ use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
-    public function list($prefix, $suffix = null) {}
+    public function detail($prefix, $suffix = null)
+    {
+        if (!empty($suffix)) {
+            $product = Product::query()->with(['category', 'images', 'attributes', 'variants'])->where('slug', $suffix)->firstOrFail();
+
+            // $attributes = $product->variants->map(function($attribute){
+            // $values = AttributeValue::whereIn('id', $valueIds)->pluck('value', 'id')->toArray();
+            // });
+
+            return view('frontend.pages.products.detail', compact('product'));
+        }
+        return redirect()->route('products.category', $prefix);
+    }
 
     protected function getProductAttributesForFilter($products)
     {
