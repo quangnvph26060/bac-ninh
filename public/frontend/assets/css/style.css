@@ -434,7 +434,6 @@ header {
 
 .box_benifit_item_content {
     padding-top: 16px;
-    text-align: center;
 }
 
 .homepage_benifit .box_benifit_item .box_benifit_item_content .title {
@@ -1352,6 +1351,9 @@ input[type="number"] {
 }
 
 @media (max-width: 768px) {
+    .box_benifit_item_content {
+        text-align: center;
+    }
     #sortSelect {
         width: 50% !important;
     }

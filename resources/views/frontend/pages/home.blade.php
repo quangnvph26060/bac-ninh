@@ -63,33 +63,27 @@
                         <div class="swiper-wrapper">
 
                             @foreach ($products as $product)
-                            <div class="swiper-slide">
-                                        <a href="{{ route('products.detail', [$product->category->slug, $product->slug]) }}">
+                                <div class="swiper-slide">
+                                    <a href="{{ route('products.detail', [$product->category->slug, $product->slug]) }}">
                                         <img src="{{ showImage($product->image) }}" alt="{{ $product->name }}" />
                                         <div class="px-4 d-flex flex-column gap-2 text-center bg-white">
                                             <span class="text-dark fw-bold text-truncate fs-6">{{ $product->name }}</span>
                                             <p class="price-product">
 
-                                                @php
-                                                    $record = $product->variants->isNotEmpty()
-                                                        ? $product->variants->first()
-                                                        : $product;
-                                                @endphp
-
-                                                @if (isOnSale($record))
+                                                @if (isOnSale($product))
                                                     <span
-                                                        class="text-danger fs-6">{{ finalPrice($record->discount_price) }}</span>
+                                                        class="text-danger fs-6">{{ finalPrice($product->discount_price) }}</span>
                                                     <del
-                                                        class="ms-2 text-muted">{{ formatPrice($record->sale_price) }}</del>
+                                                        class="ms-2 text-muted">{{ formatPrice($product->sale_price) }}</del>
                                                 @else
                                                     <span
-                                                        class="text-danger fs-6">{{ formatPrice($record->sale_price) }}</span>
+                                                        class="text-danger fs-6">{{ formatPrice($product->sale_price) }}</span>
                                                 @endif
 
                                             </p>
                                         </div>
                                     </a>
-                                    </div>
+                                </div>
                             @endforeach
                         </div>
                     </div>

@@ -3,7 +3,7 @@
         <tr class="align-middle">
             <th scope="col" style="width: 5%">ID</th>
             <th scope="col" style="width: 10%">Mã</th>
-            <th scope="col" style="width: 50%">Tiêu đề</th>
+            <th scope="col" style="width: 40%">Tiêu đề</th>
             <th scope="col" class="text-center">Loại</th>
             <th scope="col">Trạng thái</th>
             <th scope="col" class="text-center">Còn hạn trong</th>
@@ -29,11 +29,7 @@
                     <p class="mb-0 text-center border rounded-pill py-1">{{ ucfirst($coupon->type) }}</p>
                 </td>
                 <td>
-                    @if ($coupon->status == 1)
-                        <div class="bg_paid status_btn_order"><span class="px-2">Còn hạn</span></div>
-                    @else
-                        <div class="bg_unpaid status_btn_order"><span class="px-2">Hết hạn</span></div>
-                    @endif
+                    @include('frontend.components.switch-status', ['status' => $coupon->status])
                 </td>
 
                 <td class="text-center">

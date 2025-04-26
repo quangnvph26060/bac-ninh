@@ -7,6 +7,7 @@ use App\Http\Controllers\Frontend\Auth\AuthController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductController;
+use App\Http\Controllers\Frontend\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -28,8 +29,13 @@ Route::middleware('guest')->controller(AuthController::class)->group(function ()
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
-
     Route::get('coupons', [CouponController::class, 'coupons'])->name('coupons.index');
+
+    Route::group(['controller' => ProfileController::class], function () {
+        Route::get('profile', 'profile')->name('profile');
+        Route::post('update', 'update')->name('profile.update');
+        Route::post('change-password', 'changePassword')->name('change.password');
+    });
 
     Route::prefix('orders')->name('orders.')->controller(OrderController::class)->group(function () {
         Route::get('/', 'index')->name('index');

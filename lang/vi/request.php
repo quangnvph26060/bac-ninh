@@ -89,6 +89,10 @@ return [
             ],
         ],
         'attributes' => [],
+        'letters'          => ':attribute phải chứa ít nhất một chữ cái.',
+        'mixed'            => ':attribute phải chứa cả chữ hoa và chữ thường.',
+        'numbers'          => ':attribute phải chứa ít nhất một số.',
+        'symbols'          => ':attribute phải chứa ít nhất một ký tự đặc biệt.',
     ],
 
 ];

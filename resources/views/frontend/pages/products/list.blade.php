@@ -94,9 +94,16 @@
 
                             <div class="pe-3 pb-4">
                                 <div id="slider"></div>
-                                <div class="d-flex mt-3 info-range gap-1 justify-content-between">
-                                    <input type="number" class="" id="min-price" value="0" />
-                                    <input type="number" id="max-price" value="1000" />
+                                <div class="d-flex mt-3 info-range gap-1 justify-content-evenly align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <label for="min-price" class="me-2 form-label fs-6 fw-bold mb-0">MIN</label>
+                                        <input type="number" class="" id="min-price" value="0" />
+                                    </div>
+                                    -
+                                    <div class="d-flex align-items-center">
+                                        <label for="min-price" class="me-2 form-label fs-6 fw-bold mb-0">MAX</label>
+                                        <input type="number" id="max-price" value="2000" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -151,11 +158,11 @@
             var maxPriceInput = document.getElementById("max-price");
 
             noUiSlider.create(slider, {
-                start: [0, 5000], // Giá trị mặc định
+                start: [0, 2000], // Giá trị mặc định
                 connect: true, // Kết nối giữa hai thanh trượt
                 range: {
                     min: 0,
-                    max: 5000,
+                    max: 2000,
                 },
                 step: 10, // Bước nhảy
                 tooltips: [true, true], // Hiển thị tooltip trên thanh trượt
@@ -281,6 +288,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.0/nouislider.min.css" rel="stylesheet" />
 
     <style>
+        #filter-form{
+            width: 30%;
+        }
         .noUi-connect {
             background: #007bff;
         }
@@ -292,10 +302,10 @@
         }
 
         .info-range input {
-            padding: 0 8px;
+            padding: 5px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            width: 50%;
+            width: 100%;
         }
 
         #slider {
@@ -303,12 +313,6 @@
             /* Giảm chiều rộng của thanh trượt một chút */
             margin: 0 auto;
             /* Căn giữa thanh trượt */
-        }
-
-        .info-range input {
-            width: 45%;
-            /* Đảm bảo các ô input không quá rộng */
-            padding: 5px;
         }
 
         .d-md-flex {

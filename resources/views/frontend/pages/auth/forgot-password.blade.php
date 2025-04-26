@@ -39,7 +39,7 @@
                     <p class="font-medium mt-28px">Email</p>
                     <label class="border-none rounded-t border-inherit mt-8px h-38px rounded mb-16px">
                         <div>
-                            <div><input type="text" placeholder="Email" name="email" autocomplete="off"
+                            <div><input type="email" placeholder="Email" name="email" autocomplete="off"
                                     class="ant-input p-2 w-full h-full border rounded font-normal " value="">
                             </div>
                         </div>

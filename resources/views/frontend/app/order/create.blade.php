@@ -360,12 +360,6 @@
                 </div>
             </div>
         </div>
-
-        <div id="loading" style="display: none; text-align: center; padding: 50px;">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
     </div>
 @endsection
 

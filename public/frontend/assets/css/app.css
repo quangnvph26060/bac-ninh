@@ -417,13 +417,13 @@ video {
 }
 
 .dropdown_popup ul li {
-    padding: 8px 15px;
-    cursor: pointer;
     border-radius: 5px;
     transition: background 0.2s ease;
 }
 
 .dropdown_popup ul li a {
+    display: inline-block;
+    padding: 8px 15px;
     color: inherit;
     transition: all 0.3s;
 }
@@ -647,6 +647,7 @@ ul.menu.menu-root.menu-inline.menu-light.leftMenu {
     height: calc(100vh - 10%);
     max-height: calc(100vh - 130px);
     overflow-y: auto;
+    box-shadow: 2px 0 5px #0000000d;
 }
 
 .menu_side_bar .menu_main::-webkit-scrollbar {
@@ -968,15 +969,15 @@ main::-webkit-scrollbar-thumb:hover {
     justify-content: space-between;
 }
 
-.order .order_container {
+.container-wrapper {
     margin: 0 auto;
 }
 
-.order .billing__title__wrapper {
+.container-wrapper .billing__title__wrapper {
     margin-bottom: 24px;
 }
 
-.order .billing__title__content {
+.container-wrapper .billing__title__content {
     color: #091e42;
     font-size: 24px;
     font-style: normal;
