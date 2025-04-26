@@ -22,7 +22,7 @@
                 <div class="w-100 position-relative">
                     <label for="oldPassword" class="form-label">Mật khẩu cũ</label>
                     <input type="password" class="form-control pe-5" name="old_password" id="oldPassword"
-                        placeholder="Nhập mật khẩu cũ">
+                        placeholder="Nhập mật khẩu cũ" autocomplete="off">
                     <i class="bi bi-eye-slash position-absolute translate-middle-y me-3 toggle-password"
                         data-target="#oldPassword" style="cursor: pointer;"></i>
                 </div>
@@ -30,7 +30,7 @@
                 <div class="w-100 mt-3 position-relative">
                     <label for="newPassword" class="form-label">Mật khẩu mới</label>
                     <input type="password" class="form-control pe-5" name="new_password" id="newPassword"
-                        placeholder="Nhập mật khẩu mới">
+                        placeholder="Nhập mật khẩu mới" autocomplete="off">
                     <i class="bi bi-eye-slash position-absolute translate-middle-y me-3 toggle-password"
                         data-target="#newPassword" style="cursor: pointer;"></i>
                 </div>
