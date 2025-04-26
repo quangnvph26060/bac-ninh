@@ -1,18 +1,22 @@
 @switch($status)
+    @case('draft')
+        <span class="badge bg-light text-dark">Nháp</span>
+    @break
+
     @case('pending')
         <span class="badge bg-warning text-dark">Chờ xử lý</span>
     @break
 
     @case('processing')
-        <span class="badge bg-primary">Chuẩn bị hàng</span>
+        <span class="badge bg-primary text-light">Chuẩn bị hàng</span>
     @break
 
     @case('completed')
-        <span class="badge bg-success">Hoàn thành</span>
+        <span class="badge bg-success text-light">Hoàn thành</span>
     @break
 
     @case('cancelled')
-        <span class="badge bg-danger">Đã hủy</span>
+        <span class="badge bg-danger text-light">Đã hủy</span>
     @break
 
     @case('cod')
@@ -20,7 +24,7 @@
     @break
 
     @case('bank_transfer')
-        <span>Thành toán chuyển khoản</span>
+        <span>Thành toán qua ví</span>
     @break
 
     @case('paypal')

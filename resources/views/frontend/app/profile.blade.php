@@ -21,19 +21,20 @@
                 </div>
                 <div class="w-100 position-relative">
                     <label for="oldPassword" class="form-label">Mật khẩu cũ</label>
-                    <input type="password" class="form-control pe-5" name="old_password" id="oldPassword"
-                        placeholder="Nhập mật khẩu cũ" autocomplete="off">
+                    <input type="password" class="form-control pe-5" name="old_password_fake" id="oldPassword"
+                        placeholder="Nhập mật khẩu cũ" autocomplete="new-password">
                     <i class="bi bi-eye-slash position-absolute translate-middle-y me-3 toggle-password"
                         data-target="#oldPassword" style="cursor: pointer;"></i>
                 </div>
 
                 <div class="w-100 mt-3 position-relative">
                     <label for="newPassword" class="form-label">Mật khẩu mới</label>
-                    <input type="password" class="form-control pe-5" name="new_password" id="newPassword"
-                        placeholder="Nhập mật khẩu mới" autocomplete="off">
+                    <input type="password" class="form-control pe-5" name="new_password_fake" id="newPassword"
+                        placeholder="Nhập mật khẩu mới" autocomplete="new-password">
                     <i class="bi bi-eye-slash position-absolute translate-middle-y me-3 toggle-password"
                         data-target="#newPassword" style="cursor: pointer;"></i>
                 </div>
+
 
                 <button type="button" class="ant-btn ant-btn-primary w-100 mt-3" id="change-password">Đổi mật khẩu</button>
             </div>

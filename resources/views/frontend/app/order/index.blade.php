@@ -41,7 +41,7 @@
 
     <div class="table-responsive mt-4">
         <div id="order-content">
-            @include('frontend.components.order-table', ['orders' => $orders])
+            @include('frontend.app.order.order-table', ['orders' => $orders])
         </div>
     </div>
 @endsection
@@ -98,46 +98,21 @@
                 e.preventDefault();
                 const url = $(this).attr('href');
                 if (url) {
-                    fetchOrdersByUrl(url);
+                    fetchOrders(url);
                 }
+            });
+
+            $(document).on('change', '.per-page-selector', function() {
+                fetchOrders();
             });
         });
 
         // Gửi AJAX để lọc đơn hàng
-        function fetchOrders(page = 1) {
+        function fetchOrders(url = "{{ route('orders.index') }}", page = 1) {
             const status = $('.order-tab.active').data('status') || 'all';
             const search = $('input[name="search"]').val();
             const date_range = $('input[name="date_range"]').val();
-
-            $('#order-content').hide(); // Ẩn content cũ
-            $('#loading').show(); // Hiện loading
-
-            $.ajax({
-                url: "{{ route('orders.index') }}",
-                method: 'GET',
-                data: {
-                    status: status,
-                    search: search,
-                    date_range: date_range,
-                    page: page
-                },
-                success: function(response) {
-                    $('#order-content').html(response.html).fadeIn(200);
-                    $('#loading').hide();
-                },
-                error: function(xhr) {
-                    console.error("Lỗi khi lọc:", xhr);
-                    $('#loading').hide();
-                    $('#order-content').show();
-                }
-            });
-        }
-
-
-        function fetchOrdersByUrl(url) {
-            const status = $('.order-tab.active').data('status') || 'all';
-            const search = $('input[name="search"]').val();
-            const date_range = $('input[name="date_range"]').val();
+            const per_page = $('.per-page-selector').val() || 10;
 
             $('#order-content').hide();
             $('#loading').show();
@@ -146,16 +121,18 @@
                 url: url,
                 method: 'GET',
                 data: {
-                    status: status,
-                    search: search,
-                    date_range: date_range
+                    status,
+                    search,
+                    date_range,
+                    per_page,
+                    page
                 },
                 success: function(response) {
                     $('#order-content').html(response.html).fadeIn(200);
                     $('#loading').hide();
                 },
                 error: function(xhr) {
-                    console.error("Lỗi khi phân trang:", xhr);
+                    console.error("Lỗi khi load đơn hàng:", xhr);
                     $('#loading').hide();
                     $('#order-content').show();
                 }

@@ -34,7 +34,7 @@
                         @endswitch
                     </div>
                 </td>
-                <td>{{ $order->order_items_count }}</td>
+                <td>{{ $order->orderItems->sum('quantity') }} sản phẩm</td>
                 <td>@include('frontend.components.switch-status', ['status' => $order->payment_method])</td>
                 <td>{{ $order->created_at->format('d-m-Y H:i') }}</td>
             </tr>

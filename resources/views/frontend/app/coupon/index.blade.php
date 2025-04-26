@@ -70,7 +70,7 @@
             $(document).on('input', 'input[name="search"]', function() {
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => {
-                    fetchOrders();
+                    fetchCoupon();
                 }, 500); // 500ms chờ sau khi ngừng gõ
             });
 
@@ -80,24 +80,29 @@
                 e.preventDefault();
                 const url = $(this).attr('href');
                 if (url) {
-                    fetchOrdersByUrl(url);
+                    fetchCoupon(url);
                 }
+            });
+
+            $(document).on('change', '.per-page-selector', function() {
+                fetchCoupon();
             });
         });
 
         // Gửi AJAX để lọc đơn hàng
-        function fetchOrders(page = 1) {
+        function fetchCoupon(url = "{{ route('coupons.index') }}", page = 1) {
             const search = $('input[name="search"]').val();
 
-            $('#coupon-content').hide(); // Ẩn content cũ
-            $('#loading').show(); // Hiện loading
-
             $.ajax({
-                url: "{{ route('coupons.index') }}",
+                url: url,
                 method: 'GET',
                 data: {
                     search: search,
                     page: page
+                },
+                beforeSend: () => {
+                    $('#coupon-content').hide();
+                    $('#loading').show();
                 },
                 success: function(response) {
                     $('#coupon-content').html(response.html).fadeIn(200);
@@ -105,37 +110,16 @@
                 },
                 error: function(xhr) {
                     console.error("Lỗi khi lọc:", xhr);
+                    notyf.error('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
+                },
+                complete: () => {
                     $('#loading').hide();
                     $('#coupon-content').show();
                 }
             });
         }
 
-        function fetchOrdersByUrl(url) {
-            const search = $('input[name="search"]').val();
-
-            $('#coupon-content').hide();
-            $('#loading').show();
-
-            $.ajax({
-                url: url,
-                method: 'GET',
-                data: {
-                    search: search,
-                },
-                success: function(response) {
-                    $('#coupon-content').html(response.html).fadeIn(200);
-                    $('#loading').hide();
-                },
-                error: function(xhr) {
-                    console.error("Lỗi khi phân trang:", xhr);
-                    $('#loading').hide();
-                    $('#coupon-content').show();
-                }
-            });
-        }
-
-        fetchOrders()
+        fetchCoupon()
     </script>
 @endpush
 

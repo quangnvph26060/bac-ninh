@@ -22,8 +22,9 @@ class OrderController extends Controller
         $status = $request->status;
         $search = $request->search;
         $dateRange = $request->date_range;
+        $perPage = $request->input('per_page', 10);
 
-        $query = Order::withCount('orderItems')->with('user');
+        $query = Order::query()->with(['user', 'orderItems']);
 
         if ($status && $status !== 'all') {
             $query->where('status', $status);
@@ -35,15 +36,15 @@ class OrderController extends Controller
 
         if ($dateRange) {
             [$start, $end] = explode(' - ', $dateRange);
-            $start = \Carbon\Carbon::createFromFormat('d/m/Y', trim($start))->startOfDay();
-            $end = \Carbon\Carbon::createFromFormat('d/m/Y', trim($end))->endOfDay();
+            $start = Carbon::createFromFormat('d/m/Y', trim($start))->startOfDay();
+            $end = Carbon::createFromFormat('d/m/Y', trim($end))->endOfDay();
             $query->whereBetween('created_at', [$start, $end]);
         }
 
-        $orders = $query->orderBy('created_at', 'desc')->paginate(10);
+        $orders = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         if ($request->ajax()) {
-            $html = view('frontend.components.order-table', compact('orders'))->render();
+            $html = view('frontend.app.order.order-table', compact('orders'))->render();
             return response()->json([
                 'html' => $html,
             ]);

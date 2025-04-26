@@ -19,71 +19,67 @@
     }
 @endphp
 
-@if ($paginator->hasPages())
-    <div class="pagination">
-        <div class="d-flex justify-content-center align-items-center">
-            <ul class="custom-pagination">
+<div class="pagination">
+    <div class="d-flex justify-content-center align-items-center">
+        <ul class="custom-pagination">
 
-                {{-- Previous Page --}}
-                @if ($paginator->onFirstPage())
-                    <li class="page-item disabled"><i class="bi bi-chevron-left"></i></li>
+            {{-- Previous Page --}}
+            @if ($paginator->onFirstPage())
+                <li class="page-item disabled"><i class="bi bi-chevron-left"></i></li>
+            @else
+                <li class="page-item">
+                    <a href="{{ $paginator->previousPageUrl() }}"><i class="bi bi-chevron-left"></i></a>
+                </li>
+            @endif
+
+            {{-- First page and leading dots --}}
+            @if ($start > 1)
+                <li class="page-item"><a class="page-url-link" href="{{ $paginator->url(1) }}">1</a></li>
+                @if ($start > 2)
+                    <li class="page-item dots">...</li>
+                @endif
+            @endif
+
+            {{-- Main page range --}}
+            @for ($i = $start; $i <= $end; $i++)
+                @if ($i == $current)
+                    <li class="page-item active page-url-link">{{ $i }}</li>
                 @else
-                    <li class="page-item">
-                        <a href="{{ $paginator->previousPageUrl() }}"><i class="bi bi-chevron-left"></i></a>
-                    </li>
-                @endif
-
-                {{-- First page and leading dots --}}
-                @if ($start > 1)
-                    <li class="page-item"><a class="page-url-link" href="{{ $paginator->url(1) }}">1</a></li>
-                    @if ($start > 2)
-                        <li class="page-item dots">...</li>
-                    @endif
-                @endif
-
-                {{-- Main page range --}}
-                @for ($i = $start; $i <= $end; $i++)
-                    @if ($i == $current)
-                        <li class="page-item active page-url-link">{{ $i }}</li>
-                    @else
-                        <li class="page-item"><a class="page-url-link"
-                                href="{{ $paginator->url($i) }}">{{ $i }}</a></li>
-                    @endif
-                @endfor
-
-                {{-- Trailing dots and last page --}}
-                @if ($end < $total)
-                    @if ($end < $total - 1)
-                        <li class="page-item dots">...</li>
-                    @endif
                     <li class="page-item"><a class="page-url-link"
-                            href="{{ $paginator->url($total) }}">{{ $total }}</a></li>
+                            href="{{ $paginator->url($i) }}">{{ $i }}</a></li>
                 @endif
+            @endfor
 
-                {{-- Next Page --}}
-                @if ($paginator->hasMorePages())
-                    <li class="page-item">
-                        <a href="{{ $paginator->nextPageUrl() }}"><i class="bi bi-chevron-right"></i></a>
-                    </li>
-                @else
-                    <li class="page-item disabled"><i class="bi bi-chevron-right"></i></li>
+            {{-- Trailing dots and last page --}}
+            @if ($end < $total)
+                @if ($end < $total - 1)
+                    <li class="page-item dots">...</li>
                 @endif
-            </ul>
+                <li class="page-item"><a class="page-url-link"
+                        href="{{ $paginator->url($total) }}">{{ $total }}</a></li>
+            @endif
 
-            {{-- onchange="document.getElementById('per-page-form').submit()" --}}
-            {{-- Per Page Dropdown (tuỳ chỉnh thêm bằng JavaScript) --}}
-            <form id="per-page-form">
-                <select name="per_page" class="per-page-selector ms-3">
-                    @foreach ([10, 20, 50, 100] as $limit)
-                        <option value="{{ $limit }}" {{ request('per_page', 10) == $limit ? 'selected' : '' }}>
-                            {{ $limit }} / page</option>
-                    @endforeach
-                </select>
-            </form>
+            {{-- Next Page --}}
+            @if ($paginator->hasMorePages())
+                <li class="page-item">
+                    <a href="{{ $paginator->nextPageUrl() }}"><i class="bi bi-chevron-right"></i></a>
+                </li>
+            @else
+                <li class="page-item disabled"><i class="bi bi-chevron-right"></i></li>
+            @endif
 
+        </ul>
 
-        </div>
+        {{-- Per Page Dropdown (luôn hiện, nhưng disable nếu tổng số bản ghi < 10) --}}
+        <form id="per-page-form">
+            <select name="per_page" class="per-page-selector ms-3" {{ $paginator->total() < 10 ? 'disabled' : '' }}>
+                @foreach ([10, 20, 50, 100] as $limit)
+                    <option value="{{ $limit }}" {{ request('per_page', 10) == $limit ? 'selected' : '' }}>
+                        {{ $limit }} / page
+                    </option>
+                @endforeach
+            </select>
+        </form>
+
     </div>
-
-
-@endif
+</div>
