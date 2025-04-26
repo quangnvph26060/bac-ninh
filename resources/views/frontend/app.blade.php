@@ -126,7 +126,7 @@
                             <div class="user__info__content d-none d-lg-flex">
                                 <div class="user__info_name">
                                     <span class="name__user truncate">
-                                        <span>{{ Auth::user()->name }}</span>
+                                        <span class="info_name">{{ Auth::user()->name }}</span>
                                         <span class="dropdown_menu">
                                             <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">
@@ -141,10 +141,12 @@
                             <!-- Dropdown Menu -->
                             <div class="dropdown_popup">
                                 <ul>
-                                    <li><a href="/">🏠 Trở về trang chủ</a></li>
-                                    <li><a href="/account">👤 Tài khoản của tôi</a></li>
-                                    <li><a href="/settings">⚙️ Cài đặt</a></li>
-                                    <li><a href="{{ route('logout') }}">🚪 Đăng xuất</a></li>
+                                    <li><a href="/"><i class="bi bi-house-down me-2"></i> Trở về trang chủ</a>
+                                    </li>
+                                    <li><a href="{{ route('profile') }}"><i class="bi bi-person-fill-check me-2"></i>
+                                            Tài khoản của tôi</a></li>
+                                    <li><a href="{{ route('logout') }}"><i class="bi bi-box-arrow-left me-2"></i> Đăng
+                                            xuất</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -197,38 +199,20 @@
                             </li>
                             <li class="nav-item">
                                 <a href="#" class="nav-link">
-                                    <i class="bi bi-image"></i>
-                                    <span>Thư viện ảnh mẫu</span>
-                                </a>
-                            </li>
-                            <li class="nav-item has-submenu">
-                                <a href="javascript:void(0)"
-                                    class="nav-link dropdown-toggle d-flex align-items-center">
-                                    <i class="bi bi-grid"></i>
-                                    <span>Sản phẩm</span>
-                                    <i class="bi bi-chevron-down ms-auto dropdown-arrow"></i>
-                                </a>
-                                <ul class="submenu">
-                                    <li><a href="#">Danh sách sản phẩm</a></li>
-                                    <li><a href="#">Thêm sản phẩm mới</a></li>
-                                </ul>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
                                     <i class="bi bi-receipt-cutoff"></i>
                                     <span>Hóa đơn</span>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="bi bi-shop-window"></i>
-                                    <span>Cửa hàng</span>
+                            <li class="nav-item {{ request()->routeIs('coupons.index') ? 'active' : '' }}">
+                                <a href="{{ route('coupons.index') }}" class="nav-link ">
+                                    <i class="bi-tags"></i>
+                                    <span>Giảm giá</span>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="bi bi-graph-up"></i>
-                                    <span>Báo cáo</span>
+                            <li class="nav-item {{ request()->routeIs('profile') ? 'active' : '' }}">
+                                <a href="{{ route('profile') }}" class="nav-link">
+                                    <i class="bi bi-person-bounding-box"></i>
+                                    <span>Hồ sơ</span>
                                 </a>
                             </li>
                         </ul>
@@ -237,9 +221,9 @@
                     <div class="menu_fixed">
                         <ul class="nav flex-column">
                             <li class="nav-item active">
-                                <a href="#" class="nav-link">
+                                <a href="{{ url('/') }}" class="nav-link">
                                     <i class="bi bi-speedometer2"></i>
-                                    <span>Bảng tin</span>
+                                    <span>Trang chủ</span>
                                 </a>
                             </li>
                         </ul>
@@ -253,6 +237,11 @@
     </section>
 
     <div class="overlay" id="overlay"></div>
+    <div id="loading" style="display: none; text-align: center; padding: 50px;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
 
     <script src="{{ asset('frontend/assets/js/jquery-3.3.1.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
@@ -283,25 +272,6 @@
         const notyf = new Notyf({
             duration: 5000,
             ripple: true,
-            types: [{
-                    type: 'success',
-                    background: '#198754',
-                    icon: {
-                        className: 'bi bi-check-circle-fill',
-                        tagName: 'i',
-                        color: 'white'
-                    }
-                },
-                {
-                    type: 'error',
-                    background: '#dc3545',
-                    icon: {
-                        className: 'bi bi-x-circle-fill',
-                        tagName: 'i',
-                        color: 'white'
-                    }
-                }
-            ]
         });
     </script>
     @stack('scripts')

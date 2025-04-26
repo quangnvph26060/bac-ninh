@@ -16,7 +16,29 @@ use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
-    public function list($prefix, $suffix = null) {}
+    public function detail($prefix, $suffix = null)
+    {
+        if (!empty($suffix)) {
+            $product = Product::query()->with(['category', 'images', 'attributes', 'variants'])->where('slug', $suffix)->firstOrFail();
+
+            $attributes = $product->attributes->map(function ($attribute) {
+                $valueIds = json_decode($attribute->pivot->attribute_values_ids, true);
+
+                // Lấy danh sách các giá trị của thuộc tính
+                $values = AttributeValue::whereIn('id', $valueIds)->pluck('value', 'id')->toArray();
+
+                return [
+                    'name' => $attribute->name,
+                    'values' => $values,
+                ];
+            });
+
+            $suggestedProducts = Product::query()->with(['variants', 'attributes'])->whereIn('id', $product->cross_sell)->get();
+
+            return view('frontend.pages.products.detail', compact('product', 'attributes', 'suggestedProducts'));
+        }
+        return redirect()->route('products.category', $prefix);
+    }
 
     protected function getProductAttributesForFilter($products)
     {

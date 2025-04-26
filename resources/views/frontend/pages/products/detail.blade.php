@@ -7,7 +7,7 @@
                 <div>
                     @php
                         $items = [
-                            ['label' => $category->name, 'url' => route('products.list', $category->slug)],
+                            ['label' => $product->category->name, 'url' => route('products.category', $product->category->slug)],
                             ['label' => $product->name],
                         ];
                     @endphp

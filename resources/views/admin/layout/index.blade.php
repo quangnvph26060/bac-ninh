@@ -14,7 +14,7 @@
 
 
 <body>
-    <div id="wrapper">
+    <div class="wrapper">
         @include('admin.layout.sidebar')
 
         <div class="main-panel">

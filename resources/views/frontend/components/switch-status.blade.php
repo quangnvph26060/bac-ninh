@@ -27,5 +27,13 @@
         <span>Thanh toán paypal</span>
     @break
 
+    @case('1')
+        <span class="bg_paid status_btn_order">Xuất bản</span>
+    @break
+
+    @case('2')
+        <span class="bg_unpaid status_btn_order">Tạm ngưng</span>
+    @break
+
     @default
 @endswitch

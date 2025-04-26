@@ -16,28 +16,25 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
-        'name',
-        'phone',
-        'email',
-        'company_name',
-        'password',
-        'dob',
-        'status',
-        'role_id',
-        'google_id',
-        'city_id',
-        'tax_code',
-        'store_name',
-        'field_id',
-        'domain',
-        'address',
-        'storage_id',
-        'wallet',
         'img_url',
+        'name',
+        'email',
+        'password',
+        'address',
+        'phone',
+        'gender',
+        'day_of_birth',
+        'status',
+        'google_id',
         'remember_token',
         'otp_code',
         'otp_expires_at',
-        'last_otp_sent_at'
+        'last_otp_sent_at',
+        'created_at',
+        'city_id',
+        'district_id',
+        'wards_id',
+        'field_id'
     ];
 
     protected $hidden = [
@@ -46,6 +43,7 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
+        'day_of_birth' => 'date',
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'otp_expires_at' => 'datetime',

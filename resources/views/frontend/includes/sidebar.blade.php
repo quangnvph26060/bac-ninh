@@ -33,14 +33,14 @@
         {{-- Các danh mục không có con (collections) --}}
         @foreach ($collections as $collection)
             <li>
-                <a href="{{ route('products.list', $collection->slug) }}">{{ $collection->name }}</a>
+                <a href="{{ route('products.collection', $collection->slug) }}">{{ $collection->name }}</a>
             </li>
         @endforeach
 
         {{-- Các danh mục có con (categories) --}}
         @foreach ($categories as $category)
             <li class="has-children">
-                <a href="{{ route('products.list', $category->slug) }}">{{ $category->name }}</a>
+                <a href="{{ route('products.category', $category->slug) }}">{{ $category->name }}</a>
                 <i class="bi bi-chevron-right arrow-icon"></i>
             </li>
         @endforeach
@@ -56,7 +56,7 @@
                 </li>
                 @foreach ($category->children as $child)
                     <li>
-                        <a href="{{ route('products.list', [$category->slug, $child->slug]) }}">{{ $child->name }}</a>
+                        <a href="{{ route('products.category', [$category->slug, $child->slug]) }}">{{ $child->name }}</a>
                     </li>
                 @endforeach
             </ul>

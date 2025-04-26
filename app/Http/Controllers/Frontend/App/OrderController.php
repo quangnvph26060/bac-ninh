@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\AttributeValue;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
 use App\Models\State;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -75,6 +77,120 @@ class OrderController extends Controller
         $countries = Country::query()->orderBy('name', 'asc')->get();
 
         return view('frontend.app.order.create', compact('products', 'countries', 'shippingMethods'));
+    }
+
+    public function applyCoupon(Request $request)
+    {
+        $request->validate([
+            'coupon' => 'required|exists:coupons,code',
+            'options' => 'required|array',
+            'options.*.productId' => 'required|exists:products,id',
+            'options.*.variant_id' => 'nullable|exists:product_variants,id',
+        ]);
+
+        $coupon = Coupon::query()->with('products')->where('code', $request->coupon)->first();
+
+        if (!$this->isCouponValid($coupon)) {
+            return errorResponse("Mã giảm giá đã hết hiệu lực hoặc không tồn tại!", true);
+        }
+
+        // dd($request->toArray());
+
+        $shippingFee = $request->shipping;
+        $items = $request->options;
+
+        $subTotal = 0;
+        $productDetails = [];
+
+        foreach ($items as $item) {
+            $productId = $item['productId'];
+            $qty = $item['qty'];
+            $variantId = $item['variant_id'] ?? null;
+
+            if ($variantId) {
+                $variant = ProductVariant::find($variantId);
+
+                $price = isOnSale($variant) ? $variant->discount_price : $variant->sale_price;
+                $productDetails[] = [
+                    'id' => $productId,
+                    'variant_id' => $variantId,
+                    'price' => $price,
+                    'qty' => $qty,
+                    'total' => $price * $qty,
+                ];
+                $subTotal += $price * $qty;
+            } else {
+                $product = Product::find($productId);
+                $price = isOnSale($product) ? $product->discount_price : $product->sale_price;
+                $productDetails[] = [
+                    'id' => $productId,
+                    'variant_id' => null,
+                    'price' => $price,
+                    'qty' => $qty,
+                    'total' => $price * $qty,
+                ];
+                $subTotal += $price * $qty;
+            }
+        }
+
+        // Tính giảm giá nếu có coupon
+        $discountAmount = 0;
+
+        if ($coupon->type === 'order') {
+
+            $discountAmount = $coupon->value;
+
+            // Áp dụng giới hạn giảm nếu có
+            if ($coupon->max_discount && $discountAmount > $coupon->max_discount) {
+                $discountAmount = $coupon->max_discount;
+            }
+        }
+
+        if ($coupon->type === 'product') {
+            $applicableIds = $coupon->products->pluck('id')->toArray(); // Danh sách productId
+
+            foreach ($productDetails as $item) {
+                // Nếu coupon áp dụng cho tất cả hoặc trùng id
+                if (empty($applicableIds) || in_array($item['id'], $applicableIds)) {
+                    // Tính giảm giá 5% cho từng sản phẩm
+                    $discountAmount += ($coupon->value / 100) * $item['total']; // Áp dụng phần trăm trên tổng giá trị từng sản phẩm
+                }
+            }
+
+            // Áp dụng giới hạn giảm nếu có
+            if ($coupon->max_discount && $discountAmount > $coupon->max_discount) {
+                $discountAmount = $coupon->max_discount;
+            }
+        }
+
+        $grandTotal = max(0, $subTotal - $discountAmount + $shippingFee);
+
+        return response()->json([
+            'discount' => $discountAmount,
+            'grand_total' => $grandTotal,
+        ], 200);
+    }
+
+    protected function isCouponValid($coupon): bool
+    {
+        $now = Carbon::now();
+
+        if ($coupon->status == 2) return false;
+
+        // Nếu có start_date và không có end_date => kiểm tra now >= start_date
+        if ($coupon->start_date && !$coupon->end_date) {
+            return $now->greaterThanOrEqualTo($coupon->start_date);
+        }
+
+        // Nếu có cả start_date và end_date => kiểm tra now nằm trong khoảng
+        if ($coupon->start_date && $coupon->end_date) {
+            $start = $coupon->start_date;
+            $end = $coupon->end_date;
+            return $now->between($start, $end); // inclusive mặc định
+        }
+
+        // Nếu không có start_date => không hợp lệ
+        return false;
     }
 
     public function getStates($country_id)

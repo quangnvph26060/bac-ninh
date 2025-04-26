@@ -779,8 +779,6 @@ body {
     top: 0; }
   .sidebar .nav-collapse, .sidebar[data-background-color="white"] .nav-collapse {
     margin-top: 0px;
-    margin-bottom: 15px;
-    padding-bottom: 15px;
     padding-top: 10px; }
     .sidebar .nav-collapse li.active > a, .sidebar[data-background-color="white"] .nav-collapse li.active > a {
       font-weight: 600; }

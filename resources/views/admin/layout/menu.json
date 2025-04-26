@@ -1,0 +1,80 @@
+[
+    {
+        "title": "Tổng quan",
+        "icon": "fas fa-chart-bar",
+        "route": "admin.dashboard",
+        "id": "dashboard"
+    },
+    {
+        "title": "Sản phẩm",
+        "icon": "fas fa-box",
+        "id": "products",
+        "children": [
+            {
+                "title": "Quản lý sản phẩm",
+                "url": "admin.products.index"
+            },
+            {
+                "title": "Quản lý danh mục",
+                "url": "admin.categories.index"
+            },
+            {
+                "title": "Quản lý thương hiệu",
+                "url": "admin.brands.index"
+            },
+            {
+                "title": "Quản lý thuộc tính",
+                "url": "admin.attributes.index"
+            },
+            {
+                "title": "Bộ sưu tập",
+                "url": "admin.collections.index"
+            }
+        ],
+        "inRoutes": [
+            "admin.products.index", "admin.categories.index", "admin.brands.index", "admin.attributes.index", "admin.collections.index"
+        ]
+    },
+    {
+        "title": "Marketing",
+        "icon": "fas fa-box-open",
+        "id": "marketing",
+        "children": [
+            {
+                "title": "Mã giảm giá",
+                "url": "admin.coupons.index"
+            }
+        ],
+        "inRoutes": [
+            "admin.coupons.index"
+        ]
+    },
+    {
+        "title": "Nhà cung cấp",
+        "icon": "fas fa-building",
+        "route": "admin.suppliers.index",
+        "id": "suppliers"
+    },
+    {
+        "title": "Phân quyền",
+        "icon": "fas fa-user-shield",
+        "id": "permissions",
+        "children": [
+            {
+                "title": "Quản lý nhân viên",
+                "url": "admin.employees.index"
+            },
+            {
+                "title": "Quản lý vai trò",
+                "url": "admin.roles.index"
+            },
+            {
+                "title": "Quản lý quyền",
+                "url": "admin.permissions.index"
+            }
+        ],
+        "inRoutes": [
+            "admin.employees.index", "admin.roles.index", "admin.permissions.index"
+        ]
+    }
+]
