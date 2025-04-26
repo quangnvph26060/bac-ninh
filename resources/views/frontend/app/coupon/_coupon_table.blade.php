@@ -33,9 +33,9 @@
                 </td>
 
                 <td class="text-center">
-                    {{ now()->diffInDays($coupon->end_date, false) > 0
-                        ? now()->diffInDays($coupon->end_date) . ' ngày'
-                        : 'Đã hết hạn' }}
+                    {!! now()->diffInDays($coupon->end_date, false) > 0
+                        ? '<span class="text-success">' . now()->diffInDays($coupon->end_date) . " ngày</span>"
+                        : '<span class="text-danger">Đã hết hạn</span>' !!}
                 </td>
 
                 <td>
