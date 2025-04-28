@@ -25,7 +25,7 @@ class OrderController extends Controller
         $dateRange = $request->date_range;
         $perPage = $request->input('per_page', 10);
 
-        $query = Order::query()->with(['user', 'orderItems']);
+        $query = Order::query()->where('user_id', auth()->id())->with(['user', 'orderItems']);
 
         if ($status && $status !== 'all') {
             $query->where('status', $status);
@@ -586,7 +586,7 @@ class OrderController extends Controller
                 'payment_status' => $orderInfo['paymentMethod'] !== 'later' ? 'completed' : 'pending',
                 'payment_method' => $orderInfo['paymentMethod'] !== 'later' ? 'bank_transfer' : null,
                 'phone_number' => $orderInfo['phone_number'],
-                'shipping_address' => "{$orderInfo['country_id']} {$orderInfo['state_id']} {$orderInfo['city_id']} {$orderInfo['shipping_address']}",
+                'shipping_address' => "{$orderInfo['shipping_address']} {$orderInfo['city_id']} {$orderInfo['state_id']} {$orderInfo['country_id']}",
                 'note' => $orderInfo['note'],
                 'total' => $grandTotal,
                 'discount' => $discountAmount,
