@@ -4,6 +4,7 @@ namespace App\Providers;
 
 // use App\Http\View\Composers\NotificationComposer;
 use App\Models\Collection;
+use App\Models\Config;
 use App\Services\CategoryService;
 use Carbon\Carbon;
 use Illuminate\Pagination\Paginator;
@@ -26,7 +27,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
 
-        // View::composer('admin.layout.header', NotificationComposer::class);
         Carbon::setLocale('vi');
 
         $categoryService = app(CategoryService::class);
@@ -35,6 +35,13 @@ class AppServiceProvider extends ServiceProvider
             $collections = Collection::query()->select('id', 'name', 'slug')->orderBy('name', 'asc')->get();
             $categories = $categoryService->getAllCategoryIsParent();
             $view->with(['collections' => $collections, 'categories' => $categories]);
+        });
+
+        View::composer('*', function ($view) {
+            $config = Config::query()->firstOrCreate();
+            $view->with([
+                'config' => $config
+            ]);
         });
     }
 }

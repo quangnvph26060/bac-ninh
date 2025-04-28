@@ -123,7 +123,7 @@
                                         <label for="role" class="form-label">Quyền hạn</label>
                                         <select id="role" name="roles[]" class="form-control select2"
                                             multiple="multiple">
-                                            @foreach ($roles as $role)
+                                            @foreach ($roles ?? [] as $role)
                                                 <option value="{{ $role }}" @selected(isset($employee) ? $employee->hasRole($role) : false)>
                                                     {{ $role }}
                                                 </option>

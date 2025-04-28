@@ -18,12 +18,27 @@
 <script src="{{ asset('backend/assets/js/setting-demo2.js') }}"></script>
 <script src="{{ asset('backend/library/ckeditor/ckeditor.js') }}"></script>
 <script src="{{ asset('backend/assets/js/helper.js') }}"></script>
-{{-- <script src="{{ asset('backend/assets/js/demo.js') }}"></script> --}}
+
 
 <script>
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Marquee control
+        var marquee = document.getElementById('demoMarquee');
+        if (marquee) {
+            marquee.addEventListener('mouseenter', function() {
+                marquee.stop();
+            });
+            marquee.addEventListener('mouseleave', function() {
+                marquee.start();
+            });
         }
     });
 </script>

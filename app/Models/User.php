@@ -37,6 +37,8 @@ class User extends Authenticatable
         'field_id'
     ];
 
+
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -50,7 +52,10 @@ class User extends Authenticatable
         'last_otp_sent_at' => 'datetime',
     ];
 
-    protected $appends = ['user_info'];
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
 
     public function isAdmin()
     {

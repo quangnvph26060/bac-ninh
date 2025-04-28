@@ -76,5 +76,24 @@
         "inRoutes": [
             "admin.employees.index", "admin.roles.index", "admin.permissions.index"
         ]
+    },
+    {
+        "title": "Cấu hình",
+        "icon": "fa-solid fa-gear",
+        "id": "configurations",
+        "children": [
+            {
+                "title": "Cấu hình chung",
+                "url": "admin.configurations.index"
+            },
+            {
+                "title": "Cấu hình thanh toán",
+                "url": "admin.configurations.payment"
+            }
+        ],
+        "inRoutes": [
+            "admin.configurations.index", "admin.configurations.payment"
+        ]
     }
 ]
+

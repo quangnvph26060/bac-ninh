@@ -54,8 +54,10 @@ header {
 }
 
 .navbar-brand img {
-    width: 156px;
-    height: 30px;
+    width: 90px;
+    /* width: 156px; */
+    /* height: 30px; */
+    height: auto;
 }
 
 .navbar-nav .nav-link {
@@ -716,7 +718,7 @@ header {
 }
 
 .pw_catalog_wrapper .position-sticky {
-    margin-top: 55px;
+    margin-top: 90px;
 }
 
 .pw_catalog_wrapper .position-sticky input {

@@ -38,9 +38,10 @@
                             </p>
                         </div>
                     </div>
-                    <button style="width: 158px; height: 40px;" type="button"
-                        class="ant-btn ant-btn-default py-2 px-4 btn-to-shipping" disabled=""><span>Vận
-                            chuyển</span></button>
+                    <button type="button" class="ant-btn ant-btn-default py-2 px-4 h-auto" id="top-main-button"
+                        disabled="">
+                        <span>Vận chuyển</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -101,9 +102,10 @@
                 </div>
 
                 <div class="d-flex flex-column justify-content-center align-items-center my-3 mt-5 gap-3">
-                    <button type="button" class="ant-btn ant-btn-default py-2 px-4 h-auto btn-to-shipping"
-                        disabled=""><span>Vận
-                            chuyển</span></button>
+                    <button type="button" class="ant-btn ant-btn-default py-2 px-4 h-auto " disabled=""
+                        id="btn-to-shipping">
+                        <span>Vận chuyển</span>
+                    </button>
                 </div>
             </div>
 
@@ -181,9 +183,8 @@
                                 <textarea name="shipping_address" id="shipping_address" class="form-control" data-required="true"></textarea>
                             </div>
                             <div class="form-group mb-3 col-lg-12">
-                                <label for="tax_code" class=" form-label">Mã số thuế</label>
-                                <input type="text" name="tax_code" class="form-control" id="tax_code"
-                                    placeholder="Mã số thuế">
+                                <label for="note" class="form-label">Ghi chú</label>
+                                <textarea name="note" id="note" class="form-control" placeholder="Ghi chú"></textarea>
                             </div>
 
                             <hr class="my-3">
@@ -207,8 +208,9 @@
                     </div>
 
                     <div class="d-flex flex-column justify-content-center align-items-center my-3 mt-5 gap-3">
-                        <button type="button" class="ant-btn ant-btn-primary py-2 px-4 h-auto"
-                            id="btn-to-review-order"><span>Đánh giá đơn hàng</span></button>
+                        <button type="button" class="ant-btn ant-btn-primary py-2 px-4 h-auto" id="btn-to-review-order">
+                            <span>Đánh giá đơn hàng</span>
+                        </button>
                         <a href="" class="fw-bold" id="back-step-1">Quay lại</a>
                     </div>
                 </form>
@@ -287,7 +289,8 @@
                             <button type="button" onclick="applyCoupon()"
                                 class="ant-btn-primary text-white px-3 py-1 rounded-end">Áp
                                 dụng</button>
-                            <button type="button" id="remove_coupon" style="display: none;">Hủy mã</button>
+                            <button type="button" id="remove_coupon" style="display: none;"
+                                class="btn btn-outline-danger">Hủy mã</button>
 
                         </div>
                     </div>
@@ -324,10 +327,12 @@
 
                 <div class="d-flex flex-column justify-content-center align-items-center my-3 mt-5 gap-3">
                     <div class="d-flex gap-3">
-                        <button type="button" class="ant-btn ant-btn-default py-2 px-4 h-auto"><span>Thanh toán
-                                ngay</span></button>
-                        <button type="button" class="ant-btn ant-btn-primary py-2 px-4 h-auto"><span>Lưu đơn
-                                hàng</span></button>
+                        <button type="button" id="pay-now-button" class="ant-btn ant-btn-default py-2 px-4 h-auto">
+                            <span>Thanh toán ngay</span>
+                        </button>
+                        <button type="button" class="ant-btn ant-btn-primary py-2 px-4 h-auto" id="btn-save-order">
+                            <span>Lưu đơn hàng</span>
+                        </button>
                     </div>
 
                     <a href="#" class="fw-bold" id="back-step-2">Quay lại</a>
@@ -369,16 +374,11 @@
         let originalTotal = null;
         let originalShippingFee = null;
         let oldCoupon = null;
+        let defaultTotal = 0;
+        let isApplyCoupon = false;
 
-        function applyCoupon() {
-            let $input_coupon = $('#input_coupon');
-            let couponVal = $input_coupon.val().trim();
-
-            // Nếu không nhập gì hoặc trùng với coupon cũ thì không làm gì cả
-            if (couponVal === '' || couponVal === oldCoupon) return;
-
+        function getFormData() {
             let result = [];
-            let shipping = $('input[name="shipping_method_id"]:checked').attr('data-fee');
 
             $('.custom-form.mb-3').each(function() {
                 let $form = $(this);
@@ -388,7 +388,7 @@
 
                 let item = {
                     productId: productId,
-                    qty
+                    qty: qty
                 };
 
                 if (variantId !== undefined) {
@@ -398,15 +398,31 @@
                 result.push(item);
             });
 
+            return result;
+        }
+
+        function applyCoupon() {
+            isApplyCoupon = true;
+            let $input_coupon = $('#input_coupon');
+            let couponVal = $input_coupon.val().trim();
+
+            // Nếu không nhập gì hoặc trùng với coupon cũ thì không làm gì cả
+            if (couponVal === '' || couponVal === oldCoupon) return;
+
+            let shipping = $('input[name="shipping_method_id"]:checked').attr('data-fee');
+
+            let data = getFormData();
+
             $.ajax({
                 url: '{{ route('orders.apply.coupon') }}',
                 method: 'POST',
                 data: {
                     coupon: couponVal,
-                    options: result,
+                    options: data,
                     shipping
                 },
                 success: function(response) {
+                    defaultTotal = response.subTotal;
                     $('#remove_coupon').show();
                     $('#discount').show().text(`-$${response.discount}`);
                     $('#order-total-amount, .header_step_order .final-price').text(`$${response.grand_total}`);
@@ -421,6 +437,8 @@
                     oldCoupon = couponVal;
                 },
                 error: function(xhr) {
+                    isApplyCoupon = false;
+
                     notyf.error(xhr.responseJSON.message);
 
                     $input_coupon.val('');
@@ -436,14 +454,64 @@
         }
 
         $('#remove_coupon').on('click', function() {
+            oldCoupon = null;
+
             // Khôi phục lại tổng tiền ban đầu
             if (originalTotal !== null) {
-                $('#order-total-amount, .header_step_order .final-price').text(`$${originalTotal}`);
+                $('.final-price, #order-total-amount').text(`$${defaultTotal}`);
             }
+
+            $('#discount').text('$0.00')
 
             $('#input_coupon').val(''); // Xóa mã
             $('#remove_coupon').hide(); // Ẩn nút Hủy mã
         });
+
+        $('#btn-save-order').on('click', function() {
+            let data = {};
+            let products = getFormData();
+
+            let coupon = isApplyCoupon ? $('#input_coupon').val() : '';
+            let paymentMethod = $('input[name="paymentMethod"]:checked').val();
+
+            let inputIds = [
+                'first_name', 'last_name', 'email', 'phone_number', 'country_id', 'state_id', 'city_id',
+                'zip_code', 'shipping_address', 'tax_code', 'note'
+            ];
+
+            let orderInfo = {
+                coupon,
+                paymentMethod,
+                shipping_method_id: $('input[name="shipping_method_id"]:checked').val(),
+                orderName: $('.input_order_name').val()
+            };
+
+            inputIds.forEach(function(id) {
+                orderInfo[id] = $(`#${id}`).val();
+            });
+
+            data.products = products;
+            data.orderInfo = orderInfo;
+
+            $.ajax({
+                url: "{{ route('orders.store.order') }}",
+                method: "POST",
+                data: data,
+                beforeSend: () => {
+                    $('#loading').show();
+                },
+                success: (response) => {
+                    window.location.href = '{{ route('orders.index') }}'
+                },
+                error: (xhr) => {
+                    console.log(xhr.responseJSON.message);
+                },
+                complete: () => {
+                    $('#loading').hide();
+                }
+            })
+        });
+
 
         function cleanCurrency(value) {
             return parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
@@ -523,6 +591,18 @@
             return allSelected;
         }
 
+        $(document).on('click', '#top-main-button', function() {
+            const buttonText = $(this).find('span').text().trim();
+
+            if (buttonText === 'Vận chuyển') {
+                goToTransportStep()
+            }
+
+            if (buttonText === 'Đánh giá đơn hàng') {
+                getShippingInfo()
+            }
+        });
+
         function updateStepStatus(currentStep, nextStep) {
             // Ẩn tất cả tab
             $('.tab-pane').hide();
@@ -543,11 +623,33 @@
                     $('.step[data-step="' + i + '"] .step-number').html(i);
                 }
             }
+
+            const targetButton = $('#' + getButtonIdByTab(nextStep.tabId)); // Lấy nút của tab mới
+
+            const topButton = $('#top-main-button'); // Nút trên cùng bạn muốn đổi
+
+            if (targetButton.length && topButton.length) {
+                const newText = targetButton.find('span').text();
+                console.log(newText);
+
+                topButton.find('span').text(newText);
+            }
         }
 
-        // Sang bước 2
-        $(document).on('click', '.btn-to-shipping', function() {
+        function getButtonIdByTab(tabId) {
+            switch (tabId) {
+                case 'tab-transport':
+                    return 'btn-to-review-order'; // Tab vận chuyển → nút Đánh giá đơn hàng
+                case 'tab-review':
+                    return 'btn-save-order'; // Tab đánh giá → nút Lưu đơn hàng
+                case 'tab-product':
+                    return 'btn-to-shipping'; // Tab sản phẩm → nút Vận chuyển
+                default:
+                    return '';
+            }
+        }
 
+        function goToTransportStep() {
             if (!checkAllProductsSelected()) {
                 notyf.error('Vui lòng chọn đầy đủ các thuộc tính.');
                 return
@@ -602,11 +704,18 @@
                 step: 2,
                 tabId: 'tab-transport',
             });
+        }
+
+        // Sang bước 2
+        $(document).on('click', '#btn-to-shipping', function() {
+            goToTransportStep()
         });
 
 
         // Quay lại bước 1
         $(document).on('click', '#back-step-1', function(e) {
+            $('#top-main-button').find('span').text('')
+
             e.preventDefault(); // Chặn chuyển trang nếu là thẻ <a>
             updateStepStatus(2, {
                 step: 1,
@@ -617,10 +726,8 @@
             $('.step[data-step="2"]').removeClass('active');
         });
 
-        // Sang bước 3
-        $(document).on('click', '#btn-to-review-order', function() {
-
-            const form = $(this).closest("form")[0];
+        function getShippingInfo() {
+            const form = $('#btn-to-review-order').closest("form")[0];
 
             if (!form.checkValidity()) {
                 form.reportValidity(); // Hiển thị lỗi input
@@ -694,6 +801,11 @@
 
             $('.step[data-step="2"] .step-number').html('&#10003;');
             $('.step[data-step="3"]').addClass('active');
+        }
+
+        // Sang bước 3
+        $(document).on('click', '#btn-to-review-order', function() {
+            getShippingInfo()
         });
 
         // Quay lại bước 2
@@ -931,11 +1043,13 @@
             function toggleShippingButton() {
 
                 if (checkAllProductsSelected() && $('.input_order_name').val() != "") {
-                    $('.btn-to-shipping').prop('disabled', false).removeClass('ant-btn-default').addClass(
-                        'ant-btn-primary');
+                    $('#btn-to-shipping, #top-main-button').prop('disabled', false).removeClass('ant-btn-default')
+                        .addClass(
+                            'ant-btn-primary');
                 } else {
-                    $('.btn-to-shipping').prop('disabled', true).removeClass('ant-btn-primary').addClass(
-                        'ant-btn-default');
+                    $('#btn-to-shipping, #top-main-button').prop('disabled', true).removeClass('ant-btn-primary')
+                        .addClass(
+                            'ant-btn-default');
                 }
             }
 
@@ -1006,7 +1120,7 @@
                                                 Giá sản phẩm
                                             </p>
                                             <p class="variant-price text-primary fw-bold fs-6 mb-0" style="color: #091E42 !important" data-product-id="${product.id}" data-time="${product.time}">
-                                                <span>${isVariant ? '' : product.price}</span>$
+                                                $<span>${isVariant ? '' : product.price}</span>
                                             </p>
                                         </div>
                                         <div class="ms-3 d-flex flex-column justify-content-center">
@@ -1020,7 +1134,7 @@
                                                 Tổng giá
                                             </p>
                                             <p class="text-primary fw-bold fs-6 mb-0 total-price" style="color: #091E42 !important" data-product-id="${product.id}" data-time="${product.time}">
-                                                <span>${isVariant ? '' : product.price}</span>$
+                                                $<span>${isVariant ? '' : product.price}</span>
                                             </p>
                                         </div>
                                     </div>
@@ -1218,7 +1332,8 @@
                         total += value;
                     }
                 });
-                $('.final-price').text(`$${total.toFixed(0)}`);
+
+                $('.final-price').text(`$${total}`);
             }
 
             $(document).on('blur', '.step_product_input', function() {

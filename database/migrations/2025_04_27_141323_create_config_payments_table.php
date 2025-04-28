@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Models\Bank;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,10 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wallets', function (Blueprint $table) {
+        Schema::create('config_payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-            $table->decimal('balance', 15, 2)->default(0);
+            $table->foreignIdFor(Bank::class)->constrained()->cascadeOnDelete();
+            $table->string('enjoyer');
+            $table->string('account_number');
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('wallets');
+        Schema::dropIfExists('config_payments');
     }
 };

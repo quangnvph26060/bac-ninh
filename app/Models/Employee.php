@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-class Employee extends Model
+class Employee extends Authenticatable
 {
-    use HasFactory, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     protected $guard_name = 'admin';
     protected $fillable = [
@@ -20,6 +22,7 @@ class Employee extends Model
         'email',
         'address',
         'password',
+        'remember_token',
         'status',
         'contract_type',
         'avatar',
@@ -30,6 +33,7 @@ class Employee extends Model
 
     protected $hidden = [
         'password',
+        'remember_token',
     ];
 
     protected $casts = [

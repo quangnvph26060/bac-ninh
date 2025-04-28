@@ -316,3 +316,34 @@ if (!function_exists('isActiveMenu')) {
         return '';
     }
 }
+
+function generateTransactionCode($length = 6)
+{
+    // Kết hợp chữ hoa và số
+    $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $transactionCode = '';
+
+    // Tạo mã giao dịch ngẫu nhiên
+    for ($i = 0; $i < $length; $i++) {
+        $transactionCode .= $characters[random_int(0, strlen($characters) - 1)];
+    }
+
+    return $transactionCode;
+}
+
+
+if (!function_exists('generateOrderCode')) {
+    /**
+     * Tạo mã đơn hàng.
+     *
+     * @param string $prefix Tiền tố, mặc định 'ORD'
+     * @return string
+     */
+    function generateOrderCode($prefix = 'ORD')
+    {
+        $datePart = date('ymd'); // yymmdd => 6 số
+        $randomPart = strtoupper(Str::random(6)); // 6 ký tự random chữ+ số
+
+        return $prefix . $datePart . $randomPart;
+    }
+}

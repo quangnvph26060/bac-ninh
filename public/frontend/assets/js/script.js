@@ -173,25 +173,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function moveFilterForm() {
         const filterForm = document.getElementById("filter-form");
-
         const showFilterForm = document.getElementById("show-filter-form");
         const listProducts = document.querySelector(".list-products");
 
         if (!filterForm || !showFilterForm || !listProducts) return;
 
+        // Vì form sẽ di chuyển qua lại nên tìm cả trong filterForm lẫn showFilterForm
         let form =
             filterForm.querySelector("form") ||
             showFilterForm.querySelector("form");
 
-        if (!form) return; // Nếu không tìm thấy <form>, thoát luôn
+        if (!form) return;
 
-        if (window.innerWidth < 768) {
-            // Chuyển <form> vào popup mobile
+        const isMobile = window.innerWidth < 768;
+
+        if (isMobile) {
+            // Ẩn filterForm (nếu chưa ẩn)
+            if (filterForm.style.display !== "none") {
+                filterForm.style.display = "none";
+            }
+
+            // Đưa form vào popup
             if (!showFilterForm.contains(form)) {
                 showFilterForm.appendChild(form);
             }
         } else {
-            // Trả <form> về vị trí cũ
+            // Hiện filterForm (nếu đang bị ẩn)
+            if (filterForm.style.display === "none") {
+                filterForm.style.display = "";
+            }
+
+            // Trả form về vị trí ban đầu
             if (!filterForm.contains(form)) {
                 filterForm.appendChild(form);
             }

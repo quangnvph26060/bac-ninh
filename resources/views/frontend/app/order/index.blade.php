@@ -117,15 +117,22 @@
             $('#order-content').hide();
             $('#loading').show();
 
+            // Kiểm tra URL và lấy tham số 'page' nếu có
+            const urlWithParams = new URL(url, window.location.href); // URL gốc
+            const searchParams = new URLSearchParams(urlWithParams
+                .search); // Tạo đối tượng để truy xuất tham số query string
+            const pageParam = searchParams.get('page') ||
+                page; // Nếu có 'page' trong URL thì lấy, nếu không thì dùng giá trị mặc định
+
             $.ajax({
-                url: url,
+                url: urlWithParams.pathname,
                 method: 'GET',
                 data: {
                     status,
                     search,
                     date_range,
                     per_page,
-                    page
+                    page: pageParam // Truyền 'page' vào data của AJAX
                 },
                 success: function(response) {
                     $('#order-content').html(response.html).fadeIn(200);

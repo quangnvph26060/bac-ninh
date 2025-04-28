@@ -2,11 +2,26 @@
 <html lang="en">
 
 <head>
-    <title>Title</title>
     <!-- Required meta tags -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ $config->title }}</title>
+
+    <meta name="description" content="{{ $config->seo_description }}" />
+    <meta name="author" content="{{ $config->company }}" />
+
+    <!-- Open Graph Meta Tags (Facebook, LinkedIn, etc.) -->
+    <meta property="og:title" content="{{ $config->seo_title }}" />
+    <meta property="og:description" content="{{ $config->seo_description }}" />
+    <meta property="og:image" content="" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    <meta property="og:type" content="website" />
+
+    <link rel="apple-touch-icon" href="{{ showImage($config->favicon) }}" />
+    <link rel="icon" href="{{ showImage($config->favicon) }}" type="image/x-icon" />
+    <meta property="fb:app_id" content="1234567890" />
 
     <!-- Bootstrap CSS v5.2.1 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -46,7 +61,7 @@
         </div>
         <div class="logo-header">
             <a href="">
-                <img src="{{ asset('frontend/assets/img/art-logo.png') }}" alt="" />
+                <img src="{{ showImage($config->logo) }}" alt="" />
             </a>
         </div>
         <div class="content_header">
@@ -145,7 +160,8 @@
                                     </li>
                                     <li><a href="{{ route('profile') }}"><i class="bi bi-person-fill-check me-2"></i>
                                             Tài khoản của tôi</a></li>
-                                    <li><a href="{{ route('logout') }}"><i class="bi bi-box-arrow-left me-2"></i> Đăng
+                                    <li><a href="{{ route('logout') }}"><i class="bi bi-box-arrow-left me-2"></i>
+                                            Đăng
                                             xuất</a></li>
                                 </ul>
                             </div>
@@ -197,8 +213,8 @@
                                     <span>Đơn hàng</span>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
+                            <li class="nav-item {{ request()->routeIs('bills.index') ? 'active' : '' }}">
+                                <a href="{{ route('bills.index') }}" class="nav-link">
                                     <i class="bi bi-receipt-cutoff"></i>
                                     <span>Hóa đơn</span>
                                 </a>
@@ -213,6 +229,12 @@
                                 <a href="{{ route('profile') }}" class="nav-link">
                                     <i class="bi bi-person-bounding-box"></i>
                                     <span>Hồ sơ</span>
+                                </a>
+                            </li>
+                            <li class="nav-item {{ request()->routeIs('profile') ? 'active' : '' }}">
+                                <a href="{{ route('profile') }}" class="nav-link">
+                                    <i class="bi bi-wallet2"></i>
+                                    <span>Lịch sử nạp tiền</span>
                                 </a>
                             </li>
                         </ul>
