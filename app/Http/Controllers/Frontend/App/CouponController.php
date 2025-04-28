@@ -19,7 +19,7 @@ class CouponController extends Controller
         }]);
 
         if ($search) {
-            $query->where('code', 'like', '%' . $search . '%'); // 'code' là mã đơn hàng
+            $query->where('code', 'like', "%{$search}%");
         }
 
         $coupons = $query->where('start_date', '<=', now())->orderBy('created_at', 'desc')->paginate(10);
