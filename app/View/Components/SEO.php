@@ -18,6 +18,6 @@ class Seo extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('admin.components.seo');
+        return view('components.seo');
     }
 }
