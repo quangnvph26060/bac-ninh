@@ -27,6 +27,8 @@ return new class extends Migration
             $table->string('identity_card_number', 20)->nullable();
             $table->string('identity_card_image')->nullable();
             $table->text('note')->nullable();
+
+            $table->rememberToken();
             $table->timestamps();
         });
     }

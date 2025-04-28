@@ -7,7 +7,7 @@
 
         <!-- Logo (Giữa màn hình mobile) -->
         <a class="navbar-brand" href="#">
-            <img src="{{ asset('frontend/assets/img/art-logo.png') }}" alt="Logo" />
+            <img src="{{ showImage($config->logo) }}" alt="{{ $config->company }}" />
         </a>
 
         <!-- Navbar Links -->

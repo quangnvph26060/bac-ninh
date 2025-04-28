@@ -22,19 +22,13 @@
         <div class="table-responsive mt-4">
             <div id="coupon-content">
             </div>
-
-            <div id="loading" style="display: none; text-align: center; padding: 50px;">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
         </div>
     </div>
 
-    <div id="copy-toast" class="position-fixed top-0 end-0 m-3 p-3 bg-success text-white rounded shadow d-none"
+    {{-- <div id="copy-toast" class="position-fixed top-0 end-0 m-3 p-3 bg-success text-white rounded shadow d-none"
         style="z-index: 1055;">
         📋 Đã sao chép mã giảm giá!
-    </div>
+    </div> --}}
 @endsection
 
 @push('scripts')

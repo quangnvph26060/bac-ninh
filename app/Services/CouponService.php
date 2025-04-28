@@ -61,7 +61,11 @@ class CouponService extends BaseService
                 errorResponse('Mã giảm giá thất bại!');
             }
 
-            $productIds = collect(explode(',', is_array($payload['product_id']) ? $payload['product_id'][0] : $payload['product_id']))
+            $productIds = collect($payload['product_id'] ?? [])
+                ->when(!is_array($payload['product_id']), function ($collection) use ($payload) {
+                    return collect(explode(',', $payload['product_id']));
+                })
+                ->filter(fn($id) => !empty($id)) // Loại bỏ phần tử rỗng
                 ->map(fn($id) => (int) $id)
                 ->toArray();
 

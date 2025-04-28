@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\BulkActionController;
@@ -9,6 +8,7 @@ use App\Http\Controllers\Admin\CheckInventoryController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\CompanyController;
+use App\Http\Controllers\Admin\ConfigurationController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmployeeController;
@@ -16,12 +16,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\Staff\ClientController as StaffClientController;
-use App\Http\Controllers\Staff\OrderController as StaffOrderController;
-use App\Http\Controllers\Staff\ProductController as StaffProductController;
+use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ConfigController;
 use App\Http\Controllers\Admin\DailyReportController;
 use App\Http\Controllers\Admin\DebtClientController;
@@ -29,59 +24,15 @@ use App\Http\Controllers\Admin\DebtNccController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\importCouponController;
 use App\Http\Controllers\Admin\ImportProductController;
-use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ReceiptController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReportdebtController;
 use App\Http\Controllers\Admin\StorageController;
 use App\Http\Controllers\Client\SignUpController;
-use App\Http\Controllers\Staff\CheckInventoryController as staffcheckController;
-use App\Http\Controllers\Staff\WareHomeController;
-use App\Http\Controllers\SuperAdmin\StoreController;
-use App\Http\Controllers\SuperAdmin\SuperAdminController;
-use App\Models\Categories;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\TransactionController;
-use App\Http\Controllers\SuperAdmin\CampaignController;
-use App\Http\Controllers\SuperAdmin\ZnsMessageController;
-use App\Http\Controllers\SuperAdmin\ZaloController;
-use App\Http\Controllers\SuperAdminController as ControllersSuperAdminController;
-use App\Http\Middleware\CheckLogin;
-use App\Http\Middleware\CheckLoginSuperAdmin;
 use Illuminate\Support\Facades\Route;
-
-// Route::get('', [CategorieController::class, 'index']);
-Route::post('/check-account', [SignUpController::class, 'checkAccount'])->name('check.account');
-
-// Route::get('/check-phone-exists', [SignUpController::class, 'checkPhoneExists'])->name('check-phone-exists');
-// Route::get('/check-email-exists', [SignUpController::class, 'checkEmailExists'])->name('check-email-exists');
-Route::get('/dang-ky', [SignUpController::class, 'index'])->name('register.index');
-Route::post('/register_account', [SignUpController::class, 'store'])->name('register.signup');
-
-
-Route::middleware(['auth'])->group(function () {
-
-    Route::get('/home', function () {
-        return view('home');
-    })->name('home');
-
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-});
-Route::get('forget-password', function () {
-    return view('auth.forget-password');
-})->name('forget-password');
-
-Route::get('/product', function () {
-    return view('Themes.pages.product.index');
-})->name('product');
-// Route::get('/category',function(){
-//         return view('Themes.pages.category.index');
-//         })->name('category');
-Route::get('/employee', function () {
-    return view('Themes.pages.employee.index');
-})->name('employee');
-
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -89,9 +40,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('admin.auth')->group(function () {
 
         // Dashboard Router
-        Route::controller(DashboardController::class)->group(function () {
-            Route::get('/', 'dashboard')->name('dashboard');
-        });
+        Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
 
         // Logout Router
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
@@ -186,6 +135,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('save/{id?}', 'save')->name('save');
             Route::delete('destroy/{id}', 'destroy')->name('destroy');
         });
+
+        Route::group(
+            [
+                'prefix' => 'configurations',
+                'controller' => ConfigurationController::class,
+                'as' => 'configurations.'
+            ],
+            function () {
+                Route::get('/', 'configuration')->name('index');
+                Route::put('/', 'updateConfiguration')->name('update.configuration');
+                Route::get('payment', 'payment')->name('payment');
+                Route::put('payment', 'updateConfigPayment');
+            }
+        );
     });
 
     // Auth Router
@@ -232,29 +195,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('exportPdf', [ReportController::class, 'exportPdf'])->name('exportPdf');
     });
 
-    Route::get('/dashboard/day', [DashboardController::class, 'StatisticsByDay'])->name('dashboard.day');
-    Route::get('/dashboard/month', [DashboardController::class, 'StatisticsByMonth'])->name('dashboard.month');
-    Route::get('/dashboard/year', [DashboardController::class, 'StatisticsByYear'])->name('dashboard.year');
-    Route::get('/detail/{id}', [AdminController::class, 'getAdminInfor'])->name('detail');
-    Route::post('/update/{id}', [AdminController::class, 'updateAdminInfor'])->name('update');
-    Route::post('/changePassword', [AdminController::class, 'changePassword'])->name('changePassword');
-
-
-
-
-    // Route::prefix('user')->name('staff.')->group(function () {
-    //     Route::get('', [UserController::class, 'index'])->name('store');
-    //     Route::get('update/{id}', [UserController::class, 'edit'])->name('edit');
-    //     Route::post('update/{id}', [UserController::class, 'update'])->name('update');
-    //     Route::get('add', [UserController::class, 'addForm'])->name('addForm');
-    //     Route::post('add', [UserController::class, 'add'])->name('add');
-    //     Route::delete('delete/{id}', [UserController::class, 'delete'])->name('delete');
-    //     Route::post('updateAdmin/{id}', [UserController::class, 'updateadmin'])->name('updateAdmin');
-    //     Route::get('search/phone', [UserController::class, 'findByPhone'])->name('findByPhone');
-    // });
-
-
-
     Route::prefix('client')->name('client.')->group(function () {
         Route::get('/', [ClientController::class, 'index'])->name('index');
         Route::get('/detail/{id}', [ClientController::class, 'edit'])->name('detail');
@@ -265,16 +205,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/export', [ClientController::class, 'export'])->name('export');
     });
 
-
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
         Route::get('/detail/{id}', [OrderController::class, 'detail'])->name('detail');
         // Route::get('/find/phone', [OrderController::class, 'getOrderbyPhone'])->name('findByPhone');
         Route::get('/admin/order/filter', [OrderController::class, 'filterOrder'])->name('filter');
-    });
-    Route::prefix('config')->name('config.')->group(function () {
-        Route::get('/detail/{id}', [ConfigController::class, 'index'])->name('detail');
-        Route::post('/update/{id}', [ConfigController::class, 'updateConfig'])->name('update');
     });
 
     Route::prefix('checkInventory')->name('check.')->group(function () {

@@ -99,11 +99,11 @@
                         aria-expanded="false">
                         <div class="avatar-sm">
                             <img src="{{ showImage(auth()->guard('admin')->user()->img_url) }}"
-                                alt="{{ auth()->guard('admin')->user()->name }}" class="avatar-img rounded-circle">
+                                alt="{{ auth()->guard('admin')->user()->full_name }}" class="avatar-img rounded-circle">
                         </div>
                         <span class="profile-username">
                             <span class="op-7">Hi,</span>
-                            <span class="fw-bold">{{ auth()->guard('admin')->user()->name }}</span>
+                            <span class="fw-bold">{{ auth()->guard('admin')->user()->full_name }}</span>
                         </span>
                     </a>
                     <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -117,11 +117,11 @@
                                                 alt="image profile" class="avatar-img rounded-circle">
                                         </div>
                                         <div class="u-text">
-                                            <h4>{{ auth()->guard('admin')->user()->name }}</h4>
+                                            <h4>{{ auth()->guard('admin')->user()->full_name }}</h4>
                                             <p class="text-muted">{{ auth()->guard('admin')->user()->email }}</p>
                                             <div style="display: flex">
-                                                <a href="{{ route('admin.detail', ['id' => auth()->guard('admin')->id()]) }}"
-                                                    class="btn btn-xs btn-secondary btn-sm p-1">Trang cá nhân</a>
+                                                <a href="#" class="btn btn-xs btn-secondary btn-sm p-1">Trang cá
+                                                    nhân</a>
                                                 <a href="#" class="btn btn-xs btn-sm p-1"
                                                     style="background: red; color: #ffff; margin-left: 10px"
                                                     onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng
@@ -158,17 +158,3 @@
     <!-- End Navbar -->
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Marquee control
-        var marquee = document.getElementById('demoMarquee');
-        if (marquee) {
-            marquee.addEventListener('mouseenter', function() {
-                marquee.stop();
-            });
-            marquee.addEventListener('mouseleave', function() {
-                marquee.start();
-            });
-        }
-    });
-</script>

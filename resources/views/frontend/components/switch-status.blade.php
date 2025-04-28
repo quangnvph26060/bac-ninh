@@ -19,12 +19,12 @@
         <span class="badge bg-danger text-light">Đã hủy</span>
     @break
 
-    @case('cod')
-        <span>Thành toán tiền mặt</span>
+    @case(null)
+        <span>Chưa cập nhật...</span>
     @break
 
     @case('bank_transfer')
-        <span>Thành toán qua ví</span>
+        <span>Thanh toán qua ví</span>
     @break
 
     @case('paypal')

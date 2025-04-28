@@ -13,7 +13,7 @@ const columns = [
     {
         data: "representative_name",
         name: "representative_name",
-        title: "người đại điện",
+        title: "người đại diện",
         orderable: false,
         searchable: false,
     },

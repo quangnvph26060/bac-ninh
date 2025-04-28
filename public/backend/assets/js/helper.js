@@ -177,9 +177,9 @@ function submitForm(formId, successCallback, url = null) {
             data: formData,
             processData: false,
             contentType: false,
-            // beforeSend: function () {
-            //     $("#loadingSpinner").fadeIn();
-            // },
+            beforeSend: function () {
+                $("#loadingSpinner").fadeIn();
+            },
             success: function (response) {
                 console.log("Dữ liệu đã được gửi thành công", response);
                 if (typeof successCallback === "function") {
@@ -190,9 +190,9 @@ function submitForm(formId, successCallback, url = null) {
                 Notifications(xhr.responseJSON.message, "danger");
                 console.log("Lỗi khi gửi dữ liệu: ", xhr);
             },
-            // complete: function () {
-            //     $("#loadingSpinner").fadeOut();
-            // },
+            complete: function () {
+                $("#loadingSpinner").fadeOut();
+            },
         });
     });
 }

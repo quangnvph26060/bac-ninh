@@ -21,11 +21,6 @@ class Bank extends Model
         return $this->hasMany(Company::class, 'bank_id');
     }
 
-    public function superAdmin()
-    {
-        return $this->hasOne(SuperAdmin::class, 'bank_id');
-    }
-
     public function suppliers()
     {
         return $this->hasMany(Supplier::class, 'bank_id');

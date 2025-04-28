@@ -13,15 +13,26 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('config', function (Blueprint $table) {
+        Schema::create('configs', function (Blueprint $table) {
             $table->id();
-            $table->string('logo');
-            $table->string('name');
-            $table->string('email');
-            $table->string('phone');
-            $table->string('bank_account')->nullable();
-            $table->unsignedBigInteger('bank_id')->nullable();
-            $table->foreign('bank_id')->references('id')->on('banks');
+            $table->string('title')->nullable();
+            $table->string('company')->nullable();
+
+            $table->string('logo')->nullable();
+            $table->string('favicon')->nullable();
+            $table->string('address')->nullable();
+            $table->string('email')->nullable();
+            $table->string('hotline')->nullable();
+            $table->string('groups')->nullable();
+
+            $table->string('facebook')->nullable();
+            $table->string('youtobe')->nullable();
+            $table->string('tiktok')->nullable();
+
+            $table->string('copyright')->nullable();
+
+            $table->string('seo_title')->nullable();
+            $table->text('seo_description')->nullable();
             $table->timestamps();
         });
     }
