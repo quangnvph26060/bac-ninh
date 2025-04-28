@@ -3,7 +3,6 @@
         <h4 class="card-title">Tối ưu hóa công cụ tìm kiếm</h4>
         <p id="toggle-seo-fields" class="text-primary mb-0">Ẩn/Hiện SEO Fields</p>
     </div>
-
     <div class="card-body">
         <div class="seo-preview" v-pre="">
             <p class="default-seo-description" style="{{ $model ? 'display: none;' : '' }}">

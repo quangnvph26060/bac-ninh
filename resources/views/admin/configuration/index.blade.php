@@ -90,7 +90,6 @@
                             </div>
                         </div>
                     </div>
-
                     <x-seo :model="$config" />
                 </div>
                 <div class="col-md-3 gap-3 d-flex flex-column-reverse flex-md-column mb-md-0 mb-5">
