@@ -31,7 +31,7 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
-    <link rel="stylesheet" href="{{ asset('frontend/assets/css/app.css') }}" />
+    <link rel="stylesheet" href="{{ asset('frontend/assets/css/app.css') }}?v={{ filemtime(public_path('frontend/assets/css/app.css')) }}" />
 
     @stack('styles')
 </head>
