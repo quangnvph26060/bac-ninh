@@ -37,4 +37,12 @@ class ProductVariant extends Model
     {
         return $this->belongsToMany(AttributeValue::class, 'attribute_value_variants');
     }
+
+    public function getAttributeValueNamesAttribute()
+    {
+        if (!$this->attribute_value_combine) return [];
+
+        $ids = explode('-', $this->attribute_value_combine); // ['9', '19', '40']
+        return AttributeValue::whereIn('id', $ids)->pluck('value')->toArray(); // ['X-L', 'Đỏ', 'Cotton']
+    }
 }

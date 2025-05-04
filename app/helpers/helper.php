@@ -317,7 +317,7 @@ if (!function_exists('isActiveMenu')) {
     }
 }
 
-function generateTransactionCode($length = 6)
+function generateTransactionCode($length = 8)
 {
     // Kết hợp chữ hoa và số
     $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

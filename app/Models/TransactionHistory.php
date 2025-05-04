@@ -15,7 +15,6 @@ class TransactionHistory extends Model
         'transaction_type',
         'status',
         'note',
-        'bank_account',
         'code'
     ];
 

@@ -41,7 +41,6 @@
 
     <div class="table-responsive mt-4">
         <div id="order-content">
-            @include('frontend.app.order.order-table', ['orders' => $orders])
         </div>
     </div>
 @endsection
@@ -134,6 +133,10 @@
                     per_page,
                     page: pageParam // Truyền 'page' vào data của AJAX
                 },
+                beforeSend: () => {
+                    $('#coupon-content').hide();
+                    $('#loading').show();
+                },
                 success: function(response) {
                     $('#order-content').html(response.html).fadeIn(200);
                     $('#loading').hide();
@@ -142,8 +145,13 @@
                     console.error("Lỗi khi load đơn hàng:", xhr);
                     $('#loading').hide();
                     $('#order-content').show();
+                },
+                complete: () => {
+                    $('#loading').hide();
+                    $('#coupon-content').show();
                 }
             });
         }
+        fetchOrders()
     </script>
 @endpush
