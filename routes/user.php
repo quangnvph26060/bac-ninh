@@ -9,6 +9,7 @@ use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductController;
 use App\Http\Controllers\Frontend\App\ProfileController;
+use App\Http\Controllers\Frontend\App\TransactionHistoryController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -32,13 +33,16 @@ Route::middleware('auth')->group(function () {
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('coupons', [CouponController::class, 'coupons'])->name('coupons.index');
 
+    Route::get('transaction-history', [TransactionHistoryController::class, 'transactionHistory'])->name('transaction.history');
+
     Route::prefix('bills')
         ->controller(BillController::class)
         ->name('bills.')
         ->group(function () {
             Route::get('/', 'bill')->name('index');
-            Route::post('generate-qr', 'generateQr')->name('generate.qr');
-            Route::post('confirm-transfer', 'confirmTransfer')->name('confirm.transfer');
+            Route::post('paypal/process', 'processTransaction')->name('paypal.process');
+            Route::get('paypal/success', 'successTransaction')->name('paypal.success');
+            Route::get('paypal/cancel', 'cancelTransaction')->name('paypal.cancel');
         });
 
     Route::group(['controller' => ProfileController::class], function () {
@@ -49,6 +53,8 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('orders')->name('orders.')->controller(OrderController::class)->group(function () {
         Route::get('/', 'index')->name('index');
+        Route::get('show/{code}', 'show')->name('show');
+        Route::post('payment/{code}', 'payment')->name('payment');
         Route::post('store-order', 'storeOrder')->name('store.order');
         Route::post('get-products', 'getProducts')->name('get.products');
         Route::post('get-variant-price', 'getVariantPrice')->name('get-variant-price');

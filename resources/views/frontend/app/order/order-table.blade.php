@@ -13,10 +13,17 @@
     <tbody>
         @forelse ($orders as $order)
             <tr class="align-middle">
-                <td><a href="" class="name">{{ $order->order_code }}</a></td>
                 <td>
                     <div class="d-flex flex-column">
-                        <a href="#" class="name">{{ $order->user?->name }}</a>
+                        <a href="{{ route('orders.show', $order->order_code) }}"
+                            class="name">{{ $order->order_code }}</a>
+                        <p>{{ $order->order_name }}</p>
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex flex-column">
+                        <a href="{{ route('orders.show', $order->order_code) }}"
+                            class="name">{{ $order->user?->name }}</a>
                         <p>{{ $order->phone_number ?? $order->user?->phone }}</p>
                     </div>
                 </td>

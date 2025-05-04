@@ -32,6 +32,7 @@ use App\Http\Controllers\Client\SignUpController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\Frontend\App\BillController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -286,3 +287,4 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 });
+

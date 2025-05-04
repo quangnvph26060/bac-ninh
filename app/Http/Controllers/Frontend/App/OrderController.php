@@ -12,6 +12,8 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
 use App\Models\State;
+use App\Models\Wallet;
+use App\Models\WalletTransaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,9 +53,79 @@ class OrderController extends Controller
             ]);
         }
 
-        $totalPendingOrders = Order::where('status', 'pending')->count();
+        $totalPendingOrders = Order::where(['status' => 'pending', 'user_id' => auth()->id()])->count();
 
         return view('frontend.app.order.index', compact('orders', 'totalPendingOrders'));
+    }
+
+    public function show(string $code)
+    {
+        $order = Order::query()->where('order_code', $code)->with(['orderItems.productVariant.attributeValues'])->firstOrFail();
+        return view('frontend.app.order.show', compact('order'));
+    }
+
+    public function payment(Request $request)
+    {
+        $credentials = $request->validate([
+            'order_code' => 'required|exists:orders,order_code',
+        ]);
+
+        $order = Order::query()->where(['order_code' => $credentials['order_code'], 'user_id' => auth()->id()])->first();
+
+        if (!$order) {
+            return errorResponse("Đơn hàng không tồn tại!", true);
+        }
+
+        if ($order->payment_status === "completed" || $order->status !== "draft") {
+            return errorResponse("Đơn hàng đã được thanh toán!", true);
+        }
+
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => auth()->id()],
+            ['balance' => 0]
+        );
+
+        if ($order->total > $wallet->balance) {
+            return errorResponse("Số dư tài khoản không đủ, vui lòng nạp tiền để tiếp tục!", true);
+        }
+
+        try {
+            DB::beginTransaction();
+            $order->payment_status = "completed";
+            $order->status = "pending";
+            $order->payment_method = "bank_transfer";
+
+            $order->save();
+
+            $amount = $order->total;
+            $note = "THANH TOAN DON HANG #{$order->order_code}";
+
+            $balanceBefore = $wallet->balance;
+            $wallet->decrement('balance', $amount);
+            $balanceAfter = $wallet->balance;
+
+            $wallet->transactions()->create([
+                'code' => generateTransactionCode(),
+                'amount' => $amount,
+                'note' => $note,
+                'balance_before' => $balanceBefore,
+                'balance_after' => $balanceAfter,
+                'type' => "withdraw"
+            ]);
+
+            DB::commit();
+
+            return successResponse(
+                "Thanh toán đơn hàng thành công.",
+                ['amount' => formatPrice($balanceAfter)],
+                200,
+                true
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+            logger("error: " . $e->getMessage());
+            return errorResponse('Đã có lỗi xảy ra trong quá trình thanh toán!', 400);
+        }
     }
 
     public function create(Request $request)
@@ -175,7 +247,6 @@ class OrderController extends Controller
         if ($coupon->start_date && !$coupon->end_date) {
             return $now->greaterThanOrEqualTo($coupon->start_date);
         }
-
         // Nếu có cả start_date và end_date => kiểm tra now nằm trong khoảng
         if ($coupon->start_date && $coupon->end_date) {
             $start = $coupon->start_date;
@@ -516,7 +587,7 @@ class OrderController extends Controller
             extract($totals);
 
             // Tạo đơn hàng và lưu các sản phẩm
-            $order = $this->storeOrderDetails($request['orderInfo'], $grandTotal, $discountAmount, $shippingFee);
+            $order = $this->storeOrderDetails($request['orderInfo'], $grandTotal, $discountAmount, $shippingFee, $shippingAddress);
             $this->storeOrderItems($order, $productDetails);
 
             DB::commit();
@@ -538,9 +609,8 @@ class OrderController extends Controller
         if (!empty($coupon)) {
             $coupon = Coupon::query()->with('products')->where('code', $coupon)->first();
 
-            if (!$this->isCouponValid($coupon)) {
-                return false;
-            }
+            if ($this->isCouponValid($coupon)) return $coupon;
+            return null;
         }
 
         return null;
@@ -558,14 +628,15 @@ class OrderController extends Controller
 
         $shippingFee = $shippingMethod ? $shippingMethod->pivot->fee : 0;
 
-        return compact('country', 'state', 'city', 'shippingFee');
+        $shippingAddress = "{$orderInfo['shipping_address']}, {$city}, {$state}, {$country->name}";
+
+        return compact('shippingAddress', 'shippingFee');
     }
 
     private function calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee)
     {
         // Tính giảm giá nếu có coupon
         $discountAmount = $this->calculateDiscount($coupon ?? null, $productDetails, $subTotal);
-
         if ($discountAmount === false) {
             return errorResponse("Các sản phẩm không đủ điều kiện áp dụng mã giảm giá này.", true);
         }
@@ -575,18 +646,21 @@ class OrderController extends Controller
         return compact('subTotal', 'discountAmount', 'grandTotal');
     }
 
-    private function storeOrderDetails($orderInfo, $grandTotal, $discountAmount, $shippingFee)
+    private function storeOrderDetails($orderInfo, $grandTotal, $discountAmount, $shippingFee, $shippingAddress)
     {
         return Order::create(
             [
                 'user_id' => auth()->id(),
+                'full_name' => $orderInfo['first_name'] . $orderInfo['last_name'],
+                'email' => $orderInfo['email'],
+                'zip_code' => $orderInfo['zip_code'],
                 'order_code' => generateOrderCode(),
                 'order_name' => $orderInfo['orderName'],
                 'status' => $orderInfo['paymentMethod'] !== 'later' ? 'pending' : 'draft',
                 'payment_status' => $orderInfo['paymentMethod'] !== 'later' ? 'completed' : 'pending',
                 'payment_method' => $orderInfo['paymentMethod'] !== 'later' ? 'bank_transfer' : null,
                 'phone_number' => $orderInfo['phone_number'],
-                'shipping_address' => "{$orderInfo['shipping_address']} {$orderInfo['city_id']} {$orderInfo['state_id']} {$orderInfo['country_id']}",
+                'shipping_address' => $shippingAddress,
                 'note' => $orderInfo['note'],
                 'total' => $grandTotal,
                 'discount' => $discountAmount,
