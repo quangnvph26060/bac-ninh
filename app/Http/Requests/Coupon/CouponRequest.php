@@ -27,7 +27,7 @@ class CouponRequest extends FormRequest
             'code' => 'required|unique:coupons,code,' . $id,
             'value' => 'required|numeric|max:100',
             'type' => 'required|in:order,product',
-            'max_discount' => 'nullable|numeric|min:1|regex:/^\d+(\.\d{1,2})?$/',
+            'max_discount' => 'nullable|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/',
             'min_order_value' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
             'start_date' => 'nullable|date|date_format:d-m-Y H:i',
             'end_date' => 'nullable|date|after_or_equal:start_date',

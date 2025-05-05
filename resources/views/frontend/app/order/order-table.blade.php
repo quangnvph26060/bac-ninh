@@ -6,7 +6,7 @@
             <th scope="col">Trạng thái</th>
             <th scope="col">Thanh toán</th>
             <th scope="col">Số lượng</th>
-            <th scope="col">Thanh toán</th>
+            <th scope="col">Tổng tiền</th>
             <th scope="col">Ngày tạo</th>
         </tr>
     </thead>
@@ -32,23 +32,28 @@
                     <div class="d-flex">
                         @switch($order->payment_status)
                             @case('pending')
-                                <div class="bg_unpaid status_btn_order"><span class="px-2">Chưa thanh toán</span></div>
+                                <div class="bg_unpaid status_btn_order"><span class="px-2">Not yet paid</span></div>
                             @break
 
                             @case('completed')
-                                <div class="bg_paid status_btn_order"><span class="px-2">Đã thanh toán</span></div>
+                                <div class="bg_paid status_btn_order"><span class="px-2">Paid</span></div>
+                            @break
+
+                            @case('refunded')
+                                <div class="bg_refunded status_btn_order"><span class="px-2">Refunded</span></div>
                             @break
                         @endswitch
+
                     </div>
                 </td>
-                <td>{{ $order->orderItems->sum('quantity') }} sản phẩm</td>
-                <td>@include('frontend.components.switch-status', ['status' => $order->payment_method])</td>
+                <td>{{ $order->orderItems->sum('quantity') }} product</td>
+                <td>${{ formatPrice($order->total) }}</td>
                 <td>{{ $order->created_at->format('d-m-Y H:i') }}</td>
             </tr>
             @empty
                 <tr>
                     <td colspan="8" class="text-center py-4">
-                        <div class="fw-bold text-muted">Không có đơn hàng nào được tìm thấy</div>
+                        <div class="fw-bold text-muted">No orders found</div>
                     </td>
                 </tr>
             @endforelse

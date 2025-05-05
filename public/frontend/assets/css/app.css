@@ -1499,6 +1499,13 @@ main::-webkit-scrollbar-thumb:hover {
 .h-1 {
     height: 0.25rem;
 }
+
+.bg_refunded {
+    background: #cea40e1a;
+    border-color: #df8713;
+    color: #42526e !important;
+}
+
 table tbody tr td,
 table tbody tr td p,
 table tbody tr td span {

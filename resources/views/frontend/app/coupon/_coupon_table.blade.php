@@ -7,7 +7,7 @@
             <th scope="col" class="text-center">Loại</th>
             <th scope="col">Trạng thái</th>
             <th scope="col" class="text-center">Còn hạn trong</th>
-            <th scope="col" style="width: 10%">Số lần sử dụng</th>
+            <th scope="col" style="width: 13%">Số lượt sử dụng còn lại</th>
         </tr>
     </thead>
     <tbody>

@@ -257,7 +257,7 @@
                                 <div class="d-flex justify-content-between align-items-center border px-3 py-2 rounded">
                                     <div class="">
                                         <p class="mb-0 fw-bold">Số dư</p>
-                                        <p class="mb-0 fw-bold">$0.00</p>
+                                        <p class="mb-0 fw-bold">${{ formatPrice($wallet->balance) }}</p>
                                     </div>
                                     <button type="button" class="ant-btn-primary text-white px-3 py-1">Nạp tiền</button>
                                 </div>
@@ -327,9 +327,6 @@
 
                 <div class="d-flex flex-column justify-content-center align-items-center my-3 mt-5 gap-3">
                     <div class="d-flex gap-3">
-                        <button type="button" id="pay-now-button" class="ant-btn ant-btn-default py-2 px-4 h-auto">
-                            <span>Thanh toán ngay</span>
-                        </button>
                         <button type="button" class="ant-btn ant-btn-primary py-2 px-4 h-auto" id="btn-save-order">
                             <span>Lưu đơn hàng</span>
                         </button>
@@ -505,6 +502,7 @@
                 },
                 error: (xhr) => {
                     console.log(xhr.responseJSON.message);
+                    notyf.error(xhr.responseJSON.message || "Đã xảy ra lỗi.");
                 },
                 complete: () => {
                     $('#loading').hide();
@@ -518,6 +516,7 @@
         }
 
         function calculateOrderTotal() {
+            const wallet = "{{ $wallet->balance }}"
             const productPrice = cleanCurrency($('.final-price').first().text());
             const shippingFee = cleanCurrency($('#shipping-method-fee').text());
             const tax = cleanCurrency($('#tax-amount').text());
@@ -526,6 +525,12 @@
             const total = productPrice + shippingFee + tax + extraFee;
 
             $('#order-total-amount').text(`$${total.toFixed(2)}`);
+
+            if (total <= wallet) {
+                $('.alert.alert-danger').hide();
+            } else {
+                $('.alert.alert-danger').show();
+            }
         }
 
         function showWalletBalance() {
@@ -791,6 +796,9 @@
 
             $('.card-shipping').find('p').remove(); // Xoá thông tin cũ nếu có
             $('.card-shipping').append(shippingInfoHTML); // Thêm mới
+
+            console.log();
+
 
             updateStepStatus(2, {
                 step: 3,
@@ -1146,65 +1154,66 @@
 
                 updateSubtotal()
                 toggleShippingButton()
-
-                document.querySelector('#confirmed-products-wrapper').addEventListener('click', function(e) {
-                    if (e.target.classList.contains('btn-clone-product')) {
-                        const productId = e.target.getAttribute('data-id');
-
-                        const productElement = e.target.closest('.custom-form');
-                        const clone = productElement.cloneNode(true);
-                        const newTime = Date.now() + Math.random();
-
-                        // Cập nhật lại tất cả data-time
-                        clone.querySelectorAll('[data-time]').forEach(el => {
-                            el.setAttribute('data-time', newTime);
-                        });
-                        clone.setAttribute('data-time', newTime);
-
-                        // Làm trống các select
-                        const selects = clone.querySelectorAll('.product-attr-select');
-                        selects.forEach(select => {
-                            select.value = "";
-                        });
-
-                        // Ẩn info_variant_ và reset giá, tổng giá
-                        const infoVariant = clone.querySelector(`#info_variant_${productId}`);
-                        if (infoVariant) {
-                            infoVariant.classList.remove('d-flex');
-                            infoVariant.classList.add('d-none');
-
-                            const priceEl = infoVariant.querySelector('.variant-price span');
-                            const totalPriceEl = infoVariant.querySelector('.total-price span');
-                            if (priceEl) priceEl.textContent = '';
-                            if (totalPriceEl) totalPriceEl.textContent = '';
-                        }
-
-                        // Reset input số lượng về 1
-                        const quantityInput = clone.querySelector('.step_product_input');
-                        if (quantityInput) quantityInput.value = 1;
-
-                        // Thêm phần tử vào DOM
-                        $('#confirmed-products-wrapper').append(clone);
-
-                        // Cập nhật localStorage
-                        const confirmed = getConfirmedOrders();
-                        const imgEl = productElement.querySelector('img');
-                        const imgSrc = imgEl ? imgEl.getAttribute('src') : '';
-
-                        confirmed.push({
-                            id: parseInt(productId),
-                            image: imgSrc,
-                            time: newTime
-                        });
-
-                        $('#qty-order-item').text(confirmed.length);
-                        localStorage.setItem('confirmedOrders', JSON.stringify(confirmed));
-
-                        updateSubtotal();
-                        toggleShippingButton();
-                    }
-                });
             }
+
+            document.querySelector('#confirmed-products-wrapper').addEventListener('click', function(e) {
+
+                if (e.target.classList.contains('btn-clone-product')) {
+                    const productId = e.target.getAttribute('data-id');
+
+                    const productElement = e.target.closest('.custom-form');
+                    const clone = productElement.cloneNode(true);
+                    const newTime = Date.now() + Math.random();
+
+                    // Cập nhật lại tất cả data-time
+                    clone.querySelectorAll('[data-time]').forEach(el => {
+                        el.setAttribute('data-time', newTime);
+                    });
+                    clone.setAttribute('data-time', newTime);
+
+                    // Làm trống các select
+                    const selects = clone.querySelectorAll('.product-attr-select');
+                    selects.forEach(select => {
+                        select.value = "";
+                    });
+
+                    // Ẩn info_variant_ và reset giá, tổng giá
+                    const infoVariant = clone.querySelector(`#info_variant_${productId}`);
+                    if (infoVariant) {
+                        infoVariant.classList.remove('d-flex');
+                        infoVariant.classList.add('d-none');
+
+                        const priceEl = infoVariant.querySelector('.variant-price span');
+                        const totalPriceEl = infoVariant.querySelector('.total-price span');
+                        if (priceEl) priceEl.textContent = '';
+                        if (totalPriceEl) totalPriceEl.textContent = '';
+                    }
+
+                    // Reset input số lượng về 1
+                    const quantityInput = clone.querySelector('.step_product_input');
+                    if (quantityInput) quantityInput.value = 1;
+
+                    // Thêm phần tử vào DOM
+                    $('#confirmed-products-wrapper').append(clone);
+
+                    // Cập nhật localStorage
+                    const confirmed = getConfirmedOrders();
+                    const imgEl = productElement.querySelector('img');
+                    const imgSrc = imgEl ? imgEl.getAttribute('src') : '';
+
+                    confirmed.push({
+                        id: parseInt(productId),
+                        image: imgSrc,
+                        time: newTime
+                    });
+
+                    $('#qty-order-item').text(confirmed.length);
+                    localStorage.setItem('confirmedOrders', JSON.stringify(confirmed));
+
+                    updateSubtotal();
+                    toggleShippingButton();
+                }
+            });
 
             $(document).on('change', '.product-attr-select', function() {
 
@@ -1342,6 +1351,8 @@
                 const productId = $input.closest('.custom-form').data('id');
                 const time = $input.closest('.custom-form').data('time');
                 const variantId = $(`#info_variant_${productId}[data-time="${time}"]`).data('variant-id');
+                const price = $input.closest('.custom-form').find('.variant-price span').text()
+                const totalPrice = $input.closest('.custom-form').find('.total-price span')
 
                 // Kiểm tra số lượng hợp lệ (phải là số nguyên dương)
                 if (!quantity || isNaN(quantity) || parseInt(quantity) < 1) {
@@ -1349,6 +1360,7 @@
                     $input.focus();
                     $input.val(1)
                     updateSubtotal()
+                    totalPrice.text(price)
                     return;
                 }
 
@@ -1377,13 +1389,7 @@
 
                         $input.val(1)
 
-                        let total_price = $(
-                            `.total-price[data-product-id="${productId}"][data-time="${time}"] span`
-                        );
-
-                        total.text(
-                            `${xhr.responseJSON.totalPrice == 0 ? total_price.text() : xhr.responseJSON.totalPrice}`
-                        )
+                        totalPrice.text(price)
                     }
                 });
             });

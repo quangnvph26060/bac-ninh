@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
 use App\Models\State;
+use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use Carbon\Carbon;
@@ -44,7 +45,7 @@ class OrderController extends Controller
             $query->whereBetween('created_at', [$start, $end]);
         }
 
-        $orders = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        $orders = $query->orderBy('updated_at', 'desc')->paginate($perPage);
 
         if ($request->ajax()) {
             $html = view('frontend.app.order.order-table', compact('orders'))->render();
@@ -97,27 +98,13 @@ class OrderController extends Controller
 
             $order->save();
 
-            $amount = $order->total;
-            $note = "THANH TOAN DON HANG #{$order->order_code}";
-
-            $balanceBefore = $wallet->balance;
-            $wallet->decrement('balance', $amount);
-            $balanceAfter = $wallet->balance;
-
-            $wallet->transactions()->create([
-                'code' => generateTransactionCode(),
-                'amount' => $amount,
-                'note' => $note,
-                'balance_before' => $balanceBefore,
-                'balance_after' => $balanceAfter,
-                'type' => "withdraw"
-            ]);
+            $this->paymentViaWallet($order, $wallet);
 
             DB::commit();
 
             return successResponse(
                 "Thanh toán đơn hàng thành công.",
-                ['amount' => formatPrice($balanceAfter)],
+                ['amount' => formatPrice($wallet->balance)],
                 200,
                 true
             );
@@ -162,11 +149,15 @@ class OrderController extends Controller
             'options.*.variant_id' => 'nullable|exists:product_variants,id',
         ]);
 
-        $coupon = Coupon::query()->with('products')->where('code', $request->coupon)->first();
+        $coupon = Coupon::query()->with(['products', 'users'])->where('code', $request->coupon)->first();
 
         if (!$this->isCouponValid($coupon)) {
             return errorResponse("Mã giảm giá đã hết hiệu lực hoặc không tồn tại!", true);
         }
+
+        if ($coupon->users()->count() >= $coupon->usage_limit)  return errorResponse("Mã giảm giá đã hết hiệu lực, vui lòng chọn mã khác!", true, 400);
+
+        if ($coupon->users()->where('user_id', auth()->guard('web')->id())->count() >= $coupon->usage_per_user)  return errorResponse("Bạn đã hết lượt sử dụng mã giảm giá này rồi!", true, 400);
 
         $shippingFee = $request->shipping;
         $items = $request->options;
@@ -280,7 +271,7 @@ class OrderController extends Controller
             $discountAmount = $coupon->value;
 
             // Áp dụng giới hạn giảm nếu có
-            if ($coupon->max_discount && $discountAmount > $coupon->max_discount) {
+            if ($coupon->max_discount > 0 && $discountAmount > $coupon->max_discount) {
                 $discountAmount = $coupon->max_discount;
             }
         }
@@ -307,7 +298,7 @@ class OrderController extends Controller
             }
 
             // Áp dụng giới hạn giảm nếu có
-            if ($coupon->max_discount && $discountAmount > $coupon->max_discount) {
+            if ($coupon->max_discount > 0 && $discountAmount > $coupon->max_discount) {
                 $discountAmount = $coupon->max_discount;
             }
         }
@@ -530,7 +521,7 @@ class OrderController extends Controller
 
                 'orderInfo' => 'required|array',
                 'orderInfo.coupon' => 'nullable|string|max:255|exists:coupons,code',
-                'orderInfo.paymentMethod' => 'required|string|in:later,online', // tùy nếu bạn có 2 phương thức này
+                'orderInfo.paymentMethod' => 'required|string|in:later,wallet', // tùy nếu bạn có 2 phương thức này
                 'orderInfo.shipping_method_id' => 'required|integer|exists:shipping_methods,id',
                 'orderInfo.first_name' => 'required|string|max:255',
                 'orderInfo.last_name' => 'required|string|max:255',
@@ -582,13 +573,27 @@ class OrderController extends Controller
 
             // Lấy chi tiết sản phẩm và tính toán tổng đơn hàng
             $productDetails = $this->getProductDetails($request['products']);
+
             $subTotal = $this->calculateSubTotal($productDetails);
             $totals = $this->calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee);
+            if (isset($totals['success']) && $totals['success'] === false) return errorResponse($totals['message'], true, $totals['code']);
             extract($totals);
 
             // Tạo đơn hàng và lưu các sản phẩm
             $order = $this->storeOrderDetails($request['orderInfo'], $grandTotal, $discountAmount, $shippingFee, $shippingAddress);
             $this->storeOrderItems($order, $productDetails);
+            $this->couponUser($coupon, $order);
+
+            if ($request['orderInfo']['paymentMethod'] === "wallet") {
+                $wallet = Wallet::firstOrCreate(
+                    ['user_id' => auth()->id()],
+                    ['balance' => 0]
+                );
+
+                if ($wallet->balance < $grandTotal) return errorResponse("Số dư tài khoản không đủ, vui lòng nạp tiền để tiếp tục thanh toán", true, 400);
+
+                $this->paymentViaWallet($order, $wallet);
+            }
 
             DB::commit();
 
@@ -597,17 +602,58 @@ class OrderController extends Controller
 
             return handleResponse('Tạo đơn hàng thành công.', 'success', 201);
         } catch (\Exception $e) {
-            logger($e->getMessage());
+            logger("message: " . $e->getMessage() . "line: " . $e->getLine());
 
             DB::rollBack();
             return errorResponse('Đã có lỗi xảy ra trong quá trình tạo đơn hàng, vui lòng quay lại sau!', true);
         }
     }
 
+    private function paymentViaWallet($order, $wallet, string $type = 'withdraw')
+    {
+        $amount = $order->total;
+        $note = ($type === "withdraw" ? "ORDER PAYMENT" : "REFUND THE ORDER") . " #{$order->order_code}";
+
+        $balanceBefore = $wallet->balance;
+
+        if ($type === 'withdraw') {
+            $wallet->decrement('balance', $amount);
+        } elseif ($type === 'deposit') {
+            $wallet->increment('balance', $amount);
+        } else {
+            return errorResponse("Invalid transaction type!", true, 400);
+        }
+
+        $balanceAfter = $wallet->fresh()->balance;
+
+        $wallet->transactions()->create([
+            'code' => generateTransactionCode(),
+            'amount' => $amount,
+            'note' => $note,
+            'balance_before' => $balanceBefore,
+            'balance_after' => $balanceAfter,
+            'type' => $type
+        ]);
+    }
+
+    public function couponUser($coupon, $order)
+    {
+        if (!empty($coupon)) {
+            $user = User::query()->findOrFail(auth()->guard('web')->id());
+
+            DB::table('coupon_user_usages')->insert([
+                'user_id'    => $user->id,
+                'coupon_id'  => $coupon->id,
+                'order_id' => $order->id,
+                'usage_time' => now(),
+            ]);
+        }
+    }
+
     private function checkCoupon($coupon)
     {
         if (!empty($coupon)) {
-            $coupon = Coupon::query()->with('products')->where('code', $coupon)->first();
+            $coupon = Coupon::query()->with(['products', 'users'])->where('code', $coupon)->lockForUpdate()->first();
 
             if ($this->isCouponValid($coupon)) return $coupon;
             return null;
@@ -635,11 +681,11 @@ class OrderController extends Controller
 
     private function calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee)
     {
-        // Tính giảm giá nếu có coupon
+        if ($coupon && $coupon->min_order_value >= $subTotal)  return errorResponse("Giá trị đơn hàng chưa đáp ứng điều kiện!", false, 400);
+
         $discountAmount = $this->calculateDiscount($coupon ?? null, $productDetails, $subTotal);
-        if ($discountAmount === false) {
-            return errorResponse("Các sản phẩm không đủ điều kiện áp dụng mã giảm giá này.", true);
-        }
+
+        if ($discountAmount === false) return errorResponse("Các sản phẩm không đủ điều kiện áp dụng mã giảm giá này!", false, 400);
 
         $grandTotal = $this->calculateGrandTotal($subTotal, $discountAmount, $shippingFee);
 
@@ -684,39 +730,29 @@ class OrderController extends Controller
         }
     }
 
-    private function processWalletPayment(Order $order)
+    public function orderCancel(Request $request)
     {
-        // Logic thanh toán qua ví (giảm số dư ví của người dùng)
-        $user = $order->user;
+        $credentials = $request->validate([
+            'code' => 'required|exists:orders,order_code',
+            'reason' => 'required|string|max:400'
+        ]);
 
-        if ($user->wallet_balance >= $order->total) {
-            $user->wallet_balance -= $order->total;
-            $user->save();
+        $order = Order::query()->where('order_code', $credentials['code'])->firstOrFail();
 
-            // Cập nhật trạng thái đơn hàng
-            $order->status = 'paid';
-            $order->save();
+        if ($order->status !== "pending") return errorResponse("Your order cannot be cancelled.", true, 400);
 
-            return response()->json([
-                'message' => 'Đơn hàng đã được thanh toán qua ví thành công!',
-                'order' => $order
-            ]);
-        }
-
-        return response()->json([
-            'message' => 'Số dư ví không đủ để thanh toán!',
-        ], 400);
-    }
-
-    private function processCashOnDelivery(Order $order)
-    {
-        // Logic thanh toán sau (COD)
-        $order->status = 'awaiting_payment';
+        $order->reason = $credentials['reason'];
+        $order->status = "cancelled";
+        $order->payment_status = "refunded";
         $order->save();
 
-        return response()->json([
-            'message' => 'Đơn hàng đã được tạo thành công, sẽ thanh toán khi nhận hàng!',
-            'order' => $order
-        ]);
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => auth()->id()],
+            ['balance' => 0]
+        );
+
+        $this->paymentViaWallet($order, $wallet, 'deposit');
+
+        return successResponse("Hủy đơn hàng thành công.", ['wallet' => formatPrice($wallet->balance)], 200, true);
     }
 }

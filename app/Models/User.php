@@ -86,8 +86,10 @@ class User extends Authenticatable
         return $this->belongsTo(Storage::class);
     }
 
-    public function transaction()
+    public function coupons()
     {
-        return $this->hasMany(Transaction::class, 'user_id');
+        return $this->belongsToMany(Coupon::class, 'coupon_user_usages')
+            ->withPivot('usage_time')
+            ->withTimestamps();
     }
 }

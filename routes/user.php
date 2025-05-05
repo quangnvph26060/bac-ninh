@@ -54,6 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('orders')->name('orders.')->controller(OrderController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('show/{code}', 'show')->name('show');
+        Route::post('cancel', 'orderCancel')->name('cancel');
         Route::post('payment/{code}', 'payment')->name('payment');
         Route::post('store-order', 'storeOrder')->name('store.order');
         Route::post('get-products', 'getProducts')->name('get.products');
