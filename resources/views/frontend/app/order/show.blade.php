@@ -5,7 +5,7 @@
         <div class="header_step_order">
             <div class=" w-100 d-flex align-items-center gap-4 justify-content-between">
                 <div class="d-flex gap-2">
-                    <a href="#">
+                    <a href="{{ route('orders.index') }}">
                         <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M19.1429 12L4.85718 12" stroke="#42526E" stroke-width="2" stroke-miterlimit="10">
                             </path>
@@ -21,9 +21,25 @@
                     </div>
                 </div>
                 <div class="d-flex gap-2 align-items-center">
+                    @php
+                        switch ($order->payment_status) {
+                            case 'completed':
+                                $bgClass = 'bg_paid';
+                                $text = 'Đã thanh toán';
+                                break;
+                            case 'refunded':
+                                $bgClass = 'bg_refunded';
+                                $text = 'Đã hoàn tiền';
+                                break;
+                            default:
+                                $bgClass = 'bg_unpaid';
+                                $text = 'Chưa thanh toán';
+                                break;
+                        }
+                    @endphp
 
-                    <div class="{{ $order->payment_status === 'completed' ? 'bg_paid' : 'bg_unpaid' }} status_btn_order">
-                        <span class="px-2">{{ $order->payment_status === 'completed' ? 'Đã' : 'Chưa' }} thanh toán</span>
+                    <div class="{{ $bgClass }} status_btn_order">
+                        <span class="px-2">{{ $text }}</span>
                     </div>
 
                     @php
@@ -46,14 +62,15 @@
                         @break
 
                         @case('pending')
-                            <button type="button" class="ant-btn ant-btn-warning py-2 px-4 h-auto d-flex align-items-center gap-1">
+                            <button type="button" class="ant-btn ant-btn-warning py-2 px-4 h-auto d-flex align-items-center gap-1"
+                                id="btn-status">
                                 <span><i class="bi bi-clock me-1"></i>Chờ xử lý</span>
                             </button>
                         @break
 
                         @case('processing')
                             <button type="button" class="ant-btn ant-btn-info py-2 px-4 h-auto d-flex align-items-center gap-1">
-                                <span><i class="bi bi-gear me-1"></i>Đang xử lý</span>
+                                <span><i class="bi bi-gear me-1"></i>Đã xác nhận</span>
                             </button>
                         @break
 
@@ -65,44 +82,68 @@
 
                         @case('cancelled')
                             <button type="button" class="ant-btn ant-btn-danger py-2 px-4 h-auto d-flex align-items-center gap-1">
-                                <span><i class="bi bi-x-circle me-1"></i>Đã hủy</span>
+                                <span><i class="bi bi-x-circle me-2"></i>Đã hủy</span>
                             </button>
                         @break
                     @endswitch
 
+                    <button class="ant-btn ant-btn-danger py-2 px-4 h-auto" data-bs-toggle="modal"
+                        data-bs-target="#cancelOrder" id="btn-cansel-order"
+                        style="{{ $order->status === 'pending' && $order->status !== 'cancelled' ? '' : 'display: none' }}">Hủy
+                        đơn</button>
                 </div>
 
             </div>
         </div>
     </div>
 
+    @php
+        $steps = [
+            'pending' => 'Đã đặt hàng',
+            'confirmed' => 'Đã xác nhận',
+            'shipping' => 'Đang giao',
+            'completed' => 'Hoàn tất',
+        ];
+
+        $statusOrder = array_keys($steps);
+        $currentStatus = $order->status;
+
+        // Nếu status không hợp lệ, set về 'unknown' để xử lý riêng
+        $validStatus = in_array($currentStatus, $statusOrder);
+    @endphp
+
     <div class="my-4 mx-auto processing" style="max-width: 700px;">
         <div class="d-flex justify-content-between progress-step text-center">
-            <div class="step-done">
-                <i class="bi bi-check-circle"></i>
-                <div>Đã đặt hàng</div>
-            </div>
-            <div class="step-done">
-                <i class="bi bi-check-circle"></i>
-                <div>Đã xác nhận</div>
-            </div>
-            <div class="step-pending">
-                <i class="bi bi-box"></i>
-                <div>Đang đóng gói</div>
-            </div>
-            <div class="step-pending">
-                <i class="bi bi-truck"></i>
-                <div>Đang giao</div>
-            </div>
-            <div class="step-pending">
-                <i class="bi bi-emoji-smile"></i>
-                <div>Hoàn tất</div>
-            </div>
+            @foreach ($steps as $status => $label)
+                @php
+                    $iconMap = [
+                        'pending' => 'bi-check-circle',
+                        'confirmed' => 'bi-clock',
+                        'shipping' => 'bi-truck',
+                        'completed' => 'bi-emoji-smile',
+                    ];
+                    $icon = $iconMap[$status];
+
+                    if (!$validStatus || $currentStatus === 'cancelled') {
+                        $stepClass = 'step-pending';
+                    } else {
+                        $currentIndex = array_search($currentStatus, $statusOrder);
+                        $stepIndex = array_search($status, $statusOrder);
+                        $stepClass = $stepIndex <= $currentIndex ? 'step-done' : 'step-pending';
+                    }
+                @endphp
+
+                <div class="{{ $stepClass }}">
+                    <i class="bi {{ $icon }}"></i>
+                    <div>{{ $label }}</div>
+                </div>
+            @endforeach
         </div>
     </div>
 
+
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-9">
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive">
@@ -149,7 +190,7 @@
                                 </tr>
                                 <tr>
                                     <th scope="row" colspan="4" class="text-end">Discount :</th>
-                                    <td>${{ formatPrice($order->discount) }}</td>
+                                    <td>- ${{ formatPrice($order->discount) }}</td>
                                 </tr>
                                 <tr>
                                     <th scope="row" colspan="4" class="text-end">Total :</th>
@@ -165,11 +206,11 @@
             </div>
         </div>
 
-        <div class="col-lg-4">
+        <div class="col-lg-3">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="header-title mb-3">Shipping Information</h4>
-
+                    <h4 class="header-title">Shipping Information</h4>
+                    <hr class="mt-2 mb-3">
                     <h5 class="font-family-primary fw-semibold mb-2">{{ $order->full_name }}</h5>
 
                     <p class="mb-2"><span class="fw-semibold me-2">Email:</span> {{ $order->email }}</p>
@@ -191,6 +232,28 @@
         </div>
     </div>
 
+    <div class="modal fade" id="cancelOrder" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form action="" method="post" id="cancellation-form">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="titleCancelOrder">Lý do hủy đơn</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <textarea name="cancel_reason" id="cancel_reason" class="form-control" rows="4"
+                                placeholder="Vui lòng nhập lý do..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Bỏ qua</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Xác nhận hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 
@@ -238,7 +301,7 @@
 
                             notyf.success(response.message);
 
-                            $('.money__amount').text(`$${response.data.amount}`)
+                            $('.money__amount.balance').text(`$${response.data.amount}`)
 
                             const $statusDiv = $('.status_btn_order');
                             $statusDiv.removeClass('bg_unpaid').addClass('bg_paid');
@@ -250,6 +313,9 @@
                                 .html(
                                     '<i class="bi bi-check-circle me-1"></i> Chờ xử lý')
                             $('#confirm-paymant').off('click');
+
+                            $('.progress-step > div').eq(0).removeClass().addClass('step-done')
+                            $('#btn-cansel-order').show()
                         },
                         error: (xhr) => {
                             notyf.error(xhr.responseJSON.message);
@@ -269,6 +335,51 @@
                     });
                 }
             });
+        })
+
+        $("#cancellation-form").on('submit', function(e) {
+            e.preventDefault()
+
+            let code = "{{ $order->order_code }}"
+
+            $.ajax({
+                url: "{{ route('orders.cancel', '__code__') }}".replace('__code__', code),
+                method: "POST",
+                data: {
+                    code,
+                    reason: $('#cancel_reason').val()
+                },
+                beforeSend: () => {
+                    $('#coupon-content').hide();
+                    $('#loading').show();
+                },
+                success: (response) => {
+                    notyf.success(response.message);
+
+                    $('#btn-cansel-order').hide()
+
+                    $('#btn-status, #confirm-paymant')
+                        .removeClass('ant-btn-warning')
+                        .addClass('ant-btn-danger')
+                        .html(
+                            '<i class="bi bi-x-circle me-1"></i> Đã hủy')
+
+                    $('.status_btn_order').removeClass('bg_paid').removeClass('bg_unpaid').addClass(
+                        'bg_refunded').find('span').text('Đã hoàn tiền')
+
+                    $(".money__amount.balance").text(`$${response.data.wallet}`)
+
+                    $('#cancelOrder').modal('hide');
+                },
+                error: (xhr) => {
+                    notyf.error(xhr.responseJSON.message);
+                },
+                complete: () => {
+                    $('#loading').hide();
+                    $('#coupon-content').show();
+                }
+            })
+
         })
     </script>
 @endpush

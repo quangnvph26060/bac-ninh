@@ -76,7 +76,7 @@
                             </div>
                             <div class="amount__balance">
                                 <p class="balance_text">Số dư</p>
-                                <p class="money__amount">${{ formatPrice($wallet->balance) }}</p>
+                                <p class="money__amount balance">${{ formatPrice($wallet->balance) }}</p>
                             </div>
                         </div>
                     </div>
@@ -234,7 +234,7 @@
                             <li class="nav-item {{ request()->routeIs('transaction.history') ? 'active' : '' }}">
                                 <a href="{{ route('transaction.history') }}" class="nav-link">
                                     <i class="bi bi-wallet2"></i>
-                                    <span>Lịch sử nạp tiền</span>
+                                    <span>Lịch sử giao dịch</span>
                                 </a>
                             </li>
                         </ul>

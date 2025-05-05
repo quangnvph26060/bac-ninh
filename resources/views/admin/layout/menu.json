@@ -6,28 +6,42 @@
         "id": "dashboard"
     },
     {
-        "title": "Sản phẩm",
+        "title": "Order",
+        "icon": "fas fa-receipt",
+        "id": "orders",
+        "children": [
+            {
+                "title": "Order management",
+                "url": "admin.orders.index"
+            }
+        ],
+        "inRoutes": [
+            "admin.orders.index", "admin.orders.edit"
+        ]
+    },
+    {
+        "title": "Product",
         "icon": "fas fa-box",
         "id": "products",
         "children": [
             {
-                "title": "Quản lý sản phẩm",
+                "title": "Product management",
                 "url": "admin.products.index"
             },
             {
-                "title": "Quản lý danh mục",
+                "title": "Category management",
                 "url": "admin.categories.index"
             },
             {
-                "title": "Quản lý thương hiệu",
+                "title": "Brand management",
                 "url": "admin.brands.index"
             },
             {
-                "title": "Quản lý thuộc tính",
+                "title": "Attribute management",
                 "url": "admin.attributes.index"
             },
             {
-                "title": "Bộ sưu tập",
+                "title": "Collection",
                 "url": "admin.collections.index"
             }
         ],
@@ -41,7 +55,7 @@
         "id": "marketing",
         "children": [
             {
-                "title": "Mã giảm giá",
+                "title": "Discount code",
                 "url": "admin.coupons.index"
             }
         ],
@@ -50,26 +64,26 @@
         ]
     },
     {
-        "title": "Nhà cung cấp",
+        "title": "Supplier",
         "icon": "fas fa-building",
         "route": "admin.suppliers.index",
         "id": "suppliers"
     },
     {
-        "title": "Phân quyền",
+        "title": "Decentralization",
         "icon": "fas fa-user-shield",
         "id": "permissions",
         "children": [
             {
-                "title": "Quản lý nhân viên",
+                "title": "Personnel management",
                 "url": "admin.employees.index"
             },
             {
-                "title": "Quản lý vai trò",
+                "title": "Role management",
                 "url": "admin.roles.index"
             },
             {
-                "title": "Quản lý quyền",
+                "title": "Permissions management",
                 "url": "admin.permissions.index"
             }
         ],
@@ -78,17 +92,13 @@
         ]
     },
     {
-        "title": "Cấu hình",
+        "title": "Configuration",
         "icon": "fa-solid fa-gear",
         "id": "configurations",
         "children": [
             {
-                "title": "Cấu hình chung",
+                "title": "General configuration",
                 "url": "admin.configurations.index"
-            },
-            {
-                "title": "Cấu hình thanh toán",
-                "url": "admin.configurations.payment"
             }
         ],
         "inRoutes": [
