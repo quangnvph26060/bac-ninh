@@ -104,6 +104,12 @@ class OrderController extends Controller
             return successResponse("Hủy đơn hàng thành công.", ['wallet' => formatPrice($wallet->balance)], 200, true);
         });
     }
+
+    public function printInvoice(string $id)
+    {
+        $order = $this->orderService->show($id);
+        return view('frontend.template.invoice', compact('order'));
+    }
 }
 
 
