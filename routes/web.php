@@ -57,6 +57,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('edit/{id}', 'update')->name('update');
             Route::post('items', 'getItemByCode')->name('get.item.by.code');
             Route::post('cancel', 'cancelOrder')->name('cancel');
+            Route::get('invoice/preview/{id}',  'printInvoice')->name('invoice.print');
         });
 
         // Product Router

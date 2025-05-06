@@ -135,7 +135,7 @@ const dataTables = (
             },
         },
         language: {
-            url: '/backend/assets/js/plugin/datatables/vi.json'
+            // url: '/backend/assets/js/plugin/datatables/vi.json'
         }
     });
 

@@ -23,22 +23,22 @@
                     <div class="sa-page-meta__item d-flex align-items-center fs-6">
                         {{-- Payment Status --}}
                         @if ($order->payment_status == 'pending')
-                            <span class="badge bg-secondary me-2">Payment Pending</span>
+                            <span class="badge bg-secondary me-2" id="payment-status">Payment Pending</span>
                         @elseif($order->payment_status == 'completed')
-                            <span class="badge bg-success me-2">Paid</span>
+                            <span class="badge bg-success me-2" id="payment-status">Paid</span>
                         @elseif($order->payment_status == 'refunded')
                             <span class="badge bg-danger me-2">Refunded</span>
                         @endif
 
                         {{-- Order Status --}}
                         @if ($order->status == 'pending')
-                            <span class="badge bg-secondary">Pending</span>
+                            <span class="badge bg-secondary" id="order-status">Pending</span>
                         @elseif($order->status == 'confirmed')
-                            <span class="badge bg-primary">Confirmed</span>
+                            <span class="badge bg-primary" id="order-status">Confirmed</span>
                         @elseif($order->status == 'shipping')
-                            <span class="badge bg-warning text-dark">Shipping</span>
+                            <span class="badge bg-warning text-dark" id="order-status">Shipping</span>
                         @elseif($order->status == 'completed')
-                            <span class="badge bg-success">Completed</span>
+                            <span class="badge bg-success" id="order-status">Completed</span>
                         @elseif($order->status == 'cancelled')
                             <span class="badge bg-danger">Cancelled</span>
                         @endif
@@ -139,7 +139,8 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex flex-wrap gap-2 justify-content-end">
-                            <a href="#" class="btn btn-outline-dark btn-sm">
+                            <a href="{{ route('admin.orders.invoice.print', $order->id) }}" target="_blank"
+                                class="btn btn-outline-dark btn-sm">
                                 <i class="fas fa-print me-1"></i> Print Invoice
                             </a>
 
@@ -265,9 +266,30 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('backend/assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
 
     <script>
+        async function printInvoice() {
+            const {
+                jsPDF
+            } = window.jspdf;
+            const element = document.getElementById("invoiceContent");
+
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL("image/png");
+                const pdf = new jsPDF("p", "mm", "a4");
+
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+                pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+                pdf.autoPrint();
+                window.open(pdf.output("bloburl"), "_blank");
+            });
+        }
+
         $("#cancellation-form").on('submit', function(e) {
             e.preventDefault()
 
@@ -287,7 +309,7 @@
                     $('#loading').show();
                 },
                 success: (response) => {
-                    notyf.success(response.message);
+                    Notifications(response.message, "success");
 
                     $('#btn-cansel-order').hide()
 
@@ -302,10 +324,26 @@
 
                     $(".money__amount.balance").text(`$${response.data.wallet}`)
 
+                    // Cập nhật dropdown status
+                    const $statusSelect = $('select[name="status"]');
+                    $statusSelect.val('cancelled');
+
+                    $statusSelect.find('option').each(function() {
+                        const value = $(this).val();
+                        if (value !== 'cancelled') {
+                            $(this).prop('disabled', true);
+                        }
+                    });
+
+                    $('#payment-status').removeClass().addClass(
+                        'badge bg-danger me-2').text('Refunded')
+
+                    $("#order-status").removeClass().addClass('badge bg-danger').text('Cancelled')
+
                     $('#cancelOrder').modal('hide');
                 },
                 error: (xhr) => {
-                    notyf.error(xhr.responseJSON.message);
+                    Notifications(xhr.responseJSON.message, "danger");
                 },
                 complete: () => {
                     $('#loading').hide();
@@ -319,7 +357,7 @@
 
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('backend/assets/css/sweetalert2.min.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
 
     <style>
         .sa-page-meta {

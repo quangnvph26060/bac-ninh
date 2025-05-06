@@ -155,7 +155,10 @@ class OrderController extends Controller
             return errorResponse("Mã giảm giá đã hết hiệu lực hoặc không tồn tại!", true);
         }
 
-        if ($coupon->users()->count() >= $coupon->usage_limit)  return errorResponse("Mã giảm giá đã hết hiệu lực, vui lòng chọn mã khác!", true, 400);
+        if ($coupon->usage_limit > 0 && $coupon->users()->count() >= $coupon->usage_limit) {
+            return errorResponse("Mã giảm giá đã hết hiệu lực, vui lòng chọn mã khác!", true, 400);
+        }
+
 
         if ($coupon->users()->where('user_id', auth()->guard('web')->id())->count() >= $coupon->usage_per_user)  return errorResponse("Bạn đã hết lượt sử dụng mã giảm giá này rồi!", true, 400);
 
@@ -697,7 +700,7 @@ class OrderController extends Controller
         return Order::create(
             [
                 'user_id' => auth()->id(),
-                'full_name' => $orderInfo['first_name'] . $orderInfo['last_name'],
+                'full_name' => $orderInfo['first_name'] . ' ' . $orderInfo['last_name'],
                 'email' => $orderInfo['email'],
                 'zip_code' => $orderInfo['zip_code'],
                 'order_code' => generateOrderCode(),

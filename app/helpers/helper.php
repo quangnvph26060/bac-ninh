@@ -284,6 +284,15 @@ function formatPrice($price)
     return 0.00;
 }
 
+// function formatPrice($price)
+// {
+//     if (!empty($price)) {
+//         // Định dạng số với 2 chữ số thập phân và dấu phẩy phân cách phần nghìn
+//         return  number_format((float)$price, 0, '.', ',');
+//     }
+//     return 0.00;
+// }
+
 
 function generateEmployeeCode($table = 'employees', $column = 'employee_code', $prefix = 'PH', $length = 5)
 {
