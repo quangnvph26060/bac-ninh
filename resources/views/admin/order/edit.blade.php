@@ -206,10 +206,8 @@
 
                 <div class="card mt-4">
                     <div class="card-body d-flex flex-wrap gap-2 justify-content-between align-items-center">
-                        {{-- Select để đổi trạng thái đơn hàng --}}
-                        <form action="#" method="POST" class="d-flex align-items-center gap-2">
+                        <form id="status-form" method="POST" class="d-flex align-items-center gap-2">
                             @csrf
-                            @method('PUT')
 
                             @php
                                 $statusOptions = [
@@ -217,23 +215,23 @@
                                     'confirmed' => 1,
                                     'shipping' => 2,
                                     'completed' => 3,
-                                    'cancelled' => 4,
                                 ];
-                                $currentStatusIndex = $statusOptions[$order->status];
+                                $isCancelled = $order->status === 'cancelled';
+                                $currentStatusIndex = $statusOptions[$order->status] ?? -1;
                             @endphp
 
-                            <select name="status" class="form-select form-select-sm w-auto">
+                            <select id="status-select" name="status" class="form-select form-select-sm w-auto"
+                                {{ $isCancelled ? 'disabled' : '' }}>
                                 @foreach ($statusOptions as $status => $index)
-                                    <option value="{{ $status }}" {{ $order->status == $status ? 'selected' : '' }}
-                                        {{ $index < $currentStatusIndex ? 'disabled' : '' }}>
+                                    <option value="{{ $status }}" data-index="{{ $index }}"
+                                        {{ $order->status == $status ? 'selected' : '' }}
+                                        {{ !$isCancelled && $index < $currentStatusIndex ? 'disabled' : '' }}>
                                         {{ ucfirst($status) }}
                                     </option>
                                 @endforeach
                             </select>
 
-                            <button class="btn btn-sm btn-primary" type="submit">
-                                Update Status
-                            </button>
+                            <button class="btn btn-sm btn-primary" type="submit">Update Status</button>
                         </form>
                     </div>
                 </div>
@@ -266,7 +264,6 @@
 @endsection
 
 @push('scripts')
-
     <script>
         async function printInvoice() {
             const {
@@ -290,6 +287,36 @@
             });
         }
 
+        $('#status-form').on('submit', function(e) {
+            e.preventDefault();
+
+            let form = $(this);
+            let formData = form.serialize();
+            let url = "{{ route('admin.orders.update.status', $order->id) }}"; // Cập nhật đúng route
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: formData,
+                success: function(response) {
+                    let selectedIndex = $('#status-select option:selected').data('index');
+
+                    $('#status-select option').each(function() {
+                        let optionIndex = $(this).data('index');
+                        if (optionIndex < selectedIndex) {
+                            $(this).prop('disabled', true);
+                        }
+                    });
+
+                    // Optional: Hiển thị thông báo thành công
+                    Notifications(response.message, "success");
+                },
+                error: function() {
+                    Notifications(xhr.responseJSON.message, "danger");
+                }
+            });
+        });
+
         $("#cancellation-form").on('submit', function(e) {
             e.preventDefault()
 
@@ -305,8 +332,7 @@
                     reason: $('#cancel_reason').val()
                 },
                 beforeSend: () => {
-                    $('#coupon-content').hide();
-                    $('#loading').show();
+                    $("#loadingSpinner").fadeIn();
                 },
                 success: (response) => {
                     Notifications(response.message, "success");
@@ -346,8 +372,7 @@
                     Notifications(xhr.responseJSON.message, "danger");
                 },
                 complete: () => {
-                    $('#loading').hide();
-                    $('#coupon-content').show();
+                    $("#loadingSpinner").fadeOut();
                 }
             })
 

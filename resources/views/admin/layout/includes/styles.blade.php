@@ -14,6 +14,9 @@
 <link rel="stylesheet" href="{{ asset('backend/assets/css/plugins.min.css') }}">
 <link rel="stylesheet" href="{{ asset('backend/assets/css/kaiadmin.min.css') }}">
 <link rel="stylesheet" href="{{ asset('backend/assets/css/sweetalert2.min.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<link rel="stylesheet" href="{{ asset('frontend/assets/fonts/icomoon/style.css') }}">
+
 
 <link rel="stylesheet" href="{{ asset('backend/assets/css/global.css') }}">
 

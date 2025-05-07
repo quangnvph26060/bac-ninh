@@ -6,9 +6,10 @@ namespace App\Providers;
 use App\Models\Collection;
 use App\Models\Config;
 use App\Models\Wallet;
+use App\Observers\ActivityLogObserver;
 use App\Services\CategoryService;
 use Carbon\Carbon;
-use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -28,6 +29,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        // Lấy danh sách tất cả các Model
+        $models = File::allFiles(app_path('Models'));
+
+        // Đăng ký Observer cho từng Model
+        foreach ($models as $model) {
+            $modelName = 'App\\Models\\' . $model->getFilenameWithoutExtension();
+            if (class_exists($modelName)) {
+                $modelName::observe(ActivityLogObserver::class);
+            }
+        }
 
         Carbon::setLocale('vi');
 

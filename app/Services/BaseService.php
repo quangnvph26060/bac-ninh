@@ -249,6 +249,14 @@ class BaseService
             $query->when(!empty($conditions[$filter]), fn($q) => $q->where($filter, $conditions[$filter]));
         }
 
+        if (!empty($conditions['start_date']) && !empty($conditions['end_date'])) {
+            $startDate = $conditions['start_date'];
+            $endDate = $conditions['end_date'] . ' 23:59:59';
+
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+
         if ($order) {
             $query->orderBy($order[0], $order[1]);
         }
