@@ -8,10 +8,6 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="text-uppercase card-title fw-bold">order list</h5>
-                <div class="card-tool">
-                    <a href="{{ route('admin.brands.create') }}" class="btn btn-primary btn-sm fs-6"><i
-                            class="ti ti-circle-plus"></i> Create </a>
-                </div>
             </div>
 
             <x-data-table file="order" />

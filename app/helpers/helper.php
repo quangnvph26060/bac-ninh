@@ -181,11 +181,11 @@ if (!function_exists('successResponse')) {
 }
 
 if (!function_exists('handleResponse')) {
-    function handleResponse($message, $success, $code = 200, $data = [])
+    function handleResponse($message, $success, $code = 200, $data = [], $isToast  = true)
     {
         $type = $success ? 'success' : 'error';
 
-        if ($type == 'success') sessionFlash($type, $message);
+        if ($isToast) sessionFlash($type, $message);
 
         return response()->json(['success' => $success, 'message' => $message, 'data' => $data], $code);
     }

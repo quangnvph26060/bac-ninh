@@ -30,6 +30,6 @@ class Supplier extends Model
 
     public function brands()
     {
-        return $this->hasMany(BrandSupplier::class);
+        return $this->belongsToMany(Brand::class, 'brand_suppliers');
     }
 }

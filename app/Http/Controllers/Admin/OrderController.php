@@ -110,6 +110,17 @@ class OrderController extends Controller
         $order = $this->orderService->show($id);
         return view('frontend.template.invoice', compact('order'));
     }
+
+    public function updateStatus(Request $request, string $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,shipping,completed,cancelled',
+        ]);
+
+        $response = $this->orderService->updateStatus($id, $request->status);
+
+        return handleResponse($response['message'], $response['success'], $response['code'], [], false);
+    }
 }
 
 

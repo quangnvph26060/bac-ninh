@@ -6,42 +6,46 @@
         "id": "dashboard"
     },
     {
-        "title": "Order",
+        "title": "Đơn hàng",
         "icon": "fas fa-receipt",
         "id": "orders",
         "children": [
             {
-                "title": "Order management",
+                "title": "Quản lý đơn hàng",
                 "url": "admin.orders.index"
+            },
+            {
+                "title": "Lịch sử chuyển khoản",
+                "url": "admin.transfer.histories.index"
             }
         ],
         "inRoutes": [
-            "admin.orders.index", "admin.orders.edit"
+            "admin.orders.index", "admin.orders.edit", "admin.transfer.histories.index"
         ]
     },
     {
-        "title": "Product",
+        "title": "Sản phẩm",
         "icon": "fas fa-box",
         "id": "products",
         "children": [
             {
-                "title": "Product management",
+                "title": "Quản lý sản phẩm",
                 "url": "admin.products.index"
             },
             {
-                "title": "Category management",
+                "title": "Quản lý danh mục",
                 "url": "admin.categories.index"
             },
             {
-                "title": "Brand management",
+                "title": "Quản lý thương hiệu",
                 "url": "admin.brands.index"
             },
             {
-                "title": "Attribute management",
+                "title": "Quản lý thuộc tính",
                 "url": "admin.attributes.index"
             },
             {
-                "title": "Collection",
+                "title": "Bộ sưu tập",
                 "url": "admin.collections.index"
             }
         ],
@@ -55,7 +59,7 @@
         "id": "marketing",
         "children": [
             {
-                "title": "Discount code",
+                "title": "Mã giảm giá",
                 "url": "admin.coupons.index"
             }
         ],
@@ -64,40 +68,44 @@
         ]
     },
     {
-        "title": "Supplier",
+        "title": "Nhà cung cấp",
         "icon": "fas fa-building",
         "route": "admin.suppliers.index",
         "id": "suppliers"
     },
     {
-        "title": "Decentralization",
+        "title": "phân quyền",
         "icon": "fas fa-user-shield",
         "id": "permissions",
         "children": [
             {
-                "title": "Personnel management",
+                "title": "Quản lý nhân viên",
                 "url": "admin.employees.index"
             },
             {
-                "title": "Role management",
+                "title": "Quản lý vai trò",
                 "url": "admin.roles.index"
             },
             {
-                "title": "Permissions management",
+                "title": "Quản lý quyền hạn",
                 "url": "admin.permissions.index"
+            },
+            {
+                "title": "Lịch sử hoạt động",
+                "url": "admin.activity.log.history"
             }
         ],
         "inRoutes": [
-            "admin.employees.index", "admin.roles.index", "admin.permissions.index"
+            "admin.employees.index", "admin.roles.index", "admin.permissions.index", "admin.activity.log.history"
         ]
     },
     {
-        "title": "Configuration",
+        "title": "Cấu hình",
         "icon": "fa-solid fa-gear",
         "id": "configurations",
         "children": [
             {
-                "title": "General configuration",
+                "title": "Cấu hình chung",
                 "url": "admin.configurations.index"
             }
         ],

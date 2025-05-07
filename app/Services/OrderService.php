@@ -62,4 +62,20 @@ class OrderService extends BaseService
     {
         return $this->findById($id, ['*'], ['orderItems.productVariant.attributeValues', 'user']);
     }
+
+    public function updateStatus(string $id, $status)
+    {
+        try {
+            $order = $this->findById($id);
+
+            if (!$order) {
+                return errorResponse("Order not found in the system!", false, 404);
+            }
+
+            if ($this->updateData($id, ['status' => $status])) return successResponse("Status update successful");
+        } catch (\Exception $e) {
+            logger('error: ' . $e->getMessage());
+            return errorResponse("An error occurred, please try again later!", false, 500);
+        }
+    }
 }

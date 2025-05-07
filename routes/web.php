@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\BulkActionController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\Client\SignUpController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\admin\TransferHistoryController;
 use App\Http\Controllers\Frontend\App\BillController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +48,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Logout Router
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
+        Route::get('transfer-histories', [TransferHistoryController::class, 'index'])->name('transfer.histories.index');
+        Route::get('activity-log/{id?}', [ActivityController::class, 'history'])->name('activity.log.history');
+
         // Action Router
         Route::post('handle-bulk-action', [BulkActionController::class, 'handleBulkAction'])->name('handle.bulk.action');
 
@@ -58,6 +63,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('items', 'getItemByCode')->name('get.item.by.code');
             Route::post('cancel', 'cancelOrder')->name('cancel');
             Route::get('invoice/preview/{id}',  'printInvoice')->name('invoice.print');
+            Route::post('update-status/{id}',  'updateStatus')->name('update.status');
         });
 
         // Product Router

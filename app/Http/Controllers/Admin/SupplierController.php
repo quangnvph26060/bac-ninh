@@ -70,7 +70,7 @@ class SupplierController extends Controller
     {
         $title = 'Cập nhật nhà cung cấp.';
         $supplier = $this->supplierService->show($id);
-        $getSelectdBrands = $supplier->brands->pluck('brand_id')->toArray();
+        $getSelectdBrands = $supplier->brands->pluck('id')->toArray();
         $banks = DB::table('banks')->pluck('name', 'id')->toArray();
         $brands = $this->brandService->getBrandAll(false);
         return view('admin.supplier.save', compact('title', 'supplier', 'banks', 'brands', 'getSelectdBrands'));

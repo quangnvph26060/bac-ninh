@@ -3,18 +3,7 @@
 namespace App\Services;
 
 use App\Models\AttributeValue;
-use App\Models\CompanyProduct;
-use App\Models\OrderDetail;
 use App\Models\Product;
-use App\Models\ProductImages;
-use App\Models\ProductStorage;
-use Exception;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-
 
 class ProductService  extends BaseService
 {
@@ -238,6 +227,8 @@ class ProductService  extends BaseService
                 unset($payload['product_unit']);
                 unset($payload['stock']);
             }
+
+            $payload['is_featured'] ??= 0;
 
             if (!$product = $this->updateData($id, $payload)) {
                 return errorResponse('Có lỗi xảy ra. Vui lòng thử lại sau!');

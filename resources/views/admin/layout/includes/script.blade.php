@@ -14,6 +14,8 @@
 <script src="{{ asset('backend/assets/js/plugin/webfont/webfont.min.js') }}"></script>
 <script src="{{ asset('backend/assets/js/kaiadmin.min.js') }}"></script>kai
 <script src="{{ asset('backend/assets/js/kaiadmin.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script src="{{ asset('backend/assets/js/setting-demo.js') }}"></script>
 <script src="{{ asset('backend/assets/js/setting-demo2.js') }}"></script>
 <script src="{{ asset('backend/library/ckeditor/ckeditor.js') }}"></script>

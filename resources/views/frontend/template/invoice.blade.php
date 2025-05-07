@@ -33,7 +33,7 @@
         #invoiceContent {
             width: 190mm;
             max-width: 100%;
-            padding: 20px;
+            padding: 20px 20px 100px  20px;
             background-color: white;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             font-family: 'Times New Roman', serif;
@@ -41,7 +41,6 @@
             font-size: 14px;
             display: flex;
             flex-direction: column;
-            border: 1px solid #ddd;
         }
 
         .no-print {
