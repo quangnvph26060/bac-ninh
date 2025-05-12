@@ -89,6 +89,8 @@
                     let html = '';
 
                     items.forEach(item => {
+                        let path =  "{{ showImage('__image__') }}".replace('__image__', item.image);
+
                         html += `
                             <tr>
                                 <th scope="row">
@@ -99,10 +101,10 @@
                                         ${item.variant}
                                     </small>
                                 </th>
-                                <td><img src="/storage/${item.image}" alt="${item.name}" width="32" height="32"></td>
-                                <td>${item.quantity}</td>
-                                <td>${formatCurrency(parseFloat(item.price))}</td>
-                                <td>${formatCurrency(parseFloat(item.total))}</td>
+                                <td><img src="${path}" alt="${item.name}" width="32" height="32"></td>
+                                <td><small>x</small>${item.quantity}</td>
+                                <td>${formatCurrency(item.price)}</td>
+                                <td>${formatCurrency(item.total)}</td>
                             </tr>
                         `;
                     });

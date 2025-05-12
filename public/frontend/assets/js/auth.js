@@ -1,8 +1,3 @@
-const notyf = new Notyf({
-    duration: 5000,
-    ripple: true,
-});
-
 let eye = $(".fa-regular.fa-eye");
 let eye_invisible = $(".far.fa-eye-slash");
 

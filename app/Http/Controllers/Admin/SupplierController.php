@@ -54,15 +54,9 @@ class SupplierController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
-        try {
-            $supplier = $this->supplierService->addSupplier($request->all());
-            session()->flash('success', 'Thêm người đại diện thành công');
-            return redirect()->route('admin.supplier.index', ['company_id' => $request->company_id]);
-        } catch (Exception $e) {
-            Log::error('Failed to create supplier: ' . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => 'Failed to create supplier']);
-        }
+
+        $response = $this->supplierService->create($request->all());
+        return handleResponse($response['message'], $response['success'], $response['code']);
     }
 
 
@@ -85,5 +79,4 @@ class SupplierController extends Controller
 
         return handleResponse($response['message'], $response['success'], $response['code']);
     }
-
 }

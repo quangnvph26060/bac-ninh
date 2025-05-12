@@ -25,7 +25,20 @@ class SupplierService extends BaseService
         return $this->findById($id, ['*'], ['brands']);
     }
 
-    public function create(array $data) {}
+    public function create(array $data)
+    {
+        return transaction(function () use ($data) {
+            if (! $supplier = parent::create($data)) {
+                return errorResponse('Đã có lỗi xảy ra. Vui lòng thử lại sau!!!');
+            }
+
+            if (!empty($data['brand_id'])) {
+                $supplier->brands()->sync($data['brand_id']);
+            }
+
+            return successResponse('Thêm mới nhà cung cấp thành công.');
+        });
+    }
 
     public function update(string $id, array $payload)
     {

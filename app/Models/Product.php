@@ -36,7 +36,14 @@ class Product extends Model
         'seo_title',
         'seo_description',
         'tags',
-        'stock_status'
+        'stock_status',
+        'standard_shipping',
+        'express_shipping',
+        'international_shipping',
+        'design_width',
+        'design_height',
+        'design_ppi',
+        'design_format'
     ];
 
     protected $casts = [

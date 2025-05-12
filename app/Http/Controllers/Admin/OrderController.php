@@ -50,6 +50,7 @@ class OrderController extends Controller
         ]);
 
         $order = $this->orderService->getItemsByOrderCode($request->code);
+
         return successResponse("get data successfully!", $order, 200, true);
     }
 

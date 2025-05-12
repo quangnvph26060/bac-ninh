@@ -270,29 +270,26 @@ function finalPrice($discountPrice)
     return formatPrice($discountPrice);
 }
 
-// function formatPrice($price)
-// {
-//     if (!empty($price)) return '$' . number_format($price, 0, ',', '');
-//     return 0;
-// }
-
 function formatPrice($price)
 {
     if (!empty($price)) {
-        return  number_format((float)$price, 2, '.', ',');
+        // Format số với 2 chữ số thập phân
+        $formatted = number_format((float)$price, 2, '.', ',');
+
+        // Nếu phần thập phân là .00 thì bỏ đi
+        if (substr($formatted, -3) === '.00') {
+            return substr($formatted, 0, -3);
+        }
+
+        // Nếu phần thập phân kết thúc bằng 0 thì bỏ số 0 đó đi
+        if (substr($formatted, -1) === '0') {
+            return substr($formatted, 0, -1);
+        }
+
+        return $formatted;
     }
-    return 0.00;
+    return '0';
 }
-
-// function formatPrice($price)
-// {
-//     if (!empty($price)) {
-//         // Định dạng số với 2 chữ số thập phân và dấu phẩy phân cách phần nghìn
-//         return  number_format((float)$price, 0, '.', ',');
-//     }
-//     return 0.00;
-// }
-
 
 function generateEmployeeCode($table = 'employees', $column = 'employee_code', $prefix = 'PH', $length = 5)
 {
