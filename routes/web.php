@@ -186,11 +186,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('delete/{id}', [CompanyController::class, 'delete'])->name('delete');
         Route::get('filter', [CompanyController::class, 'companyFilter'])->name('filter');
     });
-
-    Route::post('/format-price', function (Request $request) {
-        return response()->json([
-            'formatted_price' => Helper::formatPrice($request->price)
-        ]);
-    })->name('format.price');
 });
 

@@ -17,7 +17,7 @@
 
     <!-- Modal -->
     <div class="modal fade" id="show-items" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold" id="exampleModalLabel">Items</h5>
@@ -29,7 +29,9 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Product name</th>
-                                    <th>Product</th>
+                                    <th>Image</th>
+                                    <th>Model</th>
+                                    <th>Design</th>
                                     <th>Quantity</th>
                                     <th>Price</th>
                                     <th>Total</th>
@@ -89,7 +91,6 @@
                     let html = '';
 
                     items.forEach(item => {
-                        let path =  "{{ showImage('__image__') }}".replace('__image__', item.image);
 
                         html += `
                             <tr>
@@ -101,30 +102,32 @@
                                         ${item.variant}
                                     </small>
                                 </th>
-                                <td><img src="${path}" alt="${item.name}" width="32" height="32"></td>
-                                <td><small>x</small>${item.quantity}</td>
-                                <td>${formatCurrency(item.price)}</td>
-                                <td>${formatCurrency(item.total)}</td>
+                                <td style="text-align: center; width: 5%;"><img class="img-thumbnail" src="${item.image}" alt="${item.name}" ></td>
+                                <td style="text-align: center; width: 5%;"><img class="img-thumbnail" src="${item.model_image}" alt="${item.name}" ></td>
+                                <td style="text-align: center; width: 5%;"><img class="img-thumbnail" src="${item.design_image}" alt="${item.name}" ></td>
+                                <td style="text-align: center; width: 5%;"><small>x</small>${item.quantity}</td>
+                                <td style="text-align: center; width: 5%;">${formatCurrency(item.price)}</td>
+                                <td style="text-align: center; width: 5%;">${formatCurrency(item.total)}</td>
                             </tr>
                         `;
                     });
 
                     html += `
                         <tr>
-                            <th scope="row" colspan="4" class="text-end">Sub Total :</th>
-                            <td><div class="fw-bold">${formatCurrency(subTotal)}</div></td>
+                            <th scope="row" colspan="6" class="text-end">Sub Total :</th>
+                            <td class="text-center"><div class="fw-bold">${formatCurrency(subTotal)}</div></td>
                         </tr>
                         <tr>
-                            <th scope="row" colspan="4" class="text-end">Shipping Charge :</th>
-                            <td>${formatCurrency(shippingFee)}</td>
+                            <th scope="row" colspan="6" class="text-end">Shipping Charge :</th>
+                            <td class="text-center">${formatCurrency(shippingFee)}</td>
                         </tr>
                         <tr>
-                            <th scope="row" colspan="4" class="text-end">Discount :</th>
-                            <td>- ${formatCurrency(discount)}</td>
+                            <th scope="row" colspan="6" class="text-end">Discount :</th>
+                            <td class="text-center">- ${formatCurrency(discount)}</td>
                         </tr>
                         <tr>
-                            <th scope="row" colspan="4" class="text-end">Total :</th>
-                            <td><div class="fw-bold">${formatCurrency(total)}</div></td>
+                            <th scope="row" colspan="6" class="text-end">Total :</th>
+                            <td class="text-center"><div class="fw-bold">${formatCurrency(total)}</div></td>
                         </tr>
                     `;
 

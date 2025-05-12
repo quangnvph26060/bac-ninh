@@ -396,6 +396,16 @@
                 let variantId = $form.find('[id^="info_variant_"]').attr('data-variant-id');
                 let qty = $form.find('.step_product_input').val();
 
+                // Get image files using native DOM
+                let modelImageInput = document.getElementById(`model_${productId}`);
+                let designImageInput = document.getElementById(`design_${productId}`);
+
+                // Lấy file từ input nếu có, nếu không sẽ là null
+                let modelImage = (modelImageInput && modelImageInput.files.length > 0) ? modelImageInput.files[0] :
+                    null;
+                let designImage = (designImageInput && designImageInput.files.length > 0) ? designImageInput.files[
+                    0] : null;
+
                 let item = {
                     productId: productId,
                     qty: qty
@@ -403,6 +413,14 @@
 
                 if (variantId !== undefined) {
                     item.variant_id = variantId;
+                }
+
+                // Add image data if exists
+                if (modelImage) {
+                    item.model_image = modelImage;
+                }
+                if (designImage) {
+                    item.design_image = designImage;
                 }
 
                 result.push(item);
@@ -483,18 +501,34 @@
             $('#remove_coupon').hide(); // Ẩn nút Hủy mã
         });
 
-        $('#btn-save-order').on('click', function() {
-            let data = {};
+        $('#btn-save-order').on('click', async function() {
+            const formData = new FormData();
             let products = getFormData();
 
+            console.log(products);
+
+            // ✅ Thêm từng ảnh vào FormData
+            products.forEach((product, index) => {
+                console.log(product);
+
+                if (product.model_image) {
+                    formData.append(`products[${index}][model_image]`, product.model_image);
+                }
+                if (product.design_image) {
+                    formData.append(`products[${index}][design_image]`, product.design_image);
+                }
+
+                // ✅ Thêm các trường thông tin sản phẩm vào FormData
+                formData.append(`products[${index}][productId]`, product.productId);
+                formData.append(`products[${index}][qty]`, product.qty);
+                if (product.variant_id) {
+                    formData.append(`products[${index}][variant_id]`, product.variant_id);
+                }
+            });
+
+            // ✅ Thông tin đặt hàng
             let coupon = isApplyCoupon ? $('#input_coupon').val() : '';
             let paymentMethod = $('input[name="paymentMethod"]:checked').val();
-
-            let inputIds = [
-                'first_name', 'last_name', 'email', 'phone_number', 'country', 'state', 'city',
-                'zip_code', 'shipping_address', 'tax_code', 'note'
-            ];
-
             let orderInfo = {
                 coupon,
                 paymentMethod,
@@ -502,30 +536,39 @@
                 orderName: $('.input_order_name').val()
             };
 
+            // ✅ Thêm thông tin khách hàng
+            let inputIds = [
+                'first_name', 'last_name', 'email', 'phone_number', 'country', 'state', 'city',
+                'zip_code', 'shipping_address', 'tax_code', 'note'
+            ];
             inputIds.forEach(function(id) {
-                orderInfo[id] = $(`#${id}`).val();
+                formData.append(`orderInfo[${id}]`, $(`#${id}`).val());
             });
 
-            data.products = products;
-            data.orderInfo = orderInfo;
+            // ✅ Thêm các thông tin khác vào FormData
+            formData.append('orderInfo[coupon]', coupon);
+            formData.append('orderInfo[paymentMethod]', paymentMethod);
+            formData.append('orderInfo[shipping_method]', $('input[name="shipping_method"]:checked').val());
+            formData.append('orderInfo[orderName]', $('.input_order_name').val());
 
-            $.ajax({
-                url: "{{ route('orders.store.order') }}",
-                method: "POST",
-                data: data,
-                beforeSend: () => {
-                    $('#loading').show();
-                },
-                success: (response) => {
-                    window.location.href = '{{ route('orders.index') }}'
-                },
-                error: (xhr) => {
-                    notyf.error(xhr.responseJSON.message || "Đã xảy ra lỗi.");
-                },
-                complete: () => {
-                    $('#loading').hide();
-                }
-            })
+            // 🚀 AJAX Request
+            try {
+                $('#loading').show();
+
+                const response = await $.ajax({
+                    url: "{{ route('orders.store.order') }}",
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false
+                });
+
+                window.location.href = '{{ route('orders.index') }}';
+            } catch (error) {
+                notyf.error(error.responseJSON?.message || "Đã xảy ra lỗi.");
+            } finally {
+                $('#loading').hide();
+            }
         });
 
 
@@ -589,26 +632,26 @@
                     <div class="d-flex gap-3">
 
                         ${product.model_image ? `
-                                                                                                                                    <div style="width: 103px;">
-                                                                                                                                        <div class="fw-semibold">Model</div>
-                                                                                                                                        <div class="image-container">
-                                                                                                                                            <img class="img-thumbnail"
-                                                                                                                                                style="cursor: pointer;"
-                                                                                                                                                src="${product.model_image}">
-                                                                                                                                        </div>
-                                                                                                                                    </div>
-                                                                                                                                    ` : ''}
+                                                                                                                                                        <div style="width: 103px;">
+                                                                                                                                                            <div class="fw-semibold">Model</div>
+                                                                                                                                                            <div class="image-container">
+                                                                                                                                                                <img class="img-thumbnail"
+                                                                                                                                                                    style="cursor: pointer;"
+                                                                                                                                                                    src="${product.model_image}">
+                                                                                                                                                            </div>
+                                                                                                                                                        </div>
+                                                                                                                                                        ` : ''}
 
                         ${product.design_image ? `
-                                                                                                                                    <div style="width: 103px;">
-                                                                                                                                        <div class="fw-semibold">Design photo</div>
-                                                                                                                                        <div class="image-container">
-                                                                                                                                            <img class="img-thumbnail"
-                                                                                                                                                style="cursor: pointer;"
-                                                                                                                                                src="${product.design_image}">
-                                                                                                                                        </div>
-                                                                                                                                    </div>
-                                                                                                                                    ` : ''}
+                                                                                                                                                        <div style="width: 103px;">
+                                                                                                                                                            <div class="fw-semibold">Design photo</div>
+                                                                                                                                                            <div class="image-container">
+                                                                                                                                                                <img class="img-thumbnail"
+                                                                                                                                                                    style="cursor: pointer;"
+                                                                                                                                                                    src="${product.design_image}">
+                                                                                                                                                            </div>
+                                                                                                                                                        </div>
+                                                                                                                                                        ` : ''}
                     </div>
                 </div>
 
@@ -900,7 +943,13 @@
                 <p>Phương thức vận chuyển: ${shippingName}</p>
             `;
 
-            const products = getFormData();
+            const products = getFormData().map(item => {
+                return {
+                    productId: item.productId,
+                    qty: item.qty,
+                    variant_id: item.variant_id
+                };
+            });
 
             const response = await $.ajax({
                 url: '{{ route('orders.get-shipping-fee') }}',
@@ -917,10 +966,7 @@
                 }
             })
 
-            console.log(isApplyCoupon);
-
             if (isApplyCoupon) {
-                console.log('apply coupon');
                 await applyCoupon(true)
             }
 

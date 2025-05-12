@@ -73,13 +73,19 @@
                                                 </a>
                                             </div>
                                         </td>
-                                        <td class="text-end">
+                                        <td class="text-center">
+                                            <img src="{{ showImage($item->model_image) }}" width="40" height="40" alt="">
+                                        </td>
+                                        <td class="text-center">
+                                            <img src="{{ showImage($item->design_image) }}" width="40" height="40" alt="">
+                                        </td>
+                                        <td class="text-center">
                                             <div class="sa-price">
                                                 <span class="sa-price__symbol">$</span><span
                                                     class="sa-price__integer">{{ formatPrice($item->price) }}</span>
                                             </div>
                                         </td>
-                                        <td class="text-end"><small>x</small>{{ $item->quantity }}</td>
+                                        <td class="text-center"><small>x</small>{{ $item->quantity }}</td>
                                         <td class="text-end">
                                             <div class="sa-price">
                                                 <span class="sa-price__symbol">$</span><span
@@ -91,7 +97,7 @@
                             </tbody>
                             <tbody class="sa-table__group">
                                 <tr>
-                                    <td colspan="3">Subtotal</td>
+                                    <td colspan="5">Subtotal</td>
                                     <td class="text-end">
                                         <div class="sa-price">
                                             <span class="sa-price__symbol">$</span><span
@@ -100,7 +106,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colspan="3">Shipping</td>
+                                    <td colspan="5">Shipping</td>
                                     <td class="text-end">
                                         <div class="sa-price">
                                             <span
@@ -109,7 +115,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colspan="3">
+                                    <td colspan="5">
                                         Discount
                                     </td>
                                     <td class="text-end">
@@ -123,7 +129,7 @@
                             </tbody>
                             <tbody>
                                 <tr>
-                                    <td colspan="3">Total</td>
+                                    <td colspan="5">Total</td>
                                     <td class="text-end">
                                         <div class="sa-price">
                                             <span class="sa-price__symbol">$</span><span

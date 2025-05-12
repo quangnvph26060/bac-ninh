@@ -44,7 +44,9 @@ class OrderService extends BaseService
             'items' => $order->orderItems->map(function ($item) {
                 return [
                     'name' => $item->product->name,
-                    'image' => $item->product->image,
+                    'image' => showImage($item->product->image),
+                    'model_image' => showImage($item->model_image),
+                    'design_image' => showImage($item->design_image),
                     'quantity' => $item->quantity,
                     'price' => $item->price,
                     'total' => $item->quantity * $item->price,

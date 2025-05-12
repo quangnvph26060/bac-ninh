@@ -1,5 +1,5 @@
 function formatCurrency(amount) {
-    if (!amount) return "0";
+    if (!amount) return "$0";
 
     // Format with 2 decimal places
     const formatted = new Intl.NumberFormat("en-US", {

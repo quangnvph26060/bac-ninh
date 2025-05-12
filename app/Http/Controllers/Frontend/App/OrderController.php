@@ -201,6 +201,8 @@ class OrderController extends Controller
             $productId = $item['productId'];
             $qty = $item['qty'];
             $variantId = $item['variant_id'] ?? null;
+            $modelImage = $item['model_image'] ?? null;
+            $designImage = $item['design_image'] ?? null;
 
             if ($variantId) {
                 $variant = ProductVariant::find($variantId);
@@ -216,6 +218,8 @@ class OrderController extends Controller
                     'qty' => $qty,
                     'total' => $price * $qty,
                     'image' =>  $product->image, // Ảnh sản phẩm (ưu tiên ảnh của biến thể)
+                    'model_image' => $modelImage,
+                    'design_image' => $designImage,
                 ];
             } else {
                 $product = Product::find($productId);
@@ -231,6 +235,8 @@ class OrderController extends Controller
                     'qty' => $qty,
                     'total' => $price * $qty,
                     'image' => $product->image, // Ảnh sản phẩm
+                    'model_image' => $modelImage,
+                    'design_image' => $designImage,
                 ];
             }
         }
@@ -726,18 +732,49 @@ class OrderController extends Controller
 
     private function storeOrderItems($order, $productDetails)
     {
-        foreach ($productDetails as $product) {
-            $order->orderItems()->create([
-                'product_id' => $product['id'],
-                'product_variant_id' => $product['variant_id'] ?? null,
-                'product_name' => $product['name'],
-                'quantity' => $product['qty'],
-                'price' => $product['price'],
-                'original_price' => $product['original_price'],
-                'image' => $product['image'],
-            ]);
+        // Mảng để lưu lại các hình ảnh đã upload thành công
+        $uploadedImages = [];
+
+        try {
+            foreach ($productDetails as $index => $product) {
+                // Lấy đường dẫn ảnh cho từng sản phẩm
+                $modelImagePath = null;
+                $designImagePath = null;
+
+                if (isset($product['model_image']) && $product['model_image'] instanceof \Illuminate\Http\UploadedFile) {
+                    $modelImagePath = uploadImages("products.$index.model_image", 'model_images', false, 150, 150, false);
+                    $uploadedImages[] = $modelImagePath;
+                }
+
+                if (isset($product['design_image']) && $product['design_image'] instanceof \Illuminate\Http\UploadedFile) {
+                    $designImagePath = uploadImages("products.$index.design_image", 'design_images', false, 150, 150, false);
+                    $uploadedImages[] = $designImagePath;
+                }
+
+                $order->orderItems()->create([
+                    'product_id' => $product['id'],
+                    'product_variant_id' => $product['variant_id'] ?? null,
+                    'product_name' => $product['name'],
+                    'quantity' => $product['qty'],
+                    'price' => $product['price'],
+                    'original_price' => $product['original_price'],
+                    'image' => $product['image'],
+                    'model_image' => $modelImagePath,
+                    'design_image' => $designImagePath,
+                ]);
+            }
+        } catch (\Exception $e) {
+            logger("Lỗi xảy ra khi lưu sản phẩm: " . $e->getMessage());
+
+            // Nếu lỗi xảy ra, xóa tất cả ảnh đã upload
+            foreach ($uploadedImages as $path) {
+                deleteImage($path);
+            }
+
+            throw new \Exception("Đã có lỗi xảy ra khi lưu sản phẩm. Ảnh đã được rollback.");
         }
     }
+
 
     public function orderCancel(Request $request)
     {

@@ -151,7 +151,9 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Product name</th>
-                                    <th>Product</th>
+                                    <th>Image</th>
+                                    <th>Model</th>
+                                    <th>Design</th>
                                     <th>Quantity</th>
                                     <th>Price</th>
                                     <th>Total</th>
@@ -169,7 +171,13 @@
                                                 {{ implode(' - ', $item->productVariant?->attributeValues->pluck('value')->toArray() ?? []) }}
                                             </small>
                                         </th>
-                                        <td><img src="{{ showImage($item->image) }}" alt="{{ $item->product_name }}"
+                                        <td style="width: 5%; text-align: center;"><img src="{{ showImage($item->image) }}" alt="{{ $item->product_name }}"
+                                                width="32" height="32">
+                                        </td>
+                                        <td style="width: 5%; text-align: center;"><img src="{{ showImage($item->model_image) }}" alt="{{ $item->product_name }}"
+                                                width="32" height="32">
+                                        </td>
+                                        <td style="width: 5%; text-align: center;"><img src="{{ showImage($item->design_image) }}" alt="{{ $item->product_name }}"
                                                 width="32" height="32">
                                         </td>
                                         <td><small>x</small>{{ $item->quantity }}</td>
@@ -179,21 +187,21 @@
                                 @endforeach
 
                                 <tr>
-                                    <th scope="row" colspan="4" class="text-end">Sub Total :</th>
+                                    <th scope="row" colspan="6" class="text-end">Sub Total :</th>
                                     <td>
                                         <div class="fw-bold">${{ formatPrice($total) }}</div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th scope="row" colspan="4" class="text-end">Shipping Charge :</th>
+                                    <th scope="row" colspan="6" class="text-end">Shipping Charge :</th>
                                     <td>${{ formatPrice($order->shipping_fee) }}</td>
                                 </tr>
                                 <tr>
-                                    <th scope="row" colspan="4" class="text-end">Discount :</th>
+                                    <th scope="row" colspan="6" class="text-end">Discount :</th>
                                     <td>- ${{ formatPrice($order->discount) }}</td>
                                 </tr>
                                 <tr>
-                                    <th scope="row" colspan="4" class="text-end">Total :</th>
+                                    <th scope="row" colspan="6" class="text-end">Total :</th>
                                     <td>
                                         <div class="fw-bold">${{ formatPrice($order->total) }}</div>
                                     </td>
