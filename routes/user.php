@@ -63,8 +63,7 @@ Route::middleware('auth')->group(function () {
         Route::post('apply-coupon', 'applyCoupon')->name('apply.coupon');
         Route::get('create', 'create')->name('create');
         Route::get('filter', 'filter')->name('filter');
-        Route::get('states/{country_id}', 'getStates')->name('get.states');
-        Route::get('cities/{state_id}', 'getCities')->name('get.cities');
+        Route::post('get-shipping-fee', 'getShippingFee')->name('get-shipping-fee');
     });
 });
 

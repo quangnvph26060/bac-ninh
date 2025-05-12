@@ -37,4 +37,8 @@ return [
         'redirect' => env('GOOGLE_CLIENT_REDIRECT'),
     ],
 
+    'textrazor' => [
+        'api_key' => env('TEXTRAZOR_API_KEY'),
+    ],
+
 ];

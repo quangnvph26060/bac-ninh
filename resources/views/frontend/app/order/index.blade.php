@@ -3,39 +3,53 @@
 @section('content')
     <div class="container-wrapper">
         <div class="billing__title__wrapper d-flex align-items-center justify-content-between flex-wrap gap-4">
-            <h1 class="billing__title__content">Đơn hàng</h1>
+            <h1 class="billing__title__content">Orders</h1>
 
             <div class="d-flex gap-2 align-items-center">
                 <a href="{{ route('orders.create') }}" id="headerOrder__createOrder_btn" class="ant-btn ant-btn-primary px-2 ">
-                    Tạo đơn hàng <i class="bi bi-plus-circle ms-2"></i>
+                    Create Order <i class="bi bi-plus-circle ms-2"></i>
                 </a>
             </div>
         </div>
     </div>
 
-    <div class="mb-2 d-flex flex-row justify-content-between">
-        <div class="align-items-center d-flex flex-row position-relative order__filterBar__statusTabs" id="list_tab_orders">
-            <div class="d-flex gap-2">
-                <div class="order-tab active" data-status="all">Tổng đơn hàng ({{ $orders->total() }})</div>
-                <div class="order-tab inactive" data-status="pending">Chờ xử lý ({{ $totalPendingOrders }})</div>
-            </div>
-        </div>
-    </div>
-
     <form id="order-filter-form" class="d-flex flex-wrap gap-3 mt-4">
-        <!-- Ô tìm kiếm -->
+        <!-- Search box -->
         <div class="form-group position-relative">
-            <label class="form-label fw-bold">Tìm kiếm</label>
+            <label class="form-label fw-bold">Search</label>
             <div class="form-group input-icon-right">
-                <input type="search" class="form-control" name="search" placeholder="Tìm kiếm theo mã đơn hàng">
+                <input type="search" class="form-control" name="search" placeholder="Search by order code">
                 <i class="bi bi-search"></i>
             </div>
         </div>
 
+        <!-- Order Status -->
+        <div class="form-group">
+            <label class="form-label fw-bold">Order Status</label>
+            <select class="form-select" name="status">
+                <option value="">All</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+        </div>
+
+        <!-- Payment Status -->
+        <div class="form-group">
+            <label class="form-label fw-bold">Payment Status</label>
+            <select class="form-select" name="payment_status">
+                <option value="">All</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="refunded">Refunded</option>
+            </select>
+        </div>
+
         <!-- Date range -->
         <div class="form-group">
-            <label class="form-label fw-bold">Ngày</label>
-            <input type="text" id="date-range" name="date_range" class="form-control" placeholder="Chọn khoảng ngày" />
+            <label class="form-label fw-bold">Date</label>
+            <input type="text" id="date-range" name="date_range" class="form-control" placeholder="Select date range" />
         </div>
     </form>
 
@@ -45,21 +59,19 @@
     </div>
 @endsection
 
-
 @push('styles')
     <link rel="stylesheet" href="{{ asset('frontend/assets/fonts/icomoon/style.css') }}">
 @endpush
 
-
 @push('scripts')
     <script>
         $(function() {
-            // Khởi tạo date range picker
+            // Initialize date range picker
             $('#date-range').daterangepicker({
                 autoUpdateInput: false,
                 locale: {
                     cancelLabel: 'Clear',
-                    applyLabel: 'Áp dụng',
+                    applyLabel: 'Apply',
                     format: 'DD/MM/YYYY'
                 }
             });
@@ -75,24 +87,21 @@
                 fetchOrders();
             });
 
-            // Click tab lọc theo trạng thái
-            $(document).on('click', '.order-tab', function() {
-                $('.order-tab').removeClass('active').addClass('inactive');
-                $(this).addClass('active').removeClass('inactive');
+            // Change event for select filters
+            $(document).on('change', 'select[name="status"], select[name="payment_status"]', function() {
                 fetchOrders();
             });
 
-            // Gõ tìm kiếm (debounce)
+            // Search input (debounce)
             let debounceTimer;
             $(document).on('input', 'input[name="search"]', function() {
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => {
                     fetchOrders();
-                }, 500); // 500ms chờ sau khi ngừng gõ
+                }, 500);
             });
 
-
-            // Phân trang
+            // Pagination
             $(document).on('click', '.page-url-link', function(e) {
                 e.preventDefault();
                 const url = $(this).attr('href');
@@ -106,9 +115,10 @@
             });
         });
 
-        // Gửi AJAX để lọc đơn hàng
+        // Send AJAX to filter orders
         function fetchOrders(url = "{{ route('orders.index') }}", page = 1) {
-            const status = $('.order-tab.active').data('status') || 'all';
+            const status = $('select[name="status"]').val();
+            const payment_status = $('select[name="payment_status"]').val();
             const search = $('input[name="search"]').val();
             const date_range = $('input[name="date_range"]').val();
             const per_page = $('.per-page-selector').val() || 10;
@@ -116,22 +126,20 @@
             $('#order-content').hide();
             $('#loading').show();
 
-            // Kiểm tra URL và lấy tham số 'page' nếu có
-            const urlWithParams = new URL(url, window.location.href); // URL gốc
-            const searchParams = new URLSearchParams(urlWithParams
-                .search); // Tạo đối tượng để truy xuất tham số query string
-            const pageParam = searchParams.get('page') ||
-                page; // Nếu có 'page' trong URL thì lấy, nếu không thì dùng giá trị mặc định
+            const urlWithParams = new URL(url, window.location.href);
+            const searchParams = new URLSearchParams(urlWithParams.search);
+            const pageParam = searchParams.get('page') || page;
 
             $.ajax({
                 url: urlWithParams.pathname,
                 method: 'GET',
                 data: {
                     status,
+                    payment_status,
                     search,
                     date_range,
                     per_page,
-                    page: pageParam // Truyền 'page' vào data của AJAX
+                    page: pageParam
                 },
                 beforeSend: () => {
                     $('#coupon-content').hide();
@@ -142,7 +150,7 @@
                     $('#loading').hide();
                 },
                 error: function(xhr) {
-                    console.error("Lỗi khi load đơn hàng:", xhr);
+                    console.error("Error loading orders:", xhr);
                     $('#loading').hide();
                     $('#order-content').show();
                 },
@@ -155,4 +163,3 @@
         fetchOrders()
     </script>
 @endpush
-

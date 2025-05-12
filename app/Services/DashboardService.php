@@ -10,6 +10,9 @@ use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\OrderItem;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
@@ -77,12 +80,12 @@ class DashboardService
                     $principal += $item->product->price * $item->quantity;
                 }
             }
-            if($sum == 0){
+            if ($sum == 0) {
                 $moneyinterest = 0;
                 $interest = 0;
-            }else{
+            } else {
                 $moneyinterest = $sum - $principal;
-                $interest = $moneyinterest/$sum;
+                $interest = $moneyinterest / $sum;
             }
 
             return [
@@ -139,7 +142,8 @@ class DashboardService
         }
     }
 
-    public function StatisticsByMonth() {
+    public function StatisticsByMonth()
+    {
         try {
 
             $currentMonth = date('m');
@@ -160,12 +164,12 @@ class DashboardService
                 }
             }
 
-            if($sum == 0){
+            if ($sum == 0) {
                 $moneyinterest = 0;
                 $interest = 0;
-            }else{
+            } else {
                 $moneyinterest = $sum - $principal;
-                $interest = $moneyinterest/$sum;
+                $interest = $moneyinterest / $sum;
             }
 
             return [
@@ -180,7 +184,8 @@ class DashboardService
         }
     }
 
-    public function StatisticsByYear() {
+    public function StatisticsByYear()
+    {
         try {
             $currentYear = date('Y');
             $income = $this->order->whereYear('created_at', $currentYear)->sum('total_money');
@@ -198,12 +203,12 @@ class DashboardService
                 }
             }
 
-            if($sum == 0){
+            if ($sum == 0) {
                 $moneyinterest = 0;
                 $interest = 0;
-            }else{
+            } else {
                 $moneyinterest = $sum - $principal;
-                $interest = $moneyinterest/$sum;
+                $interest = $moneyinterest / $sum;
             }
 
             return [
@@ -218,4 +223,106 @@ class DashboardService
         }
     }
 
+    public function getStatistics($startDate = null, $endDate = null)
+    {
+        $query = Order::query();
+
+        if ($startDate && $endDate) {
+            try {
+                $startDate = Carbon::parse($startDate)->startOfDay();
+                $endDate = Carbon::parse($endDate)->endOfDay();
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            } catch (\Exception $e) {
+                \Log::error('Date parsing error: ' . $e->getMessage());
+            }
+        }
+
+        // Tổng doanh số
+        $totalRevenue = $query->where('status', 'completed')
+            ->sum('total');
+
+        // Tổng số đơn hàng
+        $totalOrders = $query->count();
+
+        // Đơn hàng gần đây (6 đơn mới nhất)
+        $recentOrders = $query->with(['user:id,name,email'])
+            ->orderBy('created_at', 'desc')
+            ->take(6)
+            ->get()
+            ->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'order_code' => $order->order_code,
+                    'order_name' => $order->order_name,
+                    'customer_name' => $order->full_name,
+                    'phone_number' => $order->phone_number,
+                    'total' => $order->total,
+                    'status' => $order->status,
+                    'payment_status' => $order->payment_status,
+                    'created_at' => $order->created_at->format('Y-m-d H:i:s')
+                ];
+            });
+
+        // Sản phẩm bán chạy (6 sản phẩm bán nhiều nhất)
+        $bestSellingProducts = OrderItem::select(
+            'product_id',
+            DB::raw('SUM(quantity) as total_quantity'),
+            DB::raw('SUM(quantity * price) as total_revenue'),
+            DB::raw('COUNT(DISTINCT order_id) as total_orders')
+        )
+            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                return $query->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->whereHas('order', function ($query) {
+                $query->where('status', 'completed');
+            })
+            ->groupBy('product_id')
+            ->orderByDesc('total_quantity')
+            ->with(['product:id,name,image,category_id,sale_price,discount_price,discount_start,discount_end,stock', 'product.category:id,name'])
+            ->take(6)
+            ->get()
+            ->map(function ($item) {
+                $product = $item->product;
+                $product->price = isOnSale($product) ? $product->discount_price : $product->sale_price;
+                $product->image = showImage($product->image);
+                return [
+                    'product' => $product,
+                    'sold_quantity' => $item->total_quantity,
+                    'total_revenue' => $item->total_revenue,
+                    'total_orders' => $item->total_orders,
+                    'average_quantity_per_order' => round($item->total_quantity / $item->total_orders, 1)
+                ];
+            });
+
+        return [
+            'total_revenue' => $totalRevenue,
+            'total_orders' => $totalOrders,
+            'recent_orders' => $recentOrders,
+            'best_selling_products' => $bestSellingProducts,
+        ];
+    }
+
+    public function getNewestProducts($startDate = null, $endDate = null)
+    {
+        $query = Product::query();
+
+        if ($startDate && $endDate) {
+            try {
+                $startDate = Carbon::parse($startDate)->startOfDay();
+                $endDate = Carbon::parse($endDate)->endOfDay();
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            } catch (\Exception $e) {
+                \Log::error('Date parsing error: ' . $e->getMessage());
+            }
+        }
+
+        return $query->with(['brand', 'category'])
+            ->orderByDesc('created_at')
+            ->limit(6)
+            ->get()
+            ->map(function ($product) {
+                $product->image = showImage($product->image);
+                return $product;
+            });
+    }
 }

@@ -22,29 +22,21 @@ class DashboardController extends Controller
         $this->dashboardService = $dashboardService;
         $this->orderService = $orderService;
     }
-    public function dashboard()
+
+    public function dashboard(Request $request)
     {
-        $total = Order::where('status', 'completed')->sum('total');
-        $order_processing = Order::where('status', 'processing')->orderBy('updated_at', 'desc')->take(6)->get();
-        $order_list =  Order::count();
-        $product_list =  Product::count();
+        $startDate = $request->get('startDate');
+        $endDate = $request->get('endDate');
 
-        $bestSellingProducts = OrderItem::select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(price) as total_price'))
-            ->groupBy('product_id')
-            ->orderByDesc('total_quantity')
-            ->with('product')->take(6)
-            ->get()
-            ->map(fn($item) => [
-                'product' => $item->product,
-                'sold_quantity' => $item->total_quantity,
-                'total_price' => $item->total_price
+        $statistics = $this->dashboardService->getStatistics($startDate, $endDate);
+        $newestProducts = $this->dashboardService->getNewestProducts($startDate, $endDate);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'statistics' => $statistics,
+                'newestProducts' => $newestProducts
             ]);
-
-        $products = Product::orderBy('updated_at', 'desc')->with(['category', 'brand'])->take(6)->get();
-
-        // dd($bestSellingProducts);
-
-
-        return view('admin.dashboard', compact('total', 'order_processing', 'order_list', 'product_list', 'bestSellingProducts', 'products'));
+        }
+        return view('admin.dashboard', compact('statistics', 'newestProducts'));
     }
 }

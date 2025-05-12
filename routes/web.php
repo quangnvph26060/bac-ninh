@@ -20,12 +20,14 @@ use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\TransferHistoryController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use App\Helpers\Helper;
+use App\Http\Controllers\SEOAnalyzerController;
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::middleware('admin.auth')->group(function () {
-
         // Dashboard Router
         Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
 
@@ -184,4 +186,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('delete/{id}', [CompanyController::class, 'delete'])->name('delete');
         Route::get('filter', [CompanyController::class, 'companyFilter'])->name('filter');
     });
+
+    Route::post('/format-price', function (Request $request) {
+        return response()->json([
+            'formatted_price' => Helper::formatPrice($request->price)
+        ]);
+    })->name('format.price');
 });
+

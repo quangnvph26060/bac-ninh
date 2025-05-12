@@ -34,7 +34,7 @@
                         </span>
                         <div class="d-flex gap-3">
                             <p class="fw-bold text-center " style="color: #42526E; font-size: 14px;">
-                                <span class="final-price">$0.00</span>
+                                <span class="final-price">$0</span>
                             </p>
                         </div>
                     </div>
@@ -94,8 +94,7 @@
                             <p class="fw-bold" style="color: #42526E; font-size: 14px;">
                                 Tổng phụ (<span id="qty-order-item"></span> cái)
                             </p>
-                            <p class="fw-bold" style="color: #42526E; font-size: 14px;"><span
-                                    class="final-price">$0.00</span>
+                            <p class="fw-bold" style="color: #42526E; font-size: 14px;"><span class="final-price">$0</span>
                             </p>
                         </div>
                     </div>
@@ -147,30 +146,21 @@
                             <h1 class="fw-bold text-base mb-4" style="color: #091E42">Địa chỉ giao hàng</h1>
 
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="" class="required form-label">Quốc gia</label>
-                                <select name="country_id" id="country_id" class="form-select" data-required="true">
-                                    <option value="" selected disabled>Quốc gia</option>
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country->id }}">{{ $country->code . '-' . $country->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <label for="country" class="required form-label">Quốc gia</label>
+                                <input type="text" name="country" id="country" class="form-control"
+                                    placeholder="Nation" data-required="true">
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="state_id" class="form-label required">Tiểu bang</label>
-                                <select id="state_id" name="state_id" class="form-control" disabled
-                                    data-required="true">
-                                    <option value="">-- Chọn tiểu bang --</option>
-                                </select>
+                                <label for="state" class="form-label required">Tiểu bang</label>
+                                <input type="text" name="state" id="state" class="form-control"
+                                    placeholder="State" data-required="true">
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="city_id" class="form-label">Thành phố</label>
-                                <select id="city_id" name="city_id" class="form-control" disabled
-                                    data-required="true">
-                                    <option value="">-- Chọn thành phố --</option>
-                                </select>
+                                <label for="city" class="form-label">Thành phố</label>
+                                <input type="text" name="city" id="city" class="form-control"
+                                    placeholder="City" data-required="true">
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
@@ -189,17 +179,23 @@
 
                             <hr class="my-3">
 
-                            <h1 class="fw-bold text-base mb-4" style="color: #091E42">Phương thức giao hàng</h1>
+                            <h1 class="fw-bold text-base mb-3" style="color: #091E42">Phương thức giao hàng</h1>
 
                             <div style="padding: 0 0.85rem" id="shipping-methods-wrapper">
-                                @foreach ($shippingMethods as $shippingMethod)
+                                @php
+                                    $shippingMethods = [
+                                        'standard_shipping' => 'Standard Shipping (US)',
+                                        'express_shipping' => 'Express Shipping (US)',
+                                        'international_shipping' => 'International Shipping',
+                                    ];
+                                @endphp
+                                @foreach ($shippingMethods as $key => $methodName)
                                     <div class="form-check">
-                                        <input class="form-check-input" data-fee="{{ $shippingMethod->fee }}"
-                                            type="radio" name="shipping_method_id" id="{{ $shippingMethod->id }}"
-                                            @checked($loop->first)>
-                                        <label class="form-check-label fw-bold text-muted"
-                                            for="{{ $shippingMethod->id }}">
-                                            {{ $shippingMethod->name }}
+                                        <input class="form-check-input" type="radio" name="shipping_method"
+                                            id="{{ $key }}" @checked($loop->first)
+                                            value="{{ $key }}">
+                                        <label class="form-check-label fw-bold text-muted" for="{{ $key }}">
+                                            {{ $methodName }}
                                         </label>
                                     </div>
                                 @endforeach
@@ -303,24 +299,24 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
                             <span>Giá sản phẩm</span>
-                            <span class="final-price">$0.00</span>
+                            <span class="final-price">$0</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Phí vận chuyển</span>
-                            <span id="shipping-method-fee">$0.00</span>
+                            <span id="shipping-method-fee">$0</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Giảm giá</span>
-                            <span id="discount">$0.00</span>
+                            <span id="discount">$0</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Thuế</span>
-                            <span id="tax-amount">$0.00</span>
+                            <span id="tax-amount">$0</span>
                         </div>
                         <hr class="my-2">
                         <div class="d-flex justify-content-between fw-bold">
                             <span>Tổng</span>
-                            <span id="order-total-amount">$0.00</span>
+                            <span id="order-total-amount">$0</span>
                         </div>
                     </div>
                 </div>
@@ -363,10 +359,27 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Bootstrap -->
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="imagePreview" class="img-fluid" alt="Preview Image">
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 
 @push('scripts')
+    <script src="{{ asset('backend/assets/js/helper.js') }}"></script>
+
     <script>
         let originalTotal = null;
         let originalShippingFee = null;
@@ -380,7 +393,7 @@
             $('.custom-form.mb-3').each(function() {
                 let $form = $(this);
                 let productId = $form.data('id');
-                let variantId = $form.find('[id^="info_variant_"]').data('variant-id');
+                let variantId = $form.find('[id^="info_variant_"]').attr('data-variant-id');
                 let qty = $form.find('.step_product_input').val();
 
                 let item = {
@@ -398,15 +411,14 @@
             return result;
         }
 
-        function applyCoupon() {
-            isApplyCoupon = true;
+        function applyCoupon(forceApply = false) {
             let $input_coupon = $('#input_coupon');
             let couponVal = $input_coupon.val().trim();
 
             // Nếu không nhập gì hoặc trùng với coupon cũ thì không làm gì cả
-            if (couponVal === '' || couponVal === oldCoupon) return;
+            if ((couponVal === '' || couponVal === oldCoupon) && !forceApply) return;
 
-            let shipping = $('input[name="shipping_method_id"]:checked').attr('data-fee');
+            let shipping = $('input[name="shipping_method"]:checked').val();
 
             let data = getFormData();
 
@@ -419,10 +431,13 @@
                     shipping
                 },
                 success: function(response) {
+                    isApplyCoupon = true;
+
                     defaultTotal = response.subTotal;
                     $('#remove_coupon').show();
-                    $('#discount').show().text(`-$${response.discount}`);
-                    $('#order-total-amount, .header_step_order .final-price').text(`$${response.grand_total}`);
+                    $('#discount').show().text(`-${formatCurrency(response.discount)}`);
+                    $('#order-total-amount, .header_step_order .final-price').text(
+                        `${formatCurrency(response.grand_total)}`);
 
                     // Lưu lại originalTotal nếu chưa lưu
                     if (originalTotal === null && originalShippingFee === null && oldCoupon === null) {
@@ -442,8 +457,9 @@
 
                     // Khôi phục lại giá trị trước khi giảm
                     if (originalTotal !== null && originalShippingFee !== null && oldCoupon !== null) {
-                        $('#order-total-amount, .header_step_order .final-price').text(`$${originalTotal}`);
-                        $('#discount').text(`-$${originalShippingFee}`);
+                        $('#order-total-amount, .header_step_order .final-price').text(
+                            `${formatCurrency(originalTotal)}`);
+                        $('#discount').text(`-${formatCurrency(originalShippingFee)}`);
                         $input_coupon.val(oldCoupon);
                     }
                 }
@@ -452,13 +468,16 @@
 
         $('#remove_coupon').on('click', function() {
             oldCoupon = null;
+            isApplyCoupon = false;
 
             // Khôi phục lại tổng tiền ban đầu
-            if (originalTotal !== null) {
-                $('.final-price, #order-total-amount').text(`$${defaultTotal}`);
-            }
+            // if (originalTotal !== null) {
+            //     $('.final-price, #order-total-amount').text(`${formatCurrency(defaultTotal)}`);
+            // }
 
-            $('#discount').text('$0.00')
+            $('#discount').text('$0')
+
+            calculateOrderTotal()
 
             $('#input_coupon').val(''); // Xóa mã
             $('#remove_coupon').hide(); // Ẩn nút Hủy mã
@@ -472,14 +491,14 @@
             let paymentMethod = $('input[name="paymentMethod"]:checked').val();
 
             let inputIds = [
-                'first_name', 'last_name', 'email', 'phone_number', 'country_id', 'state_id', 'city_id',
+                'first_name', 'last_name', 'email', 'phone_number', 'country', 'state', 'city',
                 'zip_code', 'shipping_address', 'tax_code', 'note'
             ];
 
             let orderInfo = {
                 coupon,
                 paymentMethod,
-                shipping_method_id: $('input[name="shipping_method_id"]:checked').val(),
+                shipping_method: $('input[name="shipping_method"]:checked').val(),
                 orderName: $('.input_order_name').val()
             };
 
@@ -501,7 +520,6 @@
                     window.location.href = '{{ route('orders.index') }}'
                 },
                 error: (xhr) => {
-                    console.log(xhr.responseJSON.message);
                     notyf.error(xhr.responseJSON.message || "Đã xảy ra lỗi.");
                 },
                 complete: () => {
@@ -524,7 +542,7 @@
 
             const total = productPrice + shippingFee + tax + extraFee;
 
-            $('#order-total-amount').text(`$${total.toFixed(2)}`);
+            $('#order-total-amount').text(`${formatCurrency(total)}`);
 
             if (total <= wallet) {
                 $('.alert.alert-danger').hide();
@@ -542,11 +560,13 @@
         }
 
         function renderReviewProducts(products) {
+
             const container = $('#review-product-list');
             container.html(''); // clear trước
 
             products.forEach((product, index) => {
                 const html = `
+                <div class="">
                     <div class="row g-2 align-items-center mb-3">
                         <div class="col-auto">
                             <img src="${product.image}" alt="Product" class="img-thumbnail"
@@ -563,7 +583,36 @@
                         </div>
                     </div>
 
-            ${index < products.length - 1 ? '<hr class="my-3">' : ''}
+                    <hr class="my-3">
+
+
+                    <div class="d-flex gap-3">
+
+                        ${product.model_image ? `
+                                                                                                                                    <div style="width: 103px;">
+                                                                                                                                        <div class="fw-semibold">Model</div>
+                                                                                                                                        <div class="image-container">
+                                                                                                                                            <img class="img-thumbnail"
+                                                                                                                                                style="cursor: pointer;"
+                                                                                                                                                src="${product.model_image}">
+                                                                                                                                        </div>
+                                                                                                                                    </div>
+                                                                                                                                    ` : ''}
+
+                        ${product.design_image ? `
+                                                                                                                                    <div style="width: 103px;">
+                                                                                                                                        <div class="fw-semibold">Design photo</div>
+                                                                                                                                        <div class="image-container">
+                                                                                                                                            <img class="img-thumbnail"
+                                                                                                                                                style="cursor: pointer;"
+                                                                                                                                                src="${product.design_image}">
+                                                                                                                                        </div>
+                                                                                                                                    </div>
+                                                                                                                                    ` : ''}
+                    </div>
+                </div>
+
+            ${index < products.length - 1 ? '<hr class="my-3 border-primary">' : ''}
         `;
                 container.append(html);
             });
@@ -635,7 +684,6 @@
 
             if (targetButton.length && topButton.length) {
                 const newText = targetButton.find('span').text();
-                console.log(newText);
 
                 topButton.find('span').text(newText);
             }
@@ -657,10 +705,14 @@
         function goToTransportStep() {
             if (!checkAllProductsSelected()) {
                 notyf.error('Vui lòng chọn đầy đủ các thuộc tính.');
-                return
+                return;
             }
 
             const products = [];
+            let allImagesSelected = true;
+
+            // Tạo danh sách các Promise để đọc ảnh
+            const promises = [];
 
             $('#confirmed-products-wrapper .custom-form').each(function() {
                 const productEl = $(this);
@@ -672,6 +724,53 @@
                 const price = productEl.find('.variant-price span').text().trim();
                 const totalPrice = productEl.find('.total-price span').text().trim();
                 const quantity = productEl.find('.step_product_input').val();
+
+                const designImageInput = productEl.find(`#design_${productId}`);
+                const modelImageInput = productEl.find(`#model_${productId}`);
+
+                // Biến chứa đường dẫn ảnh (Base64)
+                let designImageBase64 = null;
+                let modelImageBase64 = null;
+
+                // 🔎 Kiểm tra ảnh "Design photo" đã chọn chưa
+                if (designImageInput.get(0).files.length === 0) {
+                    notyf.error(`Please select a design image for the product: ${name}`);
+                    productEl.css('border', '1px solid red');
+                    allImagesSelected = false;
+                } else {
+                    productEl.css('border', '');
+
+                    // Tạo Promise cho ảnh design
+                    const designPromise = new Promise((resolve) => {
+                        const designFile = designImageInput.get(0).files[0];
+                        const designReader = new FileReader();
+                        designReader.onload = function(event) {
+                            designImageBase64 = event.target.result;
+                            resolve(); // ✅ Đánh dấu hoàn thành
+                        };
+                        designReader.readAsDataURL(designFile);
+                    });
+
+                    // Thêm vào danh sách Promise
+                    promises.push(designPromise);
+                }
+
+                // 🔎 Kiểm tra ảnh "Model" (không bắt buộc)
+                if (modelImageInput.get(0).files.length > 0) {
+                    // Tạo Promise cho ảnh model
+                    const modelPromise = new Promise((resolve) => {
+                        const modelFile = modelImageInput.get(0).files[0];
+                        const modelReader = new FileReader();
+                        modelReader.onload = function(event) {
+                            modelImageBase64 = event.target.result;
+                            resolve(); // ✅ Đánh dấu hoàn thành
+                        };
+                        modelReader.readAsDataURL(modelFile);
+                    });
+
+                    // Thêm vào danh sách Promise
+                    promises.push(modelPromise);
+                }
 
                 // Lấy các giá trị attribute đã chọn (nếu là variant)
                 const attributes = [];
@@ -688,26 +787,35 @@
 
                 const attributesText = attributes.map(attr => attr.name).join(' - ');
 
-                products.push({
-                    id: productId,
-                    time: time,
-                    name: name,
-                    sku: sku,
-                    image: image,
-                    price: parseFloat(price),
-                    total_price: parseFloat(totalPrice),
-                    quantity: parseInt(quantity),
-                    attributes: attributes,
-                    attributes_text: attributesText // thêm chuỗi dạng 'S - Đỏ'
+                // Sau khi tất cả ảnh của product này được load xong, push vào products
+                Promise.all(promises).then(() => {
+                    products.push({
+                        id: productId,
+                        time: time,
+                        name: name,
+                        sku: sku,
+                        image: image,
+                        price: parseFloat(price),
+                        total_price: parseFloat(totalPrice),
+                        quantity: parseInt(quantity),
+                        attributes: attributes,
+                        attributes_text: attributesText,
+                        design_image: designImageBase64,
+                        model_image: modelImageBase64
+                    });
                 });
             });
 
-            renderReviewProducts(products)
-
-            // Sau khi lấy được dữ liệu, bạn có thể gọi updateStepStatus như bình thường
-            updateStepStatus(1, {
-                step: 2,
-                tabId: 'tab-transport',
+            // Chờ tất cả các ảnh đều load xong
+            Promise.all(promises).then(() => {
+                if (!allImagesSelected) {
+                    return;
+                }
+                renderReviewProducts(products);
+                updateStepStatus(1, {
+                    step: 2,
+                    tabId: 'tab-transport',
+                });
             });
         }
 
@@ -731,7 +839,7 @@
             $('.step[data-step="2"]').removeClass('active');
         });
 
-        function getShippingInfo() {
+        async function getShippingInfo() {
             const form = $('#btn-to-review-order').closest("form")[0];
 
             if (!form.checkValidity()) {
@@ -767,21 +875,21 @@
 
             // Gộp họ và tên
             const fullName = (formData.first_name || '') + ' ' + (formData.last_name || '');
-            const cityName = $('#city_id option:selected').text();
-            const stateName = $('#state_id option:selected').text();
-            const countryName = $('#country_id option:selected').text();
-            const selectedShipping = $('input[name="shipping_method_id"]:checked');
+            const cityName = $('#city').val();
+            const stateName = $('#state').val();
+            const countryName = $('#country').val();
+            const selectedShipping = $('input[name="shipping_method"]:checked');
             const shippingName = selectedShipping.closest('.form-check').find('label').text().trim();
             const shippingFee = selectedShipping.data('fee') || 0;
 
             const addressParts = [
-                countryName?.trim(),
-                stateName?.trim(),
+                formData.shipping_address?.trim(),
                 cityName?.trim(),
-                formData.shipping_address?.trim()
+                stateName?.trim(),
+                countryName?.trim()
             ].filter(Boolean); // Xoá các phần tử rỗng, null, undefined
 
-            const fullAddress = addressParts.join(', ') + (formData.zip_code ? ' - ' + formData.zip_code : '');
+            const fullAddress = addressParts.join(', ');
 
             // Hiển thị dữ liệu lên tab-review
             const shippingInfoHTML = `
@@ -792,13 +900,32 @@
                 <p>Phương thức vận chuyển: ${shippingName}</p>
             `;
 
-            $('#shipping-method-fee').text(`$${shippingFee}`)
+            const products = getFormData();
+
+            const response = await $.ajax({
+                url: '{{ route('orders.get-shipping-fee') }}',
+                type: 'POST',
+                data: {
+                    shipping_method: selectedShipping.val(),
+                    products
+                },
+                success: function(response) {
+                    $('#shipping-method-fee').text(`${formatCurrency(response.shipping_fee)}`)
+                },
+                error: function(error) {
+                    notyf.error(error.responseJSON.message);
+                }
+            })
+
+            console.log(isApplyCoupon);
+
+            if (isApplyCoupon) {
+                console.log('apply coupon');
+                await applyCoupon(true)
+            }
 
             $('.card-shipping').find('p').remove(); // Xoá thông tin cũ nếu có
             $('.card-shipping').append(shippingInfoHTML); // Thêm mới
-
-            console.log();
-
 
             updateStepStatus(2, {
                 step: 3,
@@ -832,76 +959,6 @@
 
 
         $(function() {
-            $('#country_id').on('change', function() {
-                let countryId = $(this).val();
-
-                $('#state_id').html('<option value="">-- Chọn tiểu bang --</option>').prop('disabled',
-                    true);
-                $('#city_id').html('<option value="">-- Chọn thành phố --</option>').prop('disabled', true);
-
-                if (countryId) {
-                    $.ajax({
-                        url: '{{ route('orders.get.states', '__id__') }}'.replace('__id__',
-                            countryId),
-                        type: 'GET',
-                        success: function(response) {
-                            if (response.states.length > 0) {
-                                $('#state_id').prop('disabled', false);
-                                $.each(response.states, function(key, state) {
-                                    $('#state_id').append(
-                                        `<option value="${state.id}">${state.name}</option>`
-                                    );
-                                });
-
-                                if (response.msg != "") {
-                                    notyf.error(xhr.responseJSON?.msg || "Đã xảy ra lỗi.");
-                                    return;
-                                }
-
-                                let html = '';
-                                $.each(response.shipping_methods, function(index, method) {
-                                    html += `
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="shipping_method_id"
-                                                id="shipping_${method.id}" data-fee="${method.fee}" value="${method.id}" ${index === 0 ? 'checked' : ''}>
-                                            <label class="form-check-label fw-bold text-muted"
-                                                for="shipping_${method.id}">
-                                                ${method.name}
-                                            </label>
-                                        </div>
-                                    `;
-                                });
-
-                                $('#shipping-methods-wrapper').html(html);
-                            }
-                        }
-                    });
-                }
-            });
-
-            $('#state_id').on('change', function() {
-                let stateId = $(this).val();
-
-                $('#city_id').html('<option value="">-- Chọn thành phố --</option>').prop('disabled', true);
-
-                if (stateId) {
-                    $.ajax({
-                        url: '{{ route('orders.get.cities', '__id__') }}'.replace('__id__',
-                            stateId),
-                        type: 'GET',
-                        success: function(response) {
-                            if (response.cities.length > 0) {
-                                $('#city_id').prop('disabled', false);
-                                $.each(response.cities, function(key, city) {
-                                    $('#city_id').append(
-                                        `<option value="${city.id}">${city.name}</option>`
-                                    );
-                                });
-                            }
-                        }
-                    });
-                }
-            });
 
             const confirmed = getConfirmedOrders();
 
@@ -1061,7 +1118,37 @@
                 }
             }
 
+            // Khi hover vào .design-tooltip, hiện tooltip content
+            $(document).on('mouseenter', '.design-tooltip', function() {
+                const width = $(this).data('width');
+                const height = $(this).data('height');
+                const dpi = $(this).data('dpi');
+                const type = $(this).data('type');
+                let content = '';
+
+                if (width && height && dpi && type) {
+                    content = `
+                        <p class="mb-0"><strong>Chiều rộng:</strong>  ${width} px</p>
+                        <p class="mb-0"><strong>Chiều cao:</strong>  ${height} px</p>
+                        <p class="mb-0"><strong>DPI:</strong>  ${dpi}</p>
+                        <p class="mb-0"><strong>Định dạng tệp:</strong>  ${type}</p>
+                    `;
+                } else {
+                    content = 'Chưa có dữ liệu';
+                }
+
+                // Đặt nội dung cho tooltip
+                $(this).find('.design-tooltip-content').html(content).fadeIn(200);
+            });
+
+            // Khi rời khỏi, ẩn tooltip content
+            $(document).on('mouseleave', '.design-tooltip', function() {
+                $(this).find('.design-tooltip-content').fadeOut(200);
+            });
+
+
             function renderConfirmedProducts(products) {
+
                 const newProductIds = products.map(product => product.id);
 
                 // Xóa các sản phẩm đã bị loại khỏi danh sách mới
@@ -1098,7 +1185,7 @@
                         // Nếu là variant thì thêm class d-none để ẩn, ngược lại hiển thị d-flex luôn
                         const infoVariantClass = product.type === 'variant' ?
                             'd-none' :
-                            'd-flex';
+                            'd-block';
 
                         const isVariant = product.type === 'variant';
 
@@ -1108,9 +1195,9 @@
                                     <div class="d-flex align-items-center">
                                         <img src="${product.image}" alt="${product.name}" class="me-3" style="width: 60px; height: auto;">
                                         <div class="lh-1">
-                                            <h2 class="product-title mb-0 fs-5">${product.name}</h2>
+                                            <h2 class="product-title mb-0 fs-5 mb-2">${product.name}</h2>
                                             <span class="text-muted product-sku" id="sku_${product.id}_${product.time}">
-                                                ${isVariant ? '' : product.sku}
+                                                ${isVariant ? '' : 'SKU: ' + product.sku}
                                             </span>
                                         </div>
 
@@ -1121,29 +1208,92 @@
                                     </div>
                                 </div>
                                 ${selectsHtml ? `<div class="row">${selectsHtml}</div>` : ''}
-                                <div class="${infoVariantClass} justify-content-between align-items-stretch pb-4" id="info_variant_${product.id}" data-time="${product.time}">
-                                    <div class="d-flex justify-content-between align-items-center w-100">
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <p class="mb-1 " style="font-size: 14px; color: #42526E; font-weight: normal;">
-                                                Giá sản phẩm
-                                            </p>
-                                            <p class="variant-price text-primary fw-bold fs-6 mb-0" style="color: #091E42 !important" data-product-id="${product.id}" data-time="${product.time}">
-                                                $<span>${isVariant ? '' : product.price}</span>
-                                            </p>
+                                <div class="is-variant ${infoVariantClass}">
+                                    <div class="d-flex justify-content-between align-items-stretch" id="info_variant_${product.id}" data-time="${product.time}">
+                                        <div class="d-flex align-items-center w-100 gap-2">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <p class="mb-1 " style="font-size: 14px; color: #42526E; font-weight: normal;">
+                                                    Product price
+                                                </p>
+                                                <p class="variant-price text-primary fw-bold fs-6 mb-0" style="color: #091E42 !important" data-product-id="${product.id}" data-time="${product.time}">
+                                                    $<span>${isVariant ? '' : product.price}</span>
+                                                </p>
+                                            </div>
+                                            <div class="ms-3 d-flex flex-column justify-content-center">
+                                                <p class="required mb-1" style="font-size: 14px; color: #42526E; font-weight: normal;">
+                                                    Quantity
+                                                </p>
+                                                <input class="step_product_input form-control" style="height: 48px;" min="1" value="1"/>
+                                            </div>
+                                            <div class="ms-3 d-flex flex-column justify-content-center">
+                                                <p class="mb-1 " style="font-size: 14px; color: #42526E; font-weight: normal;">
+                                                    Total price
+                                                </p>
+                                                <p class="text-primary fw-bold fs-6 mb-0 total-price" style="color: #091E42 !important" data-product-id="${product.id}" data-time="${product.time}">
+                                                    $<span>${isVariant ? '' : product.price}</span>
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div class="ms-3 d-flex flex-column justify-content-center">
-                                            <p class="required mb-1" style="font-size: 14px; color: #42526E; font-weight: normal;">
-                                                Số lượng
-                                            </p>
-                                            <input class="step_product_input form-control" style="height: 48px;" min="1" value="1"/>
+                                    </div>
+                                    <hr class="my-3">
+                                    <div class="d-flex gap-4 pb-4">
+                                        <div class="model-upload" style="width: 11%;">
+                                            <label class="form-label fw-bold d-block ">Model</label>
+                                            <div class="image-container">
+                                                <img class="img-thumbnail" id="show_model_${product.id}"
+                                                    style="cursor: pointer;"
+                                                    src="{{ showImage('') }}" alt=""
+                                                    onclick="document.getElementById('model_${product.id}').click();">
+
+                                                <!-- Icon thùng rác -->
+                                                <div class="image-hover-actions" id="delete_icon_${product.id}">
+                                                    <i class="fa-solid fa-eye" onclick="viewImage('show_model_${product.id}')"></i>
+                                                    <i class="fa-solid fa-trash" onclick="removeImage('show_model_${product.id}', 'model_${product.id}')"></i>
+                                                </div>
+                                            </div>
+
+                                            <input type="file" name="model" id="model_${product.id}" class="form-control d-none"
+                                                accept="image/*" onchange="previewImage(event, 'show_model_${product.id}')">
                                         </div>
-                                        <div class="ms-3 d-flex flex-column justify-content-center">
-                                            <p class="mb-1 " style="font-size: 14px; color: #42526E; font-weight: normal;">
-                                                Tổng giá
-                                            </p>
-                                            <p class="text-primary fw-bold fs-6 mb-0 total-price" style="color: #091E42 !important" data-product-id="${product.id}" data-time="${product.time}">
-                                                $<span>${isVariant ? '' : product.price}</span>
-                                            </p>
+                                        <div class="design-upload position-relative" style="width: 11%;">
+                                            <div data-width="${product.design_width}"
+                                                data-height="${product.design_height}"
+                                                data-dpi="${product.design_ppi}"
+                                                data-type="${product.design_format}"
+                                                class="design-tooltip position-absolute"
+                                                style="top: 31px; right: 5px; z-index: 10; cursor: pointer;">
+                                                <i class="fa-solid fa-circle-info"></i>
+
+                                                <!-- Đây là tooltip sẽ hiển thị khi hover -->
+                                                <div class="design-tooltip-content">
+                                                </div>
+                                            </div>
+
+                                            <label class="form-label fw-bold d-block required">Design photo</label>
+
+                                            <!-- Thẻ bao ngoài để làm container -->
+                                            <div class="image-container">
+                                                <img class="img-thumbnail" id="show_design_${product.id}"
+                                                    style="cursor: pointer;"
+                                                    src="{{ showImage('') }}" alt=""
+                                                    onclick="document.getElementById('design_${product.id}').click();">
+
+                                                <!-- Icon thùng rác -->
+                                                <div class="image-hover-actions" id="delete_icon_${product.id}">
+                                                    <i class="fa-solid fa-eye" onclick="viewImage('show_design_${product.id}')"></i>
+                                                    <i class="fa-solid fa-trash" onclick="removeImage('show_design_${product.id}', 'design_${product.id}')"></i>
+                                                </div>
+                                            </div>
+
+                                            <input type="file" name="design" id="design_${product.id}" class="form-control d-none"
+                                                accept="image/*" onchange="validateAndPreviewImage(event, 'show_design_${product.id}',
+                                                {
+                                                    expectedWidth: ${product.design_width},
+                                                    expectedHeight: ${product.design_height},
+                                                    expectedPPI: ${product.design_ppi},
+                                                    expectedFormat: '${product.design_format}',
+                                                    inputId: 'show_design_${product.id}'
+                                                })">
                                         </div>
                                     </div>
                                 </div>
@@ -1281,7 +1431,7 @@
 
                             // Ẩn phần hiển thị giá / tổng giá
                             const form = $(`.custom-form[data-id="${productId}"][data-time="${time}"]`);
-                            form.find('.d-flex.align-items-stretch').removeClass('d-flex').addClass(
+                            form.find('.is-variant.d-block').removeClass('d-block').addClass(
                                 'd-none');
 
                             return;
@@ -1298,7 +1448,7 @@
                             .text(`${response.price}`);
 
                         const form = $(`.custom-form[data-id="${productId}"][data-time="${time}"]`);
-                        form.find('.d-none').removeClass('d-none').addClass('d-flex');
+                        form.find('.is-variant.d-none').removeClass('d-none').addClass('d-block');
 
                         const totalPriceEl = form.find(
                             `.total-price[data-product-id="${productId}"][data-time="${time}"] span`
@@ -1333,16 +1483,17 @@
             }
 
             function updateSubtotal() {
-                // Cập nhật tổng tiền tất cả sản phẩm
+                // Update total price of all products
                 let total = 0;
                 $('.total-price span').each(function() {
-                    const value = parseFloat($(this).text());
+                    // Remove currency symbol and commas, then parse as float
+                    const value = parseFloat($(this).text().replace('$', '').replace(/,/g, ''));
                     if (!isNaN(value)) {
                         total += value;
                     }
                 });
 
-                $('.final-price').text(`$${total}`);
+                $('.final-price').text(`${formatCurrency(total)}`);
             }
 
             $(document).on('blur', '.step_product_input', function() {
@@ -1351,16 +1502,24 @@
                 const productId = $input.closest('.custom-form').data('id');
                 const time = $input.closest('.custom-form').data('time');
                 const variantId = $(`#info_variant_${productId}[data-time="${time}"]`).data('variant-id');
-                const price = $input.closest('.custom-form').find('.variant-price span').text()
-                const totalPrice = $input.closest('.custom-form').find('.total-price span')
+                const price = $input.closest('.custom-form').find('.variant-price span').text();
+                const totalPrice = $input.closest('.custom-form').find('.total-price span');
+
+                // Lấy giá trị cũ từ data attribute
+                const oldQuantity = $input.data('old-value') || 1;
+
+                // Nếu giá trị không thay đổi thì không làm gì cả
+                if (parseInt(quantity) === parseInt(oldQuantity)) {
+                    return;
+                }
 
                 // Kiểm tra số lượng hợp lệ (phải là số nguyên dương)
                 if (!quantity || isNaN(quantity) || parseInt(quantity) < 1) {
                     alert('Vui lòng nhập số lượng hợp lệ (>= 1)');
                     $input.focus();
-                    $input.val(1)
-                    updateSubtotal()
-                    totalPrice.text(price)
+                    $input.val(1);
+                    updateSubtotal();
+                    totalPrice.text(price);
                     return;
                 }
 
@@ -1375,11 +1534,13 @@
                     },
                     success: function(response) {
                         if (response.success) {
-                            $(`.total-price[data-product-id="${productId}"][data-time="${time}"] span`)
-                                .text(
-                                    `${response.totalPrice}`)
+                            // Lưu giá trị mới vào data attribute
+                            $input.data('old-value', quantity);
 
-                            updateSubtotal()
+                            $(`.total-price[data-product-id="${productId}"][data-time="${time}"] span`)
+                                .text(`${response.totalPrice}`);
+
+                            updateSubtotal();
                             toggleShippingButton();
                         }
                     },
@@ -1387,9 +1548,8 @@
                         notyf.error(xhr.responseJSON?.message ||
                             "Đã có lỗi xảy ra khi kiểm tra tồn kho!");
 
-                        $input.val(1)
-
-                        totalPrice.text(price)
+                        $input.val(oldQuantity);
+                        totalPrice.text(price);
                     }
                 });
             });
@@ -1562,4 +1722,154 @@
 
 @push('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <style>
+        hr {
+            border-top: 1px solid #dcdee1;
+        }
+
+        /* Tooltip icon */
+        .design-tooltip {
+            top: 5px;
+            right: 5px;
+            z-index: 10;
+            cursor: pointer;
+            color: #007bff;
+            font-size: 16px;
+        }
+
+        .arrow-up {
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #ffffff;
+            z-index: 101;
+            border-color: transparent transparent #dcdcdc transparent;
+        }
+
+        /* Tooltip content */
+        .design-tooltip-content {
+            display: none;
+            position: absolute;
+            top: -100px;
+            left: -60px;
+            background-color: #ffffff;
+            border: 1px solid #dcdcdc;
+            border-radius: 4px;
+            padding: 8px;
+            z-index: 100;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+            font-size: 13px;
+            color: #333;
+            line-height: 1.4;
+
+            /* Thêm các dòng này */
+            width: auto;
+            max-width: 250px;
+            /* Bạn có thể thay đổi giá trị này tùy ý */
+            white-space: nowrap;
+            /* Không xuống dòng */
+            overflow-wrap: break-word;
+            /* Nếu quá dài sẽ xuống dòng */
+        }
+
+
+        /* Mũi tên nhỏ ở tooltip */
+        .design-tooltip-content::before {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            /* Đặt phía dưới của tooltip */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #ffffff;
+            /* Tạo viền mỏng */
+            z-index: 101;
+        }
+
+        .image-hover-container {
+            position: relative;
+        }
+
+        .image-hover-container img {
+            transition: opacity 0.2s;
+        }
+
+        .image-hover-container:hover img {
+            opacity: 0.7;
+        }
+
+        .image-hover-actions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            color: #ff4d4f;
+            font-size: 24px;
+            display: none;
+            background-color: rgba(0, 0, 0, 0.5);
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .image-hover-actions i {
+            font-size: 11px;
+            color: white;
+            cursor: pointer;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Hiệu ứng hover */
+        .image-hover-actions i:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            /* Chiều rộng cố định */
+            height: 103px;
+            /* Chiều cao cố định */
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            /* Canh giữa theo chiều ngang */
+            align-items: center;
+            /* Canh giữa theo chiều dọc */
+            overflow: hidden;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+        }
+
+        .img-thumbnail {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            /* Giữ nguyên tỷ lệ ảnh, không bị cắt */
+        }
+
+        .image-container.has-image:hover .image-hover-actions {
+            display: flex;
+            opacity: 1;
+        }
+    </style>
 @endpush

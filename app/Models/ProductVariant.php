@@ -19,7 +19,10 @@ class ProductVariant extends Model
         'discount_start',
         'discount_end',
         'stock_status',
-        'stock'
+        'stock',
+        'standard_shipping',
+        'express_shipping',
+        'international_shipping',
     ];
 
     protected $casts = [

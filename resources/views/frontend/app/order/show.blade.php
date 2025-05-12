@@ -15,7 +15,7 @@
                     </a>
 
                     <div>
-                        <p class="text-default fs-5 fw-bold">Thông tin đơn # {{ $order->order_code }} |
+                        <p class="text-default fs-5 fw-bold">Order Information # {{ $order->order_code }} |
                             {{ $order->order_name }}</p>
                         <p>{{ $order->created_at->format('d-m-Y H:i') }}</p>
                     </div>
@@ -25,15 +25,15 @@
                         switch ($order->payment_status) {
                             case 'completed':
                                 $bgClass = 'bg_paid';
-                                $text = 'Đã thanh toán';
+                                $text = 'Paid';
                                 break;
                             case 'refunded':
                                 $bgClass = 'bg_refunded';
-                                $text = 'Đã hoàn tiền';
+                                $text = 'Refunded';
                                 break;
                             default:
                                 $bgClass = 'bg_unpaid';
-                                $text = 'Chưa thanh toán';
+                                $text = 'Unpaid';
                                 break;
                         }
                     @endphp
@@ -56,7 +56,7 @@
                                     @disabled($wallet->balance <= 0 || $wallet->balance < $order->total)>
                                     <span>${{ formatPrice($order->total) }}</span>
                                     <span class="bg-white rounded w-1 h-1"></span>
-                                    <span>Thanh toán ngay</span>
+                                    <span>Pay Now</span>
                                 </button>
                             @endif
                         @break
@@ -64,33 +64,33 @@
                         @case('pending')
                             <button type="button" class="ant-btn ant-btn-warning py-2 px-4 h-auto d-flex align-items-center gap-1"
                                 id="btn-status">
-                                <span><i class="bi bi-clock me-1"></i>Chờ xử lý</span>
+                                <span><i class="bi bi-clock me-1"></i>Pending</span>
                             </button>
                         @break
 
                         @case('processing')
                             <button type="button" class="ant-btn ant-btn-info py-2 px-4 h-auto d-flex align-items-center gap-1">
-                                <span><i class="bi bi-gear me-1"></i>Đã xác nhận</span>
+                                <span><i class="bi bi-gear me-1"></i>Confirmed</span>
                             </button>
                         @break
 
                         @case('completed')
                             <button type="button" class="ant-btn ant-btn-success py-2 px-4 h-auto d-flex align-items-center gap-1">
-                                <span><i class="bi bi-check-circle me-1"></i>Hoàn thành</span>
+                                <span><i class="bi bi-check-circle me-1"></i>Completed</span>
                             </button>
                         @break
 
                         @case('cancelled')
                             <button type="button" class="ant-btn ant-btn-danger py-2 px-4 h-auto d-flex align-items-center gap-1">
-                                <span><i class="bi bi-x-circle me-2"></i>Đã hủy</span>
+                                <span><i class="bi bi-x-circle me-2"></i>Cancelled</span>
                             </button>
                         @break
                     @endswitch
 
                     <button class="ant-btn ant-btn-danger py-2 px-4 h-auto" data-bs-toggle="modal"
                         data-bs-target="#cancelOrder" id="btn-cansel-order"
-                        style="{{ $order->status === 'pending' && $order->status !== 'cancelled' ? '' : 'display: none' }}">Hủy
-                        đơn</button>
+                        style="{{ $order->status === 'pending' && $order->status !== 'cancelled' ? '' : 'display: none' }}">Cancel
+                        Order</button>
                 </div>
 
             </div>
@@ -99,16 +99,16 @@
 
     @php
         $steps = [
-            'pending' => 'Đã đặt hàng',
-            'confirmed' => 'Đã xác nhận',
-            'shipping' => 'Đang giao',
-            'completed' => 'Hoàn tất',
+            'pending' => 'Order Placed',
+            'confirmed' => 'Confirmed',
+            'shipping' => 'Shipping',
+            'completed' => 'Completed',
         ];
 
         $statusOrder = array_keys($steps);
         $currentStatus = $order->status;
 
-        // Nếu status không hợp lệ, set về 'unknown' để xử lý riêng
+        // If status is invalid, set to 'unknown' for special handling
         $validStatus = in_array($currentStatus, $statusOrder);
     @endphp
 
@@ -172,7 +172,7 @@
                                         <td><img src="{{ showImage($item->image) }}" alt="{{ $item->product_name }}"
                                                 width="32" height="32">
                                         </td>
-                                        <td>{{ $item->quantity }}</td>
+                                        <td><small>x</small>{{ $item->quantity }}</td>
                                         <td>${{ formatPrice($item->price) }}</td>
                                         <td>${{ formatPrice($item->price * $item->quantity) }}</td>
                                     </tr>
@@ -217,7 +217,7 @@
                     <p class="mb-2"><span class="fw-semibold me-2">Mobile:</span> {{ $order->phone_number }}</p>
                     <p class="mb-2"><span class="fw-semibold me-2">Address:</span> {{ $order->shipping_address }}</p>
                     <p class="mb-0"><span class="fw-semibold me-2">Payment method:</span>
-                        {{ $order->payment_method === 'bank_transfer' ? 'via wallet' : 'Chưa cập nhật...' }}
+                        {{ $order->payment_method === 'bank_transfer' ? 'via wallet' : 'Not updated...' }}
                     </p>
                 </div>
             </div>
@@ -237,18 +237,18 @@
             <div class="modal-content">
                 <form action="" method="post" id="cancellation-form">
                     <div class="modal-header">
-                        <h5 class="modal-title fw-bold" id="titleCancelOrder">Lý do hủy đơn</h5>
+                        <h5 class="modal-title fw-bold" id="titleCancelOrder">Cancellation Reason</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
                             <textarea name="cancel_reason" id="cancel_reason" class="form-control" rows="4"
-                                placeholder="Vui lòng nhập lý do..."></textarea>
+                                placeholder="Please enter reason..."></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Bỏ qua</button>
-                        <button type="submit" class="btn btn-primary btn-sm">Xác nhận hủy</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Confirm Cancellation</button>
                     </div>
                 </form>
             </div>
@@ -271,12 +271,12 @@
             });
 
             swalWithBootstrapButtons.fire({
-                title: "Xác nhận thanh toán?",
-                text: "Thanh toán ngay để đơn hàng của bạn được xử lý và giao sớm nhất có thể.",
+                title: "Confirm Payment?",
+                text: "Pay now to have your order processed and delivered as soon as possible.",
                 icon: "warning",
                 showCancelButton: true,
-                confirmButtonText: "Đồng ý",
-                cancelButtonText: "Huỷ bỏ",
+                confirmButtonText: "Confirm",
+                cancelButtonText: "Cancel",
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -294,8 +294,8 @@
                         },
                         success: (response) => {
                             swalWithBootstrapButtons.fire({
-                                title: "Đã thanh toán!",
-                                text: "Đơn hàng của bạn đã được thanh toán thành công.",
+                                title: "Payment Successful!",
+                                text: "Your order has been paid successfully.",
                                 icon: "success"
                             });
 
@@ -305,13 +305,13 @@
 
                             const $statusDiv = $('.status_btn_order');
                             $statusDiv.removeClass('bg_unpaid').addClass('bg_paid');
-                            $statusDiv.find('span').text('Đã thanh toán');
+                            $statusDiv.find('span').text('Paid');
 
                             $('#confirm-paymant')
                                 .removeClass('ant-btn-primary')
                                 .addClass('ant-btn-warning')
                                 .html(
-                                    '<i class="bi bi-check-circle me-1"></i> Chờ xử lý')
+                                    '<i class="bi bi-check-circle me-1"></i> Pending')
                             $('#confirm-paymant').off('click');
 
                             $('.progress-step > div').eq(0).removeClass().addClass('step-done')
@@ -326,11 +326,10 @@
                         }
                     })
 
-                    // Gọi API hoặc redirect ở đây nếu cần
                 } else if (result.dismiss === Swal.DismissReason.cancel) {
                     swalWithBootstrapButtons.fire({
-                        title: "Đã huỷ",
-                        text: "Bạn đã huỷ thanh toán. Đơn hàng vẫn chưa được xử lý.",
+                        title: "Cancelled",
+                        text: "Payment has been cancelled. Your order is still pending.",
                         icon: "error"
                     });
                 }
@@ -362,10 +361,10 @@
                         .removeClass('ant-btn-warning')
                         .addClass('ant-btn-danger')
                         .html(
-                            '<i class="bi bi-x-circle me-1"></i> Đã hủy')
+                            '<i class="bi bi-x-circle me-1"></i> Cancelled')
 
                     $('.status_btn_order').removeClass('bg_paid').removeClass('bg_unpaid').addClass(
-                        'bg_refunded').find('span').text('Đã hoàn tiền')
+                        'bg_refunded').find('span').text('Refunded')
 
                     $(".money__amount.balance").text(`$${response.data.wallet}`)
 
@@ -390,6 +389,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
 
     <style>
+        .ant-btn {
+            border-radius: 100px !important;
+        }
+
         .swal2-cancel.btn.btn-danger {
             margin-right: 5px
         }

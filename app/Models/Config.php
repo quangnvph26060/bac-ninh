@@ -25,6 +25,8 @@ class Config extends Model
         'tiktok',
         'copyright',
         'seo_title',
-        'seo_description'
+        'seo_description',
+        'tax_rate',
+        'order_completion_time'
     ];
 }
