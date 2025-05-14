@@ -19,6 +19,7 @@ class CategoryController extends Controller
 
     public function index()
     {
+        dd(\App\Models\Category::all());
         if (request()->ajax()) {
             $categories = collect($this->categoryService->pagination());
 

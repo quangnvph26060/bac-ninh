@@ -34,11 +34,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Logout Router
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
-        Route::get('transfer-histories', [TransferHistoryController::class, 'index'])->name('transfer.histories.index');
         Route::get('activity-log/{id?}', [ActivityController::class, 'history'])->name('activity.log.history');
 
         // Action Router
         Route::post('handle-bulk-action', [BulkActionController::class, 'handleBulkAction'])->name('handle.bulk.action');
+
+        Route::prefix('transfer-histories')->controller(TransferHistoryController::class)->name('transfer.histories.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('reject', 'reject')->name('reject');
+            Route::post('confirm', 'confirm')->name('confirm');
+        });
 
         Route::prefix('orders')->controller(OrderController::class)->name('orders.')->group(function () {
             Route::get('/', 'index')->name('index');
@@ -150,7 +155,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/', 'configuration')->name('index');
                 Route::put('/', 'updateConfiguration')->name('update.configuration');
                 Route::get('payment', 'payment')->name('payment');
-                Route::put('payment', 'updateConfigPayment');
+                Route::post('payment', 'saveConfigPayment');
+                Route::delete('payment', 'destroyConfigPayment')->name('destroy.config.payment');
+                Route::put('payment/status', 'updateConfigPaymentStatus')->name('update.config.payment.status');
+                Route::get('payment/{id}', 'getConfigPayment')->name('get.config.payment');
             }
         );
     });
@@ -187,4 +195,3 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('filter', [CompanyController::class, 'companyFilter'])->name('filter');
     });
 });
-

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Frontend\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\ConfigPayment;
+use App\Models\TopupRequest;
 use App\Models\TransactionHistory;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use App\Services\PaypalService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -19,10 +21,91 @@ class BillController extends Controller
         $this->paypalService = $paypalService;
     }
 
-    public function bill()
+    public function bill(Request $request)
     {
+        $search = $request->search;
+        $perPage = $request->input('per_page', 10);
+        $dateRange = $request->date_range;
+        $isTopupRequest = filter_var($request->is_topup_request, FILTER_VALIDATE_BOOLEAN);
+
         $configPayments = ConfigPayment::query()->with('bank')->latest()->get();
+        $wallet = Wallet::query()->where('user_id', auth()->id())->first();
+
+        $walletTransactions = WalletTransaction::query()
+            ->with('configPayment')
+            ->where('wallet_id', $wallet->id)
+            // Nếu là yêu cầu nạp tiền, thêm điều kiện is_topup_request
+            ->when($isTopupRequest, function ($query) {
+                $query->where('is_topup_request', true);
+            })
+            // Nếu không phải yêu cầu nạp tiền, thay thế bằng status là "complete"
+            ->when(!$isTopupRequest, function ($query) {
+                $query->where('status', 'complete');
+            })
+            ->latest()
+            ->when(!empty($search), fn($q) => $q->where('code', 'like', "%{$search}%"))
+            ->when(!empty($dateRange), function ($q) use ($dateRange) {
+                [$start, $end] = explode(' - ', $dateRange);
+                $start = Carbon::createFromFormat('d/m/Y', trim($start))->startOfDay();
+                $end = Carbon::createFromFormat('d/m/Y', trim($end))->endOfDay();
+                $q->whereBetween('created_at', [$start, $end]);
+            })->paginate($perPage);
+
+        if ($request->ajax()) {
+            $view = $isTopupRequest ? 'frontend.app.bill.request-deposit-table' : 'frontend.app.bill.transaction-history-table';
+            $html = view($view, compact('walletTransactions'))->render();
+            return response()->json([
+                'html' => $html,
+            ]);
+        }
+
         return view('frontend.app.bill.index', compact('configPayments'));
+    }
+
+
+    public function process(Request $request)
+    {
+        $credentials = $request->validate([
+            'amount' => 'required|numeric',
+            'proof' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'transaction_code' => 'required|string|max:255|unique:wallet_transactions,transaction_code',
+            'note' => 'nullable|string|max:255',
+            'config_payment_id' => 'required|exists:config_payments,id'
+        ], [], [
+            'amount' => 'Amount',
+            'proof' => 'Proof',
+            'transaction_code' => 'Transaction Code',
+            'note' => 'Note',
+            'config_payment_id' => 'Config Payment'
+        ]);
+
+        $wallet = Wallet::query()->where('user_id', auth()->id())->first();
+
+        $balance_after = $wallet->balance + $credentials['amount'];
+
+        $credentials['proof'] = uploadImages('proof', 'proof');
+
+        try {
+            WalletTransaction::create([
+                'wallet_id' => $wallet->id,
+                'config_payment_id' => $credentials['config_payment_id'],
+                'code' => generateTransactionCode(),
+                'amount' => $credentials['amount'],
+                'note' => $credentials['note'],
+                'type' => 'deposit',
+                'balance_before' => $wallet->balance,
+                'balance_after' => $balance_after,
+                'status' => 'pending',
+                'proof' => $credentials['proof'],
+                'transaction_code' => $credentials['transaction_code'],
+                'is_topup_request' => true
+            ]);
+            return successResponse('The topup request has been sent, please wait for the browser.', [], 200, true);
+        } catch (\Throwable $th) {
+            deleteImage($credentials['proof']);
+            logger($th->getMessage());
+            return errorResponse('An error occurred, please try again later!', true);
+        }
     }
 
     public function generateQr(Request $request)
