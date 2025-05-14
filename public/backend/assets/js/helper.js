@@ -268,24 +268,14 @@ function autoGenerateSlug(fromSelector, toSelector) {
     });
 }
 
-function submitForm(formId, successCallback, url = null) {
+function submitForm(formId, successCallback, url = null, errorCallback = null) {
     $(formId).on("submit", function (e) {
         e.preventDefault();
 
-        // Kiểm tra xem CKEditor đã được khởi tạo trên textarea chưa
-        $("textarea.ckeditor").each(function () {
-            const editorId = this.id;
-
-            // Nếu CKEditor chưa được khởi tạo, khởi tạo nó
-            if (!CKEDITOR.instances[editorId]) {
-                CKEDITOR.replace(editorId, {
-                    filebrowserUploadMethod: "form",
-                });
-            } else {
-                // Nếu CKEditor đã được khởi tạo, cập nhật giá trị của nó
-                CKEDITOR.instances[editorId].updateElement();
-            }
-        });
+        // Cập nhật tất cả giá trị CKEditor vào các textarea tương ứng
+        for (const instance in CKEDITOR.instances) {
+            CKEDITOR.instances[instance].updateElement();
+        }
 
         // 👉 Xóa dấu phẩy trong các input có class `usd-price-format`
         $(".usd-price-format").each(function () {
@@ -311,8 +301,10 @@ function submitForm(formId, successCallback, url = null) {
                 }
             },
             error: function (xhr) {
+                if (typeof errorCallback === "function") {
+                    errorCallback(xhr);
+                }
                 Notifications(xhr.responseJSON.message, "danger");
-                console.log("Lỗi khi gửi dữ liệu: ", xhr);
             },
             complete: function () {
                 $("#loadingSpinner").fadeOut();

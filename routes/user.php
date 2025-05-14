@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
         ->name('bills.')
         ->group(function () {
             Route::get('/', 'bill')->name('index');
+            Route::post('/', 'process')->name('process');
             Route::post('paypal/process', 'processTransaction')->name('paypal.process');
             Route::get('paypal/success', 'successTransaction')->name('paypal.success');
             Route::get('paypal/cancel', 'cancelTransaction')->name('paypal.cancel');

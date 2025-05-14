@@ -15,7 +15,7 @@
                 "url": "admin.orders.index"
             },
             {
-                "title": "Lịch sử chuyển khoản",
+                "title": "Yêu cầu nạp tiền",
                 "url": "admin.transfer.histories.index"
             }
         ],
@@ -107,6 +107,10 @@
             {
                 "title": "Cấu hình chung",
                 "url": "admin.configurations.index"
+            },
+            {
+                "title": "Cấu hình thanh toán",
+                "url": "admin.configurations.payment"
             }
         ],
         "inRoutes": [

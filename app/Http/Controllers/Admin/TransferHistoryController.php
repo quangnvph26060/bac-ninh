@@ -20,11 +20,37 @@ class TransferHistoryController extends Controller
                 $query,
                 fn($dataTable) =>
                 $dataTable
-                ->addColumn('user', fn($row)=> $row->wallet->user->name)
-                    ->editColumn('created_at', fn($row) => $row->created_at->format('F j, Y \a\t g:i a'))
+                    ->addColumn('method', fn($row) => "<img src='" . showImage($row->configPayment->image) . "' alt='" . $row->configPayment->title . "' width='50'>")
+                    ->addColumn('proof', fn($row) => showImage($row->proof))
+                    ->addColumn('user', fn($row) => $row->wallet->user->name)
+                    ->editColumn('created_at', fn($row) => $row->created_at->format('F j, Y \a\t g:i a')),
+                ['method']
             );
         }
 
         return view('admin.transfer-history.index');
+    }
+
+    public function reject(Request $request)
+    {
+        $credentials = $request->validate([
+            'id' => 'required',
+            'reason' => 'required',
+        ]);
+
+        $response = $this->transferHistoryService->reject($credentials);
+
+        return handleResponse($response['message'], $response['success'], $response['code'], [], false);
+    }
+
+    public function confirm(Request $request)
+    {
+        $credentials = $request->validate([
+            'id' => 'required',
+        ]);
+
+        $response = $this->transferHistoryService->confirm($credentials);
+
+        return handleResponse($response['message'], $response['success'], $response['code'], [], false);
     }
 }

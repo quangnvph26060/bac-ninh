@@ -1906,10 +1906,14 @@ h2 {
 }
 
 .bg_surcharge-unpaid,
+.bg_unpaid span {
+    color: #b54051 !important;
+}
+
+.bg_surcharge-unpaid,
 .bg_unpaid {
     background: #b540511a;
     border-color: #b54051;
-    color: #b54051;
 }
 
 .bg_paid {
@@ -1924,7 +1928,10 @@ h2 {
 .bg_resend {
     background: #f8f8161a;
     border-color: #f7b84b;
-    color: #f7b84b;
+}
+
+.bg_refunded span {
+    color: #936922 !important;
 }
 
 .bg_whitelist {
