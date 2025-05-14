@@ -289,7 +289,8 @@
         }
 
         $(document).on('click', '.btn-primary.btn-sm.fs-6', function() {
-            $('#myForm').find('input[name="id"]').val('');
+            CKEDITOR.instances.content.setData('');
+            $('#myForm').find('img#show_image').attr('src', '{{ showImage('') }}');
             $('#myForm')[0].reset();
             $('#createModal').modal('show');
         });
