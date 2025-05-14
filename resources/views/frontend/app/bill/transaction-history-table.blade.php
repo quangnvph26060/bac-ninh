@@ -23,7 +23,6 @@
             <tr>
                 <td class="{{ $class }} fw-bold">{{ $walletTransaction->code }}</td>
                 <td class="{{ $class }}">
-                    {{ $walletTransaction->type === 'deposit' ? '+' : '-' }}
                     ${{ formatPrice($walletTransaction->amount) }}
                 </td>
                 <td class="{{ $class }}">${{ formatPrice($walletTransaction->balance_before) }}</td>

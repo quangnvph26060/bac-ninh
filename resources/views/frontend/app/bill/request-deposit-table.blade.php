@@ -26,7 +26,7 @@
                 <td class="text-center" style="width: 10%;">
                     @switch($walletTransaction->status)
                         @case('pending')
-                            <div class="bg_refunded status_btn_order"><span class="px-2">pending processing</span></div>
+                            <div class="bg_refunded status_btn_order"><span class="px-2">pending</span></div>
                         @break
 
                         @case('complete')
