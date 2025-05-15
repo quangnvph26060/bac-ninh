@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Category\CategoryRequest;
+use App\Models\Category;
 use App\Services\CategoryService;
 use App\Services\CollectionService;
 use App\Traits\PaginateTrait;
@@ -19,7 +20,8 @@ class CategoryController extends Controller
 
     public function index()
     {
-        dd(\App\Models\Category::all());
+        $this->authorize('viewAny', Category::class);
+
         if (request()->ajax()) {
             $categories = collect($this->categoryService->pagination());
 
@@ -42,6 +44,8 @@ class CategoryController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Category::class);
+
         $title = 'Thêm danh mục';
         $categories = $this->categoryService->getCategoryTreeFlatWithDepth();
         $collections = $this->collectionService->getPluckCollection();
@@ -59,6 +63,8 @@ class CategoryController extends Controller
 
     public function edit(string $id)
     {
+        $this->authorize('update', Category::class);
+
         $title = 'Sửa danh mục';
 
         $category = $this->categoryService->show($id);

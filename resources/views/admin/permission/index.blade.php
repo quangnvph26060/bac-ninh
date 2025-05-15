@@ -41,7 +41,7 @@
                                         <th>ID</th>
                                         <th>Tên quyền</th>
                                         <th>Ngày tạo</th>
-                                        <th>Hành động</th>
+                                        {{-- <th>Hành động</th> --}}
                                     </tr>
                                 </thead>
 
@@ -89,13 +89,13 @@
                         searchable: false,
                         width: '25%'
                     },
-                    {
-                        data: 'operations',
-                        name: 'operations',
-                        orderable: false,
-                        searchable: false,
-                        width: '20%'
-                    }
+                    // {
+                    //     data: 'operations',
+                    //     name: 'operations',
+                    //     orderable: false,
+                    //     searchable: false,
+                    //     width: '20%'
+                    // }
                 ],
                 order: [],
                 language: {
