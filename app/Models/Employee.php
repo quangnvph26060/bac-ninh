@@ -28,7 +28,8 @@ class Employee extends Authenticatable
         'avatar',
         'identity_card_number',
         'identity_card_image',
-        'note'
+        'note',
+        'is_admin'
     ];
 
     protected $hidden = [
@@ -39,7 +40,13 @@ class Employee extends Authenticatable
     protected $casts = [
         'date_of_birth' => 'date',
         'password' => 'hashed',
+        'is_admin' => 'boolean',
     ];
+
+    public function isAdmin(): bool
+    {
+        return $this->is_admin;
+    }
 
     public static function boot()
     {

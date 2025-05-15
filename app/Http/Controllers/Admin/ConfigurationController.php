@@ -100,6 +100,7 @@ class ConfigurationController extends Controller
 
 
         $configPayments = ConfigPayment::query()->latest()->get();
+
         return view('admin.configuration.payment', compact('configPayments'));
     }
 

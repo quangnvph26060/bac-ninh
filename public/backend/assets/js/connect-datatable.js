@@ -114,7 +114,7 @@ const dataTables = (
                         d[key] = value;
                     }
                 });
-                
+
                 const dateRange = $("#dateRangePicker").val();
                 if (dateRange) {
                     // Phân tách startDate và endDate từ giá trị của dateRange
@@ -219,8 +219,7 @@ const dataTables = (
                         );
                     },
                     error: function (xhr) {
-                        console.log(xhr);
-                        Swal.fire("Lỗi!", "Không thể xóa dữ liệu.", "error");
+                        Notifications(xhr.responseJSON.message, "danger");
                     },
                 });
             }
@@ -438,27 +437,16 @@ const dataTables = (
                                 .draw(false);
                         }
                     }, false); // Sử dụng biến table thay vì gọi lại $('#myTable').DataTable()
-                    $.notify(
-                        {
-                            icon: "icon-bell",
-                            title: "Thông báo",
-                            message: "Xóa thành công.",
-                        },
-                        {
-                            type: "success",
-                            placement: {
-                                from: "bottom",
-                                align: "right",
-                            },
-                            time: 1000,
-                        }
-                    );
+                    Notifications("Xóa thành công.", "success");
                     $("#actionSelect").val("");
                     $('input[type="checkbox"]').prop("checked", false);
                     toggleActionDiv();
                 },
-                error: function () {
-                    alert("Có lỗi xảy ra, vui lòng thử lại!");
+                error: function (xhr) {
+                    $('input[type="checkbox"]').prop("checked", false);
+                    $("#actionSelect").val("");
+                    $('#actionDiv').hide(); // Ẩn #actionDiv nếu có lỗi xảy ra
+                    Notifications(xhr.responseJSON.message, "danger");
                 },
             });
         }

@@ -27,6 +27,10 @@ class EmployeeService extends BaseService
 
         return $this->queryBuilder(
             $columns,
+            [],
+            false,
+            [],
+            [['is_admin', '<>', true]]
         );
     }
 
