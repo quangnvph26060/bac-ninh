@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\DebtNccController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\importCouponController;
 use App\Http\Controllers\Admin\ImportProductController;
+use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\ReceiptController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReportdebtController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\Client\SignUpController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\Admin\WarehouseController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -60,6 +62,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('edit/{id}', 'update')->name('update');
             Route::get('search-products', 'search')->name('search.products');
             Route::get('selected-attributes/{id}',  'getValueByAttributeId')->name('selected.attributes');
+        });
+
+        Route::prefix('materials')->controller(MaterialController::class)->name('materials.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+            Route::get('search-products', 'search')->name('search.products');
+            Route::get('selected-attributes/{id}',  'getValueByAttributeId')->name('selected.attributes');
+            Route::get('list', 'list')->name('list');
         });
 
         // Attribute Router
@@ -285,4 +298,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('get-daily-import-data', [DailyReportController::class, 'getDailyImportData'])->name('getDailyImportData');
         });
     });
+
+    Route::prefix('warehouse')->name('warehouse.')->group(function () {
+        Route::get('', [WarehouseController::class, 'index'])->name('index');
+        Route::get('create', [WarehouseController::class, 'create'])->name('create');
+        Route::get('show/{id}', [WarehouseController::class, 'show'])->name('show');
+
+    });
+
 });
+
+Route::post('/submit-table', [WarehouseController::class, 'store']);

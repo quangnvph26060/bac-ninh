@@ -94,6 +94,25 @@
         "inRoutes": [
             "admin.configurations.index", "admin.configurations.payment"
         ]
+    },
+    {
+        "title": "Quản lý vật liệu",
+        "icon": "fa-solid fa-box",
+        "id": "materials",
+        "children": [
+            {
+                "title": "Vật liệu",
+                "url": "admin.materials.index"
+            },
+            {
+                "title": "Quản lý nhập kho",
+                "url": "admin.warehouse.index"
+            }
+
+        ],
+        "inRoutes": [
+            "admin.materials.index", "admin.warehouse.index"
+        ]
     }
 ]
 

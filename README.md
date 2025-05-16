@@ -64,3 +64,59 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+/// sql vật liệu kho
+
+CREATE TABLE materials (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NULL,
+    price_usd DECIMAL(15, 2) NULL,
+    price_vnd DECIMAL(15, 0) NULL,
+    distributor VARCHAR(255) NULL,
+    stock INT NULL,
+    sku VARCHAR(100) NULL UNIQUE,
+    type VARCHAR(100) NULL,
+    status TINYINT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+);
+
+CREATE TABLE material_variants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    material_id INT NOT NULL,
+    sku VARCHAR(100) NULL ,
+    price DECIMAL(15, 2) NULL,
+    product_unit VARCHAR(50) NULL,
+    attribute_value_combine TEXT NULL,
+    stock INT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    CONSTRAINT fk_material FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
+);
+
+CREATE TABLE material_attributes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    material_id INT NOT NULL,
+    attribute_id INT NULL,
+    attribute_values_ids TEXT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    CONSTRAINT fk_material_attr_material FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
+);
+
+CREATE TABLE attribute_value_material_variants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    material_variant_id INT NOT NULL,
+    attribute_value_id INT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    CONSTRAINT fk_avmv_variant FOREIGN KEY (material_variant_id) REFERENCES material_variants(id) ON DELETE CASCADE
+);
+
+
+
+
+
+ALTER TABLE warehouse_details
+ADD COLUMN note TEXT NULL;
+
+
