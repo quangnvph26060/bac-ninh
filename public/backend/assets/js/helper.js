@@ -301,7 +301,6 @@ function submitForm(formId, successCallback, url = null, errorCallback = null) {
                 }
             },
             error: function (xhr) {
-
                 if (
                     xhr.status === 403 &&
                     xhr.getResponseHeader("Content-Type").includes("text/html")
@@ -398,7 +397,7 @@ function formatUSDPrice($input) {
 
 $(document).ready(function () {
     // Lấy tất cả input có class `usd-price-format`
-    $(".usd-price-format").on("input", function (e) {
+    $(document).on("input", ".usd-price-format", function (e) {
         if (
             e.originalEvent.inputType === "insertText" &&
             e.originalEvent.data === "."
@@ -409,12 +408,12 @@ $(document).ready(function () {
     });
 
     // Format lại khi mất focus (blur)
-    $(".usd-price-format").on("blur", function () {
+    $(document).on("blur", ".usd-price-format", function () {
         formatUSDPrice($(this));
     });
 
     // Giới hạn chỉ nhập tối đa 2 số sau dấu phẩy
-    $(".usd-price-format").on("keypress", function (e) {
+    $(document).on("keypress", ".usd-price-format", function (e) {
         if (e.key === ".") return;
 
         let value = $(this).val();

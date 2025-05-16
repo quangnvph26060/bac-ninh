@@ -816,14 +816,13 @@
 
             // Hiển thị sản phẩm tìm thấy
             products.forEach(function(product) {
-                let path = "{{ config('app.url') }}/storage/" + product.image
 
                 resultList.append(`
                 <a href="javascript:void(0);" class="list-group-item list-group-item-action selectable-item"
-                    data-id="${product.id}" data-name="${product.name}" data-image="${path}" data-price="${product.price}">
+                    data-id="${product.id}" data-name="${product.name}" data-image="${product.image}" data-price="${product.price}">
                     <div class="row align-items-center">
                         <div class="col-auto">
-                            <span class="avatar" style="background-image: url('${path}')"></span>
+                            <span class="avatar" style="background-image: url('${product.image}')"></span>
                         </div>
                         <div class="col text-truncate">
                             <h4 class="text-body d-block mb-0">${product.name}</h4>
@@ -1265,30 +1264,30 @@
                     let newHtml = `
                     <div class="accordion-item" data-variant-id="${variant.id}">
                         <h2 class="accordion-header">
-                            <button type="button" class="accordion-button collapsed position-relative" data-bs-toggle="collapse" data-bs-target="#v${index}">
+                            <button type="button" class="accordion-button collapsed position-relative" data-bs-toggle="collapse" data-bs-target="#v${variant.id}">
                                 <span class="fw-bold">${variant.name}</span>
-                                <span class="ms-2 delete-variant text-danger position-absolute" data-index="${index}">Xóa</span>
+                                <span class="ms-2 delete-variant text-danger position-absolute" data-index="${variant.id}">Xóa</span>
                             </button>
                         </h2>
-                        <div id="v${index}" class="accordion-collapse collapse">
+                        <div id="v${variant.id}" class="accordion-collapse collapse">
                             <div class="accordion-body">
                                 <div class="row">
                                     <div class="mb-3 position-relative col-md-3">
-                                        <label for="variants-${index}-sku" class="form-label required">Mã sản phẩm</label>
-                                        <input type="text" class="form-control" id="variants-${index}-sku" name="variants[${variant.id}][sku]"
+                                        <label for="variants-${variant.id}-sku" class="form-label required">Mã sản phẩm</label>
+                                        <input type="text" class="form-control" id="variants-${variant.id}-sku" name="variants[${variant.id}][sku]"
                                             aria-required="true" required="required" value="${convertToSKU(variant.name)}">
                                     </div>
                                     <div class="mb-3 position-relative col-md-3">
-                                        <label for="variants-${index}-sale-price" class="form-label required">Giá</label>
-                                        <input type="text" class="form-control usd-price-format" id="variants-${index}-sale-price" name="variants[${variant.id}][sale_price]"
+                                        <label for="variants-${variant.id}-sale-price" class="form-label required">Giá</label>
+                                        <input type="text" class="form-control usd-price-format" id="variants-${variant.id}-sale-price" name="variants[${variant.id}][sale_price]"
                                             aria-required="true" required="required">
                                     </div>
                                             <div class="mb-3 position-relative col-md-3">
-                                                <label for="variants-${index}-product-unit" class="form-label required">Đơn vị</label>
-                                                <input type="text" class="form-control" id="variants-${index}-product-unit" name="variants[${variant.id}][product_unit]">
+                                                <label for="variants-${variant.id}-product-unit" class="form-label required">Đơn vị</label>
+                                                <input type="text" class="form-control" id="variants-${variant.id}-product-unit" name="variants[${variant.id}][product_unit]">
                                             </div>
                                             <div class="mb-3 position-relative col-md-3">
-                                                <label for="variants-${index}-discount-price" class="form-label">Giá ưu đãi
+                                                <label for="variants-${variant.id}-discount-price" class="form-label">Giá ưu đãi
                                                     <span class="form-label-description">
                                                         <a href="javascript:void(0)" class="variant-turn-on-schedule">Lên lịch</a>
                                                         <a class="variant-turn-off-schedule" style="display: none"
@@ -1299,40 +1298,68 @@
                                                 </label>
 
                                                 <input type="text" class="form-control usd-price-format"
-                                                    name="variants[${variant.id}][discount_price]" id="variants-${index}-discount-price">
+                                                    name="variants[${variant.id}][discount_price]" id="variants-${variant.id}-discount-price">
                                             </div>
                                             <div class="col-md-6 variant-scheduled-time" style="display: none;">
                                                 <div class="mb-3 position-relative">
-                                                    <label class="form-label" for="variants-${index}-discount-start">
+                                                    <label class="form-label" for="variants-${variant.id}-discount-start">
                                                         Từ ngày
                                                     </label>
                                                     <input class="form-control form-date-time" type="text"
-                                                        name="variants[${variant.id}][discount_start]" id="variants-${index}-discount-start">
+                                                        name="variants[${variant.id}][discount_start]" id="variants-${variant.id}-discount-start">
                                                 </div>
                                             </div>
                                             <div class="col-md-6 variant-scheduled-time" style="display: none;">
                                                 <div class="mb-3 position-relative">
-                                                    <label class="form-label" for="variants-${index}-discount-end">
+                                                    <label class="form-label" for="variants-${variant.id}-discount-end">
                                                         Đến ngày
                                                     </label>
                                                     <input class="form-control form-date-time" type="text"
-                                                        name="variants[${variant.id}][discount_end]" id="variants-${index}-discount-end">
+                                                        name="variants[${variant.id}][discount_end]" id="variants-${variant.id}-discount-end">
                                                 </div>
                                             </div>
                                             <div class="mb-3 position-relative col-md-3">
-                                                    <label for="variants-${index}-stock" class="form-label">Số lượng</label>
+                                                    <label for="variants-${variant.id}-stock" class="form-label">Số lượng</label>
                                                     <input type="text" class="form-control"
-                                                        id="variants-${index}-stock"
+                                                        id="variants-${variant.id}-stock"
                                                         name="variants[${variant.id}][stock]">
                                             </div>
-                                            <div class="mb-3 position-relative col-md-9">
-                                                <label for="variants-${index}-stock-status" class="form-label">Trạng thái kho hàng</label>
+                                            <div class="mb-3 position-relative col-md-3">
+                                                <label
+                                                    for="variants-${variant.id}-stock-status"
+                                                    class="form-label">Vận chuyển tiêu chuẩn (Mỹ)</label>
+                                                <div class="input-group">
+                                                    <input type="text"
+                                                        class="form-control usd-price-format"
+                                                        name="variants[${variant.id}][standard_shipping]"
+                                                        id="variants-${variant.id}-standard_shipping">
+                                                    <span class="input-group-text">USD</span>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 position-relative col-md-3">
+                                                <label
+                                                    for="variants-${variant.id}-stock-status"
+                                                    class="form-label">Vận chuyển nhanh (Mỹ)</label>
+                                                <div class="input-group">
+                                                    <input type="text"
+                                                        class="form-control usd-price-format"
+                                                        name="variants[${variant.id}][express_shipping]"
+                                                        id="variants-${variant.id}-express_shipping">
+                                                    <span class="input-group-text">USD</span>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 position-relative col-md-3">
+                                                <label
+                                                    for="variants-${variant.id}-stock-status"
+                                                    class="form-label">Vận chuyển quốc tế</label>
 
-                                                <select name="variants[${variant.id}][stock_status]" id="variants-${index}-stock-status" class="form-control form-select">
-                                                    <option value="in_stock" selected>Còn hàng</option>
-                                                    <option value="out_of_stock">Hết hàng</option>
-                                                    <option value="waiting_for_goods">Chờ hàng</option>
-                                                </select>
+                                                <div class="input-group">
+                                                    <input type="text"
+                                                        class="form-control usd-price-format"
+                                                        name="variants[${variant.id}][international_shipping]"
+                                                        id="variants-${variant.id}-international_shipping">
+                                                    <span class="input-group-text">USD</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

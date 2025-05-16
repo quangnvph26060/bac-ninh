@@ -17,7 +17,6 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AuthController;
-use App\Http\Controllers\Admin\ConfigController;
 use App\Http\Controllers\Admin\DailyReportController;
 use App\Http\Controllers\Admin\DebtClientController;
 use App\Http\Controllers\Admin\DebtNccController;
@@ -25,13 +24,12 @@ use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\importCouponController;
 use App\Http\Controllers\Admin\ImportProductController;
 use App\Http\Controllers\Admin\MaterialController;
+use App\Http\Controllers\Admin\PasswordChangeRequestController;
 use App\Http\Controllers\Admin\ReceiptController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReportdebtController;
 use App\Http\Controllers\Admin\StorageController;
-use App\Http\Controllers\Client\SignUpController;
 use App\Http\Controllers\Admin\SupplierController;
-use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\Admin\TransferHistoryController;
 use Illuminate\Support\Facades\Route;
@@ -162,6 +160,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('edit/{id}', 'update')->name('update');
         });
 
+        Route::get('password-change-request', [PasswordChangeRequestController::class, 'index'])->name('password-change-request.index');
+        Route::post('password-change-request-confirm', [PasswordChangeRequestController::class, 'confirm'])->name('password-change-request.confirm');
+        Route::post('password-change-request-reject', [PasswordChangeRequestController::class, 'reject'])->name('password-change-request.reject');
+
         Route::group(['prefix' => 'roles', 'controller' => RoleController::class, 'as' => 'roles.'], function () {
             Route::get('/', 'index')->name('index');
             Route::get('create', 'create')->name('create');
@@ -198,20 +200,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('admin.guest')->group(function () {
         Route::controller(AuthController::class)->group(function () {
             Route::get('login', 'login')->name('login');
+            Route::get('forgot-password', 'forgotPasswordForm')->name('forgot-password-form');
+            Route::post('forgot-password', 'forgotPasswordPost');
             Route::post('login', 'authenticate')->name('login.authenticate');
             Route::get('verify-otp', 'showVerifyOtp')->name('verify-otp');
             Route::post('verify-otp', 'verifyOtp')->name('verify_otp_confirm');
         });
-    });
-
-    // Transaction Router
-    Route::prefix('transaction')->name('transaction.')->group(function () {
-        Route::get('', [TransactionController::class, 'index'])->name('index');
-        Route::get('search', [TransactionController::class, 'search'])->name('search');
-        Route::get('payment', [TransactionController::class, 'payment'])->name('payment');
-        Route::post('store', [TransactionController::class, 'store'])->name('store');
-        Route::get('export-pdf/{id}', [TransactionController::class, 'exportPDF'])->name('export_pdf');
-        Route::get('generateQR', [TransactionController::class, 'generateQrCode'])->name('generate');
     });
 
     // Company Router
@@ -238,31 +232,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('exportPdf', [ReportController::class, 'exportPdf'])->name('exportPdf');
     });
 
-    Route::prefix('client')->name('client.')->group(function () {
-        Route::get('/', [ClientController::class, 'index'])->name('index');
-        Route::get('/detail/{id}', [ClientController::class, 'edit'])->name('detail');
-        Route::put('/update/{id}', [ClientController::class, 'update'])->name('update');
-        Route::delete('/delete/{id}', [ClientController::class, 'delete'])->name('delete');
-        Route::get('/filter', [ClientController::class, 'findClient'])->name('filter');
-        Route::get('/clientgroup', [ClientController::class, 'clientgroup'])->name('clientgroup.index');
-        Route::get('/export', [ClientController::class, 'export'])->name('export');
-    });
-
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
         Route::get('/detail/{id}', [OrderController::class, 'detail'])->name('detail');
         // Route::get('/find/phone', [OrderController::class, 'getOrderbyPhone'])->name('findByPhone');
         Route::get('/admin/order/filter', [OrderController::class, 'filterOrder'])->name('filter');
-    });
-
-    Route::prefix('checkInventory')->name('check.')->group(function () {
-        Route::get('/', [CheckInventoryController::class, 'index'])->name('index');
-        Route::get('/filter', [CheckInventoryController::class, 'filterCheck'])->name('filter');
-        Route::get('/detail/{id}', [CheckInventoryController::class, 'detail'])->name('detail');
-    });
-    Route::prefix('support')->name('support.')->group(function () {
-        Route::get('/', [SupportController::class, 'contact'])->name('lienhe');
-        Route::post('/', [SupportController::class, 'feedback'])->name('feedback');
     });
 
     Route::prefix('importproduct')->name('importproduct.')->group(function () {
@@ -333,7 +307,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', [WarehouseController::class, 'index'])->name('index');
         Route::get('create', [WarehouseController::class, 'create'])->name('create');
         Route::get('show/{id}', [WarehouseController::class, 'show'])->name('show');
-
     });
 });
 

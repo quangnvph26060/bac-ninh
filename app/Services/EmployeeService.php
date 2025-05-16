@@ -120,4 +120,16 @@ class EmployeeService extends BaseService
             }
         });
     }
+
+    public function changePasswordByEmail($email, $newPassword)
+    {
+        if (!$data = $this->firstdByWhere(['*'], [['email', $email]])) {
+            return errorResponse("Không tìm thấy tài khoản trên hệ thống!", false, 404);
+        }
+
+        $data->password = $newPassword;
+        $data->save();
+
+        return true;
+    }
 }

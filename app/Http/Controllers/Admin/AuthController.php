@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\UserService;
+use App\Models\PasswordChangeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,16 +11,39 @@ use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
-    protected $userService;
-    public function __construct(UserService $userService)
-    {
-        $this->userService = $userService;
-    }
 
     public function login()
     {
         return view('admin.auth.login');
     }
+    public function forgotPasswordForm()
+    {
+        return view('admin.auth.forgot-password');
+    }
+
+    public function forgotPasswordPost(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email|exists:employees,email',
+            'new_password' => ['required', Password::min(8)->letters()->mixedCase()->numbers()->symbols()]
+        ], __('request.messages'), [
+            'email' => 'Email',
+            'new_password' => 'Mật khẩu mới'
+        ]);
+
+        $existingRequest = PasswordChangeRequest::where('email', $credentials['email'])
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingRequest) {
+            return errorResponse('Bạn đã gửi yêu cầu thay đổi mật khẩu và đang chờ duyệt. Vui lòng không gửi lại.', true, 422);
+        }
+
+        PasswordChangeRequest::create($credentials);
+
+        return successResponse('Gửi yêu cầu thay đổi mật khẩu thành công.', null, 200, true);
+    }
+
     public function authenticate(Request $request)
     {
         $request->validate([
