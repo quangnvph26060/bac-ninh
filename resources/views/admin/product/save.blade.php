@@ -331,7 +331,7 @@
                                                                     id="variants-{{ $variantItem['attribute_value_ids'] }}-sale-price"
                                                                     name="variants[{{ $variantItem['attribute_value_ids'] }}][sale_price]"
                                                                     aria-required="true" required="required"
-                                                                    value="{{ formatNumber($variantItem['sale_price']) }}">
+                                                                    value="{{ formatPrice($variantItem['sale_price']) }}">
                                                             </div>
                                                             <div class="mb-3 position-relative col-md-3">
                                                                 <label
@@ -361,7 +361,7 @@
                                                                     class="form-control usd-price-format"
                                                                     name="variants[{{ $variantItem['attribute_value_ids'] }}][discount_price]"
                                                                     id="variants-{{ $variantItem['attribute_value_ids'] }}-discount-price"
-                                                                    value="{{ formatNumber($variantItem['discount_price']) }}">
+                                                                    value="{{ formatPrice($variantItem['discount_price']) }}">
                                                             </div>
                                                             <div class="col-md-6 variant-scheduled-time"
                                                                 style="display: none;">
