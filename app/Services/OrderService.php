@@ -16,6 +16,7 @@ class OrderService extends BaseService
         $columns = [
             'id',
             'order_code',
+            'order_name',
             'full_name',
             'phone_number',
             'email',
@@ -23,7 +24,8 @@ class OrderService extends BaseService
             'status',
             'payment_status',
             'payment_method',
-            'created_at'
+            'created_at',
+            'reason'
         ];
 
         return $this->queryBuilder(
@@ -74,7 +76,7 @@ class OrderService extends BaseService
                 return errorResponse("Order not found in the system!", false, 404);
             }
 
-            if ($this->updateData($id, ['status' => $status])) return successResponse("Status update successful");
+            if ($order = $this->updateData($id, ['status' => $status])) return successResponse("Status update successful", $order->status);
         } catch (\Exception $e) {
             logger('error: ' . $e->getMessage());
             return errorResponse("An error occurred, please try again later!", false, 500);

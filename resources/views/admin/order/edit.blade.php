@@ -23,25 +23,45 @@
                     <div class="sa-page-meta__item d-flex align-items-center fs-6">
                         {{-- Payment Status --}}
                         @if ($order->payment_status == 'pending')
-                            <span class="badge bg-secondary me-2" id="payment-status">Payment Pending</span>
+                            <span class="badge bg-secondary me-2" id="payment-status">Chờ thanh toán</span>
                         @elseif($order->payment_status == 'completed')
-                            <span class="badge bg-success me-2" id="payment-status">Paid</span>
+                            <span class="badge bg-success me-2" id="payment-status">Đã thanh toán</span>
                         @elseif($order->payment_status == 'refunded')
-                            <span class="badge bg-danger me-2">Refunded</span>
+                            <span class="badge bg-danger me-2">Đã hoàn tiền</span>
                         @endif
 
                         {{-- Order Status --}}
                         @if ($order->status == 'pending')
-                            <span class="badge bg-secondary" id="order-status">Pending</span>
-                        @elseif($order->status == 'confirmed')
-                            <span class="badge bg-primary" id="order-status">Confirmed</span>
-                        @elseif($order->status == 'shipping')
-                            <span class="badge bg-warning text-dark" id="order-status">Shipping</span>
-                        @elseif($order->status == 'completed')
-                            <span class="badge bg-success" id="order-status">Completed</span>
+                            <span class="badge bg-warning" id="order-status">
+                                <i class="fas fa-hourglass-half me-1"></i> Chờ xác nhận
+                            </span>
+                        @elseif($order->status == 'confirmed_pending_production')
+                            <span class="badge bg-primary" id="order-status">
+                                <i class="fas fa-check-circle me-1"></i> Đã xác nhận, chờ sản xuất
+                            </span>
+                        @elseif($order->status == 'in_production')
+                            <span class="badge bg-info text-dark" id="order-status">
+                                <i class="fas fa-industry me-1"></i> Đang sản xuất
+                            </span>
+                        @elseif($order->status == 'produced_awaiting_completion')
+                            <span class="badge bg-secondary" id="order-status">
+                                <i class="fas fa-box-open me-1"></i> Đã sản xuất xong, chờ hoàn thiện
+                            </span>
+                        @elseif($order->status == 'completed_waiting_for_shipment')
+                            <span class="badge bg-dark" id="order-status">
+                                <i class="fas fa-truck-loading me-1"></i> Đã hoàn thiện, chờ giao hàng
+                            </span>
+                        @elseif($order->status == 'shipped')
+                            <span class="badge bg-success" id="order-status">
+                                <i class="fas fa-truck me-1"></i> Đã giao hàng
+                            </span>
                         @elseif($order->status == 'cancelled')
-                            <span class="badge bg-danger">Cancelled</span>
+                            <span class="badge bg-danger" id="order-status">
+                                <i class="fas fa-times-circle me-1"></i> Đã hủy
+                            </span>
                         @endif
+
+
                     </div>
 
                 </div>
@@ -52,7 +72,7 @@
             <div class="col-lg-8">
                 <div class="card mt-5">
                     <div class="card-body px-5 py-4 d-flex align-items-center justify-content-between">
-                        <h2 class="mb-0 fs-exact-18 me-4 fw-bold">Items</h2>
+                        <h2 class="mb-0 fs-exact-18 me-4 fw-bold">Sản phẩm</h2>
                     </div>
                     <div class="table-responsive">
                         <table class="sa-table">
@@ -74,10 +94,12 @@
                                             </div>
                                         </td>
                                         <td class="text-center">
-                                            <img src="{{ showImage($item->model_image) }}" width="40" height="40" alt="">
+                                            <img src="{{ showImage($item->model_image) }}" width="40" height="40"
+                                                alt="">
                                         </td>
                                         <td class="text-center">
-                                            <img src="{{ showImage($item->design_image) }}" width="40" height="40" alt="">
+                                            <img src="{{ showImage($item->design_image) }}" width="40" height="40"
+                                                alt="">
                                         </td>
                                         <td class="text-center">
                                             <div class="sa-price">
@@ -97,7 +119,7 @@
                             </tbody>
                             <tbody class="sa-table__group">
                                 <tr>
-                                    <td colspan="5">Subtotal</td>
+                                    <td colspan="5">Tổng phụ</td>
                                     <td class="text-end">
                                         <div class="sa-price">
                                             <span class="sa-price__symbol">$</span><span
@@ -106,7 +128,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colspan="5">Shipping</td>
+                                    <td colspan="5">Phí vận chuyển</td>
                                     <td class="text-end">
                                         <div class="sa-price">
                                             <span
@@ -116,7 +138,7 @@
                                 </tr>
                                 <tr>
                                     <td colspan="5">
-                                        Discount
+                                        Giảm giá
                                     </td>
                                     <td class="text-end">
                                         <div class="sa-price">
@@ -129,7 +151,7 @@
                             </tbody>
                             <tbody>
                                 <tr>
-                                    <td colspan="5">Total</td>
+                                    <td colspan="5">Tổng cộng</td>
                                     <td class="text-end">
                                         <div class="sa-price">
                                             <span class="sa-price__symbol">$</span><span
@@ -147,17 +169,18 @@
                         <div class="d-flex flex-wrap gap-2 justify-content-end">
                             <a href="{{ route('admin.orders.invoice.print', $order->id) }}" target="_blank"
                                 class="btn btn-outline-dark btn-sm">
-                                <i class="fas fa-print me-1"></i> Print Invoice
+                                <i class="fas fa-print me-1"></i> In hóa đơn
                             </a>
 
                             <a href="#" class="btn btn-outline-danger btn-sm">
-                                <i class="fas fa-file-pdf me-1"></i> Export PDF
+                                <i class="fas fa-file-pdf me-1"></i> Xuất PDF
                             </a>
 
                             @if ($order->status === 'pending')
                                 <button id="btn-cansel-order" data-bs-toggle="modal" data-bs-target="#cancelOrder"
-                                    id="btn-cansel-order" class="btn btn-outline-warning btn-sm text-dark" type="submit">
-                                    <i class="fas fa-times-circle me-1"></i> Cancel Order
+                                    id="btn-cansel-order" class="btn btn-outline-warning btn-sm text-dark"
+                                    type="submit">
+                                    <i class="fas fa-times-circle me-1"></i> Hủy đơn
                                 </button>
                             @endif
 
@@ -211,34 +234,50 @@
                 </div>
 
                 <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Cập nhật trạng thái</h5>
+                    </div>
                     <div class="card-body d-flex flex-wrap gap-2 justify-content-between align-items-center">
-                        <form id="status-form" method="POST" class="d-flex align-items-center gap-2">
+                        <form id="status-form" method="POST" class="d-flex align-items-center gap-2 w-100">
                             @csrf
 
                             @php
                                 $statusOptions = [
                                     'pending' => 0,
-                                    'confirmed' => 1,
-                                    'shipping' => 2,
-                                    'completed' => 3,
+                                    'confirmed_pending_production' => 1,
+                                    'in_production' => 2,
+                                    'produced_awaiting_completion' => 3,
+                                    'completed_waiting_for_shipment' => 4,
+                                    'shipped' => 5,
                                 ];
+
+                                // Ánh xạ trạng thái sang tiếng Việt
+                                $statusLabels = [
+                                    'pending' => 'Chờ xác nhận',
+                                    'confirmed_pending_production' => 'Đã xác nhận, chờ sản xuất',
+                                    'in_production' => 'Đang sản xuất',
+                                    'produced_awaiting_completion' => 'Đã sản xuất xong, chờ hoàn thiện',
+                                    'completed_waiting_for_shipment' => 'Đã hoàn thiện, chờ giao hàng',
+                                    'shipped' => 'Đã giao hàng',
+                                ];
+
                                 $isCancelled = $order->status === 'cancelled';
                                 $currentStatusIndex = $statusOptions[$order->status] ?? -1;
                             @endphp
 
-                            <select id="status-select" name="status" class="form-select form-select-sm w-auto"
+                            <select id="status-select" name="status" class="form-select form-select-sm w-100"
                                 {{ $isCancelled ? 'disabled' : '' }}>
                                 @foreach ($statusOptions as $status => $index)
                                     <option value="{{ $status }}" data-index="{{ $index }}"
                                         {{ $order->status == $status ? 'selected' : '' }}
                                         {{ !$isCancelled && $index < $currentStatusIndex ? 'disabled' : '' }}>
-                                        {{ ucfirst($status) }}
+                                        {{ $statusLabels[$status] }}
                                     </option>
                                 @endforeach
+                                {!! $isCancelled ? '<option value="cancelled" selected>Đã hủy đơn</option>' : '' !!}
                             </select>
-
-                            <button class="btn btn-sm btn-primary" type="submit">Update Status</button>
                         </form>
+
                     </div>
                 </div>
             </div>
@@ -293,41 +332,127 @@
             });
         }
 
+        let originalStatus = $('#status-select').val();
+
+        $('#status-select').on('change', function() {
+            let selectedStatus = $(this).val();
+
+            Swal.fire({
+                title: "Bạn có chắc chắn muốn cập nhật trạng thái?",
+                text: "Hành động này sẽ không thể hoàn tác!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Đồng ý, cập nhật!",
+                cancelButtonText: "Hủy",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Nếu người dùng đồng ý, submit form
+                    $('#status-form').trigger('submit');
+                    // Cập nhật lại trạng thái gốc
+                    originalStatus = selectedStatus;
+                } else {
+                    // Nếu người dùng hủy, quay lại trạng thái ban đầu
+                    $('#status-select').val(originalStatus);
+                }
+            });
+        });
+
         $('#status-form').on('submit', function(e) {
             e.preventDefault();
 
             let form = $(this);
             let formData = form.serialize();
-            let url = "{{ route('admin.orders.update.status', $order->id) }}"; // Cập nhật đúng route
+            let url = "{{ route('admin.orders.update.status', $order->id) }}";
 
             $.ajax({
                 url: url,
                 method: 'POST',
                 data: formData,
                 success: function(response) {
-                    let selectedIndex = $('#status-select option:selected').data('index');
 
+                    let selectedStatus = $('#status-select').val();
+
+                    // Danh sách trạng thái và HTML tương ứng
+                    const statusMapping = {
+                        'pending': `<span class="badge bg-warning" id="order-status">
+                                    <i class="fas fa-hourglass-half me-1"></i> Chờ xác nhận
+                                </span>`,
+                        'confirmed_pending_production': `<span class="badge bg-primary" id="order-status">
+                                    <i class="fas fa-check-circle me-1"></i> Đã xác nhận, chờ sản xuất
+                                </span>`,
+                        'in_production': `<span class="badge bg-info text-dark" id="order-status">
+                                    <i class="fas fa-industry me-1"></i> Đang sản xuất
+                                </span>`,
+                        'produced_awaiting_completion': `<span class="badge bg-secondary" id="order-status">
+                                    <i class="fas fa-box-open me-1"></i> Đã sản xuất xong, chờ hoàn thiện
+                                </span>`,
+                        'completed_waiting_for_shipment': `<span class="badge bg-dark" id="order-status">
+                                    <i class="fas fa-truck-loading me-1"></i> Đã hoàn thiện, chờ giao hàng
+                                </span>`,
+                        'shipped': `<span class="badge bg-success" id="order-status">
+                                    <i class="fas fa-truck me-1"></i> Đã giao hàng
+                                </span>`,
+                        'cancelled': `<span class="badge bg-danger" id="order-status">
+                                    <i class="fas fa-times-circle me-1"></i> Đã hủy
+                                </span>`
+                    };
+
+                    // Thay thế HTML của badge
+                    $('#order-status').replaceWith(statusMapping[selectedStatus]);
+
+                    // Lấy index hiện tại
+                    const statusOptions = [
+                        'pending',
+                        'confirmed_pending_production',
+                        'in_production',
+                        'produced_awaiting_completion',
+                        'completed_waiting_for_shipment',
+                        'shipped',
+                        'cancelled'
+                    ];
+                    const currentIndex = statusOptions.indexOf(selectedStatus);
+
+                    // Vô hiệu hóa tất cả các trạng thái trước đó
                     $('#status-select option').each(function() {
-                        let optionIndex = $(this).data('index');
-                        if (optionIndex < selectedIndex) {
+                        const optionValue = $(this).val();
+                        const optionIndex = statusOptions.indexOf(optionValue);
+
+                        if (optionIndex < currentIndex) {
                             $(this).prop('disabled', true);
                         }
                     });
 
-                    // Optional: Hiển thị thông báo thành công
+                    if (response.data !== 'pending') {
+                        $('#btn-cansel-order').hide()
+                    }
+
+                    // Hiển thị thông báo thành công
                     Notifications(response.message, "success");
                 },
-                error: function() {
+                error: function(xhr) {
+                    if (
+                        xhr.status === 403 &&
+                        xhr.getResponseHeader("Content-Type").includes("text/html")
+                    ) {
+                        document.open();
+                        document.write(xhr.responseText);
+                        document.close();
+                        return;
+                    }
+
+                    $('#status-select').val(originalStatus);
                     Notifications(xhr.responseJSON.message, "danger");
                 }
             });
         });
 
         $("#cancellation-form").on('submit', function(e) {
-            e.preventDefault()
+            e.preventDefault();
 
-            let code = "{{ $order->order_code }}"
-            let user_id = "{{ $order->user->id }}"
+            let code = "{{ $order->order_code }}";
+            let user_id = "{{ $order->user->id }}";
 
             $.ajax({
                 url: "{{ route('admin.orders.cancel') }}",
@@ -343,46 +468,65 @@
                 success: (response) => {
                     Notifications(response.message, "success");
 
-                    $('#btn-cansel-order').hide()
+                    // Ẩn nút hủy
+                    $('#btn-cansel-order').hide();
 
+                    // Thay đổi trạng thái nút
                     $('#btn-status, #confirm-paymant')
                         .removeClass('ant-btn-warning')
                         .addClass('ant-btn-danger')
-                        .html(
-                            '<i class="bi bi-x-circle me-1"></i> Đã hủy')
+                        .html('<i class="bi bi-x-circle me-1"></i> Đã hủy');
 
-                    $('.status_btn_order').removeClass('bg_paid').removeClass('bg_unpaid').addClass(
-                        'bg_refunded').find('span').text('Đã hoàn tiền')
+                    // Thay đổi màu trạng thái thanh toán
+                    $('.status_btn_order').removeClass('bg_paid')
+                        .removeClass('bg_unpaid')
+                        .addClass('bg_refunded')
+                        .find('span').text('Đã hoàn tiền');
 
-                    $(".money__amount.balance").text(`$${response.data.wallet}`)
+                    // Cập nhật số dư
+                    $(".money__amount.balance").text(`$${response.data.wallet}`);
 
                     // Cập nhật dropdown status
                     const $statusSelect = $('select[name="status"]');
-                    $statusSelect.val('cancelled');
 
-                    $statusSelect.find('option').each(function() {
-                        const value = $(this).val();
-                        if (value !== 'cancelled') {
-                            $(this).prop('disabled', true);
-                        }
-                    });
+                    // Thêm option "Đã hủy đơn" nếu chưa tồn tại
+                    if ($statusSelect.find('option[value="cancelled"]').length === 0) {
+                        $statusSelect.append('<option value="cancelled">Đã hủy đơn</option>');
+                    }
 
-                    $('#payment-status').removeClass().addClass(
-                        'badge bg-danger me-2').text('Refunded')
+                    // Cập nhật trạng thái thanh toán
+                    $('#payment-status').removeClass().addClass('badge bg-danger me-2').text(
+                        'Đã hoàn tiền');
 
-                    $("#order-status").removeClass().addClass('badge bg-danger').text('Cancelled')
+                    $('#status-select').prop('disabled', true);
 
+                    // Cập nhật badge trạng thái đơn hàng
+                    $("#order-status").replaceWith(`
+                        <span class="badge bg-danger" id="order-status">
+                            <i class="fas fa-times-circle me-1"></i> Đã hủy đơn
+                        </span>
+                    `);
+
+                    // Đóng modal hủy đơn
                     $('#cancelOrder').modal('hide');
                 },
                 error: (xhr) => {
+                    if (
+                        xhr.status === 403 &&
+                        xhr.getResponseHeader("Content-Type").includes("text/html")
+                    ) {
+                        document.open();
+                        document.write(xhr.responseText);
+                        document.close();
+                        return;
+                    }
                     Notifications(xhr.responseJSON.message, "danger");
                 },
                 complete: () => {
                     $("#loadingSpinner").fadeOut();
                 }
-            })
-
-        })
+            });
+        });
     </script>
 @endpush
 

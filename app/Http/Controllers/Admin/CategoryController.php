@@ -20,7 +20,7 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $this->authorize('viewAny', Category::class);
+        $this->authorize('view', Category::class);
 
         if (request()->ajax()) {
             $categories = collect($this->categoryService->pagination());
@@ -54,6 +54,8 @@ class CategoryController extends Controller
     }
     public function store(CategoryRequest $request)
     {
+        $this->authorize('create', Category::class);
+
         $credentials = $request->validated();
 
         $response = $this->categoryService->store($credentials);
@@ -63,7 +65,7 @@ class CategoryController extends Controller
 
     public function edit(string $id)
     {
-        $this->authorize('update', Category::class);
+        $this->authorize('edit', Category::class);
 
         $title = 'Sửa danh mục';
 
@@ -80,6 +82,8 @@ class CategoryController extends Controller
 
     public function update(string $id, CategoryRequest $request)
     {
+        $this->authorize('edit', Category::class);
+
         $credentials = $request->validated();
 
         $response = $this->categoryService->update($id, $credentials);

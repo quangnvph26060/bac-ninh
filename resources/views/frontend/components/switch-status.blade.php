@@ -4,23 +4,45 @@
     @break
 
     @case('pending')
-        <span class="badge bg-warning text-dark">Waiting for processing</span>
+        <span class="badge bg-warning">
+            <i class="fas fa-hourglass-half me-1"></i>Pending
+        </span>
     @break
 
-    @case('shipping')
-        <span class="badge bg-info text-light">Shipping</span>
+    @case('confirmed_pending_production')
+        <span class="badge bg-primary text-white">
+            <i class="fas fa-check-circle me-1"></i>Confirmed, waiting for production
+        </span>
     @break
 
-    @case('confirmed')
-        <span class="badge bg-primary text-light">Confirmed</span>
+    @case('in_production')
+        <span class="badge bg-info text-dark">
+            <i class="fas fa-industry me-1"></i>In production
+        </span>
     @break
 
-    @case('completed')
-        <span class="badge bg-success text-light">Complete</span>
+    @case('produced_awaiting_completion')
+        <span class="badge bg-secondary text-white">
+            <i class="fas fa-box-open me-1"></i>Produced, waiting for completion
+        </span>
+    @break
+
+    @case('completed_waiting_for_shipment')
+        <span class="badge bg-dark text-white">
+            <i class="fas fa-truck-loading me-1"></i>Completed, waiting for shipment
+        </span>
+    @break
+
+    @case('shipped')
+        <span class="badge bg-success">
+            <i class="fas fa-truck me-1"></i>Shipped
+        </span>
     @break
 
     @case('cancelled')
-        <span class="badge bg-danger text-light">Canceled</span>
+        <span class="badge bg-danger text-white">
+            <i class="fas fa-times-circle me-1"></i>Cancelled
+        </span>
     @break
 
     @case(null)

@@ -20,7 +20,7 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="exampleModalLabel">Items</h5>
+                    <h5 class="modal-title fw-bold" id="exampleModalLabel">Chi tiết đơn hàng</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -28,13 +28,13 @@
                         <table class="table table-bordered table-centered mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Product name</th>
-                                    <th>Image</th>
-                                    <th>Model</th>
-                                    <th>Design</th>
-                                    <th>Quantity</th>
-                                    <th>Price</th>
-                                    <th>Total</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Ảnh</th>
+                                    <th>Ảnh mẫu</th>
+                                    <th>Ảnh thiết kế</th>
+                                    <th>Số lượng</th>
+                                    <th>Giá</th>
+                                    <th>Tổng tiền</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -45,7 +45,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
                 </div>
             </div>
         </div>
@@ -102,9 +102,9 @@
                                         ${item.variant}
                                     </small>
                                 </th>
-                                <td style="text-align: center; width: 5%;"><img class="img-thumbnail" src="${item.image}" alt="${item.name}" ></td>
-                                <td style="text-align: center; width: 5%;"><img class="img-thumbnail" src="${item.model_image}" alt="${item.name}" ></td>
-                                <td style="text-align: center; width: 5%;"><img class="img-thumbnail" src="${item.design_image}" alt="${item.name}" ></td>
+                                <td style="text-align: center; width: 5%;"><img class="img-thumbnail" style="max-width: inherit; width: 100px;" src="${item.image}" alt="${item.name}"></td>
+                                <td style="text-align: center; width: 5%;"><img class="img-thumbnail" style="max-width: inherit; width: 100px;" src="${item.model_image}" alt="${item.name}"></td>
+                                <td style="text-align: center; width: 5%;"><img class="img-thumbnail" style="max-width: inherit; width: 100px;" src="${item.design_image}" alt="${item.name}"></td>
                                 <td style="text-align: center; width: 5%;"><small>x</small>${item.quantity}</td>
                                 <td style="text-align: center; width: 5%;">${formatCurrency(item.price)}</td>
                                 <td style="text-align: center; width: 5%;">${formatCurrency(item.total)}</td>
@@ -114,19 +114,19 @@
 
                     html += `
                         <tr>
-                            <th scope="row" colspan="6" class="text-end">Sub Total :</th>
+                            <th scope="row" colspan="6" class="text-end">Tổng phụ :</th>
                             <td class="text-center"><div class="fw-bold">${formatCurrency(subTotal)}</div></td>
                         </tr>
                         <tr>
-                            <th scope="row" colspan="6" class="text-end">Shipping Charge :</th>
+                            <th scope="row" colspan="6" class="text-end">Phí vận chuyển :</th>
                             <td class="text-center">${formatCurrency(shippingFee)}</td>
                         </tr>
                         <tr>
-                            <th scope="row" colspan="6" class="text-end">Discount :</th>
+                            <th scope="row" colspan="6" class="text-end">Giảm giá :</th>
                             <td class="text-center">- ${formatCurrency(discount)}</td>
                         </tr>
                         <tr>
-                            <th scope="row" colspan="6" class="text-end">Total :</th>
+                            <th scope="row" colspan="6" class="text-end">Tổng tiền :</th>
                             <td class="text-center"><div class="fw-bold">${formatCurrency(total)}</div></td>
                         </tr>
                     `;
@@ -136,7 +136,15 @@
                     $('#show-items').modal('show');
                 },
                 error: (xhr) => {
-                    console.log(xhr.responseJSON.message);
+                    if (
+                        xhr.status === 403 &&
+                        xhr.getResponseHeader("Content-Type").includes("text/html")
+                    ) {
+                        document.open();
+                        document.write(xhr.responseText);
+                        document.close();
+                        return
+                    }
                 },
                 complete: function() {
                     $("#loadingSpinner").fadeOut();

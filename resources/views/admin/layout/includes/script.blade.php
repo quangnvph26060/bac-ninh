@@ -26,6 +26,15 @@
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        statusCode: {
+            403: function(xhr) {
+                if (xhr.getResponseHeader('Content-Type').includes('text/html')) {
+                    document.open();
+                    document.write(xhr.responseText);
+                    document.close();
+                }
+            }
         }
     });
 </script>

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\ConfigurationController;
 use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\OrderController;
@@ -20,9 +21,6 @@ use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\TransferHistoryController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-use App\Helpers\Helper;
-use App\Http\Controllers\SEOAnalyzerController;
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -43,6 +41,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::post('reject', 'reject')->name('reject');
             Route::post('confirm', 'confirm')->name('confirm');
+        });
+
+        Route::prefix('customers')->controller(CustomerController::class)->name('customers.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('show/{id}', 'show')->name('show');
+            // Route::post('create', 'store')->name('store');
+            // Route::get('edit/{id}', 'edit')->name('edit');
+            // Route::put('edit/{id}', 'update')->name('update');
         });
 
         Route::prefix('orders')->controller(OrderController::class)->name('orders.')->group(function () {

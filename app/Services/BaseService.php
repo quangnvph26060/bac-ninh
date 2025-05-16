@@ -124,12 +124,16 @@ class BaseService
         return $query->get();
     }
 
-    public function findById(string $id, array $columns = ['*'], array $relations = [], array $wheres = [], array $order = [])
+    public function findById(string $id, array $columns = ['*'], array $relations = [], array $wheres = [], array $order = [], array $withCounts = [])
     {
         $query = $this->model->query();
 
         if (!empty($relations)) {
             $query->with($relations);
+        }
+
+        if (!empty($withCounts)) {
+            $query->withCount($withCounts);
         }
 
         foreach ($wheres as $condition) {

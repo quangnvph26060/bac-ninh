@@ -22,6 +22,8 @@ class OrderController extends Controller
     }
     public function index()
     {
+        $this->authorize('view', Order::class);
+
         if (request()->ajax()) {
             $query = $this->orderService->pagination();
 
@@ -45,6 +47,8 @@ class OrderController extends Controller
 
     public function getItemByCode(Request $request)
     {
+        $this->authorize('showItem', Order::class);
+
         $request->validate([
             'code' => 'required|exists:orders,order_code'
         ]);
@@ -56,12 +60,16 @@ class OrderController extends Controller
 
     public function edit(string $id)
     {
+        $this->authorize('edit', Order::class);
+
         $order = $this->orderService->show($id);
         return view('admin.order.edit', compact('order'));
     }
 
     public function cancelOrder(Request $request)
     {
+        $this->authorize('cancel', Order::class);
+
         $credentials = $request->validate([
             'code' => 'required|exists:orders,order_code',
             'reason' => 'required|string|max:400',
@@ -72,7 +80,7 @@ class OrderController extends Controller
             $order = Order::query()->with('user')->where('order_code', $credentials['code'])->firstOrFail();
 
             if ($order->status !== "pending") {
-                return errorResponse("Your order cannot be cancelled.", true, 400);
+                return errorResponse("Đơn hàng của bạn không thể bị hủy!", true, 400);
             }
 
             $order->reason = $credentials['reason'];
@@ -86,7 +94,7 @@ class OrderController extends Controller
             );
 
             $amount = $order->total;
-            $note = "REFUND DUE TO ADMIN CANCELLATION OF ORDER #{$order->order_code}";
+            $note = "HOÀN TIỀN DO QUẢN TRỊ VIÊN HỦY ĐƠN HÀNG #{$order->order_code}";
             $balanceBefore = $wallet->balance;
 
             $wallet->increment('balance', $amount);
@@ -108,19 +116,29 @@ class OrderController extends Controller
 
     public function printInvoice(string $id)
     {
+        $this->authorize('print', Order::class);
+
         $order = $this->orderService->show($id);
         return view('frontend.template.invoice', compact('order'));
     }
 
     public function updateStatus(Request $request, string $id)
     {
-        $request->validate([
-            'status' => 'required|in:pending,confirmed,shipping,completed,cancelled',
-        ]);
+        $this->authorize('changeStatus', Order::class);
+
+        $request->validate(
+            [
+                'status' => 'required|in:pending,confirmed_pending_production,in_production,produced_awaiting_completion,completed_waiting_for_shipment,shipped',
+            ],
+            __('request.messages'),
+            [
+                'status' => 'Trạng thái'
+            ]
+        );
 
         $response = $this->orderService->updateStatus($id, $request->status);
 
-        return handleResponse($response['message'], $response['success'], $response['code'], [], false);
+        return handleResponse($response['message'], $response['success'], $response['code'], $response['data'], false);
     }
 }
 

@@ -8,20 +8,25 @@ const columns = [
     {
         data: "order_code",
         name: "order_code",
-        title: "order code",
+        title: "Mã đơn hàng",
         width: "5%",
     },
     {
         data: "customer_information",
         name: "customer_information",
-        title: "customer information",
+        title: "Thông tin khách hàng",
         orderable: false,
         searchable: false,
     },
     {
+        data: "order_name",
+        name: "order_name",
+        title: "Tên đơn hàng",
+    },
+    {
         data: "product_count",
         name: "product_count",
-        title: "Quantity",
+        title: "Số lượng sản phẩm",
         orderable: false,
         searchable: false,
         render: (data) => {
@@ -31,7 +36,7 @@ const columns = [
     {
         data: "total",
         name: "total",
-        title: "total",
+        title: "Tổng tiền",
         orderable: false,
         searchable: false,
         render: (data) => {
@@ -39,22 +44,25 @@ const columns = [
         },
     },
     {
+        data: "reason",
+        name: "reason",
+        title: "Lý do hủy đơn",
+        orderable: false,
+        searchable: false,
+        render: (data) => {
+            return data ? data : 'N/A';
+        },
+    },
+    {
         data: "created_at",
         name: "created_at",
-        title: "ngày tạo",
+        title: "Ngày tạo",
         searchable: false,
     },
     {
         data: "status",
         name: "status",
-        title: "trạng thái",
-        // render: function (data) {
-        //     if (data == 1) {
-        //         return `<span class="badge" style="background-color: rgb(47, 179, 68);">Xuất bản</span>`;
-        //     } else {
-        //         return `<span class="badge" style="background-color: rgb(247, 103, 7);">Chưa xuất bản</span>`;
-        //     }
-        // },
+        title: "Trạng thái",
         orderable: false,
     },
 ];

@@ -1,3 +1,4 @@
+const notyf = new Notyf();
 let eye = $(".fa-regular.fa-eye");
 let eye_invisible = $(".far.fa-eye-slash");
 

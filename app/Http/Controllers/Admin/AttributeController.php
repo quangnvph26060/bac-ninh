@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Attribute\AttributeRequest;
+use App\Models\Attribute;
 use App\Services\AttributeService;
 use App\Traits\PaginateTrait;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ class AttributeController extends Controller
      */
     public function index()
     {
+        $this->authorize('view', Attribute::class);
 
         if (request()->ajax()) {
             $query = $this->attributeService->pagination();
@@ -40,6 +42,8 @@ class AttributeController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Attribute::class);
+
         $title = 'Thêm mới thuộc tính';
         $attribute = null;
 
@@ -51,6 +55,8 @@ class AttributeController extends Controller
      */
     public function store(AttributeRequest $request)
     {
+        $this->authorize('create', Attribute::class);
+
         $payload = $request->validated();
 
         $response = $this->attributeService->store($payload);
@@ -63,6 +69,8 @@ class AttributeController extends Controller
      */
     public function edit(string $id)
     {
+        $this->authorize('edit', Attribute::class);
+
         $title = 'Cập nhật thuộc tính';
         $attribute = $this->attributeService->show($id);
         return view('admin.attribute.save', compact('title', 'attribute'));
@@ -73,6 +81,8 @@ class AttributeController extends Controller
      */
     public function update(AttributeRequest $request, string $id)
     {
+        $this->authorize('edit', Attribute::class);
+
         $payload = $request->validated();
 
         $response = $this->attributeService->update($id, $payload);

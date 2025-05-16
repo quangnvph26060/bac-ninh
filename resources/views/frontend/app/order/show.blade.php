@@ -52,7 +52,7 @@
                         @case('draft')
                             @if ($order->payment_status === 'pending')
                                 <button type="button" id="confirm-paymant"
-                                    class="ant-btn ant-btn-{{ $wallet->balance <= 0 || $wallet->balance < $order->total ? 'default' : 'primary' }} py-2 px-4 h-auto d-flex align-items-center gap-1"
+                                    class="ant-btn ant-btn-{{ $wallet->balance <= 0 || $wallet->balance < $order->total ? 'default' : 'primary' }} h-auto d-flex align-items-center gap-1"
                                     @disabled($wallet->balance <= 0 || $wallet->balance < $order->total)>
                                     <span>${{ formatPrice($order->total) }}</span>
                                     <span class="bg-white rounded w-1 h-1"></span>
@@ -62,33 +62,33 @@
                         @break
 
                         @case('pending')
-                            <button type="button" class="ant-btn ant-btn-warning py-2 px-4 h-auto d-flex align-items-center gap-1"
+                            <button type="button" class="ant-btn ant-btn-warning h-auto d-flex align-items-center gap-1"
                                 id="btn-status">
                                 <span><i class="bi bi-clock me-1"></i>Pending</span>
                             </button>
                         @break
 
                         @case('processing')
-                            <button type="button" class="ant-btn ant-btn-info py-2 px-4 h-auto d-flex align-items-center gap-1">
+                            <button type="button" class="ant-btn ant-btn-info h-auto d-flex align-items-center gap-1">
                                 <span><i class="bi bi-gear me-1"></i>Confirmed</span>
                             </button>
                         @break
 
                         @case('completed')
-                            <button type="button" class="ant-btn ant-btn-success py-2 px-4 h-auto d-flex align-items-center gap-1">
+                            <button type="button" class="ant-btn ant-btn-success h-auto d-flex align-items-center gap-1">
                                 <span><i class="bi bi-check-circle me-1"></i>Completed</span>
                             </button>
                         @break
 
                         @case('cancelled')
-                            <button type="button" class="ant-btn ant-btn-danger py-2 px-4 h-auto d-flex align-items-center gap-1">
+                            <button type="button" class="ant-btn ant-btn-danger h-auto d-flex align-items-center gap-1">
                                 <span><i class="bi bi-x-circle me-2"></i>Cancelled</span>
                             </button>
                         @break
                     @endswitch
 
-                    <button class="ant-btn ant-btn-danger py-2 px-4 h-auto" data-bs-toggle="modal"
-                        data-bs-target="#cancelOrder" id="btn-cansel-order"
+                    <button class="ant-btn ant-btn-danger h-auto" data-bs-toggle="modal" data-bs-target="#cancelOrder"
+                        id="btn-cansel-order"
                         style="{{ $order->status === 'pending' && $order->status !== 'cancelled' ? '' : 'display: none' }}">Cancel
                         Order</button>
                 </div>
@@ -97,50 +97,32 @@
         </div>
     </div>
 
-    @php
-        $steps = [
-            'pending' => 'Order Placed',
-            'confirmed' => 'Confirmed',
-            'shipping' => 'Shipping',
-            'completed' => 'Completed',
-        ];
-
-        $statusOrder = array_keys($steps);
-        $currentStatus = $order->status;
-
-        // If status is invalid, set to 'unknown' for special handling
-        $validStatus = in_array($currentStatus, $statusOrder);
-    @endphp
-
-    <div class="my-4 mx-auto processing" style="max-width: 700px;">
-        <div class="d-flex justify-content-between progress-step text-center">
-            @foreach ($steps as $status => $label)
-                @php
-                    $iconMap = [
-                        'pending' => 'bi-check-circle',
-                        'confirmed' => 'bi-clock',
-                        'shipping' => 'bi-truck',
-                        'completed' => 'bi-emoji-smile',
-                    ];
-                    $icon = $iconMap[$status];
-
-                    if (!$validStatus || $currentStatus === 'cancelled') {
-                        $stepClass = 'step-pending';
-                    } else {
-                        $currentIndex = array_search($currentStatus, $statusOrder);
-                        $stepIndex = array_search($status, $statusOrder);
-                        $stepClass = $stepIndex <= $currentIndex ? 'step-done' : 'step-pending';
-                    }
-                @endphp
-
-                <div class="{{ $stepClass }}">
-                    <i class="bi {{ $icon }}"></i>
-                    <div>{{ $label }}</div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-
+    <ul id="progressbar" class="my-5">
+        <li class="active" id="step1">
+            <div class="icon-wrapper"><i class="bi bi-calendar"></i></div>
+            <strong>Choose Date</strong>
+        </li>
+        <li id="step2">
+            <div class="icon-wrapper"><i class="bi bi-tree"></i></div>
+            <strong>Choose Campsite</strong>
+        </li>
+        <li id="step3">
+            <div class="icon-wrapper"><i class="bi bi-truck-front"></i></div>
+            <strong>Choose RV</strong>
+        </li>
+        <li id="step4">
+            <div class="icon-wrapper"><i class="bi bi-geo-alt"></i></div>
+            <strong>Booking Check</strong>
+        </li>
+        <li id="step5">
+            <div class="icon-wrapper"><i class="bi bi-geo-alt"></i></div>
+            <strong>Booking Check</strong>
+        </li>
+        <li id="step6">
+            <div class="icon-wrapper"><i class="bi bi-geo-alt"></i></div>
+            <strong>Booking Check</strong>
+        </li>
+    </ul>
 
     <div class="row">
         <div class="col-lg-9">
@@ -152,7 +134,7 @@
                                 <tr>
                                     <th>Product name</th>
                                     <th>Image</th>
-                                    <th>Model</th>
+                                    <th>Mockup</th>
                                     <th>Design</th>
                                     <th>Quantity</th>
                                     <th>Price</th>
@@ -171,13 +153,15 @@
                                                 {{ implode(' - ', $item->productVariant?->attributeValues->pluck('value')->toArray() ?? []) }}
                                             </small>
                                         </th>
-                                        <td style="width: 5%; text-align: center;"><img src="{{ showImage($item->image) }}" alt="{{ $item->product_name }}"
+                                        <td style="width: 5%; text-align: center;"><img src="{{ showImage($item->image) }}"
+                                                alt="{{ $item->product_name }}" width="32" height="32">
+                                        </td>
+                                        <td style="width: 5%; text-align: center;"><img
+                                                src="{{ showImage($item->model_image) }}" alt="{{ $item->product_name }}"
                                                 width="32" height="32">
                                         </td>
-                                        <td style="width: 5%; text-align: center;"><img src="{{ showImage($item->model_image) }}" alt="{{ $item->product_name }}"
-                                                width="32" height="32">
-                                        </td>
-                                        <td style="width: 5%; text-align: center;"><img src="{{ showImage($item->design_image) }}" alt="{{ $item->product_name }}"
+                                        <td style="width: 5%; text-align: center;"><img
+                                                src="{{ showImage($item->design_image) }}" alt="{{ $item->product_name }}"
                                                 width="32" height="32">
                                         </td>
                                         <td><small>x</small>{{ $item->quantity }}</td>
@@ -217,7 +201,7 @@
         <div class="col-lg-3">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="header-title">Shipping Information</h4>
+                    <h4 class="header-title fw-bold">Shipping Information</h4>
                     <hr class="mt-2 mb-3">
                     <h5 class="font-family-primary fw-semibold mb-2">{{ $order->full_name }}</h5>
 
@@ -398,6 +382,10 @@
 
     <style>
         .ant-btn {
+            font-size: 11px !important;
+        }
+
+        .ant-btn {
             border-radius: 100px !important;
         }
 
@@ -405,46 +393,71 @@
             margin-right: 5px
         }
 
-        .processing i {
-            font-size: 2rem;
-        }
-
-        .processing .progress-step {
+        #progressbar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding: 0;
             position: relative;
         }
 
-        .processing .progress-step::before {
-            content: "";
-            position: absolute;
-            top: 32px;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background-color: #dee2e6;
-            z-index: 0;
+        #progressbar li {
+            list-style-type: none;
+            width: 25%;
+            position: relative;
+            text-align: center;
+            font-weight: 400;
+            color: #ccc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .processing .step-done,
-        .processing .step-pending {
+
+        #progressbar li .icon-wrapper {
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            background: #d8d8d8;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            color: white;
+            font-size: 22px;
             position: relative;
             z-index: 1;
-            background-color: white;
-            padding: 10px;
-            min-width: 80px;
         }
 
-        .processing .step-done i {
-            color: #28a745;
+        #progressbar li::after {
+            content: "";
+            width: 100%;
+            height: 2px;
+            background: #d8d8d8;
+            position: absolute;
+            left: -50%;
+            top: 25px;
         }
 
-        .processing .step-pending i {
-            color: #adb5bd;
+        #progressbar li:first-child::after {
+            content: none;
         }
 
-        .processing .step-done div,
-        .processing .step-pending div {
-            margin-top: 5px;
-            font-size: 14px;
+        #progressbar li.active .icon-wrapper {
+            background: #2f8d46;
+        }
+
+        #progressbar li.completed .icon-wrapper {
+            background: #d4f8d4;
+            color: #34c759;
+        }
+
+        #progressbar li.active,
+        #progressbar li.completed {
+            color: #2f8d46;
+        }
+
+        #progressbar li.active::after,
+        #progressbar li.completed::after {
+            background: #2f8d46;
         }
 
         .header-title {

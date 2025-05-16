@@ -1,21 +1,43 @@
 @switch($status)
     @case('pending')
-        <span class="badge bg-warning text-dark">Pending</span>
+        <span class="badge bg-warning rounded-pill">
+            <i class="fas fa-hourglass-half me-1"></i> Chờ xác nhận
+        </span>
     @break
 
-    @case('confirmed')
-        <span class="badge rounded-pill bg-secondary">Confirmed</span>
+    @case('confirmed_pending_production')
+        <span class="badge bg-primary rounded-pill">
+            <i class="fas fa-check-circle me-1"></i> Đã xác nhận, chờ sản xuất
+        </span>
     @break
 
-    @case('shipping')
-        <span class="badge rounded-pill bg-info text-dark">Shipping</span>
+    @case('in_production')
+        <span class="badge bg-info text-dark rounded-pill">
+            <i class="fas fa-industry me-1"></i> Đang sản xuất
+        </span>
     @break
 
-    @case('completed')
-        <span class="badge rounded-pill bg-success">Completed</span>
+    @case('produced_awaiting_completion')
+        <span class="badge bg-info text-dark rounded-pill">
+            <i class="fas fa-industry me-1"></i> Đang sản xuất
+        </span>
+    @break
+
+    @case('produced_awaiting_completion')
+        <span class="badge bg-secondary rounded-pill">
+            <i class="fas fa-box-open me-1"></i> Đã sản xuất xong, chờ hoàn thiện
+        </span>
+    @break
+
+    @case('completed_waiting_for_shipment')
+        <span class="badge bg-dark rounded-pill">
+            <i class="fas fa-truck-loading me-1"></i> Đã hoàn thiện, chờ giao hàng
+        </span>
     @break
 
     @case('cancelled')
-        <span class="badge rounded-pill bg-danger">Cancelled</span>
+        <span class="badge bg-danger rounded-pill">
+            <i class="fas fa-times-circle me-1"></i> Đã hủy
+        </span>
     @break
 @endswitch

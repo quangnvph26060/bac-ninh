@@ -57,6 +57,16 @@ const columns = [
         title: "hợp đồng",
         searchable: false,
         orderable: false,
+        render: function (data) {
+            switch (data) {
+                case "full-time":
+                    return "Toàn thời gian";
+                case "part-time":
+                    return "Bán thời gian";
+                default:
+                    return "Thử việc";
+            }
+        },
     },
     {
         data: "status",
