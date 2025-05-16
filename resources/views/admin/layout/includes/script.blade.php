@@ -19,7 +19,7 @@
 <script src="{{ asset('backend/assets/js/setting-demo.js') }}"></script>
 <script src="{{ asset('backend/assets/js/setting-demo2.js') }}"></script>
 <script src="{{ asset('backend/library/ckeditor/ckeditor.js') }}"></script>
-<script src="{{ asset('backend/assets/js/helper.js') }}"></script>
+<script src="{{ asset('backend/assets/js/helper.js') }}?v={{ filemtime(public_path('backend/assets/js/helper.js')) }}"></script>
 
 
 <script>
