@@ -73,7 +73,7 @@ class ProductController extends Controller
 
         $payload = $request->validated();
         $response = $this->productService->store($payload);
-        return handleResponse($response['message'], $response['success'], $response['code']);
+        return handleResponse($response['message'], $response['success'], $response['code'], [], false);
     }
 
     public function edit(string $id)
@@ -101,7 +101,7 @@ class ProductController extends Controller
 
         $payload = $request->validated();
         $response = $this->productService->update($id, $payload);
-        return handleResponse($response['message'], $response['success'], $response['code']);
+        return handleResponse($response['message'], $response['success'], $response['code'], [], false);
     }
 
     public function import(Request $request)
@@ -144,5 +144,39 @@ class ProductController extends Controller
     public function getValueByAttributeId($attributeId)
     {
         return $this->attributeService->getValueByAttributeId($attributeId);
+    }
+
+    /**
+     * Tìm kiếm sản phẩm dựa trên query.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search(Request $request)
+    {
+        // Lấy query từ request
+        $query = $request->get('query');
+        $page = $request->get('page', 1); // Mặc định trang là 1
+        $perPage = $request->get('per_page', 10); // Mặc định 10 sản phẩm mỗi trang
+
+        // Tìm kiếm sản phẩm theo tên
+        $products = Product::query()->select('id', 'name', 'image')->where('name', 'like', '%' . $query . '%')
+            ->paginate($perPage); // Phân trang kết quả
+
+        $formattedProducts = collect($products->items())->map(function ($product) {
+            $product->image = showImage($product->image);
+            return $product;
+        });
+
+        // Trả về kết quả tìm kiếm dạng JSON, bao gồm dữ liệu sản phẩm và phân trang
+        return response()->json([
+            'data' => $formattedProducts,
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'total_pages' => $products->lastPage(),
+                'prev_page_url' => $products->previousPageUrl(),
+                'next_page_url' => $products->nextPageUrl(),
+            ],
+        ]);
     }
 }

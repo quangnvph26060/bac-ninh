@@ -4,7 +4,7 @@
 <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 
 <head>
-    <title>Login</title>
+    <title>Quên mật khẩu</title>
     <!-- css -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -14,9 +14,11 @@
     <link rel="stylesheet" href="{{ asset('backend/auth/assets/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('backend/auth/assets/css/slick.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
     <link rel="stylesheet" type="text/css" href="{{ asset('backend/auth/assets/css/style.css') }}">
+
+    <link rel="stylesheet" href="{{ asset('global/css/toastr.css') }}">
 
     <link rel="icon" href="{{ asset('backend/auth/assets/images/cropped-favicon-sgomedia-32x32.png') }}"
         type="image/x-icon">
@@ -222,79 +224,58 @@
                     </figure>
 
                     <div class="login_form">
-                        <form method="post" accept-charset="utf-8" id="form-login" action="">
+                        <form method="post" accept-charset="utf-8" id="form-login">
                             @csrf
-
                             <div class="form_group" style="display: block;">
                                 <label for="email" class="form-lable fw-bold">Email</label>
                                 <div class="list_group">
-                                    <input type="text" name="email" autocomplete="off" required=""
-                                        placeholder="Địa chỉ Email" id="email" value="{{ old('email') }}">
-                                    <figure class="feild_icon"><img
-                                            src="{{ asset('backend/auth/assets/images/login_user_icon.png') }}">
+                                    <input type="text" name="email" autocomplete="off" placeholder="Địa chỉ Email"
+                                        id="email">
+                                    <figure class="feild_icon">
+                                        <img src="{{ asset('backend/auth/assets/images/login_user_icon.png') }}">
                                     </figure>
-                                    @error('email')
-                                        <small class="text-danger mb-2">{{ $message }}</small>
-                                    @enderror
                                 </div>
 
-                                <label for="password" class="form-lable fw-bold">Mật khẩu</label>
+                                <label for="password" class="form-lable fw-bold">Mật khẩu mới</label>
                                 <div class="list_group">
-                                    <input type="password" name="password" autocomplete="off" required=""
-                                        placeholder="Password" id="password" value="{{ old('password') }}">
+                                    <input type="text" name="new_password" autocomplete="off" placeholder="Mật khẩu "
+                                        id="password">
                                     <figure class="feild_icon">
                                         <img src="{{ asset('backend/auth/assets/images/login_padlock_icon.png') }}">
                                     </figure>
-                                    <i class="fa-solid fa-eye toggle-password"
-                                        style="cursor:pointer; position:absolute; right:10px; top:50%; transform:translateY(-50%);"></i>
-                                    @error('password')
-                                        <small class="text-danger mb-2">{{ $message }}</small>
-                                    @enderror
                                 </div>
-
-                                <div class="form-group">
-                                    <div class="form-check my-3">
-                                        <input class="form-check-input" name="remember" type="checkbox" id="remember">
-                                        <label class="form-check-label" for="remember">
-                                            Lưu mật khẩu
-                                        </label>
-                                    </div>
-                                </div>
-
-                                @error('g-recaptcha-response')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
 
                                 <div class="btn">
                                     <button type="submit" name="button"
                                         class="loginButton loginButtonGg remove-msg before-login disabled_button"
-                                        id="submitBtn">Đăng nhập</button>
+                                        id="submitBtn">Xác nhận</button>
                                 </div>
+
+                                <p style="font-size: 13px; color: #999; text-align:center; margin-top: 10px;">
+                                    Mật khẩu mới sẽ có hiệu lực sau khi được quản trị viên kiểm tra, xác minh và phê
+                                    duyệt.
+                                </p>
                             </div>
-
                         </form>
-                        <div class="create_forget_acc" style="display: flex;justify-content: end;">
-                            <a href="{{ route('admin.forgot-password-form') }}" class="btn_login remove-msg forgot-pass"
-                                style="margin-bottom: 15px;" id="forgot-password">Quên mật khẩu?</a>
+                        <div class="create_forget_acc d-flex forgot-pass mt-3">
+                            <p class="text-dark">Bạn đã có tài khoản? <a href="{{ route('admin.login') }}"
+                                    class=" remove-msg " id="forgot-password">
+                                    Quay lại</a></p>
                         </div>
-
                     </div>
                 </div>
             </div>
-
-
         </div>
     </div><!-- end content -->
 
     <!-- js -->
+    <!-- jQuery phải đứng TRƯỚC tất cả -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.marquee/1.5.0/jquery.marquee.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.pause/0.2/jquery.pause.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <!-- Bootstrap (bản 5 vẫn chạy ổn với Notify) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/6.0.0-beta1/js/tempus-dominus.min.js">
-    </script>
+
+    <script src="{{ asset('global/js/toastr.js') }}"></script>
+
 </body>
 
 
@@ -304,66 +285,27 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
-        $('.toggle-password').click(function() {
-            var input = $('#password');
-            var icon = $(this);
-            if (input.attr('type') === 'password') {
-                input.attr('type', 'text');
-                icon.removeClass('fa-eye').addClass('fa-eye-slash');
-            } else {
-                input.attr('type', 'password');
-                icon.removeClass('fa-eye-slash').addClass('fa-eye');
-            }
-        });
-
-        $(document).on('click', '.remove-msg', function(e) {
-            $('.message').text('');
-        });
-        $(document).on('click', '.forgot-pass', function(e) {
-            $('#form-forgot-pass').find('.form_group').removeAttr('style');
-            if ($('#form-forgot-pass').find('.form_group').hasClass('active')) {
-                $('#form-forgot-pass').find('.form_group').removeClass('active');
-            }
-            $('#form-login').addClass('hidden');
-            $('.create_forget_acc').addClass('hidden');
-            $('.other_login').addClass('hidden');
-        });
-        $(document).on('click', '.btn-back-login', function(e) {
-            $('#form-forgot-pass').find('.form_group').addClass('active');
-            $('#form-login').removeClass('hidden');
-            $('.create_forget_acc').removeClass('hidden');
-            $('.other_login').removeClass('hidden');
-        });
-        if (window.location.pathname == "/forgot-password-navi") {
-            $(document).on('click', '.btn-back-login', function(e) {
-                $('#form-login').find('.form_group').removeAttr('style');
-                $('#form-forgot-pass').find('.form_group').removeAttr('style');
-                $('#form-forgot-pass').find('.form_group').addClass('active');
-                $('#form-login').removeClass('hidden');
-                $('.create_forget_acc').removeAttr('style');
-                $('.other_login').removeAttr('style');
-            });
-        }
-
-        $(document).on('click', '.loginButtonGg', function(e) {
+        $('#form-login').on('submit', function(e) {
             e.preventDefault();
-            jQuery(this).attr('disabled', true);
-            jQuery(this).addClass('disabled_button');
-            var form = document.getElementById('form-login');
-            form.submit();
-        });
 
-        $(document).on('click', '.forgotPasswordButton', function(e) {
-            e.preventDefault();
-            jQuery('.loginButton').attr('disabled', true);
-            jQuery('.loginButton').addClass('disabled_button');
-            var form = document.getElementById('form-forgot-pass');
-            form.submit();
-        });
+            let formData = new FormData(this)
+
+            formData.append('_token', '{{ csrf_token() }}');
+
+            $.ajax({
+                url: window.location.href,
+                method: "POST",
+                processData: false, // Quan trọng khi dùng FormData
+                contentType: false,
+                data: formData,
+                success: function(response) {
+                    datgin.success(response.message)
+                    $('#form-login').trigger('reset');
+                },
+                error: function(xhr) {
+                    datgin.error(xhr.responseJSON.message)
+                }
+            })
+        })
     });
-
-    function onTurnstileLoad() {
-        jQuery('.loginButton').removeClass('disabled_button');
-        jQuery('.loginButton').attr('disabled', false);
-    }
 </script>

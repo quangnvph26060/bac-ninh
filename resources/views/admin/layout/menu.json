@@ -83,14 +83,28 @@
         ]
     },
     {
-        "title": "Phân quyền",
-        "icon": "fas fa-user-shield",
-        "id": "permissions",
+        "title": "Nhân viên",
+        "icon": "fas fa-id-badge",
+        "id": "employees",
         "children": [
             {
                 "title": "Quản lý nhân viên",
                 "url": "admin.employees.index"
             },
+            {
+                "title": "Yêu cầu đổi mật khẩu",
+                "url": "admin.password-change-request.index"
+            }
+        ],
+        "inRoutes": [
+            "admin.employees.index", "admin.roles.index", "admin.permissions.index", "admin.activity.log.history"
+        ]
+    },
+    {
+        "title": "Phân quyền",
+        "icon": "fas fa-user-shield",
+        "id": "permissions",
+        "children": [
             {
                 "title": "Quản lý vai trò",
                 "url": "admin.roles.index"

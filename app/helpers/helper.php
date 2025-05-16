@@ -68,7 +68,6 @@ if (!function_exists('uploadImages')) {
 
                 // Resize nếu $resize = true, giữ tỷ lệ
                 if ($resize) {
-                    logger("Before resize: " . $img->width() . "x" . $img->height());
                     $img->resize($width, $height, function ($constraint) {
                         $constraint->aspectRatio();
                         $constraint->upsize(); // Không phóng to ảnh nhỏ
