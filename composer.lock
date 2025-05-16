@@ -126,6 +126,7 @@
         },
         {
             "name": "aws/aws-sdk-php",
+
             "version": "3.343.8",
             "source": {
                 "type": "git",
