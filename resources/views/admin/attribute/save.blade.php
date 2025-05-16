@@ -52,7 +52,7 @@
                                 </thead>
 
                                 <tbody>
-                                    @foreach ($attribute->values as $value)
+                                    @foreach ($attribute->values ?? [] as $value)
                                         <tr>
                                             <td width="5%">{{ $loop->iteration }}</td>
                                             <td><input type="text" name="values[{{ $value->id }}][value]"

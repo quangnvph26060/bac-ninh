@@ -23,21 +23,21 @@ class PermissionController extends Controller
 
             return DataTables::of($employees)
                 ->editColumn('created_at', fn($row) => $row->created_at->format('d-m-Y H:i'))
-                ->editColumn(
-                    'operations',
-                    fn($row) =>
-                    "
-                    <button data-id='$row->id'
-                        class='btn btn-primary btn-sm table-actions btn-operation-edit'>
-                        <i class='ti ti-edit'></i>
-                    </button>
-                    <button data-id='$row->id'
-                        class='btn btn-danger btn-sm table-actions btn-operation-destroy'>
-                        <i class='ti ti-trash'></i>
-                    </button>
-                "
-                )
-                ->rawColumns(['operations'])
+                // ->editColumn(
+                //     'operations',
+                //     fn($row) =>
+                //     "
+                //     <button data-id='$row->id'
+                //         class='btn btn-primary btn-sm table-actions btn-operation-edit'>
+                //         <i class='ti ti-edit'></i>
+                //     </button>
+                //     <button data-id='$row->id'
+                //         class='btn btn-danger btn-sm table-actions btn-operation-destroy'>
+                //         <i class='ti ti-trash'></i>
+                //     </button>
+                // "
+                // )
+                // ->rawColumns(['operations'])
                 ->make(true);
         }
         return view('admin.permission.index');

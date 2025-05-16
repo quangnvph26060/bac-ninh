@@ -12,6 +12,8 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
 use App\Models\State;
+use App\Models\User;
+use App\Models\Wallet;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,18 +23,23 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $status = $request->status;
+        $payment_status = $request->payment_status;
         $search = $request->search;
         $dateRange = $request->date_range;
         $perPage = $request->input('per_page', 10);
 
         $query = Order::query()->where('user_id', auth()->id())->with(['user', 'orderItems']);
 
-        if ($status && $status !== 'all') {
+        if ($status) {
             $query->where('status', $status);
         }
 
+        if ($payment_status) {
+            $query->where('payment_status', $payment_status);
+        }
+
         if ($search) {
-            $query->where('order_code', 'like', '%' . $search . '%'); // 'code' là mã đơn hàng
+            $query->where('order_code', 'like', '%' . $search . '%');
         }
 
         if ($dateRange) {
@@ -42,7 +49,7 @@ class OrderController extends Controller
             $query->whereBetween('created_at', [$start, $end]);
         }
 
-        $orders = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        $orders = $query->orderBy('updated_at', 'desc')->paginate($perPage);
 
         if ($request->ajax()) {
             $html = view('frontend.app.order.order-table', compact('orders'))->render();
@@ -51,13 +58,68 @@ class OrderController extends Controller
             ]);
         }
 
-        $totalPendingOrders = Order::where('status', 'pending')->count();
+        return view('frontend.app.order.index', compact('orders'));
+    }
 
-        return view('frontend.app.order.index', compact('orders', 'totalPendingOrders'));
+    public function show(string $code)
+    {
+        $order = Order::query()->where('order_code', $code)->with(['orderItems.productVariant.attributeValues'])->firstOrFail();
+        return view('frontend.app.order.show', compact('order'));
+    }
+
+    public function payment(Request $request)
+    {
+        $credentials = $request->validate([
+            'order_code' => 'required|exists:orders,order_code',
+        ]);
+
+        $order = Order::query()->where(['order_code' => $credentials['order_code'], 'user_id' => auth()->id()])->first();
+
+        if (!$order) {
+            return errorResponse("Order not found!", true);
+        }
+
+        if ($order->payment_status === "completed" || $order->status !== "draft") {
+            return errorResponse("Order has already been paid!", true);
+        }
+
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => auth()->id()],
+            ['balance' => 0]
+        );
+
+        if ($order->total > $wallet->balance) {
+            return errorResponse("Insufficient balance, please top up to continue!", true);
+        }
+
+        try {
+            DB::beginTransaction();
+            $order->payment_status = "completed";
+            $order->status = "pending";
+            $order->payment_method = "bank_transfer";
+
+            $order->save();
+
+            $this->paymentViaWallet($order, $wallet);
+
+            DB::commit();
+
+            return successResponse(
+                "Order payment successful.",
+                ['amount' => formatPrice($wallet->balance)],
+                200,
+                true
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+            logger("error: " . $e->getMessage());
+            return errorResponse('An error occurred during payment!', 400);
+        }
     }
 
     public function create(Request $request)
     {
+
         $perPage = $request->per_page ?? 10;
         $searchText = $request->search_text;
 
@@ -74,11 +136,10 @@ class OrderController extends Controller
             return view('frontend.app.order._product_list', compact('products'))->render();
         }
 
-        $shippingMethods = ShippingMethod::query()->latest()->get();
-
+        // $shippingMethods = ShippingMethod::query()->latest()->get();
         $countries = Country::query()->orderBy('name', 'asc')->get();
 
-        return view('frontend.app.order.create', compact('products', 'countries', 'shippingMethods'));
+        return view('frontend.app.order.create', compact('products', 'countries'));
     }
 
     public function applyCoupon(Request $request)
@@ -88,25 +149,38 @@ class OrderController extends Controller
             'options' => 'required|array',
             'options.*.productId' => 'required|exists:products,id',
             'options.*.variant_id' => 'nullable|exists:product_variants,id',
+            'shipping' => 'required|string|in:standard_shipping,express_shipping,international_shipping',
         ]);
 
-        $coupon = Coupon::query()->with('products')->where('code', $request->coupon)->first();
+        $coupon = Coupon::query()->with(['products', 'users'])->where('code', $request->coupon)->first();
 
         if (!$this->isCouponValid($coupon)) {
-            return errorResponse("Mã giảm giá đã hết hiệu lực hoặc không tồn tại!", true);
+            return errorResponse("Coupon has expired or does not exist!", true);
         }
 
-        $shippingFee = $request->shipping;
+        if ($coupon->usage_limit > 0 && $coupon->users()->count() >= $coupon->usage_limit) {
+            return errorResponse("Coupon has expired, please choose another one!", true, 400);
+        }
+
+        if ($coupon->users()->where('user_id', auth()->guard('web')->id())->count() >= $coupon->usage_per_user) {
+            return errorResponse("You have reached the maximum usage limit for this coupon!", true, 400);
+        }
+
+        $shippingFee = 0;
+        $shippingMethod = $request->shipping;
         $items = $request->options;
+
+        $this->calculateShippingFee($shippingMethod, $items, $shippingFee);
 
         $productDetails = $this->getProductDetails($items);
         $subTotal = $this->calculateSubTotal($productDetails);
 
-        // Tính giảm giá nếu có coupon
+        if ($coupon && $coupon->min_order_value >= $subTotal) return errorResponse("Giá trị đơn hàng chưa đáp ứng điều kiện mã giảm giá!", true, 400);
+
         $discountAmount = $this->calculateDiscount($coupon, $productDetails, $subTotal);
 
-        if ($discountAmount == false) {
-            return errorResponse("Các sản phẩm không đủ điều kiện áp dụng mã giảm giá này.", true);
+        if ($discountAmount === false) {
+            return errorResponse("Products do not meet the coupon requirements.", true);
         }
 
         $grandTotal = $this->calculateGrandTotal($subTotal, $discountAmount, $shippingFee);
@@ -127,6 +201,8 @@ class OrderController extends Controller
             $productId = $item['productId'];
             $qty = $item['qty'];
             $variantId = $item['variant_id'] ?? null;
+            $modelImage = $item['model_image'] ?? null;
+            $designImage = $item['design_image'] ?? null;
 
             if ($variantId) {
                 $variant = ProductVariant::find($variantId);
@@ -142,6 +218,8 @@ class OrderController extends Controller
                     'qty' => $qty,
                     'total' => $price * $qty,
                     'image' =>  $product->image, // Ảnh sản phẩm (ưu tiên ảnh của biến thể)
+                    'model_image' => $modelImage,
+                    'design_image' => $designImage,
                 ];
             } else {
                 $product = Product::find($productId);
@@ -157,6 +235,8 @@ class OrderController extends Controller
                     'qty' => $qty,
                     'total' => $price * $qty,
                     'image' => $product->image, // Ảnh sản phẩm
+                    'model_image' => $modelImage,
+                    'design_image' => $designImage,
                 ];
             }
         }
@@ -175,7 +255,6 @@ class OrderController extends Controller
         if ($coupon->start_date && !$coupon->end_date) {
             return $now->greaterThanOrEqualTo($coupon->start_date);
         }
-
         // Nếu có cả start_date và end_date => kiểm tra now nằm trong khoảng
         if ($coupon->start_date && $coupon->end_date) {
             $start = $coupon->start_date;
@@ -209,7 +288,7 @@ class OrderController extends Controller
             $discountAmount = $coupon->value;
 
             // Áp dụng giới hạn giảm nếu có
-            if ($coupon->max_discount && $discountAmount > $coupon->max_discount) {
+            if ($coupon->max_discount > 0 && $discountAmount > $coupon->max_discount) {
                 $discountAmount = $coupon->max_discount;
             }
         }
@@ -236,7 +315,7 @@ class OrderController extends Controller
             }
 
             // Áp dụng giới hạn giảm nếu có
-            if ($coupon->max_discount && $discountAmount > $coupon->max_discount) {
+            if ($coupon->max_discount > 0 && $discountAmount > $coupon->max_discount) {
                 $discountAmount = $coupon->max_discount;
             }
         }
@@ -247,7 +326,6 @@ class OrderController extends Controller
     // Hàm tính tổng tiền đơn hàng (grandTotal)
     private function calculateGrandTotal($subTotal, $discountAmount, $shippingFee)
     {
-        logger("$subTotal - $discountAmount + $shippingFee");
         return max(0, $subTotal - $discountAmount + $shippingFee);
     }
 
@@ -255,11 +333,11 @@ class OrderController extends Controller
     {
         $states = State::where('country_id', $country_id)->get(['id', 'name']);
         if (!$country = Country::query()->with('shippingMethods')->find($country_id)) {
-            $msg = "Quốc gia không hợp lệ!";
+            $msg = "Invalid country!";
         }
 
         if ($country->shippingMethods->isEmpty()) {
-            $msg = "Quốc gia {$country->name} không được hỗ trợ vận chuyển.";
+            $msg = "Shipping is not available for {$country->name}.";
         }
 
         $shippingMethods = $country->shippingMethods->map(fn($method) => [
@@ -287,7 +365,7 @@ class OrderController extends Controller
         $ids = $request->input('product_ids');
 
         $products = Product::query()
-            ->select('id', 'image', 'name', 'sku',  'type', 'sale_price', 'discount_price', 'stock', 'stock_status')
+            ->select('id', 'image', 'name', 'sku',  'type', 'sale_price', 'discount_price', 'discount_start', 'discount_end', 'stock', 'stock_status', 'design_width', 'design_height', 'design_ppi', 'design_format')
             ->whereIn('id', $ids)
             ->get();
 
@@ -315,6 +393,10 @@ class OrderController extends Controller
                     'name' => $product->name,
                     'attributes' => $attributesFormatted,
                     'type' => $product->type,
+                    'design_width' => $product->design_width,
+                    'design_height' => $product->design_height,
+                    'design_ppi' => $product->design_ppi,
+                    'design_format' => $product->design_format,
                 ];
             } else {
 
@@ -328,7 +410,11 @@ class OrderController extends Controller
                     'attributes' => [],
                     'price' => formatPrice($price),
                     'type' => $product->type,
-                    'sku' => $product->sku
+                    'sku' => $product->sku,
+                    'design_width' => $product->design_width,
+                    'design_height' => $product->design_height,
+                    'design_ppi' => $product->design_ppi,
+                    'design_format' => $product->design_format,
                 ];
             }
         }
@@ -344,13 +430,13 @@ class OrderController extends Controller
         $product = Product::find($productId);
 
         if (!$product) {
-            return response()->json(['message' => 'Không tìm thấy sản phẩm'], 404);
+            return response()->json(['message' => 'Product not found'], 404);
         }
 
         // Nếu là sản phẩm đơn giản
         if ($product->type === 'simple') {
             if ($product->stock <= 0 || $product->stock_status == 'out_of_stock') {
-                return response()->json(['message' => 'Số lượng trong kho không đủ!'], 400);
+                return response()->json(['message' => 'Insufficient stock!'], 400);
             }
 
             $price = isOnSale($product) ? $product->discount_price : $product->sale_price;
@@ -369,11 +455,11 @@ class OrderController extends Controller
             ->first();
 
         if (!$variant) {
-            return response()->json(['message' => 'Không tìm thấy biến thể phù hợp'], 404);
+            return response()->json(['message' => 'Variant not found'], 404);
         }
 
         if ($variant->stock <= 0 || $variant->stock_status == 'out_of_stock') {
-            return response()->json(['message' => 'Số lượng trong kho không đủ!'], 400);
+            return response()->json(['message' => 'Insufficient stock!'], 400);
         }
 
         $price = isOnSale($variant) ? $variant->discount_price : $variant->sale_price;
@@ -401,7 +487,7 @@ class OrderController extends Controller
         $product = Product::find($productId);
 
         if (!$product) {
-            return response()->json(['message' => 'Không tìm thấy sản phẩm'], 404);
+            return response()->json(['message' => 'Product not found'], 404);
         }
 
         // Kiểm tra nếu là sản phẩm dạng variant
@@ -409,7 +495,7 @@ class OrderController extends Controller
             $variant = ProductVariant::find($variantId);
 
             if (!$variant || $variant->product_id != $productId) {
-                return response()->json(['message' => 'Không tìm thấy biến thể phù hợp'], 404);
+                return response()->json(['message' => 'Variant not found'], 404);
             }
 
             $price = isOnSale($variant) ? $variant->discount_price : $variant->sale_price;
@@ -418,15 +504,15 @@ class OrderController extends Controller
             if ($variant->stock < $qty) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Số lượng trong kho không đủ!',
-                    'totalPrice' => number_format($price, 0, ',', '')
+                    'message' => 'Insufficient stock!',
+                    'totalPrice' => formatPrice($price)
                 ], 400);
             }
 
             return response()->json([
                 'success' => true,
                 'stock' => $variant->stock,
-                'totalPrice' => $price * $qty
+                'totalPrice' => formatPrice($price * $qty)
             ]);
         } else {
             // Sản phẩm không phải là variant, lấy giá và kiểm tra kho của sản phẩm chính
@@ -435,15 +521,15 @@ class OrderController extends Controller
             if ($product->stock < $qty) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Số lượng trong kho không đủ!',
-                    'totalPrice' => number_format($price, 0, ',', '')
+                    'message' => 'Insufficient stock!',
+                    'totalPrice' => formatPrice($price)
                 ], 400);
             }
 
             return response()->json([
                 'success' => true,
                 'stock' => $product->stock,
-                'totalPrice' => $price * $qty
+                'totalPrice' => formatPrice($price * $qty)
             ]);
         }
     }
@@ -459,15 +545,15 @@ class OrderController extends Controller
 
                 'orderInfo' => 'required|array',
                 'orderInfo.coupon' => 'nullable|string|max:255|exists:coupons,code',
-                'orderInfo.paymentMethod' => 'required|string|in:later,online', // tùy nếu bạn có 2 phương thức này
-                'orderInfo.shipping_method_id' => 'required|integer|exists:shipping_methods,id',
+                'orderInfo.paymentMethod' => 'required|string|in:later,wallet',
+                'orderInfo.shipping_method' => 'required|string|in:standard_shipping,express_shipping,international_shipping',
                 'orderInfo.first_name' => 'required|string|max:255',
                 'orderInfo.last_name' => 'required|string|max:255',
                 'orderInfo.email' => 'required|email|max:255',
                 'orderInfo.phone_number' => 'required|string|max:20',
-                'orderInfo.country_id' => 'required|integer|exists:countries,id',
-                'orderInfo.state_id' => 'required|integer|exists:states,id',
-                'orderInfo.city_id' => 'required|integer|exists:cities,id',
+                'orderInfo.country' => 'required|string|max:255',
+                'orderInfo.state' => 'required|string|max:255',
+                'orderInfo.city' => 'required|string|max:255',
                 'orderInfo.zip_code' => 'required|string|max:20',
                 'orderInfo.shipping_address' => 'required|string|max:500',
                 'orderInfo.note' => 'nullable|string|max:255',
@@ -475,25 +561,25 @@ class OrderController extends Controller
             ],
             __('request.messages'),
             [
-                'products' => 'sản phẩm',
-                'products.*.productId' => 'ID sản phẩm',
-                'products.*.qty' => 'số lượng',
-                'products.*.variant_id' => 'biến thể sản phẩm',
+                'products' => 'products',
+                'products.*.productId' => 'product ID',
+                'products.*.qty' => 'quantity',
+                'products.*.variant_id' => 'product variant',
 
-                'orderInfo.coupon' => 'mã giảm giá',
-                'orderInfo.paymentMethod' => 'phương thức thanh toán',
-                'orderInfo.shipping_method_id' => 'phương thức giao hàng',
-                'orderInfo.first_name' => 'họ',
-                'orderInfo.last_name' => 'tên',
+                'orderInfo.coupon' => 'coupon',
+                'orderInfo.paymentMethod' => 'payment method',
+                'orderInfo.shipping_method' => 'shipping method',
+                'orderInfo.first_name' => 'first name',
+                'orderInfo.last_name' => 'last name',
                 'orderInfo.email' => 'email',
-                'orderInfo.phone_number' => 'số điện thoại',
-                'orderInfo.country_id' => 'quốc gia',
-                'orderInfo.state_id' => 'tỉnh/thành phố',
-                'orderInfo.city_id' => 'quận/huyện',
-                'orderInfo.zip_code' => 'mã bưu điện',
-                'orderInfo.shipping_address' => 'địa chỉ giao hàng',
-                'orderInfo.orderName' => 'Tên đơn hàng',
-                'orderInfo.note' => 'Ghi chú'
+                'orderInfo.phone_number' => 'phone number',
+                'orderInfo.country' => 'country',
+                'orderInfo.state' => 'state',
+                'orderInfo.city' => 'city',
+                'orderInfo.zip_code' => 'zip code',
+                'orderInfo.shipping_address' => 'shipping address',
+                'orderInfo.orderName' => 'Order Name',
+                'orderInfo.note' => 'Note'
             ]
         );
 
@@ -501,46 +587,104 @@ class OrderController extends Controller
             DB::beginTransaction();
 
             // Lấy thông tin vận chuyển
-            $shippingDetails = $this->getShippingDetails($request['orderInfo']);
-            extract($shippingDetails);
+            $shippingAddress = $this->getShippingDetails($request['orderInfo']);
+
+            $shippingFee = 0;
+            $shippingMethod = $request['orderInfo']['shipping_method'];
+
+            $this->calculateShippingFee($shippingMethod, $request['products'], $shippingFee);
 
             // Kiểm tra mã giảm giá nếu có
             $coupon = $this->checkCoupon($request['orderInfo']['coupon'] ?? null);
 
-            if ($coupon === false) return errorResponse("Mã giảm giá đã hết hiệu lực hoặc không tồn tại!", true);
+            if ($coupon === false) return errorResponse("Coupon has expired or does not exist!", true);
 
             // Lấy chi tiết sản phẩm và tính toán tổng đơn hàng
             $productDetails = $this->getProductDetails($request['products']);
+
             $subTotal = $this->calculateSubTotal($productDetails);
             $totals = $this->calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee);
+            if (isset($totals['success']) && $totals['success'] === false) return errorResponse($totals['message'], true, $totals['code']);
             extract($totals);
 
             // Tạo đơn hàng và lưu các sản phẩm
-            $order = $this->storeOrderDetails($request['orderInfo'], $grandTotal, $discountAmount, $shippingFee);
+            $order = $this->storeOrderDetails($request['orderInfo'], $grandTotal, $discountAmount, $shippingFee, $shippingAddress);
             $this->storeOrderItems($order, $productDetails);
+            $this->couponUser($coupon, $order);
+
+            if ($request['orderInfo']['paymentMethod'] === "wallet") {
+                $wallet = Wallet::firstOrCreate(
+                    ['user_id' => auth()->id()],
+                    ['balance' => 0]
+                );
+
+                if ($wallet->balance < $grandTotal) return errorResponse("Insufficient balance, please top up to continue payment", true, 400);
+
+                $this->paymentViaWallet($order, $wallet);
+            }
 
             DB::commit();
 
             // OrderCreated.php (Event)
             // UpdateStockOnOrderCreated (Listener)
 
-            return handleResponse('Tạo đơn hàng thành công.', 'success', 201);
+            return handleResponse('Order created successfully.', 'success', 201);
         } catch (\Exception $e) {
-            logger($e->getMessage());
+            logger("message: " . $e->getMessage() . "line: " . $e->getLine());
 
             DB::rollBack();
-            return errorResponse('Đã có lỗi xảy ra trong quá trình tạo đơn hàng, vui lòng quay lại sau!', true);
+            return errorResponse('An error occurred while creating the order, please try again later!', true);
+        }
+    }
+
+    private function paymentViaWallet($order, $wallet, string $type = 'withdraw')
+    {
+        $amount = $order->total;
+        $note = ($type === "withdraw" ? "ORDER PAYMENT" : "REFUND THE ORDER") . " #{$order->order_code}";
+
+        $balanceBefore = $wallet->balance;
+
+        if ($type === 'withdraw') {
+            $wallet->decrement('balance', $amount);
+        } elseif ($type === 'deposit') {
+            $wallet->increment('balance', $amount);
+        } else {
+            return errorResponse("Invalid transaction type!", true, 400);
+        }
+
+        $balanceAfter = $wallet->fresh()->balance;
+
+        $wallet->transactions()->create([
+            'code' => generateTransactionCode(),
+            'amount' => $amount,
+            'note' => $note,
+            'balance_before' => $balanceBefore,
+            'balance_after' => $balanceAfter,
+            'type' => $type
+        ]);
+    }
+
+    public function couponUser($coupon, $order)
+    {
+        if (!empty($coupon)) {
+            $user = User::query()->findOrFail(auth()->guard('web')->id());
+
+            DB::table('coupon_user_usages')->insert([
+                'user_id'    => $user->id,
+                'coupon_id'  => $coupon->id,
+                'order_id' => $order->id,
+                'usage_time' => now(),
+            ]);
         }
     }
 
     private function checkCoupon($coupon)
     {
         if (!empty($coupon)) {
-            $coupon = Coupon::query()->with('products')->where('code', $coupon)->first();
+            $coupon = Coupon::query()->with(['products', 'users'])->where('code', $coupon)->lockForUpdate()->first();
 
-            if (!$this->isCouponValid($coupon)) {
-                return false;
-            }
+            if ($this->isCouponValid($coupon)) return $coupon;
+            return null;
         }
 
         return null;
@@ -548,45 +692,36 @@ class OrderController extends Controller
 
     private function getShippingDetails($orderInfo)
     {
-        $country = Country::findOrFail($orderInfo['country_id']);
-        $state = State::query()->find($orderInfo['state_id'])->name;
-        $city = City::query()->find($orderInfo['city_id'])->name;
-
-        $shippingMethod = $country->shippingMethods()
-            ->where('shipping_method_id', $orderInfo['shipping_method_id'])
-            ->first();
-
-        $shippingFee = $shippingMethod ? $shippingMethod->pivot->fee : 0;
-
-        return compact('country', 'state', 'city', 'shippingFee');
+        return "{$orderInfo['shipping_address']}, {$orderInfo['city']}, {$orderInfo['state']}, {$orderInfo['country']}";
     }
 
     private function calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee)
     {
-        // Tính giảm giá nếu có coupon
+
         $discountAmount = $this->calculateDiscount($coupon ?? null, $productDetails, $subTotal);
 
-        if ($discountAmount === false) {
-            return errorResponse("Các sản phẩm không đủ điều kiện áp dụng mã giảm giá này.", true);
-        }
+        if ($discountAmount === false) return errorResponse("Các sản phẩm không đủ điều kiện áp dụng mã giảm giá này!", false, 400);
 
         $grandTotal = $this->calculateGrandTotal($subTotal, $discountAmount, $shippingFee);
 
         return compact('subTotal', 'discountAmount', 'grandTotal');
     }
 
-    private function storeOrderDetails($orderInfo, $grandTotal, $discountAmount, $shippingFee)
+    private function storeOrderDetails($orderInfo, $grandTotal, $discountAmount, $shippingFee, $shippingAddress)
     {
         return Order::create(
             [
                 'user_id' => auth()->id(),
+                'full_name' => $orderInfo['first_name'] . ' ' . $orderInfo['last_name'],
+                'email' => $orderInfo['email'],
+                'zip_code' => $orderInfo['zip_code'],
                 'order_code' => generateOrderCode(),
                 'order_name' => $orderInfo['orderName'],
                 'status' => $orderInfo['paymentMethod'] !== 'later' ? 'pending' : 'draft',
                 'payment_status' => $orderInfo['paymentMethod'] !== 'later' ? 'completed' : 'pending',
                 'payment_method' => $orderInfo['paymentMethod'] !== 'later' ? 'bank_transfer' : null,
                 'phone_number' => $orderInfo['phone_number'],
-                'shipping_address' => "{$orderInfo['shipping_address']} {$orderInfo['city_id']} {$orderInfo['state_id']} {$orderInfo['country_id']}",
+                'shipping_address' => $shippingAddress,
                 'note' => $orderInfo['note'],
                 'total' => $grandTotal,
                 'discount' => $discountAmount,
@@ -597,52 +732,128 @@ class OrderController extends Controller
 
     private function storeOrderItems($order, $productDetails)
     {
-        foreach ($productDetails as $product) {
-            $order->orderItems()->create([
-                'product_id' => $product['id'],
-                'product_variant_id' => $product['variant_id'] ?? null,
-                'product_name' => $product['name'],
-                'quantity' => $product['qty'],
-                'price' => $product['price'],
-                'original_price' => $product['original_price'],
-                'image' => $product['image'],
-            ]);
+        // Mảng để lưu lại các hình ảnh đã upload thành công
+        $uploadedImages = [];
+
+        try {
+            foreach ($productDetails as $index => $product) {
+                // Lấy đường dẫn ảnh cho từng sản phẩm
+                $modelImagePath = null;
+                $designImagePath = null;
+
+                if (isset($product['model_image']) && $product['model_image'] instanceof \Illuminate\Http\UploadedFile) {
+                    $modelImagePath = uploadImages("products.$index.model_image", 'model_images', false, 150, 150, false);
+                    $uploadedImages[] = $modelImagePath;
+                }
+
+                if (isset($product['design_image']) && $product['design_image'] instanceof \Illuminate\Http\UploadedFile) {
+                    $designImagePath = uploadImages("products.$index.design_image", 'design_images', false, 150, 150, false);
+                    $uploadedImages[] = $designImagePath;
+                }
+
+                $order->orderItems()->create([
+                    'product_id' => $product['id'],
+                    'product_variant_id' => $product['variant_id'] ?? null,
+                    'product_name' => $product['name'],
+                    'quantity' => $product['qty'],
+                    'price' => $product['price'],
+                    'original_price' => $product['original_price'],
+                    'image' => $product['image'],
+                    'model_image' => $modelImagePath,
+                    'design_image' => $designImagePath,
+                ]);
+            }
+        } catch (\Exception $e) {
+            logger("Lỗi xảy ra khi lưu sản phẩm: " . $e->getMessage());
+
+            // Nếu lỗi xảy ra, xóa tất cả ảnh đã upload
+            foreach ($uploadedImages as $path) {
+                deleteImage($path);
+            }
+
+            throw new \Exception("Đã có lỗi xảy ra khi lưu sản phẩm. Ảnh đã được rollback.");
         }
     }
 
-    private function processWalletPayment(Order $order)
+
+    public function orderCancel(Request $request)
     {
-        // Logic thanh toán qua ví (giảm số dư ví của người dùng)
-        $user = $order->user;
+        $credentials = $request->validate([
+            'code' => 'required|exists:orders,order_code',
+            'reason' => 'required|string|max:400'
+        ]);
 
-        if ($user->wallet_balance >= $order->total) {
-            $user->wallet_balance -= $order->total;
-            $user->save();
+        $order = Order::query()->where('order_code', $credentials['code'])->firstOrFail();
 
-            // Cập nhật trạng thái đơn hàng
-            $order->status = 'paid';
-            $order->save();
+        if ($order->status !== "pending") return errorResponse("Your order cannot be cancelled.", true, 400);
 
-            return response()->json([
-                'message' => 'Đơn hàng đã được thanh toán qua ví thành công!',
-                'order' => $order
-            ]);
-        }
-
-        return response()->json([
-            'message' => 'Số dư ví không đủ để thanh toán!',
-        ], 400);
-    }
-
-    private function processCashOnDelivery(Order $order)
-    {
-        // Logic thanh toán sau (COD)
-        $order->status = 'awaiting_payment';
+        $order->reason = $credentials['reason'];
+        $order->status = "cancelled";
+        $order->payment_status = "refunded";
         $order->save();
 
-        return response()->json([
-            'message' => 'Đơn hàng đã được tạo thành công, sẽ thanh toán khi nhận hàng!',
-            'order' => $order
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => auth()->id()],
+            ['balance' => 0]
+        );
+
+        $this->paymentViaWallet($order, $wallet, 'deposit');
+
+        return successResponse("Order cancelled successfully.", ['wallet' => formatPrice($wallet->balance)], 200, true);
+    }
+
+    public function getShippingFee(Request $request)
+    {
+        $request->validate([
+            'shipping_method' => 'required|in:standard_shipping,express_shipping,international_shipping',
+            'products' => 'required|array|min:1',
         ]);
+
+        $sum = 0;
+        $shippingMethod = $request->shipping_method;
+
+        // Gọi hàm tính phí vận chuyển
+        $error = $this->calculateShippingFee($shippingMethod, $request->products, $sum);
+
+        // Nếu có lỗi, trả về JSON error
+        if ($error) {
+            return response()->json([
+                'success' => false,
+                'message' => $error
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'shipping_fee' => $sum
+        ]);
+    }
+
+    private function calculateShippingFee($shippingMethod, $products, &$sum)
+    {
+        foreach ($products as $product) {
+            if (isset($product['variant_id'])) {
+                $variant = ProductVariant::query()
+                    ->where('product_id', $product['productId'])
+                    ->where('id', $product['variant_id'])
+                    ->first();
+
+                if (!$variant) {
+                    return "Không tìm thấy biến thể sản phẩm với ID: {$product['variant_id']}";
+                }
+
+                $sum += $variant->$shippingMethod * $product['qty'];
+            } else {
+                $productModel = Product::query()->find($product['productId']);
+
+                if (!$productModel) {
+                    return "Không tìm thấy sản phẩm với ID: {$product['productId']}";
+                }
+
+                $sum += $productModel->$shippingMethod * $product['qty'];
+            }
+        }
+
+        return null; // Không có lỗi
     }
 }

@@ -37,9 +37,9 @@ class ProductRequest extends FormRequest
                 $this->input('type') == 'variant' ? 'nullable' : 'required',
                 'numeric',
                 'min:1',
-                'regex:/^\d+(\.\d{1,2})?$/'
+                'regex:/^\d*(\.\d{1,2})?$/'
             ],  // Sale price should be a number and can be null, but if present, it should be >= 0
-            'discount_price' => 'nullable|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/',  // Discount price should be a number and can be null, but if present, it should be >= 0
+            'discount_price' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',  // Discount price should be a number and can be null, but if present, it should be >= 0
             'discount_start' => 'nullable|date_format:d-m-Y H:i',  // Discount start date, optional but if present, it should be in 'd-m-Y' format
             'discount_end' => 'nullable|date_format:d-m-Y H:i|after_or_equal:discount_start',  // Discount end date, optional but if present, it should be in 'd-m-Y' format
             'stock' => 'nullable|integer|min:0',  // Stock should be a number and can be null, but if present, it should be >= 0
@@ -48,14 +48,16 @@ class ProductRequest extends FormRequest
             'sku' => 'nullable|string|max:255',  // SKU is optional, but if provided, it should be a string
             'variants' => ($this->input('type') == 'variant' ? 'required' : 'nullable') . '|array',  // Variants are optional but should be an array if present
             'variants.*.sku' => 'required|string|max:255',  // Each variant must have a SKU (string)
-            'variants.*.sale_price' => 'required|numeric|min:1|regex:/^\d+(\.\d{1,2})?$/',  // Each variant must have a sale price (numeric, >= 0)
+            'variants.*.sale_price' => 'required|numeric|min:1|regex:/^\d*(\.\d{1,2})?$/',  // Each variant must have a sale price (numeric, >= 0)
             'variants.*.product_unit' => 'nullable|string|min:0|max:100',  // Each variant must have a sale price (numeric, >= 0)
-            'variants.*.discount_price' => 'nullable|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/',  // Discount price for each variant (optional but should be numeric if provided)
+            'variants.*.discount_price' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',  // Discount price for each variant (optional but should be numeric if provided)
             'variants.*.discount_start' => 'nullable|date_format:d-m-Y',  // Discount start date for each variant
             'variants.*.discount_end' => 'nullable|date_format:d-m-Y|after_or_equal:variants.*.discount_start',  // Discount end date for each variant
-            'variants.*.stock_status' => 'required|string|in:out_of_stock,waiting_for_goods,in_stock',  // Variant stock status should be one of the defined values
             'variants.*.stock' => 'nullable|numeric|min:0',  // Variant stock status should be one of the defined values
             'variants.*.status' => 'nullable|numeric|in:1',  // Variant stock status should be one of the defined values
+            'variants.*.standard_shipping' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
+            'variants.*.express_shipping' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
+            'variants.*.international_shipping' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
             'cross_sell' => 'nullable',  // Cross-sell products are optional
             'status' => 'required|numeric|in:1,2',  // Status should be a boolean (1 or 0)
             'is_show_home' => 'nullable|boolean',  // Show on home page flag should be a boolean (1 or 0)
@@ -64,6 +66,13 @@ class ProductRequest extends FormRequest
             'tags' => 'nullable',  // Tags are optional but should be an array if provided
             'attributes.*' => 'nullable|array',  // Attribute IDs are optional but should be an array if provided
             'attributes.*.*' => 'required',  // Each attribute ID must exist in the attributes table
+            'standard_shipping' => 'required|regex:/^\d*(\.\d{1,2})?$/',
+            'express_shipping' => 'nullable|regex:/^\d*(\.\d{1,2})?$/',
+            'international_shipping' => 'nullable|regex:/^\d*(\.\d{1,2})?$/',
+            'design_width' => 'required|integer|min:0',
+            'design_height' => 'required|integer|min:0',
+            'design_ppi' => 'required|integer|min:0',
+            'design_format' => 'required|string|in:jpg,png,gif,jpeg,webp',
         ];
     }
 
@@ -122,12 +131,22 @@ class ProductRequest extends FormRequest
             'variants.*.discount_start' => 'Ngày bắt đầu ưu đãi biến thể',
             'variants.*.discount_end' => 'Ngày kết thúc ưu đãi biến thể',
             'variants.*.stock_status' => 'Trạng thái tồn kho biến thể',
+            'variants.*.standard_shipping' => 'Vận chuyển tiêu chuẩn',
+            'variants.*.express_shipping' => 'Vận chuyển nhanh',
+            'variants.*.international_shipping' => 'Vận chuyển quốc tế',
             'cross_sell' => 'Sản phẩm bán kèm',
             'status' => 'Trạng thái',
             'is_show_home' => 'Hiển thị trên trang chủ',
             'category_id' => 'Danh mục sản phẩm',
             'brand_id' => 'Thương hiệu',
             'tags' => 'Tags',
+            'standard_shipping' => 'Vận chuyển tiêu chuẩn',
+            'express_shipping' => 'Vận chuyển nhanh',
+            'international_shipping' => 'Vận chuyển quốc tế',
+            'design_width' => 'Chiều rộng ảnh thiết kế',
+            'design_height' => 'Chiều cao ảnh thiết kế',
+            'design_ppi' => 'Độ phân giải ảnh thiết kế',
+            'design_format' => 'Định dạng ảnh thiết kế',
         ];
     }
 }

@@ -71,11 +71,7 @@
                 brand_id: {
                     title: 'Chọn thương hiệu',
                     data: @json($brands)
-                },
-                company_id: {
-                    title: 'Chọn nhà cung cấp',
-                    data: @json($companies)
-                },
+                }
             })
 
         })

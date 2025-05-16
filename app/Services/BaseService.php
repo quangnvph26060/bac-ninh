@@ -124,12 +124,16 @@ class BaseService
         return $query->get();
     }
 
-    public function findById(string $id, array $columns = ['*'], array $relations = [], array $wheres = [], array $order = [])
+    public function findById(string $id, array $columns = ['*'], array $relations = [], array $wheres = [], array $order = [], array $withCounts = [])
     {
         $query = $this->model->query();
 
         if (!empty($relations)) {
             $query->with($relations);
+        }
+
+        if (!empty($withCounts)) {
+            $query->withCount($withCounts);
         }
 
         foreach ($wheres as $condition) {
@@ -248,6 +252,14 @@ class BaseService
         foreach ($filters as $filter) {
             $query->when(!empty($conditions[$filter]), fn($q) => $q->where($filter, $conditions[$filter]));
         }
+
+        if (!empty($conditions['start_date']) && !empty($conditions['end_date'])) {
+            $startDate = $conditions['start_date'];
+            $endDate = $conditions['end_date'] . ' 23:59:59';
+
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
 
         if ($order) {
             $query->orderBy($order[0], $order[1]);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class BulkActionController extends Controller
 {
@@ -26,6 +27,10 @@ class BulkActionController extends Controller
         // Kiểm tra xem class có tồn tại hay không
         if (!class_exists($modelClass)) {
             return response()->json(['message' => 'Model không hợp lệ.'], 400);
+        }
+
+        if (Gate::denies('delete-model', $validatedData['model'])) {
+            return response()->json(['message' => 'Bạn không có quyền thực hiện thao tác này!'], 403);
         }
 
         try {

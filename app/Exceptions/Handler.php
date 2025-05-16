@@ -4,8 +4,11 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Log;
 use Throwable;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -48,6 +51,41 @@ class Handler extends ExceptionHandler
             return parent::render($request, $exception);
         }
 
+
+        if ($exception instanceof AuthorizationException) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->view('errors.403', [], 403);
+            }
+            return response()->view('errors.403', [], 403);
+        }
+
+        // Bắt các HttpException 403 khác
+        if ($exception instanceof HttpException && $exception->getStatusCode() === 403) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->view('errors.403', [], 403);
+            }
+
+            return response()->view('errors.403', [], 403);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $exception->getMessage()
+            ], 500);
+        }
+
+
         return parent::render($request, $exception);
+    }
+
+    public function report(Throwable $exception)
+    {
+        Log::error('>>Exception occurred<<', [
+            'message' => $exception->getMessage(),
+            'file'    => $exception->getFile(),
+            'line'    => $exception->getLine(),
+        ]);
+
+        parent::report($exception);
     }
 }

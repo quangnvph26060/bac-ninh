@@ -1,29 +1,3 @@
-console.log(typeof $.notify);
-
-// Kiểm tra xem có cột dt-control hay không
-const hasDtControl = columns.some((col) => col.className === "dt-control");
-
-// Tạo <thead>
-let thead = "<thead><tr>";
-
-// Nếu có dt-control, thì thêm vào đầu tiên
-if (hasDtControl) {
-    thead += "<th></th>"; // Chỗ này để chừa vị trí cho dt-control
-}
-
-thead += '<th><input type="checkbox" id="selectAll" class="form-check-input" /></th>';
-
-// Thêm các cột khác vào thead
-columns.forEach(function (column) {
-    if (column.className !== "dt-control") {
-        thead += "<th>" + column.title + "</th>";
-    }
-});
-thead += "</tr></thead>";
-
-// Thêm <thead> vào bảng
-$("#myTable").append(thead);
-
 const Toast = Swal.mixin({
     toast: true,
     position: "top-end",
@@ -42,38 +16,79 @@ const dataTables = (
     model,
     filters = {},
     sortable = false,
-    isOperation = true
+    isOperation = true,
+    hasCheckbox = true,
+    hasDateRange = false
 ) => {
+    const hasDtControl = columns.some((col) => col.className === "dt-control");
+
+    // Tạo <thead> động
+    let thead = "<thead><tr>";
+
+    if (hasDtControl) {
+        thead += "<th></th>"; // Dành cho dt-control
+    }
+
+    if (hasCheckbox) {
+        thead +=
+            '<th><input type="checkbox" id="selectAll" class="form-check-input" /></th>';
+    }
+
+    columns.forEach(function (column) {
+        if (column.className !== "dt-control") {
+            thead += "<th>" + (column.title || "") + "</th>";
+        }
+    });
+
+    if (isOperation) {
+        thead += "<th>Hành động</th>";
+    }
+
+    thead += "</tr></thead>";
+    $("#myTable").append(thead);
+
     // Nếu có dt-control, đảm bảo nó ở vị trí đầu tiên
-    let finalColumns = hasDtControl
-        ? [
-              {
-                  className: "dt-control",
-                  orderable: false,
-                  data: null,
-                  defaultContent: "",
-              },
-              {
-                  data: "checkbox",
-                  name: "checkbox",
-                  orderable: false,
-                  searchable: false,
-                  width: "5px",
-                  className: "text-center",
-              },
-              ...columns.filter((col) => col.className !== "dt-control"),
-          ]
-        : [
-              {
-                  data: "checkbox",
-                  name: "checkbox",
-                  orderable: false,
-                  searchable: false,
-                  width: "5px",
-                  className: "text-center",
-              },
-              ...columns,
-          ];
+    let finalColumns;
+
+    if (hasDtControl) {
+        finalColumns = [
+            {
+                className: "dt-control",
+                orderable: false,
+                data: null,
+                defaultContent: "",
+            },
+            ...(hasCheckbox
+                ? [
+                      {
+                          data: "checkbox",
+                          name: "checkbox",
+                          orderable: false,
+                          searchable: false,
+                          width: "5px",
+                          className: "text-center",
+                      },
+                  ]
+                : []),
+            ...columns.filter((col) => col.className !== "dt-control"),
+        ];
+    } else {
+        finalColumns = [
+            ...(hasCheckbox
+                ? [
+                      {
+                          data: "checkbox",
+                          name: "checkbox",
+                          orderable: false,
+                          searchable: false,
+                          width: "5px",
+                          className: "text-center",
+                      },
+                  ]
+                : []),
+            ...columns,
+        ];
+    }
 
     if (isOperation) {
         finalColumns.push({
@@ -99,6 +114,18 @@ const dataTables = (
                         d[key] = value;
                     }
                 });
+
+                const dateRange = $("#dateRangePicker").val();
+                if (dateRange) {
+                    // Phân tách startDate và endDate từ giá trị của dateRange
+                    const [startDate, endDate] = dateRange.split(" - ");
+                    d.start_date = moment(startDate, "DD/MM/YYYY").format(
+                        "YYYY-MM-DD"
+                    );
+                    d.end_date = moment(endDate, "DD/MM/YYYY").format(
+                        "YYYY-MM-DD"
+                    );
+                }
             },
         },
         columns: finalColumns,
@@ -135,8 +162,8 @@ const dataTables = (
             },
         },
         language: {
-            url: '/backend/assets/js/plugin/datatables/vi.json'
-        }
+            // url: "/backend/assets/js/plugin/datatables/vi.json",
+        },
     });
 
     $(document).on("click", ".btn-operation-destroy", function () {
@@ -192,8 +219,7 @@ const dataTables = (
                         );
                     },
                     error: function (xhr) {
-                        console.log(xhr);
-                        Swal.fire("Lỗi!", "Không thể xóa dữ liệu.", "error");
+                        Notifications(xhr.responseJSON.message, "danger");
                     },
                 });
             }
@@ -304,6 +330,45 @@ const dataTables = (
         $("#actionDiv").nextAll().last().after(resetButton);
     }
 
+    if (hasDateRange) {
+        const datePickerHtml = `
+            <div class="d-flex align-items-center">
+                <input type="text" id="dateRangePicker" name="date_range" class="form-control" placeholder="Chọn khoảng ngày" />
+            </div>
+        `;
+
+        targetDiv.after(datePickerHtml);
+
+        $("#dateRangePicker").daterangepicker({
+            autoUpdateInput: false,
+            locale: {
+                cancelLabel: "Clear",
+                applyLabel: "Áp dụng",
+                format: "DD/MM/YYYY",
+            },
+        });
+
+        $("#date-range").on("cancel.daterangepicker", function (ev, picker) {
+            $(this).val("");
+        });
+
+        // Bắt sự kiện khi chọn ngày
+        $("#dateRangePicker").on(
+            "apply.daterangepicker",
+            function (ev, picker) {
+                $(this).val(
+                    picker.startDate.format("DD/MM/YYYY") +
+                        " - " +
+                        picker.endDate.format("DD/MM/YYYY")
+                );
+                // filters.startDate = picker.startDate.format("YYYY-MM-DD");
+                // filters.endDate = picker.endDate.format("YYYY-MM-DD");
+
+                table.ajax.reload();
+            }
+        );
+    }
+
     $(".action-filter").on("change", function () {
         table.ajax.reload();
     });
@@ -320,6 +385,12 @@ const dataTables = (
         if (!hasSelectedFilters) return;
 
         $(".form-select").val("").trigger("change");
+    });
+
+    $('#myTable thead input[type="checkbox"]').on("click", function () {
+        const isChecked = $(this).prop("checked");
+        $('#myTable tbody input[type="checkbox"]').prop("checked", isChecked);
+        toggleActionDiv();
     });
 
     $("#myTable tbody").on("click", 'input[type="checkbox"]', function () {
@@ -366,27 +437,16 @@ const dataTables = (
                                 .draw(false);
                         }
                     }, false); // Sử dụng biến table thay vì gọi lại $('#myTable').DataTable()
-                    $.notify(
-                        {
-                            icon: "icon-bell",
-                            title: "Thông báo",
-                            message: "Xóa thành công.",
-                        },
-                        {
-                            type: "success",
-                            placement: {
-                                from: "bottom",
-                                align: "right",
-                            },
-                            time: 1000,
-                        }
-                    );
+                    Notifications("Xóa thành công.", "success");
                     $("#actionSelect").val("");
                     $('input[type="checkbox"]').prop("checked", false);
                     toggleActionDiv();
                 },
-                error: function () {
-                    alert("Có lỗi xảy ra, vui lòng thử lại!");
+                error: function (xhr) {
+                    $('input[type="checkbox"]').prop("checked", false);
+                    $("#actionSelect").val("");
+                    $('#actionDiv').hide(); // Ẩn #actionDiv nếu có lỗi xảy ra
+                    Notifications(xhr.responseJSON.message, "danger");
                 },
             });
         }

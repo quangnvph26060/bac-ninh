@@ -2,6 +2,16 @@
 
 @section('content')
     <div class="page-inner">
+        <div class="card custom-card mb-3">
+            <div class="card-body">
+                <form action="" class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" id="date-range" name="date_range" class="form-control"
+                            placeholder="Chọn thời gian" />
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-xl-6  mb-3">
@@ -13,10 +23,8 @@
                                     Tổng doanh số
                                 </div>
                                 <h3 class="fw-semibold mb-2">
-                                    {{ number_format($total, 0, ',', '.') }} VND
-
+                                    ${{ formatPrice($statistics['total_revenue']) }}
                                 </h3>
-
                             </div>
                             <div class="avatar avatar-md avatar-rounded  svg-white">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"
@@ -46,8 +54,7 @@
                                     Tổng số đơn hàng
                                 </div>
                                 <h3 class="fw-semibold mb-2">
-                                    {{ number_format($order_list, 0, ',', '.') }}
-
+                                    {{ formatPrice($statistics['total_orders']) }}
                                 </h3>
 
                             </div>
@@ -135,7 +142,7 @@
             </div> --}}
         </div>
 
-        <div class=" mb-3">
+        <div class="mb-3">
             <div class="row">
                 <div class="col-xl-6">
                     <div class="card custom-card">
@@ -148,30 +155,30 @@
                         </div>
                         <div class="card-body">
                             <ul class="list-unstyled project-recent-transactions-list">
-                                @forelse ($order_processing as $item)
+                                @forelse ($statistics['recent_orders'] as $recent_order)
                                     <li class="mb-2">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="lh-1">
                                                 <span
                                                     class="avatar avatar-ms avatar-rounded bg-primary-transparent fw-semibold fs-14"
                                                     style="color: #000000">
-                                                    {{ strtoupper(substr($item->order_name, 0, 1)) }}
+                                                    {{ strtoupper(substr($recent_order['order_name'], 0, 1)) }}
                                                 </span>
                                             </div>
                                             <div class="flex-fill"> <span class="d-block fw-semibold">
-                                                    {{ $item->order_name }}
+                                                    {{ $recent_order['order_name'] }}
 
                                                 </span> <span class="d-block fs-13 text-muted">
-                                                    {{ $item->phone_number }}
+                                                    {{ $recent_order['phone_number'] }}
 
                                                 </span> </div>
                                             <div class="text-end"> <span class="h6 mb-0 fw-semibold text-danger">
 
-                                                    {{ number_format($item->total) }} VND
+                                                    ${{ formatPrice($recent_order['total']) }}
                                                 </span> <span class="d-block text-muted fs-13">
                                                     @php
 
-                                                        $dateString = $item->created_at;
+                                                        $dateString = $recent_order['created_at'];
                                                         $date = new DateTime($dateString);
 
                                                         // Định dạng lại ngày
@@ -206,13 +213,12 @@
                         </div>
                         <div class="card-body">
                             <ul class="list-unstyled ecommerce-top-selling-list">
-                                @forelse ($bestSellingProducts as $item)
+                                @forelse ($statistics['best_selling_products'] as $item)
                                     <li class="mb-2">
                                         <div class="d-flex align-items-center flex-wrap">
                                             <div class="me-3 lh-1">
                                                 <span class="avatar avatar-md">
-                                                    <img src="{{ asset('storage' . $item['product']->image) }}"
-                                                        alt="">
+                                                    <img src="{{ $item['product']->image }}" alt="">
                                                 </span>
                                             </div>
                                             <div class=" flex-fill"> <span class="d-block mb-0 fw-semibold">
@@ -224,12 +230,19 @@
                                                 </span> </div>
                                             <div class="text-end"> <span class="mb-0 d-block h6 fw-semibold">
 
-                                                    {{ number_format($item['total_price'], 0, ',', '.') }} VND
+                                                    ${{ formatPrice($item['product']->price) }}
 
                                                 </span> <span class="mb-0 d-block text-muted fs-13">
-                                                    {{ number_format($item['sold_quantity'], 0, ',', '.') }} đã bán
+                                                    {{ $item['sold_quantity'] }} đã bán
 
-                                                </span> </div>
+                                                </span>
+                                                <span class="mb-0 d-block text-muted fs-13">
+                                                    {{ $item['total_orders'] }} đơn hàng
+                                                </span>
+                                                <span class="mb-0 d-block text-muted fs-13">
+                                                    Trung bình {{ $item['average_quantity_per_order'] }} sản phẩm/đơn
+                                                </span>
+                                            </div>
                                         </div>
                                     </li>
                                 @empty
@@ -267,22 +280,26 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($products as $item)
+                                @forelse ($newestProducts as $item)
                                     <tr>
                                         <td class="brder-bottom-0">
                                             <div class="d-flex align-items-center">
-                                                <div class="avatar avatar-sm me-2"> <img
-                                                        src="{{ showImage($item->image) }}" alt="avatar"
-                                                        class=""> </div> <a href=""
+                                                <div class="avatar avatar-sm me-2">
+                                                    <img src="{{ $item->image }}" alt="avatar" class="">
+                                                </div>
+                                                <a href=""
                                                     title="{{ $item->name }}">{{ Str::words($item->name, 30, '...') }}</a>
                                             </div>
                                         </td>
                                         <td>{{ $item->stock }}</td>
-                                        <td>{{ $item->product_unit }}</td>
+                                        <td>{{ $item->product_unit ?? '-----' }}</td>
                                         <td>{{ $item->brand->name }}</td>
                                         <td>{{ $item->category->name }}</td>
                                     </tr>
                                 @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center">Không có sản phẩm nào</td>
+                                    </tr>
                                 @endforelse
 
                             </tbody>
@@ -293,6 +310,168 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        $('#date-range').daterangepicker({
+            autoUpdateInput: false,
+            locale: {
+                cancelLabel: 'Clear',
+                applyLabel: 'Áp dụng',
+                format: 'DD/MM/YYYY'
+            }
+        });
+
+        $('#date-range').on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+            fetchData();
+        });
+
+        $('#date-range').on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+            fetchData();
+        });
+
+        function fetchData() {
+            let dateRange = $('#date-range').val();
+            let startDate = null;
+            let endDate = null;
+
+            if (dateRange) {
+                [startDate, endDate] = dateRange.split(' - ');
+                // Convert from DD/MM/YYYY to YYYY-MM-DD
+                startDate = startDate.split('/').reverse().join('-');
+                endDate = endDate.split('/').reverse().join('-');
+            }
+
+            $.ajax({
+                url: window.location.href,
+                type: 'GET',
+                data: {
+                    startDate: startDate,
+                    endDate: endDate
+                },
+                beforeSend: function() {
+                    $("#loadingSpinner").fadeIn();
+                },
+                success: function(response) {
+                    console.log(response);
+
+                    // Update total revenue
+                    $('.fw-semibold').first().text(formatCurrency(response.statistics.total_revenue));
+
+                    // Update total orders
+                    $('.fw-semibold').eq(1).text(response.statistics.total_orders);
+
+                    // Update recent orders
+                    let recentOrdersHtml = '';
+                    if (response.statistics.recent_orders && response.statistics.recent_orders.length > 0) {
+                        response.statistics.recent_orders.forEach(function(order) {
+                            let date = new Date(order.created_at);
+                            let formattedDate = 'Ngày ' + date.getDate() + ' tháng ' + (date
+                                .getMonth() + 1) + ' năm ' + date.getFullYear();
+
+                            recentOrdersHtml += `
+                                <li class="mb-2">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="lh-1">
+                                            <span class="avatar avatar-ms avatar-rounded bg-primary-transparent fw-semibold fs-14" style="color: #000000">
+                                                ${order.order_name.charAt(0).toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <span class="d-block fw-semibold">${order.order_name}</span>
+                                            <span class="d-block fs-13 text-muted">${order.phone_number}</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="h6 mb-0 fw-semibold text-danger">${formatCurrency(order.total)}</span>
+                                            <span class="d-block text-muted fs-13">${formattedDate}</span>
+                                        </div>
+                                    </div>
+                                </li>
+                            `;
+                        });
+                    } else {
+                        recentOrdersHtml = '<li class="text-center">Không có đơn hàng nào</li>';
+                    }
+                    $('.project-recent-transactions-list').html(recentOrdersHtml);
+
+                    // Update best selling products
+                    let bestSellingHtml = '';
+                    if (response.statistics.best_selling_products && response.statistics.best_selling_products
+                        .length > 0) {
+                        response.statistics.best_selling_products.forEach(function(item) {
+                            bestSellingHtml += `
+                                <li class="mb-2">
+                                    <div class="d-flex align-items-center flex-wrap">
+                                        <div class="me-3 lh-1">
+                                            <span class="avatar avatar-md">
+                                                <img src="${item.product.image}" alt="">
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <span class="d-block mb-0 fw-semibold">${item.product.name}</span>
+                                            <span class="text-muted fs-13">${item.product.category.name}</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="mb-0 d-block h6 fw-semibold">${formatCurrency(item.product.price)}</span>
+                                            <span class="mb-0 d-block text-muted fs-13">${item.sold_quantity} đã bán</span>
+                                            <span class="mb-0 d-block text-muted fs-13">${item.total_orders} đơn hàng</span>
+                                            <span class="mb-0 d-block text-muted fs-13">Trung bình ${item.average_quantity_per_order} sản phẩm/đơn</span>
+                                        </div>
+                                    </div>
+                                </li>
+                            `;
+                        });
+                    } else {
+                        bestSellingHtml = '<li class="text-center">Không có sản phẩm nào</li>';
+                    }
+                    $('.ecommerce-top-selling-list').html(bestSellingHtml);
+
+                    let newestProductsHtml = '';
+                    if (response.newestProducts && response.newestProducts.length > 0) {
+                        response.newestProducts.forEach(function(item) {
+                            // Truncate name to 30 words
+                            let truncatedName = item.name.split(' ').slice(0, 30).join(' ');
+                            if (item.name.split(' ').length > 30) {
+                                truncatedName += '...';
+                            }
+
+                            newestProductsHtml += `
+                                <tr>
+                                    <td class="brder-bottom-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-2">
+                                                <img src="${item.image}" alt="avatar" class="">
+                                            </div>
+                                            <a href="" title="${item.name}">${truncatedName}</a>
+                                        </div>
+                                    </td>
+                                    <td>${item.stock}</td>
+                                    <td>${item.product_unit || '-----'}</td>
+                                    <td>${item.brand.name}</td>
+                                    <td>${item.category.name}</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        newestProductsHtml =
+                            '<tr><td colspan="5" class="text-center">Không có sản phẩm nào</td></tr>';
+                    }
+                    $('.table-responsive table tbody').html(newestProductsHtml);
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr, status, error);
+                    alert('Có lỗi xảy ra khi tải dữ liệu');
+                },
+                complete: function() {
+                    $("#loadingSpinner").fadeOut();
+                }
+            });
+        }
+    </script>
+@endpush
+
 @push('styles')
     <style>
         .avatar img {

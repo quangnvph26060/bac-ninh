@@ -6,6 +6,24 @@
         "id": "dashboard"
     },
     {
+        "title": "Đơn hàng",
+        "icon": "fas fa-receipt",
+        "id": "orders",
+        "children": [
+            {
+                "title": "Quản lý đơn hàng",
+                "url": "admin.orders.index"
+            },
+            {
+                "title": "Yêu cầu nạp tiền",
+                "url": "admin.transfer.histories.index"
+            }
+        ],
+        "inRoutes": [
+            "admin.orders.index", "admin.orders.edit", "admin.transfer.histories.index"
+        ]
+    },
+    {
         "title": "Sản phẩm",
         "icon": "fas fa-box",
         "id": "products",
@@ -56,6 +74,15 @@
         "id": "suppliers"
     },
     {
+        "title": "Khách hàng",
+        "icon": "fas fa-user",
+        "route": "admin.customers.index",
+        "id": "customers",
+        "inRoutes": [
+            "admin.customers.index", "admin.customers.show"
+        ]
+    },
+    {
         "title": "Phân quyền",
         "icon": "fas fa-user-shield",
         "id": "permissions",
@@ -68,13 +95,14 @@
                 "title": "Quản lý vai trò",
                 "url": "admin.roles.index"
             },
+
             {
-                "title": "Quản lý quyền",
-                "url": "admin.permissions.index"
+                "title": "Lịch sử hoạt động",
+                "url": "admin.activity.log.history"
             }
         ],
         "inRoutes": [
-            "admin.employees.index", "admin.roles.index", "admin.permissions.index"
+            "admin.employees.index", "admin.roles.index", "admin.permissions.index", "admin.activity.log.history"
         ]
     },
     {
@@ -115,4 +143,5 @@
         ]
     }
 ]
+
 

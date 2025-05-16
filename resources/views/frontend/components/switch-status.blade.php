@@ -1,42 +1,68 @@
 @switch($status)
     @case('draft')
-        <span class="badge bg-light text-dark">Nháp</span>
+        <span class="badge bg-light text-dark border">Draft</span>
     @break
 
     @case('pending')
-        <span class="badge bg-warning text-dark">Chờ xử lý</span>
+        <span class="badge bg-warning">
+            <i class="fas fa-hourglass-half me-1"></i>Pending
+        </span>
     @break
 
-    @case('processing')
-        <span class="badge bg-primary text-light">Chuẩn bị hàng</span>
+    @case('confirmed_pending_production')
+        <span class="badge bg-primary text-white">
+            <i class="fas fa-check-circle me-1"></i>Confirmed, waiting for production
+        </span>
     @break
 
-    @case('completed')
-        <span class="badge bg-success text-light">Hoàn thành</span>
+    @case('in_production')
+        <span class="badge bg-info text-dark">
+            <i class="fas fa-industry me-1"></i>In production
+        </span>
+    @break
+
+    @case('produced_awaiting_completion')
+        <span class="badge bg-secondary text-white">
+            <i class="fas fa-box-open me-1"></i>Produced, waiting for completion
+        </span>
+    @break
+
+    @case('completed_waiting_for_shipment')
+        <span class="badge bg-dark text-white">
+            <i class="fas fa-truck-loading me-1"></i>Completed, waiting for shipment
+        </span>
+    @break
+
+    @case('shipped')
+        <span class="badge bg-success">
+            <i class="fas fa-truck me-1"></i>Shipped
+        </span>
     @break
 
     @case('cancelled')
-        <span class="badge bg-danger text-light">Đã hủy</span>
+        <span class="badge bg-danger text-white">
+            <i class="fas fa-times-circle me-1"></i>Cancelled
+        </span>
     @break
 
     @case(null)
-        <span>Chưa cập nhật...</span>
+        <span>Not updated yet...</span>
     @break
 
     @case('bank_transfer')
-        <span>Thanh toán qua ví</span>
+        <span>Payment via wallet</span>
     @break
 
     @case('paypal')
-        <span>Thanh toán paypal</span>
+        <span>Paypal payment</span>
     @break
 
     @case('1')
-        <span class="bg_paid status_btn_order">Xuất bản</span>
+        <span class="bg_paid status_btn_order">Publish</span>
     @break
 
     @case('2')
-        <span class="bg_unpaid status_btn_order">Tạm ngưng</span>
+        <span class="bg_unpaid status_btn_order">Pause</span>
     @break
 
     @default

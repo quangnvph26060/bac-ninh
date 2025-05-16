@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ asset('backend/auth/assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('backend/auth/assets/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('backend/auth/assets/css/slick.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
 
     <link rel="stylesheet" type="text/css" href="{{ asset('backend/auth/assets/css/style.css') }}">
@@ -239,12 +240,17 @@
                                 <div class="list_group">
                                     <input type="password" name="password" autocomplete="off" required=""
                                         placeholder="Password" id="password" value="{{ old('password') }}">
-                                    <figure class="feild_icon"><img
-                                            src="{{ asset('backend/auth/assets/images/login_padlock_icon.png') }}"></figure>
+                                    <figure class="feild_icon">
+                                        <img src="{{ asset('backend/auth/assets/images/login_padlock_icon.png') }}">
+                                    </figure>
+                                    <i class="fa-solid fa-eye toggle-password"
+                                        style="cursor:pointer; position:absolute; right:10px; top:50%; transform:translateY(-50%);"></i>
                                     @error('password')
                                         <small class="text-danger mb-2">{{ $message }}</small>
                                     @enderror
                                 </div>
+
+
 
                                 <div class="form-group">
                                     <div class="form-check my-3">
@@ -303,6 +309,18 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
+        $('.toggle-password').click(function() {
+            var input = $('#password');
+            var icon = $(this);
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                input.attr('type', 'password');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+
         $(document).on('click', '.remove-msg', function(e) {
             $('.message').text('');
         });

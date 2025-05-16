@@ -39,7 +39,7 @@ class AuthController extends Controller
         }
 
         toastr()->error('Tài khoản hoặc mật khẩu không chính xác!');
-        return redirect()->back()->withInput(['email']);
+        return back()->withInput(['email']);
     }
 
 

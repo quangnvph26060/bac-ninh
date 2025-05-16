@@ -14,12 +14,12 @@
                         @endphp
 
                         @if (isOnSale($record))
-                            <span class="">{{ finalPrice($record->discount_price) }}</span>
+                            <span class="">${{ finalPrice($record->discount_price) }}</span>
 
                             <small class="text-muted"> <del
-                                    class="ms-2">{{ formatPrice($record->sale_price) }}</del></small>
+                                    class="ms-2">${{ formatPrice($record->sale_price) }}</del></small>
                         @else
-                            <span class="">{{ formatPrice($record->sale_price) }}</span>
+                            <span class="">${{ formatPrice($record->sale_price) }}</span>
                         @endif
                     </p>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Brand\BrandRequest;
+use App\Models\Brand;
 use App\Services\BrandService;
 use App\Services\CompanyService;
 use App\Services\SupplierService;
@@ -23,6 +24,8 @@ class BrandController extends Controller
     }
     public function index()
     {
+        $this->authorize('view', Brand::class);
+
         if (request()->ajax()) {
             $query = $this->brandService->pagination();
 
@@ -42,6 +45,8 @@ class BrandController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Brand::class);
+
         $title = 'Thêm thương hiệu';
         $brand = null;
         return view('admin.brand.save', compact('title', 'brand'));
@@ -49,6 +54,8 @@ class BrandController extends Controller
 
     public function store(BrandRequest $request)
     {
+        $this->authorize('create', Brand::class);
+
         $payload = $request->validated();
         $response = $this->brandService->store($payload);
         return handleResponse($response['message'], $response['success'], $response['code']);
@@ -56,6 +63,8 @@ class BrandController extends Controller
 
     public function edit(string $id)
     {
+        $this->authorize('edit', Brand::class);
+
         $title = 'Cập nhật thương hiệu';
         $brand = $this->brandService->show($id);
         return view('admin.brand.save', compact('brand', 'title'));
@@ -63,6 +72,8 @@ class BrandController extends Controller
 
     public function update(string $id, BrandRequest $request)
     {
+        $this->authorize('edit', Brand::class);
+
         $payload = $request->validated();
         $response = $this->brandService->update($id, $payload);
         return handleResponse($response['message'], $response['success'], $response['code']);

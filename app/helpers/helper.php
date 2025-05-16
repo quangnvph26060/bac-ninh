@@ -181,11 +181,11 @@ if (!function_exists('successResponse')) {
 }
 
 if (!function_exists('handleResponse')) {
-    function handleResponse($message, $success, $code = 200, $data = [])
+    function handleResponse($message, $success, $code = 200, $data = [], $isToast  = true)
     {
         $type = $success ? 'success' : 'error';
 
-        if ($type == 'success') sessionFlash($type, $message);
+        if ($isToast) sessionFlash($type, $message);
 
         return response()->json(['success' => $success, 'message' => $message, 'data' => $data], $code);
     }
@@ -270,20 +270,26 @@ function finalPrice($discountPrice)
     return formatPrice($discountPrice);
 }
 
-// function formatPrice($price)
-// {
-//     if (!empty($price)) return '$' . number_format($price, 0, ',', '');
-//     return 0;
-// }
-
 function formatPrice($price)
 {
     if (!empty($price)) {
-        return  number_format((float)$price, 2, '.', ',');
-    }
-    return 0.00;
-}
+        // Format số với 2 chữ số thập phân
+        $formatted = number_format((float)$price, 2, '.', ',');
 
+        // Nếu phần thập phân là .00 thì bỏ đi
+        if (substr($formatted, -3) === '.00') {
+            return substr($formatted, 0, -3);
+        }
+
+        // Nếu phần thập phân kết thúc bằng 0 thì bỏ số 0 đó đi
+        if (substr($formatted, -1) === '0') {
+            return substr($formatted, 0, -1);
+        }
+
+        return $formatted;
+    }
+    return '0';
+}
 
 function generateEmployeeCode($table = 'employees', $column = 'employee_code', $prefix = 'PH', $length = 5)
 {
@@ -317,7 +323,7 @@ if (!function_exists('isActiveMenu')) {
     }
 }
 
-function generateTransactionCode($length = 6)
+function generateTransactionCode($length = 13)
 {
     // Kết hợp chữ hoa và số
     $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

@@ -12,11 +12,15 @@ class ConfigurationController extends Controller
 {
     public function configuration()
     {
+        $this->authorize('view', Config::class);
+
         return view('admin.configuration.index');
     }
 
     public function updateConfiguration(Request $request)
     {
+        $this->authorize('edit', Config::class);
+
         $credentials = $request->validate(
             [
                 'title'             => 'nullable|string|max:255',
@@ -96,32 +100,95 @@ class ConfigurationController extends Controller
     public function payment()
     {
         // return "<img src='https://img.vietqr.io/image/970422-5885128062004-compact.png?amount=500000&addInfo=AASNNA' />";
-        $banks = Bank::pluck('shortName', 'id')->toArray();
+        // $banks = Bank::pluck('shortName', 'id')->toArray();
+        $this->authorize('view', ConfigPayment::class);
+
+
         $configPayments = ConfigPayment::query()->latest()->get();
-        return view('admin.configuration.payment', compact('banks', 'configPayments'));
+
+        return view('admin.configuration.payment', compact('configPayments'));
     }
 
-    public function updateConfigPayment(Request $request)
+    public function getConfigPayment(string $id)
     {
-        $credentials = $request->validate([
-            'accounts' => 'nullable|array',
-            'accounts.*.enjoyer' => 'required|max:100',
-            'accounts.*.account_number' => 'required|max:100',
-            'accounts.*.bank_id' => 'required|max:100'
-        ]);
+        $this->authorize('view', ConfigPayment::class);
 
-        ConfigPayment::query()->delete();
+        $configPayment = ConfigPayment::query()->find($id);
 
-        if (!empty($credentials['accounts'])) {
-            foreach ($credentials['accounts'] as $account) {
-                ConfigPayment::create([
-                    'enjoyer' => $account['enjoyer'],
-                    'account_number' => $account['account_number'],
-                    'bank_id' => $account['bank_id'],
-                ]);
-            }
+        if (!$configPayment) {
+            return errorResponse('Không tìm thấy dữ liệu.', true);
         }
 
-        return successResponse('Lưu thay đổi thành công.', [], 200, true);
+        $configPayment->image = showImage($configPayment->image);
+
+        return successResponse('Lấy dữ liệu thành công.', $configPayment, 200, true);
+    }
+
+    public function saveConfigPayment(Request $request)
+    {
+        $this->authorize('save', ConfigPayment::class);
+
+        $credentials = $request->validate([
+            'title' => 'nullable|string|max:255',
+            'content' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'id' => 'nullable|exists:config_payments,id'
+        ]);
+
+        if ($request->hasFile('image')) {
+            $credentials['image'] = uploadImages('image', 'image');
+        }
+
+        if (!empty($credentials['id'])) {
+            $configPayment = ConfigPayment::query()->find($credentials['id']);
+            if ($request->hasFile('image') && !empty($oldImage = $configPayment->image)) {
+                deleteImage($oldImage);
+            }
+            $configPayment->update($credentials);
+        } else {
+            ConfigPayment::query()->create($credentials);
+        }
+
+        $configPayments = ConfigPayment::query()->latest()->get()->map(function ($item) {
+            $item->image = showImage($item->image);
+            return $item;
+        });
+
+        return successResponse('Lưu thay đổi thành công.', $configPayments, 200, true);
+    }
+
+    public function updateConfigPaymentStatus(Request $request)
+    {
+        $this->authorize('editStatus', ConfigPayment::class);
+
+        $credentials = $request->validate([
+            'id' => 'required|exists:config_payments,id',
+            'status' => 'required|boolean'
+        ]);
+
+        $configPayment = ConfigPayment::query()->find($credentials['id']);
+
+        $configPayment->status = $credentials['status'];
+        $configPayment->save();
+
+        return successResponse('Cập nhật trạng thái thành công.', [], 200, true);
+    }
+
+    public function destroyConfigPayment(Request $request)
+    {
+        $this->authorize('destroy', ConfigPayment::class);
+
+        $credentials = $request->validate([
+            'id' => 'required|exists:config_payments,id'
+        ]);
+
+        ConfigPayment::query()->where('id', $credentials['id'])->delete();
+
+        $configPayments = ConfigPayment::query()->latest()->get()->map(function ($item) {
+            $item->image = showImage($item->image);
+            return $item;
+        });
+
+        return successResponse('Xóa thành công.', $configPayments, 200, true);
     }
 }

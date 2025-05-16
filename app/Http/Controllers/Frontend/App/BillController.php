@@ -4,22 +4,108 @@ namespace App\Http\Controllers\Frontend\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\ConfigPayment;
+use App\Models\TopupRequest;
 use App\Models\TransactionHistory;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
+use App\Services\PaypalService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class BillController extends Controller
 {
-    public function bill()
+    public $paypalService;
+    public function __construct(PaypalService $paypalService)
     {
-        $wallet = Wallet::firstOrCreate(
-            ['user_id' => auth()->id()],
-            ['balance' => 0]
-        );
+        $this->paypalService = $paypalService;
+    }
+
+    public function bill(Request $request)
+    {
+        $search = $request->search;
+        $perPage = $request->input('per_page', 10);
+        $dateRange = $request->date_range;
+        $isTopupRequest = filter_var($request->is_topup_request, FILTER_VALIDATE_BOOLEAN);
+
         $configPayments = ConfigPayment::query()->with('bank')->latest()->get();
-        return view('frontend.app.bill.index', compact('configPayments', 'wallet'));
+        $wallet = Wallet::query()->where('user_id', auth()->id())->first();
+
+        $walletTransactions = WalletTransaction::query()
+            ->with('configPayment')
+            ->where('wallet_id', $wallet->id)
+            // Nếu là yêu cầu nạp tiền, thêm điều kiện is_topup_request
+            ->when($isTopupRequest, function ($query) {
+                $query->where('is_topup_request', true);
+            })
+            // Nếu không phải yêu cầu nạp tiền, thay thế bằng status là "complete"
+            ->when(!$isTopupRequest, function ($query) {
+                $query->where('status', 'complete');
+            })
+            ->latest()
+            ->when(!empty($search), fn($q) => $q->where('code', 'like', "%{$search}%"))
+            ->when(!empty($dateRange), function ($q) use ($dateRange) {
+                [$start, $end] = explode(' - ', $dateRange);
+                $start = Carbon::createFromFormat('d/m/Y', trim($start))->startOfDay();
+                $end = Carbon::createFromFormat('d/m/Y', trim($end))->endOfDay();
+                $q->whereBetween('created_at', [$start, $end]);
+            })->paginate($perPage);
+
+        if ($request->ajax()) {
+            $view = $isTopupRequest ? 'frontend.app.bill.request-deposit-table' : 'frontend.app.bill.transaction-history-table';
+            $html = view($view, compact('walletTransactions'))->render();
+            return response()->json([
+                'html' => $html,
+            ]);
+        }
+
+        return view('frontend.app.bill.index', compact('configPayments'));
+    }
+
+
+    public function process(Request $request)
+    {
+        $credentials = $request->validate([
+            'amount' => 'required|numeric',
+            'proof' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'transaction_code' => 'required|string|max:255|unique:wallet_transactions,transaction_code',
+            'note' => 'nullable|string|max:255',
+            'config_payment_id' => 'required|exists:config_payments,id'
+        ], [], [
+            'amount' => 'Amount',
+            'proof' => 'Proof',
+            'transaction_code' => 'Transaction Code',
+            'note' => 'Note',
+            'config_payment_id' => 'Config Payment'
+        ]);
+
+        $wallet = Wallet::query()->where('user_id', auth()->id())->first();
+
+        $balance_after = $wallet->balance + $credentials['amount'];
+
+        $credentials['proof'] = uploadImages('proof', 'proof');
+
+        try {
+            WalletTransaction::create([
+                'wallet_id' => $wallet->id,
+                'config_payment_id' => $credentials['config_payment_id'],
+                'code' => generateTransactionCode(),
+                'amount' => $credentials['amount'],
+                'note' => $credentials['note'],
+                'type' => 'deposit',
+                'balance_before' => $wallet->balance,
+                'balance_after' => $balance_after,
+                'status' => 'pending',
+                'proof' => $credentials['proof'],
+                'transaction_code' => $credentials['transaction_code'],
+                'is_topup_request' => true
+            ]);
+            return successResponse('The topup request has been sent, please wait for the browser.', [], 200, true);
+        } catch (\Throwable $th) {
+            deleteImage($credentials['proof']);
+            logger($th->getMessage());
+            return errorResponse('An error occurred, please try again later!', true);
+        }
     }
 
     public function generateQr(Request $request)
@@ -118,5 +204,135 @@ class BillController extends Controller
             logger($e->getMessage());
             return errorResponse('Đã có lỗi xảy ra, vui lòng thử lại sau!', true);
         }
+    }
+
+    public function processTransaction(Request $request)
+    {
+        $request->validate(
+            [
+                'amount' => 'required|numeric',
+                'note' => 'nullable|string|max:255'
+            ],
+            __('request.messages'),
+            [
+                'amount' => 'Số tiền',
+                'note' => 'Ghi chú'
+            ]
+        );
+
+        try {
+            $response = $this->paypalService->createOrder(
+                $request->amount,
+                'USD',
+                route('bills.paypal.success'),
+                route('bills.paypal.cancel')
+            );
+
+            if (isset($response['id']) && $response['status'] == 'CREATED') {
+                session([
+                    'paypal_wallet' => [
+                        'token' => $response['id'],
+                        'amount' => $request->amount,
+                        'note' => $request->note,
+                    ]
+                ]);
+                foreach ($response['links'] as $link) {
+                    if ($link['rel'] === 'approve') {
+                        return response()->json([
+                            'approval_url' => $link['href'],
+                        ]);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            logger("error:" . $e->getMessage());
+            return errorResponse('Đã có lỗi xảy ra trong quá trình thành toán!', true);
+        }
+    }
+
+    public function successTransaction(Request $request)
+    {
+        try {
+            $response = $this->paypalService->captureOrder($request->token);
+
+            $paypalWallet = session('paypal_wallet');
+
+            // Nếu không có session hoặc token không trùng khớp
+            if (!$paypalWallet || $paypalWallet['token'] !== $request->token) {
+                return redirect()->route('bills.index')->with('error', 'Lệnh nạp không hợp lệ!');
+            }
+
+            $amount = $paypalWallet['amount'];
+            $note = $paypalWallet['note'];
+            $status = $response['status'] ?? 'FAILED';
+
+            // Lấy ví (nếu chưa có thì tạo)
+            $wallet = Wallet::firstOrCreate(
+                ['user_id' => auth()->id()],
+                ['balance' => 0]
+            );
+
+            $balanceBefore = $wallet->balance;
+
+            if ($status === 'COMPLETED') {
+                $wallet->increment('balance', $amount);
+            }
+
+            $balanceAfter = $wallet->fresh()->balance;
+
+            // Ghi lại lịch sử giao dịch, dù thành công hay thất bại
+            WalletTransaction::create([
+                'wallet_id' => $wallet->id,
+                'code' => generateTransactionCode(),
+                'amount' => $amount,
+                'note' => $note,
+                'balance_before' => $balanceBefore,
+                'balance_after' => $balanceAfter,
+                'extra' => json_encode($response), // Có thể lưu toàn bộ response
+            ]);
+
+            session()->forget('paypal_wallet');
+
+            if ($status === 'COMPLETED') {
+                return redirect()->route('bills.index')->with('success', 'Nạp tiền thành công!');
+            } else {
+                return redirect()->route('bills.index')->with('error', 'Giao dịch không hoàn tất.');
+            }
+        } catch (\Exception $e) {
+            logger("PayPal error: " . $e->getMessage());
+
+            // Ghi lại nếu có session
+            if (session()->has('paypal_wallet')) {
+                $paypalWallet = session('paypal_wallet');
+                $wallet = Wallet::firstOrCreate(
+                    ['user_id' => auth()->id()],
+                    ['balance' => 0]
+                );
+
+                WalletTransaction::create([
+                    'wallet_id' => $wallet->id,
+                    'code' => generateTransactionCode(),
+                    'amount' => $paypalWallet['amount'],
+                    'note' => $paypalWallet['note'] . ' (Lỗi khi thanh toán)',
+                    'balance_before' => $wallet->balance,
+                    'balance_after' => $wallet->balance,
+                    'status' => 'failure',
+                    'extra' => json_encode(['exception' => $e->getMessage()]),
+                ]);
+
+                session()->forget('paypal_wallet');
+            }
+
+            return redirect()
+                ->route('bills.index')
+                ->with('error', 'Đã xảy ra lỗi khi xử lý thanh toán.');
+        }
+    }
+
+
+    public function cancelTransaction()
+    {
+        return back()
+            ->with('error', 'You have canceled the transaction.');
     }
 }

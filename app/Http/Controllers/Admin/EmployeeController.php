@@ -5,26 +5,26 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Employee\EmployeeRequest;
 use App\Mail\EmployeeCreated;
+use App\Models\Employee;
 use App\Services\EmployeeService;
 use App\Services\RoleService;
 use App\Traits\PaginateTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+
 use Illuminate\Support\Facades\Mail;
 
 class EmployeeController extends Controller
 {
     use PaginateTrait;
 
-    public function __construct(public EmployeeService $employeeService, public RoleService $roleService)
-    {
-        // $this->categoryService = $categoryService;
-    }
+    public function __construct(public EmployeeService $employeeService, public RoleService $roleService) {}
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        $this->authorize('view', Employee::class);
+
         if (request()->ajax()) {
 
             return $this->processDataTable(
@@ -44,6 +44,8 @@ class EmployeeController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Employee::class);
+
         $title = 'Thêm mới nhân viên';
         return view('admin.employee.save', compact('title'));
     }
@@ -53,6 +55,8 @@ class EmployeeController extends Controller
      */
     public function store(EmployeeRequest $request)
     {
+        $this->authorize('create', Employee::class);
+
         $payload = $request->validated();
         $response = $this->employeeService->store($payload);
         if ($response['success']) {
@@ -66,6 +70,8 @@ class EmployeeController extends Controller
      */
     public function edit(string $id)
     {
+        $this->authorize('edit', Employee::class);
+
         $title = 'Cập nhật nhân viên';
         $employee = $this->employeeService->show($id);
         $roles =  $this->roleService->pluckRole();
@@ -77,16 +83,10 @@ class EmployeeController extends Controller
      */
     public function update(EmployeeRequest $request, string $id)
     {
+        $this->authorize('edit', Employee::class);
+
         $payload = $request->validated();
         $response = $this->employeeService->update($id, $payload);
         return handleResponse($response['message'], $response['success'], $response['code']);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

@@ -6,10 +6,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\UserInfo;
 use App\Models\Storage;
-use App\Models\Campaign;
-use App\Models\CampaignDetail;
+
 
 class User extends Authenticatable
 {
@@ -26,15 +24,9 @@ class User extends Authenticatable
         'day_of_birth',
         'status',
         'google_id',
-        'remember_token',
         'otp_code',
         'otp_expires_at',
-        'last_otp_sent_at',
-        'created_at',
-        'city_id',
-        'district_id',
-        'wards_id',
-        'field_id'
+        'last_otp_sent_at'
     ];
 
 
@@ -42,6 +34,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'otp_expires_at',
+        'last_otp_sent_at'
     ];
 
     protected $casts = [
@@ -86,8 +80,15 @@ class User extends Authenticatable
         return $this->belongsTo(Storage::class);
     }
 
-    public function transaction()
+    public function coupons()
     {
-        return $this->hasMany(Transaction::class, 'user_id');
+        return $this->belongsToMany(Coupon::class, 'coupon_user_usages')
+            ->withPivot('usage_time')
+            ->withTimestamps();
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }

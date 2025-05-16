@@ -31,7 +31,8 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
-    <link rel="stylesheet" href="{{ asset('frontend/assets/css/app.css') }}" />
+    <link rel="stylesheet"
+        href="{{ asset('frontend/assets/css/app.css') }}?v={{ filemtime(public_path('frontend/assets/css/app.css')) }}" />
 
     @stack('styles')
 </head>
@@ -76,7 +77,7 @@
                             </div>
                             <div class="amount__balance">
                                 <p class="balance_text">Số dư</p>
-                                <p class="money__amount">$0.00</p>
+                                <p class="money__amount balance">${{ formatPrice($wallet->balance) }}</p>
                             </div>
                         </div>
                     </div>
@@ -231,10 +232,10 @@
                                     <span>Hồ sơ</span>
                                 </a>
                             </li>
-                            <li class="nav-item {{ request()->routeIs('profile') ? 'active' : '' }}">
-                                <a href="{{ route('profile') }}" class="nav-link">
+                            <li class="nav-item {{ request()->routeIs('transaction.history') ? 'active' : '' }}">
+                                <a href="{{ route('transaction.history') }}" class="nav-link">
                                     <i class="bi bi-wallet2"></i>
-                                    <span>Lịch sử nạp tiền</span>
+                                    <span>Lịch sử giao dịch</span>
                                 </a>
                             </li>
                         </ul>
@@ -294,6 +295,10 @@
         const notyf = new Notyf({
             duration: 5000,
             ripple: true,
+            position: {
+                x: "center",
+                y: "top",
+            },
         });
     </script>
     @stack('scripts')

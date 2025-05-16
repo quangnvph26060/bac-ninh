@@ -19,7 +19,10 @@ class ProductVariant extends Model
         'discount_start',
         'discount_end',
         'stock_status',
-        'stock'
+        'stock',
+        'standard_shipping',
+        'express_shipping',
+        'international_shipping',
     ];
 
     protected $casts = [
@@ -36,5 +39,13 @@ class ProductVariant extends Model
     public function attributeValues()
     {
         return $this->belongsToMany(AttributeValue::class, 'attribute_value_variants');
+    }
+
+    public function getAttributeValueNamesAttribute()
+    {
+        if (!$this->attribute_value_combine) return [];
+
+        $ids = explode('-', $this->attribute_value_combine); // ['9', '19', '40']
+        return AttributeValue::whereIn('id', $ids)->pluck('value')->toArray(); // ['X-L', 'Đỏ', 'Cotton']
     }
 }

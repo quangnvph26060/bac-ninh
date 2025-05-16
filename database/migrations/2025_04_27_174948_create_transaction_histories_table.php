@@ -19,7 +19,6 @@ return new class extends Migration
             $table->enum('transaction_type', ['recharge', 'withdraw'])->default('recharge'); // Ví dụ: 'nạp tiền', 'rút tiền', v.v.
             $table->enum('status', ['complete', 'processing', 'failure'])->default('processing'); // Ví dụ: 'hoàn thành', 'đang xử lý', 'thất bại'
             $table->text('note')->nullable(); // Ghi chú thêm nếu cần
-            $table->string('bank_account')->nullable(); // Tài khoản ngân hàng nếu cần
             $table->text('transaction_content')->nullable();
             $table->timestamps();
         });

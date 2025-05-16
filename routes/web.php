@@ -1,15 +1,15 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\BulkActionController;
 use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\CheckInventoryController;
-use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\ConfigurationController;
 use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\OrderController;
@@ -31,24 +31,51 @@ use App\Http\Controllers\Admin\ReportdebtController;
 use App\Http\Controllers\Admin\StorageController;
 use App\Http\Controllers\Client\SignUpController;
 use App\Http\Controllers\Admin\SupplierController;
-use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\WarehouseController;
+use App\Http\Controllers\Admin\TransferHistoryController;
 use Illuminate\Support\Facades\Route;
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::middleware('admin.auth')->group(function () {
-
         // Dashboard Router
         Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
 
         // Logout Router
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
+        Route::get('activity-log/{id?}', [ActivityController::class, 'history'])->name('activity.log.history');
+
         // Action Router
         Route::post('handle-bulk-action', [BulkActionController::class, 'handleBulkAction'])->name('handle.bulk.action');
+
+        Route::prefix('transfer-histories')->controller(TransferHistoryController::class)->name('transfer.histories.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('reject', 'reject')->name('reject');
+            Route::post('confirm', 'confirm')->name('confirm');
+        });
+
+        Route::prefix('customers')->controller(CustomerController::class)->name('customers.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('show/{id}', 'show')->name('show');
+            // Route::post('create', 'store')->name('store');
+            // Route::get('edit/{id}', 'edit')->name('edit');
+            // Route::put('edit/{id}', 'update')->name('update');
+        });
+
+        Route::prefix('orders')->controller(OrderController::class)->name('orders.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+            Route::post('items', 'getItemByCode')->name('get.item.by.code');
+            Route::post('cancel', 'cancelOrder')->name('cancel');
+            Route::get('invoice/preview/{id}',  'printInvoice')->name('invoice.print');
+            Route::post('update-status/{id}',  'updateStatus')->name('update.status');
+        });
 
         // Product Router
         Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
@@ -159,7 +186,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/', 'configuration')->name('index');
                 Route::put('/', 'updateConfiguration')->name('update.configuration');
                 Route::get('payment', 'payment')->name('payment');
-                Route::put('payment', 'updateConfigPayment');
+                Route::post('payment', 'saveConfigPayment');
+                Route::delete('payment', 'destroyConfigPayment')->name('destroy.config.payment');
+                Route::put('payment/status', 'updateConfigPaymentStatus')->name('update.config.payment.status');
+                Route::get('payment/{id}', 'getConfigPayment')->name('get.config.payment');
             }
         );
     });
@@ -305,7 +335,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('show/{id}', [WarehouseController::class, 'show'])->name('show');
 
     });
-
 });
 
 Route::post('/submit-table', [WarehouseController::class, 'store']);

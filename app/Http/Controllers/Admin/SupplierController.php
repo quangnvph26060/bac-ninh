@@ -4,17 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Supplier\SupplierRequest;
-use App\Http\Responses\ApiResponse;
 use App\Models\Supplier;
 use App\Services\BrandService;
 use App\Services\SupplierService;
 use App\Traits\PaginateTrait;
-use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class SupplierController extends Controller
 {
@@ -23,6 +18,7 @@ class SupplierController extends Controller
 
     public function index()
     {
+        $this->authorize('view', Supplier::class);
 
         if (request()->ajax()) {
             $query = $this->supplierService->pagination();
@@ -47,6 +43,8 @@ class SupplierController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Supplier::class);
+
         $title = 'Thêm mới nhà cung cấp.';
         $supplier = null;
         return view('admin.supplier.save', compact('title', 'supplier'));
@@ -54,23 +52,20 @@ class SupplierController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
-        try {
-            $supplier = $this->supplierService->addSupplier($request->all());
-            session()->flash('success', 'Thêm người đại diện thành công');
-            return redirect()->route('admin.supplier.index', ['company_id' => $request->company_id]);
-        } catch (Exception $e) {
-            Log::error('Failed to create supplier: ' . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => 'Failed to create supplier']);
-        }
+        $this->authorize('create', Supplier::class);
+
+        $response = $this->supplierService->create($request->all());
+        return handleResponse($response['message'], $response['success'], $response['code']);
     }
 
 
     public function edit(string $id)
     {
+        $this->authorize('edit', Supplier::class);
+
         $title = 'Cập nhật nhà cung cấp.';
         $supplier = $this->supplierService->show($id);
-        $getSelectdBrands = $supplier->brands->pluck('brand_id')->toArray();
+        $getSelectdBrands = $supplier->brands->pluck('id')->toArray();
         $banks = DB::table('banks')->pluck('name', 'id')->toArray();
         $brands = $this->brandService->getBrandAll(false);
         return view('admin.supplier.save', compact('title', 'supplier', 'banks', 'brands', 'getSelectdBrands'));
@@ -78,6 +73,7 @@ class SupplierController extends Controller
 
     public function update(string $id, SupplierRequest $request)
     {
+        $this->authorize('edit', Supplier::class);
 
         $payload = $request->validated();
 
@@ -85,5 +81,4 @@ class SupplierController extends Controller
 
         return handleResponse($response['message'], $response['success'], $response['code']);
     }
-
 }

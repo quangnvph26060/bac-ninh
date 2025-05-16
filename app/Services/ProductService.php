@@ -3,18 +3,7 @@
 namespace App\Services;
 
 use App\Models\AttributeValue;
-use App\Models\CompanyProduct;
-use App\Models\OrderDetail;
 use App\Models\Product;
-use App\Models\ProductImages;
-use App\Models\ProductStorage;
-use Exception;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-
 
 class ProductService  extends BaseService
 {
@@ -73,11 +62,14 @@ class ProductService  extends BaseService
                 'discount_start'            => optional($variant->discount_start)->format('d-m-Y H:i'),
                 'discount_end'              => optional($variant->discount_end)->format('d-m-Y H:i'),
                 'product_unit'              => $variant->product_unit,
-                'stock_status'              => $variant->stock_status,
+                // 'stock_status'              => $variant->stock_status,
                 'status'                    => $variant->status,
                 'id'                        => $variant->id,
                 'attribute_value_ids'       => $variant->attributeValues->pluck('id')->implode('-'), // nếu bạn muốn dùng lại key
                 'stock'                     => $variant->stock,
+                'standard_shipping'         => $variant->standard_shipping,
+                'express_shipping'          => $variant->express_shipping,
+                'international_shipping'    => $variant->international_shipping,
             ];
         });
     }
@@ -172,6 +164,9 @@ class ProductService  extends BaseService
                 unset($payload['discount_end']);
                 unset($payload['product_unit']);
                 unset($payload['stock']);
+                unset($payload['standard_shipping']);
+                unset($payload['express_shipping']);
+                unset($payload['international_shipping']);
             }
 
             if (! $product = $this->create($payload)) {
@@ -237,7 +232,12 @@ class ProductService  extends BaseService
                 unset($payload['discount_end']);
                 unset($payload['product_unit']);
                 unset($payload['stock']);
+                unset($payload['standard_shipping']);
+                unset($payload['express_shipping']);
+                unset($payload['international_shipping']);
             }
+
+            $payload['is_featured'] ??= 0;
 
             if (!$product = $this->updateData($id, $payload)) {
                 return errorResponse('Có lỗi xảy ra. Vui lòng thử lại sau!');
@@ -316,15 +316,31 @@ class ProductService  extends BaseService
                 'product_unit'   => $variantData['product_unit'] ?? null,
                 'discount_start' => $variantData['discount_start'] ?? null,
                 'discount_end'   => $variantData['discount_end'] ?? null,
-                'stock_status'   => $variantData['stock_status'],
                 'stock'          => $variantData['stock'] ?? 0,
-                'status'         => $variantData['status'] ?? 2,
-                'attribute_value_combine' => $combineKey // Có thể giữ để hiển thị, nhưng không xử lý logic bằng nó
+                'status'         => $variantData['status'] ?? 1,
+                'attribute_value_combine' => $combineKey,
+                'standard_shipping' => $variantData['standard_shipping'] ?? 0,
+                'express_shipping' => $variantData['express_shipping'] ?? 0,
+                'international_shipping' => $variantData['international_shipping'] ?? 0,
             ];
 
             if ($existingVariants->has($combineKey)) {
                 $variant = $existingVariants[$combineKey];
-                $variant->update($data);
+
+                // Kiểm tra xem có thay đổi gì không
+                $hasChanges = false;
+                foreach ($data as $key => $value) {
+
+                    if ($variant->$key != $value) {
+                        $hasChanges = true;
+                        break;
+                    }
+                }
+
+                // Chỉ update nếu có thay đổi
+                if ($hasChanges) {
+                    $variant->update($data);
+                }
             } else {
                 $variant = $product->variants()->create($data);
             }
@@ -338,13 +354,26 @@ class ProductService  extends BaseService
 
         $minSalePriceVariant = $this->getMinSalePriceVariant($product);
 
-        $product->update([
+        // Kiểm tra xem có cần update product không
+        $productData = [
             'stock' => $qty,
             'sale_price' => $minSalePriceVariant->sale_price,
             'discount_price' => $minSalePriceVariant->discount_price,
             'discount_start' => $minSalePriceVariant->discount_start,
             'discount_end' => $minSalePriceVariant->discount_end,
-        ]);
+        ];
+
+        $hasProductChanges = false;
+        foreach ($productData as $key => $value) {
+            if ($product->$key != $value) {
+                $hasProductChanges = true;
+                break;
+            }
+        }
+
+        if ($hasProductChanges) {
+            $product->update($productData);
+        }
 
         // Xóa các biến thể không còn
         $variantsToDelete = $product->variants()->whereNotIn('id', $newVariantIds)->get();
