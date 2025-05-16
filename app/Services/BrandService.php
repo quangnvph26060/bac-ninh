@@ -3,15 +3,6 @@
 namespace App\Services;
 
 use App\Models\Brand;
-use App\Models\Cart;
-use App\Models\Product;
-use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-
 
 class BrandService extends BaseService
 {

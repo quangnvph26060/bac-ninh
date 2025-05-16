@@ -26,7 +26,11 @@ class EmployeeRequest extends FormRequest
         $id = $this->route('id', null);
         return [
             'full_name' => 'required|max:250',
-            "phone" => "required|regex:/^\+?[1-9]\d{1,14}$/|unique:employees,phone,{$id}",
+            "phone" => [
+                "required",
+                "regex:/^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/",
+                "unique:employees,phone,{$id}"
+            ],
             'email' => "required|email|max:250|unique:employees,email,{$id}",
             'gender' => 'required|in:other,male,female',
             'date_of_birth' => 'nullable|date|date_format:d-m-Y|before:today|after:01-01-1900',
@@ -69,3 +73,4 @@ class EmployeeRequest extends FormRequest
         ];
     }
 }
+// "phone" => "required|regex:/^\+?[1-9]\d{1,14}$/|unique:employees,phone,{$id}",

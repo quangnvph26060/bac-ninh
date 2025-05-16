@@ -19,7 +19,10 @@
         </div>
         <!-- End Logo Header -->
     </div>
-
+    {{-- {
+    "title": "Quản lý quyền hạn",
+    "url": "admin.permissions.index"
+    }, --}}
     @php
         $menu = json_decode(file_get_contents(resource_path('views/admin/layout/menu.json')), true);
         $currentRoute = request()->route()->getName();
@@ -30,7 +33,11 @@
             <ul class="nav nav-secondary">
                 @foreach ($menu ?? [] as $item)
                     @php
-                        $isActive = request()->routeIs($item['route'] ?? '') ? 'active' : '';
+                        $isActive =
+                            request()->routeIs($item['route'] ?? '') ||
+                            (isset($item['inRoutes']) && in_array($currentRoute, $item['inRoutes']))
+                                ? 'active'
+                                : '';
                         $hasChildren = isset($item['children']);
                         $href = $hasChildren
                             ? '#' . $item['id']

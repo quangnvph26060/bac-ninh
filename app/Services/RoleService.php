@@ -67,15 +67,4 @@ class RoleService extends BaseService
             return successResponse('Cập nhật vai trò thành công.');
         });
     }
-
-    public function destroy($id)
-    {
-        try {
-            $this->deleteById($id);
-            return successResponse('Xóa vai trò thành công.');
-        } catch (\Exception $e) {
-            logger('RoleService:' . $e->getMessage());
-            return errorResponse('Xóa vai trò thất bại!');
-        }
-    }
 }

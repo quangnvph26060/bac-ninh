@@ -12,11 +12,15 @@ class ConfigurationController extends Controller
 {
     public function configuration()
     {
+        $this->authorize('view', Config::class);
+
         return view('admin.configuration.index');
     }
 
     public function updateConfiguration(Request $request)
     {
+        $this->authorize('edit', Config::class);
+
         $credentials = $request->validate(
             [
                 'title'             => 'nullable|string|max:255',
@@ -97,6 +101,7 @@ class ConfigurationController extends Controller
     {
         // return "<img src='https://img.vietqr.io/image/970422-5885128062004-compact.png?amount=500000&addInfo=AASNNA' />";
         // $banks = Bank::pluck('shortName', 'id')->toArray();
+        $this->authorize('view', ConfigPayment::class);
 
 
         $configPayments = ConfigPayment::query()->latest()->get();
@@ -106,6 +111,8 @@ class ConfigurationController extends Controller
 
     public function getConfigPayment(string $id)
     {
+        $this->authorize('view', ConfigPayment::class);
+
         $configPayment = ConfigPayment::query()->find($id);
 
         if (!$configPayment) {
@@ -119,6 +126,8 @@ class ConfigurationController extends Controller
 
     public function saveConfigPayment(Request $request)
     {
+        $this->authorize('save', ConfigPayment::class);
+
         $credentials = $request->validate([
             'title' => 'nullable|string|max:255',
             'content' => 'nullable|string',
@@ -150,6 +159,8 @@ class ConfigurationController extends Controller
 
     public function updateConfigPaymentStatus(Request $request)
     {
+        $this->authorize('editStatus', ConfigPayment::class);
+
         $credentials = $request->validate([
             'id' => 'required|exists:config_payments,id',
             'status' => 'required|boolean'
@@ -165,6 +176,8 @@ class ConfigurationController extends Controller
 
     public function destroyConfigPayment(Request $request)
     {
+        $this->authorize('destroy', ConfigPayment::class);
+
         $credentials = $request->validate([
             'id' => 'required|exists:config_payments,id'
         ]);

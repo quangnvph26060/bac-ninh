@@ -3,8 +3,9 @@
 namespace App\Policies;
 
 use App\Models\Employee;
+use App\Models\User;
 
-class CataloguePolicy
+class BrandPolicy
 {
     public function hasAccess(Employee $employee, $permission)
     {
@@ -16,30 +17,21 @@ class CataloguePolicy
      */
     public function view(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Catalogue View');
+        return $this->hasAccess($employee, 'Brand View');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Catalogue Create');
+        return $this->hasAccess($employee, 'Brand Create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function edit(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Catalogue Edit');
+        return $this->hasAccess($employee, 'Brand Edit');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function destroy(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Catalogue Destroy');
+        return $this->hasAccess($employee, 'Brand Destroy');
     }
 }

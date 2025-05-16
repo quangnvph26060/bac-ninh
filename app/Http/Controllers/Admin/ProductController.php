@@ -33,6 +33,8 @@ class ProductController extends Controller
     ) {}
     public function index()
     {
+        $this->authorize('view', Product::class);
+
         if (request()->ajax()) {
             $query = $this->productService->getProductAll();
 
@@ -56,6 +58,8 @@ class ProductController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Product::class);
+
         $title = 'thêm sản phẩm';
         $brands = $this->brandService->getBrandAll();
         $categories = $this->categoryService->getCategoryAll();
@@ -65,6 +69,8 @@ class ProductController extends Controller
 
     public function store(ProductRequest $request)
     {
+        $this->authorize('create', Product::class);
+
         $payload = $request->validated();
         $response = $this->productService->store($payload);
         return handleResponse($response['message'], $response['success'], $response['code']);
@@ -72,6 +78,8 @@ class ProductController extends Controller
 
     public function edit(string $id)
     {
+        $this->authorize('edit', Product::class);
+
         $title = 'Cập nhật sản phẩm';
 
         $brands = $this->brandService->getBrandAll();
@@ -89,6 +97,7 @@ class ProductController extends Controller
 
     public function update(string $id, ProductRequest $request)
     {
+        $this->authorize('edit', Product::class);
 
         $payload = $request->validated();
         $response = $this->productService->update($id, $payload);
@@ -97,6 +106,8 @@ class ProductController extends Controller
 
     public function import(Request $request)
     {
+        $this->authorize('import', Product::class);
+
         $request->validate([
             'file' => 'required|mimes:xlsx,csv|max:2048',
         ]);
@@ -118,118 +129,16 @@ class ProductController extends Controller
 
     public function export()
     {
+        $this->authorize('export', Product::class);
+
         return Excel::download(new ProductExport, 'products.xlsx');
     }
 
     public function downloadTemplate()
     {
+        $this->authorize('downloadTemplate', Product::class);
+
         return Excel::download(new ProductTemplateExport, 'product_template.xlsx');
-    }
-
-    public function export1(Request $request)
-    {
-        $selectedCategories = json_decode($request->query('categories', '[]'), true);
-        $selectedCompanies = json_decode($request->query('companies', '[]'), true);
-        $selectedBrands = json_decode($request->query('brands', '[]'), true);
-
-        // Lọc sản phẩm dựa trên các loại hàng được chọn
-        $query = Product::query();
-
-        if ($selectedCategories) {
-            $query->whereIn('category_id', $selectedCategories);
-        }
-
-        if ($selectedBrands) {
-            $query->whereIn('brands_id', $selectedBrands);
-        }
-
-        if ($selectedCompanies) {
-            $query->company->whereIn('company_id', $selectedCompanies);
-        }
-
-        $products = $query->get();
-
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Đặt tiêu đề cột
-        $sheet->setCellValue('A1', 'Mã sản phẩm');
-        $sheet->setCellValue('B1', 'tên sản phẩm');
-        $sheet->setCellValue('C1', 'Đơn vị');
-        $sheet->setCellValue('D1', 'Số lương');
-        $sheet->setCellValue('E1', 'Giá nhập');
-        $sheet->setCellValue('F1', 'Giá bán');
-        $sheet->setCellValue('G1', 'Danh mục');
-        $sheet->setCellValue('H1', 'Thương hiệu');
-        $sheet->setCellValue('I1', 'Nhà cung cấp');
-
-        $row = 2;
-        foreach ($products as $product) {
-            $sheet->setCellValue('A' . $row, $product->code);
-            $sheet->setCellValue('B' . $row, $product->name);
-            $sheet->setCellValue('C' . $row, $product->product_unit);
-            $sheet->setCellValue('D' . $row, $product->quantity);
-            $sheet->setCellValue('E' . $row, $product->price);
-            $sheet->setCellValue('F' . $row, $product->priceBuy);
-            $sheet->setCellValue('G' . $row, $product->categories ? $product->categories->name : ''); // Kiểm tra nếu categories tồn tại
-            $sheet->setCellValue('H' . $row, $product->brands ? $product->brands->name : ''); // Kiểm tra nếu brands tồn tại
-            $sheet->setCellValue('I' . $row, $product->company->pluck('name')->join(', ')); // Lấy tên các công ty, nối thành chuỗi
-            $row++;
-        }
-
-        $sheet->getColumnDimension('A')->setWidth(20);
-        $sheet->getColumnDimension('B')->setWidth(30);
-        $sheet->getColumnDimension('C')->setWidth(10);
-        $sheet->getColumnDimension('D')->setWidth(20);
-        $sheet->getColumnDimension('E')->setWidth(20);
-        $sheet->getColumnDimension('F')->setWidth(20);
-        $sheet->getColumnDimension('G')->setWidth(20);
-        $sheet->getColumnDimension('H')->setWidth(20);
-        $sheet->getColumnDimension('I')->setWidth(50);
-
-        $writer = new Xlsx($spreadsheet);
-
-        $response = response()->stream(
-            function () use ($writer) {
-                $writer->save('php://output');
-            },
-            200,
-            [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'Content-Disposition' => 'attachment; filename="products.xlsx"',
-            ]
-        );
-
-        return $response;
-    }
-
-    /**
-     * Tìm kiếm sản phẩm dựa trên query.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function search(Request $request)
-    {
-        // Lấy query từ request
-        $query = $request->get('query');
-        $page = $request->get('page', 1); // Mặc định trang là 1
-        $perPage = $request->get('per_page', 10); // Mặc định 10 sản phẩm mỗi trang
-
-        // Tìm kiếm sản phẩm theo tên
-        $products = Product::where('name', 'like', '%' . $query . '%')
-            ->paginate($perPage); // Phân trang kết quả
-
-        // Trả về kết quả tìm kiếm dạng JSON, bao gồm dữ liệu sản phẩm và phân trang
-        return response()->json([
-            'data' => $products->items(),
-            'pagination' => [
-                'current_page' => $products->currentPage(),
-                'total_pages' => $products->lastPage(),
-                'prev_page_url' => $products->previousPageUrl(),
-                'next_page_url' => $products->nextPageUrl(),
-            ],
-        ]);
     }
 
     public function getValueByAttributeId($attributeId)

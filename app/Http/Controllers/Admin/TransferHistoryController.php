@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\WalletTransaction;
 use App\Services\TransferHistoryService;
 use App\Traits\PaginateTrait;
 use Illuminate\Http\Request;
@@ -13,6 +14,8 @@ class TransferHistoryController extends Controller
     public function __construct(public TransferHistoryService $transferHistoryService) {}
     public function index()
     {
+        $this->authorize('view', WalletTransaction::class);
+
         if (request()->ajax()) {
             $query = $this->transferHistoryService->pagination();
 
@@ -33,6 +36,8 @@ class TransferHistoryController extends Controller
 
     public function reject(Request $request)
     {
+        $this->authorize('refuse', WalletTransaction::class);
+
         $credentials = $request->validate([
             'id' => 'required',
             'reason' => 'required',
@@ -45,6 +50,8 @@ class TransferHistoryController extends Controller
 
     public function confirm(Request $request)
     {
+        $this->authorize('confirm', WalletTransaction::class);
+
         $credentials = $request->validate([
             'id' => 'required',
         ]);

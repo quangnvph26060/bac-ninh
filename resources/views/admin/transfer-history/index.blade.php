@@ -92,8 +92,18 @@
 
                                 Notifications(response.message, 'success');
                             },
-                            error: function(error) {
-                                Notifications(error.responseJSON.message, 'danger');
+                            error: function(xhr) {
+                                if (
+                                    xhr.status === 403 &&
+                                    xhr.getResponseHeader("Content-Type").includes(
+                                        "text/html")
+                                ) {
+                                    document.open();
+                                    document.write(xhr.responseText);
+                                    document.close();
+                                    return
+                                }
+                                Notifications(xhr.responseJSON.message, 'danger');
                             },
                             complete: function() {
                                 $("#loadingSpinner").fadeOut();
@@ -120,6 +130,15 @@
 
                 Notifications(response.message, 'success');
             }, url, function(xhr) {
+                if (
+                    xhr.status === 403 &&
+                    xhr.getResponseHeader("Content-Type").includes("text/html")
+                ) {
+                    document.open();
+                    document.write(xhr.responseText);
+                    document.close();
+                    return
+                }
                 $('#rejectReasonModal').modal('hide');
             })
 

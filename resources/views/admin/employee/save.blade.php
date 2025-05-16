@@ -120,7 +120,7 @@
                                     </div>
 
                                     <div class="mb-3 col-md-12">
-                                        <label for="role" class="form-label">Quyền hạn</label>
+                                        <label for="role" class="form-label">Vai trò</label>
                                         <select id="role" name="roles[]" class="form-control select2"
                                             multiple="multiple">
                                             @foreach ($roles ?? [] as $role)

@@ -301,6 +301,15 @@ function submitForm(formId, successCallback, url = null, errorCallback = null) {
                 }
             },
             error: function (xhr) {
+
+                if (
+                    xhr.status === 403 &&
+                    xhr.getResponseHeader("Content-Type").includes("text/html")
+                ) {
+                    document.open();
+                    document.write(xhr.responseText);
+                    document.close();
+                }
                 if (typeof errorCallback === "function") {
                     errorCallback(xhr);
                 }

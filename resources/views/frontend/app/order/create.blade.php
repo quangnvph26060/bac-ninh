@@ -633,7 +633,7 @@
 
                         ${product.model_image ? `
                                                                                                                                                         <div style="width: 103px;">
-                                                                                                                                                            <div class="fw-semibold">Model</div>
+                                                                                                                                                            <div class="fw-semibold">Mockup</div>
                                                                                                                                                             <div class="image-container">
                                                                                                                                                                 <img class="img-thumbnail"
                                                                                                                                                                     style="cursor: pointer;"
@@ -1284,7 +1284,7 @@
                                     <hr class="my-3">
                                     <div class="d-flex gap-4 pb-4">
                                         <div class="model-upload" style="width: 11%;">
-                                            <label class="form-label fw-bold d-block ">Model</label>
+                                            <label class="form-label fw-bold d-block ">Mockup</label>
                                             <div class="image-container">
                                                 <img class="img-thumbnail" id="show_model_${product.id}"
                                                     style="cursor: pointer;"

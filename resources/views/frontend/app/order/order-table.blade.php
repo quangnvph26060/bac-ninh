@@ -1,31 +1,33 @@
 <table class="table table-striped custom-table">
     <thead>
         <tr class="align-middle">
-            <th scope="col">Mã đơn hàng</th>
-            <th scope="col">Thông tin người nhận</th>
-            <th scope="col">Trạng thái</th>
-            <th scope="col">Thanh toán</th>
-            <th scope="col">Số lượng</th>
-            <th scope="col">Tổng tiền</th>
-            <th scope="col">Ngày tạo</th>
+            <th scope="col" style="width: 10%;">Order Code</th>
+            <th scope="col">Information recipient</th>
+            <th scope="col">Order Name</th>
+            <th scope="col">Status</th>
+            <th scope="col">Payment</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Total</th>
+            <th scope="col">Reason</th>
+            <th scope="col">Created At</th>
         </tr>
     </thead>
     <tbody>
         @forelse ($orders as $order)
             <tr class="align-middle">
                 <td>
-                    <div class="d-flex flex-column">
-                        <a href="{{ route('orders.show', $order->order_code) }}"
-                            class="name">{{ $order->order_code }}</a>
-                        <p>{{ $order->order_name }}</p>
-                    </div>
+                    <a href="{{ route('orders.show', $order->order_code) }}" class="name">{{ $order->order_code }}</a>
                 </td>
                 <td>
                     <div class="d-flex flex-column">
                         <a href="{{ route('orders.show', $order->order_code) }}"
                             class="name">{{ $order->user?->name }}</a>
+                        <a href="mailto:{{ $order->user?->email }}">{{ $order->user?->email }}</a>
                         <p>{{ $order->phone_number ?? $order->user?->phone }}</p>
                     </div>
+                </td>
+                <td>
+                    {{ $order->order_name }}
                 </td>
                 <td>@include('frontend.components.switch-status', ['status' => $order->status])</td>
                 <td>
@@ -48,6 +50,7 @@
                 </td>
                 <td>{{ $order->orderItems->sum('quantity') }} product</td>
                 <td>${{ formatPrice($order->total) }}</td>
+                <td>{{ $order->reason ?? 'N/A' }}</td>
                 <td>{{ $order->created_at->format('d-m-Y H:i') }}</td>
             </tr>
             @empty
