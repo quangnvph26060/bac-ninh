@@ -140,41 +140,57 @@ class OrderController extends Controller
 
         return handleResponse($response['message'], $response['success'], $response['code'], $response['data'], false);
     }
+
+    public function barcodeScanner()
+    {
+        return view('admin.order.barcode-scanner');
+    }
+
+    public function getByBarcode(Request $request)
+    {
+        $order = Order::query()->where('barcode', $request->barcode)->first();
+
+        if (!$order) {
+            return errorResponse("Không tìm thấy đơn hàng!", true, 404);
+        }
+
+        return successResponse("Lấy đơn hàng thành công!",route('admin.orders.edit', $order->id), 200, true);
+    }
 }
 
 
-        // $order = Order::query()->where('order_code', $credentials['code'])->firstOrFail();
+// $order = Order::query()->where('order_code', $credentials['code'])->firstOrFail();
 
-        // if ($order->status !== "pending") return errorResponse("Your order cannot be cancelled.", true, 400);
+// if ($order->status !== "pending") return errorResponse("Your order cannot be cancelled.", true, 400);
 
-        // $order->reason = $credentials['reason'];
-        // $order->status = "cancelled";
-        // $order->payment_status = "refunded";
-        // $order->save();
+// $order->reason = $credentials['reason'];
+// $order->status = "cancelled";
+// $order->payment_status = "refunded";
+// $order->save();
 
-        // $wallet = Wallet::firstOrCreate(
-        //     ['user_id' => $credentials['user_id']],
-        //     ['balance' => 0]
-        // );
+// $wallet = Wallet::firstOrCreate(
+//     ['user_id' => $credentials['user_id']],
+//     ['balance' => 0]
+// );
 
-        // $amount = $order->total;
-        // $note = "REFUND DUE TO ADMIN CANCELLATION OF ORDER #{$order->order_code}";
+// $amount = $order->total;
+// $note = "REFUND DUE TO ADMIN CANCELLATION OF ORDER #{$order->order_code}";
 
-        // $balanceBefore = $wallet->balance;
+// $balanceBefore = $wallet->balance;
 
-        // $wallet->increment('balance', $amount);
+// $wallet->increment('balance', $amount);
 
-        // $balanceAfter = $wallet->fresh()->balance;
+// $balanceAfter = $wallet->fresh()->balance;
 
-        // $wallet->transactions()->create([
-        //     'code' => generateTransactionCode(),
-        //     'amount' => $amount,
-        //     'note' => $note,
-        //     'balance_before' => $balanceBefore,
-        //     'balance_after' => $balanceAfter,
-        //     'type' => "deposit"
-        // ]);
+// $wallet->transactions()->create([
+//     'code' => generateTransactionCode(),
+//     'amount' => $amount,
+//     'note' => $note,
+//     'balance_before' => $balanceBefore,
+//     'balance_after' => $balanceAfter,
+//     'type' => "deposit"
+// ]);
 
-        // dispatch(new SendOrderCancelledEmail($order, $balanceBefore, $balanceAfter));
+// dispatch(new SendOrderCancelledEmail($order, $balanceBefore, $balanceAfter));
 
-        // return successResponse("Hủy đơn hàng thành công.", ['wallet' => formatPrice($wallet->balance)], 200, true);
+// return successResponse("Hủy đơn hàng thành công.", ['wallet' => formatPrice($wallet->balance)], 200, true);

@@ -272,6 +272,22 @@ function submitForm(formId, successCallback, url = null, errorCallback = null) {
     $(formId).on("submit", function (e) {
         e.preventDefault();
 
+        let isValid = true;
+
+        $(this)
+            .find("input[data-rules], textarea[data-rules], select[data-rules]")
+            .each(function () {
+                // Gọi validate lại từng input/textarea/select
+                if (!validateInput(this)) {
+                    isValid = false;
+                }
+            });
+
+        // Nếu có lỗi, chặn submit
+        if (!isValid) {
+            return;
+        }
+
         // Cập nhật tất cả giá trị CKEditor vào các textarea tương ứng
         for (const instance in CKEDITOR.instances) {
             CKEDITOR.instances[instance].updateElement();

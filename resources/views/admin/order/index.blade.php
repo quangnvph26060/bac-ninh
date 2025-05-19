@@ -1,13 +1,14 @@
 @extends('admin.layout.index')
+
 @section('content')
     <div class="page-inner">
         <div class="page-header">
-            <x-breadcrumb :items="[['name' => 'order']]" />
+            <x-breadcrumb :items="[['name' => 'đơn hàng']]" />
         </div>
 
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="text-uppercase card-title fw-bold">order list</h5>
+                <h5 class="text-uppercase card-title fw-bold">danh sách đơn hàng</h5>
             </div>
 
             <x-data-table file="order" />

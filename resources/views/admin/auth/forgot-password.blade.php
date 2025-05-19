@@ -260,7 +260,9 @@
                         <div class="create_forget_acc d-flex forgot-pass mt-3">
                             <p class="text-dark">Bạn đã có tài khoản? <a href="{{ route('admin.login') }}"
                                     class=" remove-msg " id="forgot-password">
-                                    Quay lại</a></p>
+                                    Quay lại
+                                </a>
+                            </p>
                         </div>
                     </div>
                 </div>

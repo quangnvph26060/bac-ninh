@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\PasswordChangeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +15,17 @@ class AuthController extends Controller
 
     public function login()
     {
-        return view('admin.auth.login');
+        $token = request('token', null);
+        $email = null;
+        if ($token) {
+            $email = base64_decode($token);
+            $existingEmployee = Employee::query()->where('email', $email)->exists();
+
+            if (!$existingEmployee) {
+                $email = null;
+            }
+        }
+        return view('admin.auth.login', compact('email'));
     }
     public function forgotPasswordForm()
     {
@@ -30,6 +41,12 @@ class AuthController extends Controller
             'email' => 'Email',
             'new_password' => 'Mật khẩu mới'
         ]);
+
+        $employee = Employee::where('email', $credentials['email'])->first();
+
+        if ($employee->isAdmin()) {
+            return errorResponse('Tài khoản không tồn tại!', true, 422);
+        }
 
         $existingRequest = PasswordChangeRequest::where('email', $credentials['email'])
             ->where('status', 'pending')

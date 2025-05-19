@@ -17,10 +17,16 @@
             {
                 "title": "Yêu cầu nạp tiền",
                 "url": "admin.transfer.histories.index"
+            },
+            {
+                "title": "Tra cứu đơn hàng",
+                "url": "admin.orders.barcode.scanner"
             }
         ],
         "inRoutes": [
-            "admin.orders.index", "admin.orders.edit", "admin.transfer.histories.index"
+            "admin.orders.index",
+            "admin.orders.edit",
+            "admin.transfer.histories.index"
         ]
     },
     {
@@ -50,7 +56,11 @@
             }
         ],
         "inRoutes": [
-            "admin.products.index", "admin.categories.index", "admin.brands.index", "admin.attributes.index", "admin.collections.index"
+            "admin.products.index",
+            "admin.categories.index",
+            "admin.brands.index",
+            "admin.attributes.index",
+            "admin.collections.index"
         ]
     },
     {
@@ -63,9 +73,7 @@
                 "url": "admin.coupons.index"
             }
         ],
-        "inRoutes": [
-            "admin.coupons.index"
-        ]
+        "inRoutes": ["admin.coupons.index"]
     },
     {
         "title": "Nhà cung cấp",
@@ -78,9 +86,7 @@
         "icon": "fas fa-user",
         "route": "admin.customers.index",
         "id": "customers",
-        "inRoutes": [
-            "admin.customers.index", "admin.customers.show"
-        ]
+        "inRoutes": ["admin.customers.index", "admin.customers.show"]
     },
     {
         "title": "Nhân viên",
@@ -97,7 +103,10 @@
             }
         ],
         "inRoutes": [
-            "admin.employees.index", "admin.roles.index", "admin.permissions.index", "admin.activity.log.history"
+            "admin.employees.index",
+            "admin.roles.index",
+            "admin.permissions.index",
+            "admin.activity.log.history"
         ]
     },
     {
@@ -116,7 +125,10 @@
             }
         ],
         "inRoutes": [
-            "admin.employees.index", "admin.roles.index", "admin.permissions.index", "admin.activity.log.history"
+            "admin.employees.index",
+            "admin.roles.index",
+            "admin.permissions.index",
+            "admin.activity.log.history"
         ]
     },
     {
@@ -134,7 +146,8 @@
             }
         ],
         "inRoutes": [
-            "admin.configurations.index", "admin.configurations.payment"
+            "admin.configurations.index",
+            "admin.configurations.payment"
         ]
     },
     {
@@ -150,12 +163,7 @@
                 "title": "Quản lý nhập kho",
                 "url": "admin.warehouse.index"
             }
-
         ],
-        "inRoutes": [
-            "admin.materials.index", "admin.warehouse.index"
-        ]
+        "inRoutes": ["admin.materials.index", "admin.warehouse.index"]
     }
 ]
-
-

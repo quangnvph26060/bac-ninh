@@ -245,7 +245,7 @@
                                     <figure class="feild_icon">
                                         <img src="{{ asset('backend/auth/assets/images/login_padlock_icon.png') }}">
                                     </figure>
-                                    <i class="fa-solid fa-eye toggle-password"
+                                    <i class="far fa-eye toggle-password"
                                         style="cursor:pointer; position:absolute; right:10px; top:50%; transform:translateY(-50%);"></i>
                                     @error('password')
                                         <small class="text-danger mb-2">{{ $message }}</small>

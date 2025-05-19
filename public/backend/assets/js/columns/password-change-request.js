@@ -21,7 +21,7 @@ const columns = [
                 case "approved":
                     return "<span class='badge bg-success'>Đã xác nhận</span>";
                 case "rejected":
-                    return "<span class='badge bg-danger'>Đã hủy</span>";
+                    return "<span class='badge bg-danger'>Đã từ chối</span>";
                 default:
                     return "<span class='badge bg-secondary'>Không xác định</span>";
             }

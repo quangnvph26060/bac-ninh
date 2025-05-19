@@ -24,9 +24,9 @@
 
                                     <div class="mb-3 position-relative col-md-12">
                                         <label for="name" class="form-label required">Tên danh mục</label>
-                                        <input type="text" placeholder="Tên sản phẩm" aria-required="true" required
-                                            class="form-control" name="name" id="name"
-                                            value="{{ optional($brand)->name }}">
+                                        <x-input-component id="name" name="name" type="text" class="form-control"
+                                            placeholder="Nhập tên sản phẩm" rules="required|min:5|max:30"
+                                            attribute="Tên sản phẩm" value="{{ optional($brand)->name }}" />
                                     </div>
 
                                     <div class="mb-3 position-relative col-md-12">
@@ -46,8 +46,10 @@
                                     </div>
 
                                     <div class="mb-3 position-relative col-md-12">
-                                        <label for="description" class="form-label">Mô tả</label>
-                                        <textarea rows="3" name="description" class="form-control" id="description" placeholder="Mô tả ngắn">{!! optional($brand)->description !!}</textarea>
+                                        <label for="description" class="form-label">Mô tả ngắn</label>
+                                        <x-input-component id="description" name="description" type="textarea"
+                                            class="form-control" placeholder="Nhập mô tả ngắn" rules="nullable|min:5|max:400"
+                                            attribute="Mô tả ngắn" value="{{ optional($brand)->description }}" rows="3" />
                                     </div>
 
                                     <div class="mb-3 position-relative col-md-12">
@@ -96,8 +98,7 @@
             $('.seo-edit-section').toggle(); // Ẩn/hiện các trường SEO
         });
 
-        const inputIds = [
-            {
+        const inputIds = [{
                 id: 'name',
                 maxLength: 250
             },
