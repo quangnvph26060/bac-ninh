@@ -12,11 +12,14 @@
             <x-breadcrumb :items="$items" />
         </div>
 
+        {{-- <img src="data:image/png;base64,{{ DNS1D::getBarcodePNG($order->barcode, 'C128') }}" alt="barcode" /> --}}
+
         <div class="sa-page-meta">
             <div class="sa-page-meta__body">
                 <div class="sa-page-meta__list">
                     <div class="sa-page-meta__item">
-                        {{ $order->created_at->format('F j, Y \a\t g:i a') }}
+                        {{-- {{ $order->created_at->format('F j, Y \a\t g:i a') }} --}}
+                        {{ $order->created_at->format('d/m/Y H:i') }}
                     </div>
                     <div class="sa-page-meta__item">{{ $order->orderItems->count() }} items</div>
                     <div class="sa-page-meta__item">Total ${{ formatPrice($order->total) }}</div>
@@ -210,7 +213,7 @@
                         <div class="ms-3 ps-2">
                             <div class="fs-exact-16 fw-bold ">{{ $order->user->name }}</div>
                             <div class="fs-exact-13 text-muted">
-                                Valued customer since {{ $order->user->created_at->format('Y') }}
+                                Khách hàng từ {{ $order->user->created_at->format('Y') }}
                             </div>
                         </div>
                     </div>
@@ -218,7 +221,7 @@
 
                 <div class="card mt-4">
                     <div class="card-body d-flex align-items-center justify-content-between pb-0 pt-4">
-                        <h2 class="fs-exact-18 mb-0 fw-bold">Contact person</h2>
+                        <h2 class="fs-exact-18 mb-0 fw-bold">Thông Tin Liên Hệ</h2>
                         {{-- <a href="#" class="fs-exact-14">Edit</a> --}}
                     </div>
                     <div class="card-body pt-4 fs-exact-16">

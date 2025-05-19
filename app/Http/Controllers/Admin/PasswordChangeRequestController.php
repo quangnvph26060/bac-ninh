@@ -11,7 +11,9 @@ class PasswordChangeRequestController extends Controller
 {
     use PaginateTrait;
 
-    public function __construct(public PasswordChangeRequestService $passwordChangeRequestService) {}
+    public function __construct(public PasswordChangeRequestService $passwordChangeRequestService)
+    {
+    }
 
     public function index()
     {
@@ -37,6 +39,18 @@ class PasswordChangeRequestController extends Controller
         ]);
 
         $response = $this->passwordChangeRequestService->confirm($request->id);
+
+        return handleResponse($response['message'], $response['success'], $response['code'], null, false);
+    }
+
+    public function reject(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:password_change_requests,id',
+            'reason' => 'required|string'
+        ]);
+
+        $response = $this->passwordChangeRequestService->reject($request->id, $request->reason);
 
         return handleResponse($response['message'], $response['success'], $response['code'], null, false);
     }

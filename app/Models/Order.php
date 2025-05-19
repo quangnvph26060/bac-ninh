@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Client;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Order extends Model
 {
@@ -28,7 +29,8 @@ class Order extends Model
         'shipping_address',
         'note',
         'discount',
-        'shipping_fee'
+        'shipping_fee',
+        'barcode'
     ];
 
     public function getOrderdetailAttribute()
@@ -59,4 +61,16 @@ class Order extends Model
     {
         return $this->belongsTo(Client::class);
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($order) {
+            do {
+                $barcode = 'ORDER-' . strtoupper(Str::random(8));
+            } while (Order::where('barcode', $barcode)->exists());
+
+            $order->barcode = $barcode;
+        });
+    }
+
 }

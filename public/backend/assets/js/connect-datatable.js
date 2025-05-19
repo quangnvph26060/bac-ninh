@@ -348,9 +348,13 @@ const dataTables = (
             },
         });
 
-        $("#date-range").on("cancel.daterangepicker", function (ev, picker) {
-            $(this).val("");
-        });
+        $("#dateRangePicker").on(
+            "cancel.daterangepicker",
+            function (ev, picker) {
+                $(this).val("");
+                table.ajax.reload();
+            }
+        );
 
         // Bắt sự kiện khi chọn ngày
         $("#dateRangePicker").on(
@@ -445,7 +449,7 @@ const dataTables = (
                 error: function (xhr) {
                     $('input[type="checkbox"]').prop("checked", false);
                     $("#actionSelect").val("");
-                    $('#actionDiv').hide(); // Ẩn #actionDiv nếu có lỗi xảy ra
+                    $("#actionDiv").hide(); // Ẩn #actionDiv nếu có lỗi xảy ra
                     Notifications(xhr.responseJSON.message, "danger");
                 },
             });

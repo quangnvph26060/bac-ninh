@@ -71,14 +71,13 @@
 .toastr {
     min-width: 250px;
     max-width: 800px;
-    background-color: #fff;
     color: #333;
     box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
     border-radius: 6px;
     padding: 0.75rem 1rem;
     display: flex !important;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
     font-family: Arial, sans-serif;
     font-size: 0.9rem;
     cursor: default;
@@ -87,29 +86,79 @@
     position: relative;
 }
 
+/* Thanh trượt thời gian */
+.toastr .progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background-color: var(--color);
+    width: 100%;
+    animation-timing-function: linear;
+}
+
+/* Keyframe cho animation của progress bar */
+@keyframes slideOut {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0%;
+    }
+}
+
+.toastr .icon i {
+    color: var(--color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: x-large;
+    background-color: rgb(0 0 0 / 20%);
+    border-radius: 100px;
+    padding: 9px;
+}
+
+.toastr span {
+    color: #fff;
+    opacity: 0.8;
+}
+
+.toastr .content .title::first-letter {
+    text-transform: uppercase;
+    font-size: large;
+    font-weight: bold;
+}
+.toastr .content .title {
+    color: #fff;
+    font-size: large;
+    font-weight: bold;
+}
+.toastr .fa-xmark {
+    color: #fff;
+}
 /* Kiểu toast theo loại */
 .toastr.success {
     border-left: 5px solid #28a745;
-    background-color: #e6f4ea;
-    color: #276738;
+    --color: #0abf30;
+    background-image: linear-gradient(to right, #0abf3055, #22242f 30%);
 }
 
 .toastr.error {
     border-left: 5px solid #dc3545;
-    background-color: #f8d7da;
-    color: #5f0909;
+    --color: #f24d4c;
+    background-image: linear-gradient(to right, #f24d4c55, #2f2222 30%);
 }
 
 .toastr.warning {
     border-left: 5px solid #ffc107;
-    background-color: #fff3cd;
-    color: #664d03;
+    --color: #e9bd0c;
+    background-image: linear-gradient(to right, #e9bd0c55, #22242f 30%);
 }
 
 .toastr.info {
     border-left: 5px solid #17a2b8;
-    background-color: #d1ecf1;
-    color: #0c5460;
+    --color: #3498db;
+    background-image: linear-gradient(to right, #3498db55, #22242f 30%);
 }
 
 /* Icon */

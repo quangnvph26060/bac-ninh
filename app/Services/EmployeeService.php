@@ -132,4 +132,9 @@ class EmployeeService extends BaseService
 
         return true;
     }
+
+    public function getEmployeeByEmail($email)
+    {
+        return $this->firstdByWhere(['*'], [['email', $email]]);
+    }
 }

@@ -304,7 +304,6 @@ class ProductService  extends BaseService
         $newVariantIds = [];
 
         foreach ($newVariants as $key => $variantData) {
-            logger($variantData);
             $valueIds = explode('-', string: $key); // Lấy ra mảng attribute_value_id
             sort($valueIds); // Sort để đồng bộ so sánh
 

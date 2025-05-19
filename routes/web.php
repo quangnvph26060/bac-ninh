@@ -71,8 +71,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('edit/{id}', 'update')->name('update');
             Route::post('items', 'getItemByCode')->name('get.item.by.code');
             Route::post('cancel', 'cancelOrder')->name('cancel');
-            Route::get('invoice/preview/{id}',  'printInvoice')->name('invoice.print');
-            Route::post('update-status/{id}',  'updateStatus')->name('update.status');
+            Route::get('invoice/preview/{id}', 'printInvoice')->name('invoice.print');
+            Route::post('update-status/{id}', 'updateStatus')->name('update.status');
+            Route::get('barcode-scanner', 'barcodeScanner')->name('barcode.scanner');
+            Route::post('get-by-barcode', 'getByBarcode')->name('get.by.barcode');
         });
 
         // Product Router
@@ -86,7 +88,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('edit/{id}', 'edit')->name('edit');
             Route::put('edit/{id}', 'update')->name('update');
             Route::get('search-products', 'search')->name('search.products');
-            Route::get('selected-attributes/{id}',  'getValueByAttributeId')->name('selected.attributes');
+            Route::get('selected-attributes/{id}', 'getValueByAttributeId')->name('selected.attributes');
         });
 
         Route::prefix('materials')->controller(MaterialController::class)->name('materials.')->group(function () {
@@ -96,7 +98,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('edit/{id}', 'edit')->name('edit');
             Route::put('edit/{id}', 'update')->name('update');
             Route::get('search-products', 'search')->name('search.products');
-            Route::get('selected-attributes/{id}',  'getValueByAttributeId')->name('selected.attributes');
+            Route::get('selected-attributes/{id}', 'getValueByAttributeId')->name('selected.attributes');
             Route::get('list', 'list')->name('list');
         });
 
@@ -111,11 +113,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Category Router
         Route::prefix('categories')->controller(CategoryController::class)->name('categories.')->group(function () {
-            Route::get('/',   'index')->name('index');
-            Route::get('create',  'create')->name('create');
-            Route::post('create',  'store')->name('store');
-            Route::get('edit/{id}',  'edit')->name('edit');
-            Route::put('edit/{id}',  'update')->name('update');
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
         });
 
         // Collection Router
@@ -199,7 +201,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Auth Router
     Route::middleware('admin.guest')->group(function () {
         Route::controller(AuthController::class)->group(function () {
-            Route::get('login', 'login')->name('login');
+            Route::get('login/{token?}', 'login')->name('login');
             Route::get('forgot-password', 'forgotPasswordForm')->name('forgot-password-form');
             Route::post('forgot-password', 'forgotPasswordPost');
             Route::post('login', 'authenticate')->name('login.authenticate');
@@ -237,20 +239,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/detail/{id}', [OrderController::class, 'detail'])->name('detail');
         // Route::get('/find/phone', [OrderController::class, 'getOrderbyPhone'])->name('findByPhone');
         Route::get('/admin/order/filter', [OrderController::class, 'filterOrder'])->name('filter');
-    });
-
-    Route::prefix('importproduct')->name('importproduct.')->group(function () {
-        Route::get('/', [ImportProductController::class, 'index'])->name('index');
-        Route::get('/add', [ImportProductController::class, 'add'])->name('add');
-        Route::get('/import', [ImportProductController::class, 'listImport'])->name('import');
-        Route::post('/import/add', [ImportProductController::class, 'importadd'])->name('import.add');
-        Route::post('/import/update', [ImportProductController::class, 'importupdate'])->name('import.update');
-        Route::post('/import/update/price', [ImportProductController::class, 'importupdateprice'])->name('import.update.price');
-        Route::get('/import/delete', [ImportProductController::class, 'importdelete'])->name('import.delete');
-        Route::post('/import/addCategory', [ImportProductController::class, 'addCategory'])->name('import.addCategory');
-        // tạo phiếu
-        Route::post('/importCoupon', [importCouponController::class, 'add'])->name('importCoupon.add');
-        Route::get('/detail/{id}', [ImportProductController::class, 'importdetail'])->name('importCoupon.detail');
     });
 
     Route::prefix('debts')->name('debts.')->group(function () {

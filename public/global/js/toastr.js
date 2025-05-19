@@ -22,7 +22,7 @@
 
     const toastr = {
         show(message, type = "info", options = {}) {
-            const delay = options.time || 3000;
+            const delay = options.time || 5000;
             const position = options.position || "top-right";
 
             const container = getContainer(position);
@@ -38,27 +38,37 @@
             }
 
             const iconMap = {
-                success: '<i class="fas fa-check-circle"></i>',
-                error: '<i class="fas fa-times-circle"></i>',
-                warning: '<i class="fas fa-exclamation-triangle"></i>',
-                info: '<i class="fas fa-info-circle"></i>',
+                success: '<i class="fa-solid fa-circle-check"></i>',
+                error: '<i class="fa-solid fa-circle-exclamation"></i>',
+                warning: '<i class="fa-solid fa-triangle-exclamation"></i>',
+                info: '<i class="fa-solid fa-circle-info"></i>',
             };
 
             toast.innerHTML = `
             <span class="icon">${iconMap[type]}</span>
-            <span>${message}</span>
-            <span class="close-btn"><i class="fas fa-times"></i></span>
+            <div class="content">
+                <div class="title">${type}</div>
+                <span>${message}</span>
+            </div>
+            <span class="close-btn"><i class="fa-solid fa-xmark"></i></span>
+            <div class="progress-bar"></div>
         `;
 
-            toast.addEventListener("animationend", () => {
+            // Thêm animation cho progress-bar
+            const progressBar = toast.querySelector(".progress-bar");
+            progressBar.style.animation = `slideOut ${delay}ms linear forwards`;
+
+            // Animation kết thúc thì xóa phần tử
+            toast.addEventListener("animationend", (e) => {
                 if (
-                    toast.classList.contains("hide-up") ||
-                    toast.classList.contains("hide-down")
+                    e.animationName === "fadeUpOut" ||
+                    e.animationName === "fadeDownOut"
                 ) {
                     if (container.contains(toast)) container.removeChild(toast);
                 }
             });
 
+            // Nút đóng
             toast.querySelector(".close-btn").onclick = () => {
                 if (position.startsWith("top")) {
                     toast.classList.remove("show-top");
@@ -71,6 +81,7 @@
 
             container.appendChild(toast);
 
+            // Tự động ẩn sau khoảng thời gian delay
             setTimeout(() => {
                 if (!container.contains(toast)) return;
                 if (position.startsWith("top")) {
