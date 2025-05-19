@@ -25,13 +25,6 @@
                             <div class="form-body">
                                 <div class="row">
 
-                                    {{-- <div class="mb-3 position-relative col-md-6">
-                                        <label for="full_name" class="form-label">Mã nhân viên</label>
-                                        <input type="text" placeholder="Mã nhân viên" class="form-control"
-                                            name="employee_code" id="employee_code" value="" data-bs-toggle="tooltip"
-                                            data-bs-placement="top" title="Tự động tạo nếu không nhập">
-                                    </div> --}}
-
                                     <div class="mb-3 position-relative col-md-12">
                                         <label for="full_name" class="form-label required">Tên đầy đủ</label>
                                         <input type="text" placeholder="Tên đầy đủ" class="form-control" name="full_name"
@@ -118,24 +111,38 @@
                                         <label for="note" class="form-label">Ghi chú</label>
                                         <textarea rows="3" name="note" class="form-control" id="note" placeholder="Ghi chú">{{ $employee->note ?? '' }}</textarea>
                                     </div>
-
-                                    <div class="mb-3 col-md-12">
-                                        <label for="role" class="form-label">Vai trò</label>
-                                        <select id="role" name="roles[]" class="form-control select2"
-                                            multiple="multiple">
-                                            @foreach ($roles ?? [] as $role)
-                                                <option value="{{ $role }}" @selected(isset($employee) ? $employee->hasRole($role) : false)>
-                                                    {{ $role }}
-                                                </option>
-                                            @endforeach
-                                            <!-- thêm các role khác nếu cần -->
-                                        </select>
-                                    </div>
-
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    @foreach ($permissions as $groupName => $permission)
+                        <div class="card mb-3">
+                            <div class="card-header d-flex justify-content-between align-items-center bg-dark text-white">
+                                <div>
+                                    <strong>{{ $groupName }}</strong>
+                                    <span class="badge bg-light text-dark ms-2">{{ count($permission) }} quyền</span>
+                                </div>
+                                <div>
+                                    <input type="checkbox" class="form-check-input select-all cursor"
+                                        id="selectAll-{{ \Str::slug($groupName) }}">
+                                    <label for="selectAll-{{ \Str::slug($groupName) }}"
+                                        class="form-check-label ms-1 text-white cursor">Chọn tất cả</label>
+                                </div>
+                            </div>
+                            <div class="card-body d-flex flex-wrap gap-3">
+                                @foreach ($permission as $item)
+                                    <div class="form-check">
+                                        <input class="form-check-input cursor" type="checkbox" name="permissions[]"
+                                            id="{{ \Str::slug($item->name) }}" value="{{ $item->name }}"
+                                            @checked(in_array($item->name, !empty($assignedPermissions) ? $assignedPermissions : []))>
+                                        <label class="form-check-label mb-0 cursor"
+                                            for="{{ \Str::slug($item->name) }}">{{ $item->name }}</label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
 
                 </div>
                 <div class="col-md-3 gap-3 d-flex flex-column-reverse flex-md-column mb-md-0 mb-5">
@@ -185,6 +192,32 @@
 
     <script>
         $(document).ready(function() {
+            $('.card.mb-3').each(function() {
+                const card = $(this);
+
+
+                const allChecked = card.find('input[type="checkbox"]:not([id^="selectAll"])').length > 0 &&
+                    card.find('input[type="checkbox"]:not([id^="selectAll"])').length ===
+                    card.find('input[type="checkbox"]:not([id^="selectAll"]):checked').length;
+
+                card.find('.select-all').prop('checked', allChecked);
+
+                // Sự kiện khi nhấn "Chọn tất cả"
+                card.find('.select-all').on('change', function() {
+                    const isChecked = $(this).is(':checked');
+                    card.find('input[type="checkbox"]:not([id^="selectAll"])').prop('checked',
+                        isChecked);
+                });
+
+                // Sự kiện khi checkbox con thay đổi
+                card.find('input[type="checkbox"]:not([id^="selectAll"])').on('change', function() {
+                    const allChecked = card.find('input[type="checkbox"]:not([id^="selectAll"])')
+                        .length ===
+                        card.find('input[type="checkbox"]:not([id^="selectAll"]):checked').length;
+                    card.find('.select-all').prop('checked', allChecked);
+                });
+            });
+            
             submitForm('#myForm', function(response) {
                 window.location.href = "{{ route('admin.employees.index') }}"
             })

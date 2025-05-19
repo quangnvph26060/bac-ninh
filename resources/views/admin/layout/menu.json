@@ -100,13 +100,18 @@
             {
                 "title": "Yêu cầu đổi mật khẩu",
                 "url": "admin.password-change-request.index"
+            },
+            {
+                "title": "Lịch sử hoạt động",
+                "url": "admin.activity.log.history"
             }
         ],
         "inRoutes": [
             "admin.employees.index",
             "admin.roles.index",
             "admin.permissions.index",
-            "admin.activity.log.history"
+            "admin.activity.log.history",
+            "admin.password-change-request.index"
         ]
     },
     {
@@ -117,11 +122,6 @@
             {
                 "title": "Quản lý vai trò",
                 "url": "admin.roles.index"
-            },
-
-            {
-                "title": "Lịch sử hoạt động",
-                "url": "admin.activity.log.history"
             }
         ],
         "inRoutes": [
