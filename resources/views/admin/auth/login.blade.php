@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
 
-    <link rel="stylesheet" type="text/css" href="{{ asset('backend/auth/assets/css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('backend/auth/assets/css/style.css') }}?v={{ filemtime(public_path('backend/auth/assets/css/style.css')) }}">
 
     <link rel="icon" href="{{ asset('backend/auth/assets/images/cropped-favicon-sgomedia-32x32.png') }}"
         type="image/x-icon">
