@@ -16,7 +16,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
-    <link rel="stylesheet" type="text/css" href="{{ asset('backend/auth/assets/css/style.css') }}">
+    <link rel="stylesheet" type="text/css"
+        href="{{ asset('backend/auth/assets/css/style.css') }}?v={{ filemtime(public_path('backend/auth/assets/css/style.css')) }}">
 
     <link rel="stylesheet" href="{{ asset('global/css/toastr.css') }}">
 
