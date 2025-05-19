@@ -7,6 +7,7 @@ use App\Http\Requests\Employee\EmployeeRequest;
 use App\Mail\EmployeeCreated;
 use App\Models\Employee;
 use App\Services\EmployeeService;
+use App\Services\PermissionService;
 use App\Services\RoleService;
 use App\Traits\PaginateTrait;
 use Illuminate\Http\Request;
@@ -17,7 +18,9 @@ class EmployeeController extends Controller
 {
     use PaginateTrait;
 
-    public function __construct(public EmployeeService $employeeService, public RoleService $roleService) {}
+    public function __construct(public EmployeeService $employeeService, public PermissionService $permissionService)
+    {
+    }
     /**
      * Display a listing of the resource.
      */
@@ -47,7 +50,8 @@ class EmployeeController extends Controller
         $this->authorize('create', Employee::class);
 
         $title = 'Thêm mới nhân viên';
-        return view('admin.employee.save', compact('title'));
+        $permissions = $this->permissionService->groupPermissionsByNamespace();
+        return view('admin.employee.save', compact('title', 'permissions'));
     }
 
     /**
@@ -73,9 +77,10 @@ class EmployeeController extends Controller
         $this->authorize('edit', Employee::class);
 
         $title = 'Cập nhật nhân viên';
+        $permissions = $this->permissionService->groupPermissionsByNamespace();
         $employee = $this->employeeService->show($id);
-        $roles =  $this->roleService->pluckRole();
-        return view('admin.employee.save', compact('employee', 'title', 'roles'));
+        $assignedPermissions = $employee->permissions->pluck('name')->toArray();
+        return view('admin.employee.save', compact('employee', 'title', 'permissions', 'assignedPermissions'));
     }
 
     /**

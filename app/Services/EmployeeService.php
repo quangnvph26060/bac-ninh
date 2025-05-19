@@ -55,7 +55,7 @@ class EmployeeService extends BaseService
                 errorResponse('Thêm nhân viên thất bại!');
             }
 
-            $employee->syncRoles($payload['roles'] ?? []);
+            $employee->syncPermissions($payload['permissions'] ?? []);
 
             return successResponse('Thêm nhân viên thành công.', $employee, 201);
         }, function () use ($uploadedAvatar, $uploadedIdentityCard) {
@@ -100,7 +100,7 @@ class EmployeeService extends BaseService
                 errorResponse('Cập nhật viên thất bại!');
             }
 
-            $employee->syncRoles($payload['roles'] ?? []);
+            $employee->syncPermissions($payload['permissions'] ?? []);
 
             if (!empty($uploadedAvatar)) {
                 deleteImage($oldAvatar);

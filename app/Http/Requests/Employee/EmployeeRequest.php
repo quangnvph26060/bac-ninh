@@ -45,6 +45,8 @@ class EmployeeRequest extends FormRequest
             'identity_card_image' => 'nullable|image|mimes:png,jpg,webp|max:2048',
             'roles' => 'nullable|array',
             'roles.*' => 'string|exists:roles,name',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'string|exists:permissions,name',
         ];
     }
 
@@ -70,6 +72,8 @@ class EmployeeRequest extends FormRequest
             'status' => 'trạng thái',
             'avatar' => 'ảnh đại diện',
             'identity_card_image' => 'ảnh CCCD',
+            'roles' => 'vai trò',
+            'permissions' => 'quyền',
         ];
     }
 }
