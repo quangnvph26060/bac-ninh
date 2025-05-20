@@ -15,7 +15,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="text-uppercase card-title fw-bold">danh sách sản phẩm</h5>
                 <div class="card-tool">
-                    <a href="{{ route('admin.products.download.product.template') }}" target="_blank"
+                    {{-- <a href="{{ route('admin.products.download.product.template') }}" target="_blank"
                         class="btn btn-outline-light btn-sm text-dark border fs-6"><i class="ti ti-file-download me-2"></i>
                         Download Template </a>
                     <a href="{{ route('admin.products.export') }}" target="_blank"
@@ -23,7 +23,7 @@
                         Export</a>
                     <button class="btn btn-outline-light btn-sm text-dark border fs-6" data-bs-toggle="modal"
                         data-bs-target="#importProduct"><i class="ti ti-file-import me-2"></i>
-                        Import</button>
+                        Import</button> --}}
                     <a href="{{ route('admin.products.create') }}" class="btn btn-primary btn-sm fs-6"><i
                             class="ti ti-circle-plus"></i> Thêm mới </a>
                 </div>

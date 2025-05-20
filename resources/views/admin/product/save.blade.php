@@ -284,15 +284,46 @@
                                     </div>
 
                                     <button type="button" class="btn btn-light text-dark btn-sm" disabled
-                                        id="save-attributes">Lưu thuộc
-                                        tính</button>
+                                        id="save-attributes">Lưu</button>
                                 </div>
 
                                 <div class="tab-pane fade" id="variant" role="tabpanel" aria-labelledby="variant-tab">
-                                    <button type="button" class="btn btn-primary btn-sm my-3" id="generateVariants">Tạo
-                                        biến
-                                        thể tự
-                                        động</button>
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="form-label">Lọc theo giá trị thuộc tính</label>
+                                                    <select class="form-select" id="filter-attribute-values" multiple>
+                                                        <option value="all">Tất cả</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="form-label">Giá</label>
+                                                    <input type="text" class="form-control usd-price-format" id="filter-price">
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="form-label">Số lượng</label>
+                                                    <input type="text" class="form-control" id="filter-stock">
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="form-label">Vận chuyển tiêu chuẩn</label>
+                                                    <input type="text" class="form-control usd-price-format" id="filter-standard-shipping">
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="form-label">Vận chuyển nhanh</label>
+                                                    <input type="text" class="form-control usd-price-format" id="filter-express-shipping">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Vận chuyển quốc tế</label>
+                                                    <input type="text" class="form-control usd-price-format" id="filter-international-shipping">
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="form-label">&nbsp;</label>
+                                                    <button type="button" class="btn btn-primary w-100" id="apply-filter">Áp dụng</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div class="accordion" id="variantAccordion">
                                         @foreach ($variants ?? [] as $variantItem)
@@ -1205,14 +1236,18 @@
                 // Lưu vào localStorage
                 if (Object.keys(selectedAttributesData).length > 0) {
                     localStorage.setItem('selectedAttributes', JSON.stringify(selectedAttributesData));
-                    alert('Lưu thuộc tính thành công!');
+                    generateVariants();
+                    $('#attribute').removeClass('active show');
+                    $('#attribute-tab').removeClass('active');
+
+                    $('#variant').addClass('active show');
+                    $('#variant-tab').addClass('active');
                 } else {
                     alert('Vui lòng chọn ít nhất một thuộc tính và giá trị!');
                 }
             });
 
-            $('#generateVariants').on('click', function() {
-
+            function generateVariants() {
                 let storedAttributes = JSON.parse(localStorage.getItem('selectedAttributes') || '{}');
                 let keys = Object.keys(storedAttributes);
                 let values = Object.values(storedAttributes);
@@ -1249,126 +1284,178 @@
                     const variantId = String($(this).data('variant-id'));
 
                     if (!validVariantIds.includes(variantId)) {
-
                         $(this).remove();
                     }
                 });
 
+                // Cập nhật select filter với tất cả các giá trị thuộc tính
+                let allAttributeValues = [];
+                values.forEach(attributeValues => {
+                    attributeValues.forEach(value => {
+                        let [id, name] = value.split('-');
+                        allAttributeValues.push({id, name});
+                    });
+                });
+
+                // Cập nhật select filter
+                let filterSelect = $('#filter-attribute-values');
+                filterSelect.empty();
+                filterSelect.append('<option value="all">Tất cả</option>');
+                allAttributeValues.forEach(value => {
+                    filterSelect.append(`<option value="${value.name}">${value.name}</option>`);
+                });
+
+                // Khởi tạo select2 cho filter
+                filterSelect.select2({
+                    placeholder: "Chọn giá trị thuộc tính",
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                // Xử lý sự kiện khi chọn option "All"
+                let isChanging = false;
+                filterSelect.on('change', function(e) {
+                    if (isChanging) return;
+
+                    let selectedValues = $(this).val();
+
+                    isChanging = true;
+
+                    // Enable tất cả các option trước
+                    $(this).find('option').prop('disabled', false);
+
+                    if (!selectedValues || selectedValues.length === 0) {
+                        // Nếu không có giá trị nào được chọn, enable tất cả
+                        isChanging = false;
+                        return;
+                    }
+
+                    if (selectedValues.includes('all')) {
+                        // Nếu chọn "All", disable tất cả các option khác
+                        $(this).find('option:not([value="all"])').prop('disabled', true);
+                        $(this).val(['all']).trigger('change');
+                    } else {
+                        // Nếu chọn các option khác, disable option "All"
+                        $(this).find('option[value="all"]').prop('disabled', true);
+                    }
+
+                    isChanging = false;
+                });
+
                 // Hiển thị hoặc cập nhật biến thể
                 result.forEach((variant, index) => {
-
                     if ($(`#variantAccordion [data-variant-id="${variant.id}"]`).length > 0) {
                         return;
                     }
 
                     let newHtml = `
-                    <div class="accordion-item" data-variant-id="${variant.id}">
-                        <h2 class="accordion-header">
-                            <button type="button" class="accordion-button collapsed position-relative" data-bs-toggle="collapse" data-bs-target="#v${variant.id}">
-                                <span class="fw-bold">${variant.name}</span>
-                                <span class="ms-2 delete-variant text-danger position-absolute" data-index="${variant.id}">Xóa</span>
-                            </button>
-                        </h2>
-                        <div id="v${variant.id}" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                <div class="row">
-                                    <div class="mb-3 position-relative col-md-3">
-                                        <label for="variants-${variant.id}-sku" class="form-label required">Mã sản phẩm</label>
-                                        <input type="text" class="form-control" id="variants-${variant.id}-sku" name="variants[${variant.id}][sku]"
-                                            aria-required="true" required="required" value="${convertToSKU(variant.name)}">
-                                    </div>
-                                    <div class="mb-3 position-relative col-md-3">
-                                        <label for="variants-${variant.id}-sale-price" class="form-label required">Giá</label>
-                                        <input type="text" class="form-control usd-price-format" id="variants-${variant.id}-sale-price" name="variants[${variant.id}][sale_price]"
-                                            aria-required="true" required="required">
-                                    </div>
+                            <div class="accordion-item" data-variant-id="${variant.id}">
+                                <h2 class="accordion-header">
+                                    <button type="button" class="accordion-button collapsed position-relative" data-bs-toggle="collapse" data-bs-target="#v${variant.id}">
+                                        <span class="fw-bold">${variant.name}</span>
+                                        <span class="ms-2 delete-variant text-danger position-absolute" data-index="${variant.id}">Xóa</span>
+                                    </button>
+                                </h2>
+                                <div id="v${variant.id}" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <div class="row">
                                             <div class="mb-3 position-relative col-md-3">
-                                                <label for="variants-${variant.id}-product-unit" class="form-label required">Đơn vị</label>
-                                                <input type="text" class="form-control" id="variants-${variant.id}-product-unit" name="variants[${variant.id}][product_unit]">
+                                                <label for="variants-${variant.id}-sku" class="form-label required">Mã sản phẩm</label>
+                                                <input type="text" class="form-control" id="variants-${variant.id}-sku" name="variants[${variant.id}][sku]"
+                                                    aria-required="true" required="required" value="${convertToSKU(variant.name)}">
                                             </div>
                                             <div class="mb-3 position-relative col-md-3">
-                                                <label for="variants-${variant.id}-discount-price" class="form-label">Giá ưu đãi
-                                                    <span class="form-label-description">
-                                                        <a href="javascript:void(0)" class="variant-turn-on-schedule">Lên lịch</a>
-                                                        <a class="variant-turn-off-schedule" style="display: none"
-                                                            href="javascript:void(0)">
-                                                            Hủy
-                                                        </a>
-                                                    </span>
-                                                </label>
+                                                <label for="variants-${variant.id}-sale-price" class="form-label required">Giá</label>
+                                                <input type="text" class="form-control usd-price-format" id="variants-${variant.id}-sale-price" name="variants[${variant.id}][sale_price]"
+                                                    aria-required="true" required="required">
+                                            </div>
+                                                    <div class="mb-3 position-relative col-md-3">
+                                                        <label for="variants-${variant.id}-product-unit" class="form-label required">Đơn vị</label>
+                                                        <input type="text" class="form-control" id="variants-${variant.id}-product-unit" name="variants[${variant.id}][product_unit]">
+                                                    </div>
+                                                    <div class="mb-3 position-relative col-md-3">
+                                                        <label for="variants-${variant.id}-discount-price" class="form-label">Giá ưu đãi
+                                                            <span class="form-label-description">
+                                                                <a href="javascript:void(0)" class="variant-turn-on-schedule">Lên lịch</a>
+                                                                <a class="variant-turn-off-schedule" style="display: none"
+                                                                    href="javascript:void(0)">
+                                                                    Hủy
+                                                                </a>
+                                                            </span>
+                                                        </label>
 
-                                                <input type="text" class="form-control usd-price-format"
-                                                    name="variants[${variant.id}][discount_price]" id="variants-${variant.id}-discount-price">
-                                            </div>
-                                            <div class="col-md-6 variant-scheduled-time" style="display: none;">
-                                                <div class="mb-3 position-relative">
-                                                    <label class="form-label" for="variants-${variant.id}-discount-start">
-                                                        Từ ngày
-                                                    </label>
-                                                    <input class="form-control form-date-time" type="text"
-                                                        name="variants[${variant.id}][discount_start]" id="variants-${variant.id}-discount-start">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 variant-scheduled-time" style="display: none;">
-                                                <div class="mb-3 position-relative">
-                                                    <label class="form-label" for="variants-${variant.id}-discount-end">
-                                                        Đến ngày
-                                                    </label>
-                                                    <input class="form-control form-date-time" type="text"
-                                                        name="variants[${variant.id}][discount_end]" id="variants-${variant.id}-discount-end">
-                                                </div>
-                                            </div>
-                                            <div class="mb-3 position-relative col-md-3">
-                                                    <label for="variants-${variant.id}-stock" class="form-label">Số lượng</label>
-                                                    <input type="text" class="form-control"
-                                                        id="variants-${variant.id}-stock"
-                                                        name="variants[${variant.id}][stock]">
-                                            </div>
-                                            <div class="mb-3 position-relative col-md-3">
-                                                <label
-                                                    for="variants-${variant.id}-stock-status"
-                                                    class="form-label">Vận chuyển tiêu chuẩn (Mỹ)</label>
-                                                <div class="input-group">
-                                                    <input type="text"
-                                                        class="form-control usd-price-format"
-                                                        name="variants[${variant.id}][standard_shipping]"
-                                                        id="variants-${variant.id}-standard_shipping">
-                                                    <span class="input-group-text">USD</span>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3 position-relative col-md-3">
-                                                <label
-                                                    for="variants-${variant.id}-stock-status"
-                                                    class="form-label">Vận chuyển nhanh (Mỹ)</label>
-                                                <div class="input-group">
-                                                    <input type="text"
-                                                        class="form-control usd-price-format"
-                                                        name="variants[${variant.id}][express_shipping]"
-                                                        id="variants-${variant.id}-express_shipping">
-                                                    <span class="input-group-text">USD</span>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3 position-relative col-md-3">
-                                                <label
-                                                    for="variants-${variant.id}-stock-status"
-                                                    class="form-label">Vận chuyển quốc tế</label>
+                                                        <input type="text" class="form-control usd-price-format"
+                                                            name="variants[${variant.id}][discount_price]" id="variants-${variant.id}-discount-price">
+                                                    </div>
+                                                    <div class="col-md-6 variant-scheduled-time" style="display: none;">
+                                                        <div class="mb-3 position-relative">
+                                                            <label class="form-label" for="variants-${variant.id}-discount-start">
+                                                                Từ ngày
+                                                            </label>
+                                                            <input class="form-control form-date-time" type="text"
+                                                                name="variants[${variant.id}][discount_start]" id="variants-${variant.id}-discount-start">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 variant-scheduled-time" style="display: none;">
+                                                        <div class="mb-3 position-relative">
+                                                            <label class="form-label" for="variants-${variant.id}-discount-end">
+                                                                Đến ngày
+                                                            </label>
+                                                            <input class="form-control form-date-time" type="text"
+                                                                name="variants[${variant.id}][discount_end]" id="variants-${variant.id}-discount-end">
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3 position-relative col-md-3">
+                                                            <label for="variants-${variant.id}-stock" class="form-label">Số lượng</label>
+                                                            <input type="text" class="form-control"
+                                                                id="variants-${variant.id}-stock"
+                                                                name="variants[${variant.id}][stock]">
+                                                    </div>
+                                                    <div class="mb-3 position-relative col-md-3">
+                                                        <label
+                                                            for="variants-${variant.id}-stock-status"
+                                                            class="form-label">Vận chuyển tiêu chuẩn (Mỹ)</label>
+                                                        <div class="input-group">
+                                                            <input type="text"
+                                                                class="form-control usd-price-format"
+                                                                name="variants[${variant.id}][standard_shipping]"
+                                                                id="variants-${variant.id}-standard_shipping">
+                                                            <span class="input-group-text">USD</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3 position-relative col-md-3">
+                                                        <label
+                                                            for="variants-${variant.id}-stock-status"
+                                                            class="form-label">Vận chuyển nhanh (Mỹ)</label>
+                                                        <div class="input-group">
+                                                            <input type="text"
+                                                                class="form-control usd-price-format"
+                                                                name="variants[${variant.id}][express_shipping]"
+                                                                id="variants-${variant.id}-express_shipping">
+                                                            <span class="input-group-text">USD</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3 position-relative col-md-3">
+                                                        <label
+                                                            for="variants-${variant.id}-stock-status"
+                                                            class="form-label">Vận chuyển quốc tế</label>
 
-                                                <div class="input-group">
-                                                    <input type="text"
-                                                        class="form-control usd-price-format"
-                                                        name="variants[${variant.id}][international_shipping]"
-                                                        id="variants-${variant.id}-international_shipping">
-                                                    <span class="input-group-text">USD</span>
+                                                        <div class="input-group">
+                                                            <input type="text"
+                                                                class="form-control usd-price-format"
+                                                                name="variants[${variant.id}][international_shipping]"
+                                                                id="variants-${variant.id}-international_shipping">
+                                                            <span class="input-group-text">USD</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        `;
+                                `;
                     $('#variantAccordion').append(newHtml);
                 });
-            });
+            }
 
             $(document).on('click', '.delete-variant', function() {
                 let index = $(this).data('index'); // Lấy index của biến thể
@@ -1437,6 +1524,59 @@
                 altInput: true,
                 altFormat: "d-m-Y H:i",
                 locale: "vn"
+            });
+
+            // Thêm xử lý sự kiện cho nút áp dụng filter
+            $('#apply-filter').on('click', function() {
+                let selectedValues = $('#filter-attribute-values').val();
+                let price = $('#filter-price').val();
+                let stock = $('#filter-stock').val();
+                let standardShipping = $('#filter-standard-shipping').val();
+                let expressShipping = $('#filter-express-shipping').val();
+                let internationalShipping = $('#filter-international-shipping').val();
+
+                if (!selectedValues || selectedValues.length === 0) {
+                    alert('Vui lòng chọn ít nhất một giá trị thuộc tính!');
+                    return;
+                }
+
+                // Lặp qua tất cả các biến thể
+                $('#variantAccordion .accordion-item').each(function() {
+                    let variantName = $(this).find('.accordion-button span.fw-bold').text();
+                    let variantValues = variantName.split(' - ');
+                    let shouldUpdate = false;
+
+                    // Kiểm tra xem có phải chọn "All" không
+                    if (selectedValues.includes('all')) {
+                        shouldUpdate = true;
+                    } else {
+                        // Kiểm tra xem biến thể có chứa bất kỳ giá trị nào được chọn không
+                        shouldUpdate = selectedValues.some(value => variantValues.includes(value));
+                    }
+
+                    if (shouldUpdate) {
+                        // Cập nhật giá nếu có
+                        if (price) {
+                            $(this).find(`input[name*="[sale_price]"]`).val(price);
+                        }
+                        // Cập nhật số lượng nếu có
+                        if (stock) {
+                            $(this).find(`input[name*="[stock]"]`).val(stock);
+                        }
+                        // Cập nhật vận chuyển tiêu chuẩn nếu có
+                        if (standardShipping) {
+                            $(this).find(`input[name*="[standard_shipping]"]`).val(standardShipping);
+                        }
+                        // Cập nhật vận chuyển nhanh nếu có
+                        if (expressShipping) {
+                            $(this).find(`input[name*="[express_shipping]"]`).val(expressShipping);
+                        }
+                        // Cập nhật vận chuyển quốc tế nếu có
+                        if (internationalShipping) {
+                            $(this).find(`input[name*="[international_shipping]"]`).val(internationalShipping);
+                        }
+                    }
+                });
             });
 
         });
