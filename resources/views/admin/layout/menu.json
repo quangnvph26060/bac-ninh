@@ -26,7 +26,8 @@
         "inRoutes": [
             "admin.orders.index",
             "admin.orders.edit",
-            "admin.transfer.histories.index"
+            "admin.transfer.histories.index",
+            "admin.orders.barcode.scanner"
         ]
     },
     {
