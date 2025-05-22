@@ -156,6 +156,7 @@ const validateAndPreviewImage = function (event, imgId, options) {
         expectedPPI,
         expectedFormat,
         inputId,
+        imageDefault,
     } = options;
 
     const file = event.target.files[0];
@@ -189,8 +190,7 @@ const validateAndPreviewImage = function (event, imgId, options) {
                 imgElement.src = reader.result;
             } else {
                 event.target.value = "";
-                imgElement.src =
-                    "http://127.0.0.1:8000/images/image-default.png";
+                imgElement.src = imageDefault;
 
                 // Gọi hàm hiển thị lỗi
                 showToast(

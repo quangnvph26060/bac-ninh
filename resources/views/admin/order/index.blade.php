@@ -30,7 +30,6 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Tên sản phẩm</th>
-                                    <th>Ảnh</th>
                                     <th>Ảnh mẫu</th>
                                     <th>Ảnh thiết kế</th>
                                     <th>Số lượng</th>
@@ -57,7 +56,7 @@
     <script>
         $(document).ready(function() {
             const api = "{{ route('admin.orders.index') }}"
-            dataTables(api, columns, 'Brand')
+            dataTables(api, columns, 'Brand', {}, false, true, false, true)
         })
 
         let oldCode = null;
@@ -96,14 +95,14 @@
                         html += `
                             <tr>
                                 <th scope="row">
-                                    <p class="mb-0 fw-bold">
-                                        ${item.name}
-                                    </p>
-                                    <small class="fw-medium">
-                                        ${item.variant}
-                                    </small>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img class="img-thumbnail" style="max-width: inherit; width: 60px;" src="${item.image}" alt="${item.name}">
+                                        <div>
+                                            <h5 class="mb-0">${item.name}</h5>
+                                            <small>${item.variant}</small>
+                                        </div>
+                                    </div>
                                 </th>
-                                <td style="text-align: center; width: 5%;"><img class="img-thumbnail" style="max-width: inherit; width: 100px;" src="${item.image}" alt="${item.name}"></td>
                                 <td style="text-align: center; width: 5%;"><img class="img-thumbnail" style="max-width: inherit; width: 100px;" src="${item.model_image}" alt="${item.name}"></td>
                                 <td style="text-align: center; width: 5%;"><img class="img-thumbnail" style="max-width: inherit; width: 100px;" src="${item.design_image}" alt="${item.name}"></td>
                                 <td style="text-align: center; width: 5%;"><small>x</small>${item.quantity}</td>
@@ -115,19 +114,19 @@
 
                     html += `
                         <tr>
-                            <th scope="row" colspan="6" class="text-end">Tổng phụ :</th>
+                            <th scope="row" colspan="5" class="text-end">Tổng phụ :</th>
                             <td class="text-center"><div class="fw-bold">${formatCurrency(subTotal)}</div></td>
                         </tr>
                         <tr>
-                            <th scope="row" colspan="6" class="text-end">Phí vận chuyển :</th>
+                            <th scope="row" colspan="5" class="text-end">Phí vận chuyển :</th>
                             <td class="text-center">${formatCurrency(shippingFee)}</td>
                         </tr>
                         <tr>
-                            <th scope="row" colspan="6" class="text-end">Giảm giá :</th>
+                            <th scope="row" colspan="5" class="text-end">Giảm giá :</th>
                             <td class="text-center">- ${formatCurrency(discount)}</td>
                         </tr>
                         <tr>
-                            <th scope="row" colspan="6" class="text-end">Tổng tiền :</th>
+                            <th scope="row" colspan="5" class="text-end">Tổng tiền :</th>
                             <td class="text-center"><div class="fw-bold">${formatCurrency(total)}</div></td>
                         </tr>
                     `;

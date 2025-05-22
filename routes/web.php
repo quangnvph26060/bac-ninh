@@ -1,4 +1,5 @@
 <?php
+// phpinfo();
 
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\AttributeController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\Admin\StorageController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\Admin\TransferHistoryController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 

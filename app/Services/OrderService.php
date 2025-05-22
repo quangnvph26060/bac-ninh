@@ -33,7 +33,7 @@ class OrderService extends BaseService
             ['orderItems'],
             false,
             [],
-            [['status', '<>', 'draft']],
+            [['payment_status', '<>', 'pending']],
         );
     }
 
@@ -64,7 +64,7 @@ class OrderService extends BaseService
 
     public function show($id)
     {
-        return $this->findById($id, ['*'], ['orderItems.productVariant.attributeValues', 'user']);
+        return $this->findById($id, ['*'], ['orderItems.productVariant.attributeValues', 'user'], [['payment_status', '<>', 'pending']]);
     }
 
     public function updateStatus(string $id, $status)

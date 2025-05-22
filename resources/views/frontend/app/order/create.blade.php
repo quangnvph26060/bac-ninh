@@ -135,9 +135,9 @@
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="phone_number" class="form-label required">Số điện thoại</label>
+                                <label for="phone_number" class="form-label">Số điện thoại</label>
                                 <input type="text" name="phone_number" class="form-control" id="phone_number"
-                                    data-required="true" placeholder="Số điện thoại" pattern="^\d{8,15}$"
+                                    placeholder="Số điện thoại" pattern="^\d{8,15}$"
                                     title="Số điện thoại phải chứa từ 8 đến 15 chữ số, không bao gồm dấu cách hoặc ký tự đặc biệt.">
                             </div>
 
@@ -378,7 +378,10 @@
 
 
 @push('scripts')
+    <script src="https://unpkg.com/exifr/dist/lite.umd.js"></script>
+
     <script src="{{ asset('backend/assets/js/helper.js') }}"></script>
+
 
     <script>
         let originalTotal = null;
@@ -632,26 +635,26 @@
                     <div class="d-flex gap-3">
 
                         ${product.model_image ? `
-                                                                                                                                                        <div style="width: 103px;">
-                                                                                                                                                            <div class="fw-semibold">Mockup</div>
-                                                                                                                                                            <div class="image-container">
-                                                                                                                                                                <img class="img-thumbnail"
-                                                                                                                                                                    style="cursor: pointer;"
-                                                                                                                                                                    src="${product.model_image}">
-                                                                                                                                                            </div>
-                                                                                                                                                        </div>
-                                                                                                                                                        ` : ''}
+                                                                                                                                                                    <div style="width: 103px;">
+                                                                                                                                                                        <div class="fw-semibold">Mockup</div>
+                                                                                                                                                                        <div class="image-container">
+                                                                                                                                                                            <img class="img-thumbnail"
+                                                                                                                                                                                style="cursor: pointer;"
+                                                                                                                                                                                src="${product.model_image}">
+                                                                                                                                                                        </div>
+                                                                                                                                                                    </div>
+                                                                                                                                                                    ` : ''}
 
                         ${product.design_image ? `
-                                                                                                                                                        <div style="width: 103px;">
-                                                                                                                                                            <div class="fw-semibold">Design photo</div>
-                                                                                                                                                            <div class="image-container">
-                                                                                                                                                                <img class="img-thumbnail"
-                                                                                                                                                                    style="cursor: pointer;"
-                                                                                                                                                                    src="${product.design_image}">
-                                                                                                                                                            </div>
-                                                                                                                                                        </div>
-                                                                                                                                                        ` : ''}
+                                                                                                                                                                    <div style="width: 103px;">
+                                                                                                                                                                        <div class="fw-semibold">Design photo</div>
+                                                                                                                                                                        <div class="image-container">
+                                                                                                                                                                            <img class="img-thumbnail"
+                                                                                                                                                                                style="cursor: pointer;"
+                                                                                                                                                                                src="${product.design_image}">
+                                                                                                                                                                        </div>
+                                                                                                                                                                    </div>
+                                                                                                                                                                    ` : ''}
                     </div>
                 </div>
 
@@ -1338,7 +1341,8 @@
                                                     expectedHeight: ${product.design_height},
                                                     expectedPPI: ${product.design_ppi},
                                                     expectedFormat: '${product.design_format}',
-                                                    inputId: 'show_design_${product.id}'
+                                                    inputId: 'show_design_${product.id}',
+                                                    imageDefault: '{{ config('app.url') }}/images/image-default.png'
                                                 })">
                                         </div>
                                     </div>

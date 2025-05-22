@@ -2,12 +2,12 @@
 @section('content')
     <div class="page-inner">
         <div class="page-header">
-            <x-breadcrumb :items="[['name' => 'transfer history']]" />
+            <x-breadcrumb :items="[['name' => 'yêu cầu nạp tiền']]" />
         </div>
 
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="text-uppercase card-title fw-bold">transfer list</h5>
+                <h5 class="text-uppercase card-title fw-bold">danh sách yêu cầu nạp tiền</h5>
             </div>
 
             <x-data-table file="transfer-history" />

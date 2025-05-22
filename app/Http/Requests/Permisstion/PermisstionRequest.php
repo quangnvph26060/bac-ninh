@@ -25,6 +25,8 @@ class PermisstionRequest extends FormRequest
 
         return [
             'name' => "required|unique:permissions,name,$id",
+            'vi_name' => "required|unique:permissions,vi_name,$id",
+            'group_name' => "required",
         ];
     }
 
@@ -36,7 +38,9 @@ class PermisstionRequest extends FormRequest
     public function attributes()
     {
         return [
-            'name' => 'Tên quyền'
+            'name' => 'Tên quyền',
+            'vi_name' => 'Tên quyền tiếng việt',
+            'group_name' => 'Nhóm quyền',
         ];
     }
 }

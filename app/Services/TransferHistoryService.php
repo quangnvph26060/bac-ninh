@@ -16,7 +16,7 @@ class TransferHistoryService extends BaseService
 
         return $this->queryBuilder(
             ['*'],
-            ['wallet.user:id,name', 'configPayment'],
+            ['wallet.user:id,name,email', 'configPayment'],
             false,
             [],
             [['is_topup_request', true]]

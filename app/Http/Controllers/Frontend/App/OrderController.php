@@ -175,7 +175,8 @@ class OrderController extends Controller
         $productDetails = $this->getProductDetails($items);
         $subTotal = $this->calculateSubTotal($productDetails);
 
-        if ($coupon && $coupon->min_order_value >= $subTotal) return errorResponse("Giá trị đơn hàng chưa đáp ứng điều kiện mã giảm giá!", true, 400);
+        if ($coupon && $coupon->min_order_value >= $subTotal)
+            return errorResponse("Giá trị đơn hàng chưa đáp ứng điều kiện mã giảm giá!", true, 400);
 
         $discountAmount = $this->calculateDiscount($coupon, $productDetails, $subTotal);
 
@@ -217,7 +218,7 @@ class OrderController extends Controller
                     'original_price' => $originalPrice,
                     'qty' => $qty,
                     'total' => $price * $qty,
-                    'image' =>  $product->image, // Ảnh sản phẩm (ưu tiên ảnh của biến thể)
+                    'image' => $product->image, // Ảnh sản phẩm (ưu tiên ảnh của biến thể)
                     'model_image' => $modelImage,
                     'design_image' => $designImage,
                 ];
@@ -249,7 +250,8 @@ class OrderController extends Controller
     {
         $now = Carbon::now();
 
-        if ($coupon->status == 2) return false;
+        if ($coupon->status == 2)
+            return false;
 
         // Nếu có start_date và không có end_date => kiểm tra now >= start_date
         if ($coupon->start_date && !$coupon->end_date) {
@@ -282,7 +284,8 @@ class OrderController extends Controller
     {
         $discountAmount = 0;
 
-        if ($coupon === null) return $discountAmount;
+        if ($coupon === null)
+            return $discountAmount;
 
         if ($coupon->type === 'order') {
             $discountAmount = $coupon->value;
@@ -341,9 +344,9 @@ class OrderController extends Controller
         }
 
         $shippingMethods = $country->shippingMethods->map(fn($method) => [
-            'id'   => $method->id,
+            'id' => $method->id,
             'name' => $method->name,
-            'fee'  => number_format($method->pivot->fee, 0),
+            'fee' => number_format($method->pivot->fee, 0),
         ]);
 
         return response()->json([
@@ -365,7 +368,7 @@ class OrderController extends Controller
         $ids = $request->input('product_ids');
 
         $products = Product::query()
-            ->select('id', 'image', 'name', 'sku',  'type', 'sale_price', 'discount_price', 'discount_start', 'discount_end', 'stock', 'stock_status', 'design_width', 'design_height', 'design_ppi', 'design_format')
+            ->select('id', 'image', 'name', 'sku', 'type', 'sale_price', 'discount_price', 'discount_start', 'discount_end', 'stock', 'stock_status', 'design_width', 'design_height', 'design_ppi', 'design_format')
             ->whereIn('id', $ids)
             ->get();
 
@@ -467,7 +470,7 @@ class OrderController extends Controller
         return response()->json([
             'price' => number_format($price, 0, ',', ''),
             'variant_id' => $variant->id,
-            'sku' =>  $variant->sku
+            'sku' => $variant->sku
         ]);
     }
 
@@ -550,7 +553,7 @@ class OrderController extends Controller
                 'orderInfo.first_name' => 'required|string|max:255',
                 'orderInfo.last_name' => 'required|string|max:255',
                 'orderInfo.email' => 'required|email|max:255',
-                'orderInfo.phone_number' => 'required|string|max:20',
+                'orderInfo.phone_number' => 'nullable|string|max:20',
                 'orderInfo.country' => 'required|string|max:255',
                 'orderInfo.state' => 'required|string|max:255',
                 'orderInfo.city' => 'required|string|max:255',
@@ -597,14 +600,16 @@ class OrderController extends Controller
             // Kiểm tra mã giảm giá nếu có
             $coupon = $this->checkCoupon($request['orderInfo']['coupon'] ?? null);
 
-            if ($coupon === false) return errorResponse("Coupon has expired or does not exist!", true);
+            if ($coupon === false)
+                return errorResponse("Coupon has expired or does not exist!", true);
 
             // Lấy chi tiết sản phẩm và tính toán tổng đơn hàng
             $productDetails = $this->getProductDetails($request['products']);
 
             $subTotal = $this->calculateSubTotal($productDetails);
             $totals = $this->calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee);
-            if (isset($totals['success']) && $totals['success'] === false) return errorResponse($totals['message'], true, $totals['code']);
+            if (isset($totals['success']) && $totals['success'] === false)
+                return errorResponse($totals['message'], true, $totals['code']);
             extract($totals);
 
             // Tạo đơn hàng và lưu các sản phẩm
@@ -618,7 +623,8 @@ class OrderController extends Controller
                     ['balance' => 0]
                 );
 
-                if ($wallet->balance < $grandTotal) return errorResponse("Insufficient balance, please top up to continue payment", true, 400);
+                if ($wallet->balance < $grandTotal)
+                    return errorResponse("Insufficient balance, please top up to continue payment", true, 400);
 
                 $this->paymentViaWallet($order, $wallet);
             }
@@ -670,8 +676,8 @@ class OrderController extends Controller
             $user = User::query()->findOrFail(auth()->guard('web')->id());
 
             DB::table('coupon_user_usages')->insert([
-                'user_id'    => $user->id,
-                'coupon_id'  => $coupon->id,
+                'user_id' => $user->id,
+                'coupon_id' => $coupon->id,
                 'order_id' => $order->id,
                 'usage_time' => now(),
             ]);
@@ -683,7 +689,8 @@ class OrderController extends Controller
         if (!empty($coupon)) {
             $coupon = Coupon::query()->with(['products', 'users'])->where('code', $coupon)->lockForUpdate()->first();
 
-            if ($this->isCouponValid($coupon)) return $coupon;
+            if ($this->isCouponValid($coupon))
+                return $coupon;
             return null;
         }
 
@@ -700,7 +707,8 @@ class OrderController extends Controller
 
         $discountAmount = $this->calculateDiscount($coupon ?? null, $productDetails, $subTotal);
 
-        if ($discountAmount === false) return errorResponse("Các sản phẩm không đủ điều kiện áp dụng mã giảm giá này!", false, 400);
+        if ($discountAmount === false)
+            return errorResponse("Các sản phẩm không đủ điều kiện áp dụng mã giảm giá này!", false, 400);
 
         $grandTotal = $this->calculateGrandTotal($subTotal, $discountAmount, $shippingFee);
 
@@ -717,7 +725,7 @@ class OrderController extends Controller
                 'zip_code' => $orderInfo['zip_code'],
                 'order_code' => generateOrderCode(),
                 'order_name' => $orderInfo['orderName'],
-                'status' => $orderInfo['paymentMethod'] !== 'later' ? 'pending' : 'draft',
+                'status' => 'pending',
                 'payment_status' => $orderInfo['paymentMethod'] !== 'later' ? 'completed' : 'pending',
                 'payment_method' => $orderInfo['paymentMethod'] !== 'later' ? 'bank_transfer' : null,
                 'phone_number' => $orderInfo['phone_number'],
@@ -785,7 +793,8 @@ class OrderController extends Controller
 
         $order = Order::query()->where('order_code', $credentials['code'])->firstOrFail();
 
-        if ($order->status !== "pending") return errorResponse("Your order cannot be cancelled.", true, 400);
+        if ($order->status !== "pending")
+            return errorResponse("Your order cannot be cancelled.", true, 400);
 
         $order->reason = $credentials['reason'];
         $order->status = "cancelled";
@@ -855,5 +864,114 @@ class OrderController extends Controller
         }
 
         return null; // Không có lỗi
+    }
+
+    public function payBulk(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|exists:orders,id'
+        ]);
+
+        $ids = $request->ids;
+
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => auth()->guard('web')->id()],
+            ['balance' => 0]
+        );
+
+        $orders = Order::whereIn('id', $ids)
+            ->where('user_id', auth()->guard('web')->id())
+            ->get();
+
+        $sum = $orders->sum('total');
+
+        if ($sum > $wallet->balance)
+            return errorResponse("Insufficient surplus to complete this transaction!", true, 400);
+
+        DB::beginTransaction();
+        try {
+            $orders->map(function ($order) use ($wallet) {
+                if ($order->payment_status !== "pending" || $order->status !== "pending")
+                    return errorResponse("Order has already been paid!", true, 400);
+
+                if ($wallet->balance < $order->total)
+                    return errorResponse("Insufficient surplus to complete this transaction!", true, 400);
+
+                $order->update(['payment_status' => 'completed']);
+
+                $this->paymentViaWallet($order, $wallet);
+            });
+
+            DB::commit();
+            return successResponse("Orders paid successfully.", null, 200, true);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return errorResponse("Transaction failed: " . $e->getMessage(), true, 500);
+        }
+    }
+
+    public function cancelBulk(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|exists:orders,id'
+        ]);
+
+        $ids = $request->ids;
+
+        $orders = Order::whereIn('id', $ids)
+            ->where('user_id', auth()->guard('web')->id())
+            ->get();
+
+        try {
+            DB::beginTransaction();
+
+            $orders->map(function ($order) {
+                $order->update([
+                    'status' => 'cancelled',
+                    'payment_status' => 'pending',
+                    'canceled_by' => 'customer'
+                ]);
+            });
+
+            DB::commit();
+            return successResponse("Orders cancelled successfully.", null, 200, true);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            logger("message: " . $e->getMessage() . "line: " . $e->getLine());
+            return errorResponse("An error occurred while canceling the order, please try again later!", true, 500);
+        }
+    }
+
+    public function deleteBulk(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|exists:orders,id'
+        ]);
+
+        $ids = $request->ids;
+
+        $orders = Order::whereIn('id', $ids)
+            ->where('user_id', auth()->guard('web')->id())
+            ->get();
+
+        if ($orders->isEmpty())
+            return errorResponse("No orders found.", true, 404);
+
+        try {
+            DB::beginTransaction();
+
+            $orders->map(function ($order) {
+                if ($order->status !== "pending" || $order->payment_status !== "pending")
+                    return errorResponse("Order has already been paid!", true, 400);
+
+                $order->delete();
+            });
+
+            DB::commit();
+            return successResponse("Orders deleted successfully.", null, 200, true);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return errorResponse("An error occurred while deleting the order, please try again later!", true, 500);
+        }
     }
 }

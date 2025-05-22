@@ -79,19 +79,29 @@
                             <div class="collapse {{ isActiveMenu($item) }}" id="{{ $item['id'] }}">
                                 <ul class="nav nav-collapse">
                                     @foreach ($item['children'] as $child)
-                                        @php
-                                            $isChildActive = request()->routeIs($child['url']) ? 'active' : '';
-                                        @endphp
-                                        <li class="nav-item {{ $isChildActive }}">
-                                            <a href="{{ route($child['url']) }}">
-                                                <span class="sub-item">{{ $child['title'] }}</span>
-                                            </a>
-                                        </li>
+                                        @isset($child['url'])
+                                            @php
+                                                $isChildActive = request()->routeIs($child['url']) ? 'active' : '';
+                                            @endphp
+                                            <li class="nav-item {{ $isChildActive }}">
+                                                <a href="{{ route($child['url']) }}">
+                                                    <span class="sub-item">{{ $child['title'] }}</span>
+                                                </a>
+                                            </li>
+                                        @else
+                                            <li class="nav-item">
+                                                <a href="javascript:void(0)" class="d-flex justify-content-between">
+                                                    <span class="sub-item">{{ $child['title'] }}</span>
+                                                    <span
+                                                        class="badge rounded-pill {{ $child['class'] }}">{{ $result[$child['status']] }}
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        @endisset
                                     @endforeach
                                 </ul>
                             </div>
                         @endif
-
                     </li>
                 @endforeach
             </ul>

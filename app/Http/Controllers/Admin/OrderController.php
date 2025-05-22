@@ -78,7 +78,7 @@ class OrderController extends Controller
 
         return DB::transaction(function () use ($credentials) {
             $order = Order::query()->with('user')->where('order_code', $credentials['code'])->firstOrFail();
-
+// || $order->payment_method !== "pending"
             if ($order->status !== "pending") {
                 return errorResponse("Đơn hàng của bạn không thể bị hủy!", true, 400);
             }
@@ -94,7 +94,7 @@ class OrderController extends Controller
             );
 
             $amount = $order->total;
-            $note = "HOÀN TIỀN DO QUẢN TRỊ VIÊN HỦY ĐƠN HÀNG #{$order->order_code}";
+            $note = "ORDER REFUND #{$order->order_code}";
             $balanceBefore = $wallet->balance;
 
             $wallet->increment('balance', $amount);
@@ -154,7 +154,7 @@ class OrderController extends Controller
             return errorResponse("Không tìm thấy đơn hàng!", true, 404);
         }
 
-        return successResponse("Lấy đơn hàng thành công!",route('admin.orders.edit', $order->id), 200, true);
+        return successResponse("Lấy đơn hàng thành công!", route('admin.orders.edit', $order->id), 200, true);
     }
 }
 

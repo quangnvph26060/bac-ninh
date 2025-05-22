@@ -31,6 +31,8 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
     <link rel="stylesheet"
         href="{{ asset('frontend/assets/css/app.css') }}?v={{ filemtime(public_path('frontend/assets/css/app.css')) }}" />
 
@@ -71,15 +73,17 @@
 
                 <div class="d-flex h-100 justify-content-end row__info__user">
                     <div class="box__money">
-                        <div class="balance__box pe-2">
-                            <div class="logo__balance">
-                                <img src="{{ asset('frontend/assets/img/balance.png') }}" alt="balance" />
+                        <a href="{{ route('bills.index') }}">
+                            <div class="balance__box pe-2">
+                                <div class="logo__balance">
+                                    <img src="{{ asset('frontend/assets/img/balance.png') }}" alt="balance" />
+                                </div>
+                                <div class="amount__balance">
+                                    <p class="balance_text">Balance</p>
+                                    <p class="money__amount balance">${{ formatPrice($wallet->balance) }}</p>
+                                </div>
                             </div>
-                            <div class="amount__balance">
-                                <p class="balance_text">Số dư</p>
-                                <p class="money__amount balance">${{ formatPrice($wallet->balance) }}</p>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                     <div class="box__money">
                         <div class="balance__box pe-2">
@@ -87,7 +91,7 @@
                                 <img src="{{ asset('frontend/assets/img/not-yet-paid.png') }}" alt="balance" />
                             </div>
                             <div class="amount__balance">
-                                <p class="balance_text">Chưa trả</p>
+                                <p class="balance_text">Not yet paid</p>
                                 <p class="money__amount money_unpaid">$0.00</p>
                             </div>
                         </div>
@@ -157,13 +161,11 @@
                             <!-- Dropdown Menu -->
                             <div class="dropdown_popup">
                                 <ul>
-                                    <li><a href="/"><i class="bi bi-house-down me-2"></i> Trở về trang chủ</a>
+                                    <li><a href="/"><i class="bi bi-house-down me-2"></i>Back go home</a>
                                     </li>
                                     <li><a href="{{ route('profile') }}"><i class="bi bi-person-fill-check me-2"></i>
-                                            Tài khoản của tôi</a></li>
-                                    <li><a href="{{ route('logout') }}"><i class="bi bi-box-arrow-left me-2"></i>
-                                            Đăng
-                                            xuất</a></li>
+                                            My account</a></li>
+                                    <li><a href="{{ route('logout') }}"><i class="bi bi-box-arrow-left me-2"></i>Logout</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -232,21 +234,27 @@
                                     <span>Hồ sơ</span>
                                 </a>
                             </li>
-                            <li class="nav-item {{ request()->routeIs('transaction.history') ? 'active' : '' }}">
+                            {{-- <li class="nav-item {{ request()->routeIs('transaction.history') ? 'active' : '' }}">
                                 <a href="{{ route('transaction.history') }}" class="nav-link">
                                     <i class="bi bi-wallet2"></i>
                                     <span>Lịch sử giao dịch</span>
                                 </a>
-                            </li>
+                            </li> --}}
                         </ul>
                     </div>
 
                     <div class="menu_fixed">
                         <ul class="nav flex-column">
                             <li class="nav-item active">
-                                <a href="{{ url('/') }}" class="nav-link">
+                                <a target="_blank" href="{{ url('/') }}" class="nav-link">
                                     <i class="bi bi-speedometer2"></i>
                                     <span>Trang chủ</span>
+                                </a>
+                            </li>
+                            <li class="nav-item active">
+                                <a href="{{ route('products.all') }}" target="_blank" class="nav-link">
+                                    <i class="bi bi-list"></i>
+                                    <span>Catalog</span>
                                 </a>
                             </li>
                         </ul>

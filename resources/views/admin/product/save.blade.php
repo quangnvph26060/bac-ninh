@@ -291,7 +291,7 @@
                                     <div class="card mb-3">
                                         <div class="card-body">
                                             <div class="row">
-                                                <div class="col-md-4 mb-3">
+                                                <div class="col-md-6 mb-3">
                                                     <label class="form-label">Lọc theo giá trị thuộc tính</label>
                                                     <select class="form-select" id="filter-attribute-values" multiple>
                                                         <option value="all">Tất cả</option>
@@ -299,27 +299,36 @@
                                                 </div>
                                                 <div class="col-md-2 mb-3">
                                                     <label class="form-label">Giá</label>
-                                                    <input type="text" class="form-control usd-price-format" id="filter-price">
+                                                    <input type="text" class="form-control usd-price-format"
+                                                        id="filter-price">
                                                 </div>
                                                 <div class="col-md-2 mb-3">
                                                     <label class="form-label">Số lượng</label>
                                                     <input type="text" class="form-control" id="filter-stock">
                                                 </div>
                                                 <div class="col-md-2 mb-3">
+                                                    <label class="form-label">Đơn vị</label>
+                                                    <input type="text" class="form-control" id="filter-unit">
+                                                </div>
+                                                <div class="col-md-2 mb-3">
                                                     <label class="form-label">Vận chuyển tiêu chuẩn</label>
-                                                    <input type="text" class="form-control usd-price-format" id="filter-standard-shipping">
+                                                    <input type="text" class="form-control usd-price-format"
+                                                        id="filter-standard-shipping">
                                                 </div>
                                                 <div class="col-md-2 mb-3">
                                                     <label class="form-label">Vận chuyển nhanh</label>
-                                                    <input type="text" class="form-control usd-price-format" id="filter-express-shipping">
+                                                    <input type="text" class="form-control usd-price-format"
+                                                        id="filter-express-shipping">
                                                 </div>
                                                 <div class="col-md-2">
                                                     <label class="form-label">Vận chuyển quốc tế</label>
-                                                    <input type="text" class="form-control usd-price-format" id="filter-international-shipping">
+                                                    <input type="text" class="form-control usd-price-format"
+                                                        id="filter-international-shipping">
                                                 </div>
                                                 <div class="col-md-2 mb-3">
                                                     <label class="form-label">&nbsp;</label>
-                                                    <button type="button" class="btn btn-primary w-100" id="apply-filter">Áp dụng</button>
+                                                    <button type="button" class="btn btn-primary w-100"
+                                                        id="apply-filter">Áp dụng</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -1293,7 +1302,10 @@
                 values.forEach(attributeValues => {
                     attributeValues.forEach(value => {
                         let [id, name] = value.split('-');
-                        allAttributeValues.push({id, name});
+                        allAttributeValues.push({
+                            id,
+                            name
+                        });
                     });
                 });
 
@@ -1531,6 +1543,7 @@
                 let selectedValues = $('#filter-attribute-values').val();
                 let price = $('#filter-price').val();
                 let stock = $('#filter-stock').val();
+                let unit = $("#filter-unit").val();
                 let standardShipping = $('#filter-standard-shipping').val();
                 let expressShipping = $('#filter-express-shipping').val();
                 let internationalShipping = $('#filter-international-shipping').val();
@@ -1563,9 +1576,13 @@
                         if (stock) {
                             $(this).find(`input[name*="[stock]"]`).val(stock);
                         }
+                        if (unit) {
+                            $(this).find(`input[name*="[product_unit]"]`).val(unit);
+                        }
                         // Cập nhật vận chuyển tiêu chuẩn nếu có
                         if (standardShipping) {
-                            $(this).find(`input[name*="[standard_shipping]"]`).val(standardShipping);
+                            $(this).find(`input[name*="[standard_shipping]"]`).val(
+                                standardShipping);
                         }
                         // Cập nhật vận chuyển nhanh nếu có
                         if (expressShipping) {
@@ -1573,7 +1590,8 @@
                         }
                         // Cập nhật vận chuyển quốc tế nếu có
                         if (internationalShipping) {
-                            $(this).find(`input[name*="[international_shipping]"]`).val(internationalShipping);
+                            $(this).find(`input[name*="[international_shipping]"]`).val(
+                                internationalShipping);
                         }
                     }
                 });

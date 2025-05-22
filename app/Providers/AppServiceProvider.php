@@ -5,12 +5,14 @@ namespace App\Providers;
 // use App\Http\View\Composers\NotificationComposer;
 use App\Models\Collection;
 use App\Models\Config;
+use App\Models\Order;
 use App\Models\Wallet;
 use App\Observers\ActivityLogObserver;
 use App\Services\CategoryService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -74,6 +76,29 @@ class AppServiceProvider extends ServiceProvider
                 'wallet' => $wallet,
                 'authUser' => $user
             ]);
+        });
+
+        $statuses = [
+            'pending',
+            'confirmed_pending_production',
+            'in_production',
+            'produced_awaiting_completion',
+            'completed_waiting_for_shipment',
+            'shipped',
+            'cancelled',
+        ];
+
+        $ordersCountByStatus = Order::select('status', DB::raw('count(*) as total'))
+            ->whereIn('status', $statuses)
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $result = collect($statuses)->mapWithKeys(function ($status) use ($ordersCountByStatus) {
+            return [$status => $ordersCountByStatus->get($status, 0)];
+        });
+
+        view()->composer('admin.layout.sidebar', function ($view) use ($result) {
+            $view->with(['result' => $result]);
         });
     }
 }
