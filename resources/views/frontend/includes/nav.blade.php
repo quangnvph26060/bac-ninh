@@ -6,7 +6,7 @@
         </button>
 
         <!-- Logo (Giữa màn hình mobile) -->
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="{{ url('/') }}">
             <img src="{{ showImage($config->logo) }}" alt="{{ $config->company }}" />
         </a>
 
