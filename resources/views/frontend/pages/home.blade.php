@@ -104,7 +104,7 @@
         </div>
     </div>
 
-    <div class="banner_discount w-100 mx-auto position-relative">
+    {{-- <div class="banner_discount w-100 mx-auto position-relative">
         <div class="banner_discount_container" data-aos="fade-down" data-aos-once="true">
             <a href="">
                 <img class="img-fluid" src="{{ asset('frontend/assets/img/motherday.jpg') }}" alt="" />
@@ -154,7 +154,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <div class="how_it_work_step_wrapper">
         <div data-aos="fade-down" data-aos-once="true" data-aos-delay="400" class="title_content">

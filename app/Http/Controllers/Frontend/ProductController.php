@@ -33,7 +33,10 @@ class ProductController extends Controller
                 ];
             });
 
-            $suggestedProducts = Product::query()->with(['variants', 'attributes'])->whereIn('id', $product->cross_sell)->get();
+            $suggestedProducts = Product::query()
+                ->with(['variants', 'attributes'])
+                ->whereIn('id', $product->cross_sell ?? [])
+                ->get();
 
             return view('frontend.pages.products.detail', compact('product', 'attributes', 'suggestedProducts'));
         }
