@@ -11,7 +11,9 @@ use Illuminate\Http\Request;
 class TransferHistoryController extends Controller
 {
     use PaginateTrait;
-    public function __construct(public TransferHistoryService $transferHistoryService) {}
+    public function __construct(public TransferHistoryService $transferHistoryService)
+    {
+    }
     public function index()
     {
         $this->authorize('view', WalletTransaction::class);
@@ -25,9 +27,9 @@ class TransferHistoryController extends Controller
                 $dataTable
                     ->addColumn('method', fn($row) => "<img src='" . showImage($row->configPayment->image) . "' alt='" . $row->configPayment->title . "' width='50'>")
                     ->addColumn('proof', fn($row) => showImage($row->proof))
-                    ->addColumn('user', fn($row) => $row->wallet->user->name)
-                    ->editColumn('created_at', fn($row) => $row->created_at->format('F j, Y \a\t g:i a')),
-                ['method']
+                    ->addColumn('user', fn($row) => "<p class='mb-0'> " . $row->wallet->user->name . " </p><p class='mb-0'> " . $row->wallet->user->email . " </p>")
+                    ->editColumn('created_at', fn($row) => $row->created_at->format('d/m/Y H:i')),
+                ['method', 'user']
             );
         }
 

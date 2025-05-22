@@ -6,17 +6,34 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-6">
+            <div class="col-lg-5">
                 <form action="" method="post" id="myForm">
                     <div class="card">
                         <div class="card-header">
                             <h5 class="text-uppercase card-title fw-bold" id="title-change">Thêm mới quyền</h5>
                         </div>
                         <div class="card-body">
-                            <div class="mb-3 col-md-12">
-                                <label for="name" class="form-label">Tên quyền</label>
-                                <input type="text" placeholder="Tên quyền" class="form-control" name="name"
-                                    id="name">
+                            <div class="row">
+                                <div class="mb-3 col-md-6">
+                                    <label for="vi_name" class="form-label">Tên quyền tiếng việt</label>
+                                    <input type="text" placeholder="Tên quyền tiếng việt" class="form-control"
+                                        name="vi_name" id="vi_name">
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label for="name" class="form-label">Tên quyền</label>
+                                    <input type="text" placeholder="Tên quyền" class="form-control" name="name"
+                                        id="name">
+                                </div>
+                                <div class="mb-3 col-md-12">
+                                    <label for="group_name" class="form-label">Nhóm quyền</label>
+                                    <input type="text" placeholder="Nhóm quyền" class="form-control" name="group_name"
+                                        id="group_name" list="group_name_list">
+                                    <datalist id="group_name_list">
+                                        @foreach ($groupNames as $groupName)
+                                            <option value="{{ $groupName }}">{{ $groupName }}</option>
+                                        @endforeach
+                                    </datalist>
+                                </div>
                             </div>
                         </div>
                         <div class="card-footer">
@@ -27,7 +44,7 @@
                     </div>
                 </form>
             </div>
-            <div class="col-lg-6">
+            <div class="col-lg-7">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="text-uppercase card-title fw-bold">danh sách quyền</h5>
@@ -39,9 +56,11 @@
                                 <thead>
                                     <tr>
                                         <th>ID</th>
+                                        <th>Tên quyền tiếng việt</th>
                                         <th>Tên quyền</th>
+                                        <th>Nhóm quyền</th>
                                         <th>Ngày tạo</th>
-                                        {{-- <th>Hành động</th> --}}
+                                        <th>Hành động</th>
                                     </tr>
                                 </thead>
 
@@ -79,9 +98,18 @@
                         width: '5%'
                     },
                     {
+                        data: 'vi_name',
+                        name: 'vi_name',
+
+                    },
+                    {
                         data: 'name',
                         name: 'name',
                         className: 'target-name'
+                    },
+                    {
+                        data: 'group_name',
+                        name: 'group_name',
                     },
                     {
                         data: 'created_at',
@@ -89,13 +117,13 @@
                         searchable: false,
                         width: '25%'
                     },
-                    // {
-                    //     data: 'operations',
-                    //     name: 'operations',
-                    //     orderable: false,
-                    //     searchable: false,
-                    //     width: '20%'
-                    // }
+                    {
+                        data: 'operations',
+                        name: 'operations',
+                        orderable: false,
+                        searchable: false,
+                        width: '12%'
+                    }
                 ],
                 order: [],
                 language: {
@@ -156,7 +184,9 @@
 
             $(document).on('click', '.btn-operation-edit', function() {
                 let $button = $(this);
-                let $id = $button.data('id');
+                let $record = $button.data('record');
+
+                let $id = $record.id;
 
                 // Lấy thẻ <tr> cha gần nhất
                 let $tr = $button.closest('tr');
@@ -169,6 +199,8 @@
                 $('#title-change').text(`Cập nhật quyền - ${targetName}`)
 
                 $(`input[name="name"]`).val(targetName)
+                $(`input[name="group_name"]`).val($record.group_name)
+                $(`input[name="vi_name"]`).val($record.vi_name)
 
             });
 

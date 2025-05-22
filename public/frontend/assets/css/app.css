@@ -237,6 +237,17 @@ video {
     width: calc(100vw - 250px);
 }
 
+.title {
+    color: #687187;
+    display: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 24px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .cursor {
     cursor: pointer;
 }
@@ -1492,6 +1503,11 @@ main::-webkit-scrollbar-thumb:hover {
     background-color: #fff;
     background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
+tr.disabled-row {
+    /* opacity: 0.5; */
+    pointer-events: none;
+}
+
 .w-1 {
     width: 0.25rem;
 }
@@ -1891,7 +1907,7 @@ h2 {
     /* padding: 5px 1px; */
 }
 
-.status_btn_order span{
+.status_btn_order span {
     font-size: 11px;
 }
 

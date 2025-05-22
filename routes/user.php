@@ -65,6 +65,9 @@ Route::middleware('auth')->group(function () {
         Route::get('create', 'create')->name('create');
         Route::get('filter', 'filter')->name('filter');
         Route::post('get-shipping-fee', 'getShippingFee')->name('get-shipping-fee');
+        Route::post('pay-bulk', 'payBulk')->name('payBulk');
+        Route::post('cancel-bulk', 'cancelBulk')->name('cancelBulk');
+        Route::post('delete-bulk', 'deleteBulk')->name('deleteBulk');
     });
 });
 

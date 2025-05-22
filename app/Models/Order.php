@@ -30,7 +30,9 @@ class Order extends Model
         'note',
         'discount',
         'shipping_fee',
-        'barcode'
+        'barcode',
+        'tracking',
+        'canceled_by'
     ];
 
     public function getOrderdetailAttribute()
@@ -72,5 +74,4 @@ class Order extends Model
             $order->barcode = $barcode;
         });
     }
-
 }

@@ -15,20 +15,66 @@
                 "url": "admin.orders.index"
             },
             {
-                "title": "Yêu cầu nạp tiền",
-                "url": "admin.transfer.histories.index"
-            },
-            {
                 "title": "Tra cứu đơn hàng",
                 "url": "admin.orders.barcode.scanner"
+            },
+            {
+                "title": "Chờ xác nhận",
+                "status": "pending",
+                "class": "bg-warning text-dark"
+            },
+            {
+                "title": "Đã xác nhận, chờ sản xuất",
+                "status": "confirmed_pending_production",
+                "class": "bg-info"
+            },
+            {
+                "title": "Đang sản xuất",
+                "status": "in_production",
+                "class": "bg-primary"
+            },
+            {
+                "title": "Đã sản xuất xong, chờ hoàn thiện",
+                "status": "produced_awaiting_completion",
+                "class": "bg-secondary"
+            },
+            {
+                "title": "Đã hoàn thiện, chờ giao hàng",
+                "status": "completed_waiting_for_shipment",
+                "class": "bg-light text-dark"
+            },
+            {
+                "title": "Đã giao hàng",
+                "status": "shipped",
+                "class": "bg-success"
+            },
+            {
+                "title": "Đã hủy",
+                "status": "cancelled",
+                "class": "bg-danger"
             }
         ],
         "inRoutes": [
             "admin.orders.index",
             "admin.orders.edit",
-            "admin.transfer.histories.index",
             "admin.orders.barcode.scanner"
         ]
+    },
+    {
+        "title": "Tài chính",
+        "icon": "fas fa-money-bill",
+        "id": "finance",
+        "children": [
+            {
+                "title": "Yêu cầu nạp tiền",
+                "url": "admin.transfer.histories.index"
+            },
+            {
+                "title": "Thống kê",
+                "url": "admin.transfer.histories.index"
+            }
+        ],
+        "inRoutes": ["admin.transfer.histories.index"]
     },
     {
         "title": "Sản phẩm",
@@ -149,5 +195,26 @@
             }
         ],
         "inRoutes": ["admin.materials.index", "admin.warehouse.index"]
+    },
+    {
+        "title": "Phân quyền",
+        "icon": "fas fa-user-shield",
+        "id": "permissions",
+        "children": [
+            {
+                "title": "Quản lý vai trò",
+                "url": "admin.roles.index"
+            },
+            {
+                "title": "Quản lý quyền hạn",
+                "url": "admin.permissions.index"
+            }
+        ],
+        "inRoutes": [
+            "admin.employees.index",
+            "admin.roles.index",
+            "admin.permissions.index",
+            "admin.activity.log.history"
+        ]
     }
 ]

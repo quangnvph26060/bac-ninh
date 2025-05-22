@@ -74,6 +74,7 @@ class EmployeeController extends Controller
      */
     public function edit(string $id)
     {
+
         $this->authorize('edit', Employee::class);
 
         $title = 'Cập nhật nhân viên';

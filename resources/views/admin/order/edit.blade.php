@@ -178,24 +178,6 @@
                             <a href="#" class="btn btn-outline-danger btn-sm">
                                 <i class="fas fa-file-pdf me-1"></i> Xuất PDF
                             </a>
-
-                            @if ($order->status === 'pending')
-                                <button id="btn-cansel-order" data-bs-toggle="modal" data-bs-target="#cancelOrder"
-                                    id="btn-cansel-order" class="btn btn-outline-warning btn-sm text-dark"
-                                    type="submit">
-                                    <i class="fas fa-times-circle me-1"></i> Hủy đơn
-                                </button>
-                            @endif
-
-                            {{-- @if ($order->payment_status === 'completed' && $order->status !== 'refunded')
-                                <form action="#" method="POST" onsubmit="return confirm('Refund this order?');">
-                                    @csrf
-                                    @method('POST')
-                                    <button class="btn btn-outline-secondary btn-sm" type="submit">
-                                        <i class="fas fa-undo-alt me-1"></i> Refund
-                                    </button>
-                                </form>
-                            @endif --}}
                         </div>
                     </div>
                 </div>
@@ -243,7 +225,6 @@
                     <div class="card-body d-flex flex-wrap gap-2 justify-content-between align-items-center">
                         <form id="status-form" method="POST" class="d-flex align-items-center gap-2 w-100">
                             @csrf
-
                             @php
                                 $statusOptions = [
                                     'pending' => 0,
@@ -252,6 +233,7 @@
                                     'produced_awaiting_completion' => 3,
                                     'completed_waiting_for_shipment' => 4,
                                     'shipped' => 5,
+                                    'cancelled' => 6,
                                 ];
 
                                 // Ánh xạ trạng thái sang tiếng Việt
@@ -262,32 +244,35 @@
                                     'produced_awaiting_completion' => 'Đã sản xuất xong, chờ hoàn thiện',
                                     'completed_waiting_for_shipment' => 'Đã hoàn thiện, chờ giao hàng',
                                     'shipped' => 'Đã giao hàng',
+                                    'cancelled' => 'Hủy đơn',
                                 ];
 
-                                $isCancelled = $order->status === 'cancelled';
                                 $currentStatusIndex = $statusOptions[$order->status] ?? -1;
                             @endphp
 
                             <select id="status-select" name="status" class="form-select form-select-sm w-100"
-                                {{ $isCancelled ? 'disabled' : '' }}>
+                                @disabled($order->status === 'cancelled')>
                                 @foreach ($statusOptions as $status => $index)
+                                    @php
+                                        $disableCancelled = $status === 'cancelled' && $order->status !== 'pending';
+                                    @endphp
+
                                     <option value="{{ $status }}" data-index="{{ $index }}"
-                                        {{ $order->status == $status ? 'selected' : '' }}
-                                        {{ !$isCancelled && $index < $currentStatusIndex ? 'disabled' : '' }}>
+                                        @selected($order->status == $status) @disabled($index < $currentStatusIndex || $disableCancelled)>
                                         {{ $statusLabels[$status] }}
                                     </option>
                                 @endforeach
-                                {!! $isCancelled ? '<option value="cancelled" selected>Đã hủy đơn</option>' : '' !!}
+
                             </select>
                         </form>
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="cancelOrder" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="cancelOrder" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <form action="" method="post" id="cancellation-form">
@@ -302,7 +287,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Bỏ qua</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"
+                            id="cancelModal">Bỏ qua</button>
                         <button type="submit" class="btn btn-primary btn-sm">Xác nhận hủy</button>
                     </div>
                 </form>
@@ -335,32 +321,43 @@
             });
         }
 
-        let originalStatus = $('#status-select').val();
+        $('#status-select').on('focus', function() {
+            originalStatus = $(this).val();
+        });
 
         $('#status-select').on('change', function() {
-            let selectedStatus = $(this).val();
 
-            Swal.fire({
-                title: "Bạn có chắc chắn muốn cập nhật trạng thái?",
-                text: "Hành động này sẽ không thể hoàn tác!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Đồng ý, cập nhật!",
-                cancelButtonText: "Hủy",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Nếu người dùng đồng ý, submit form
-                    $('#status-form').trigger('submit');
-                    // Cập nhật lại trạng thái gốc
-                    originalStatus = selectedStatus;
-                } else {
-                    // Nếu người dùng hủy, quay lại trạng thái ban đầu
-                    $('#status-select').val(originalStatus);
-                }
-            });
+            if ($(this).val() === "cancelled") {
+                $('#cancelOrder').modal('show')
+            } else {
+                let selectedStatus = $(this).val();
+
+                Swal.fire({
+                    title: "Bạn có chắc chắn muốn cập nhật trạng thái?",
+                    text: "Hành động này sẽ không thể hoàn tác!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Đồng ý, cập nhật!",
+                    cancelButtonText: "Hủy",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Nếu người dùng đồng ý, submit form
+                        $('#status-form').trigger('submit');
+                        // Cập nhật lại trạng thái gốc
+                        originalStatus = selectedStatus;
+                    } else {
+                        // Nếu người dùng hủy, quay lại trạng thái ban đầu
+                        $('#status-select').val(originalStatus);
+                    }
+                });
+            }
         });
+
+        $('#cancelModal').click(function() {
+            $('#status-select').val(originalStatus);
+        })
 
         $('#status-form').on('submit', function(e) {
             e.preventDefault();
@@ -427,10 +424,6 @@
                         }
                     });
 
-                    if (response.data !== 'pending') {
-                        $('#btn-cansel-order').hide()
-                    }
-
                     // Hiển thị thông báo thành công
                     Notifications(response.message, "success");
                 },
@@ -470,9 +463,6 @@
                 },
                 success: (response) => {
                     Notifications(response.message, "success");
-
-                    // Ẩn nút hủy
-                    $('#btn-cansel-order').hide();
 
                     // Thay đổi trạng thái nút
                     $('#btn-status, #confirm-paymant')
