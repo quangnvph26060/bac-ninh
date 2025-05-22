@@ -68,7 +68,7 @@
             </tr>
             @empty
                 <tr>
-                    <td colspan="9" class="text-center py-4">
+                    <td colspan="11" class="text-center py-4">
                         <div class="fw-bold text-muted">No orders found</div>
                     </td>
                 </tr>

@@ -468,7 +468,7 @@ class OrderController extends Controller
         $price = isOnSale($variant) ? $variant->discount_price : $variant->sale_price;
 
         return response()->json([
-            'price' => number_format($price, 0, ',', ''),
+            'price' => formatPrice($price),
             'variant_id' => $variant->id,
             'sku' => $variant->sku
         ]);

@@ -196,7 +196,7 @@ const validateAndPreviewImage = function (event, imgId, options) {
                 showToast(
                     "error",
                     `Thiết kế không khớp với mẫu.
-                    Thiết kế đề xuất: Width: ${expectedWidth}px, Height: ${expectedHeight}px, PPI: ${expectedPPI}, File format: ${expectedFormat}.
+                    Thiết kế đề xuất: Width: ${expectedWidth}px, Height: ${expectedHeight}px, PPI: ${expectedPPI}, File format: .${expectedFormat}
                     Thiết kế của bạn: Width: ${width}px, Height: ${height}px, PPI: ${ppi}, File format: ${fileType}.`
                 );
             }

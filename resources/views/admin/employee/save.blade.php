@@ -134,10 +134,10 @@
                                 @foreach ($permission as $item)
                                     <div class="form-check">
                                         <input class="form-check-input cursor" type="checkbox" name="permissions[]"
-                                            id="{{ \Str::slug($item->vi_name) }}" value="{{ $item->name }}"
+                                            id="{{ \Str::slug($item->name) }}" value="{{ $item->name }}"
                                             @checked(in_array($item->name, !empty($assignedPermissions) ? $assignedPermissions : []))>
                                         <label class="form-check-label mb-0 cursor"
-                                            for="{{ \Str::slug($item->vi_name) }}">{{ $item->vi_name }}</label>
+                                            for="{{ \Str::slug($item->name) }}">{{ $item->name }}</label>
                                     </div>
                                 @endforeach
                             </div>
