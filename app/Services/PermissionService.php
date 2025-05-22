@@ -46,14 +46,26 @@ class PermissionService extends BaseService
     }
 
 
+    // public function groupPermissionsByNamespace()
+    // {
+    //     return $this->permission->query()
+    //         ->select('id', 'name', 'group_name', 'vi_name')
+    //         ->orderBy('group_name', 'asc')
+    //         ->orderBy('id', 'asc')
+    //         ->get()
+    //         ->groupBy('group_name');
+    // }
+
     public function groupPermissionsByNamespace()
     {
         return $this->permission->query()
-            ->select('id', 'name', 'group_name', 'vi_name')
-            ->orderBy('group_name', 'asc')
+            ->select('name', 'id')
             ->orderBy('id', 'asc')
             ->get()
-            ->groupBy('group_name');
+            ->groupBy(function ($permission) {
+                $parts = explode(' ', $permission->name);
+                return $parts[0];
+            });
     }
 
 
