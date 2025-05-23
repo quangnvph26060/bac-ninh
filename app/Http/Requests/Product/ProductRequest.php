@@ -58,6 +58,10 @@ class ProductRequest extends FormRequest
             'variants.*.standard_shipping' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
             'variants.*.express_shipping' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
             'variants.*.international_shipping' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
+            'variants.*.design_width' => 'required|integer|min:0',
+            'variants.*.design_height' => 'required|integer|min:0',
+            'variants.*.design_ppi' => 'required|integer|min:0',
+            'variants.*.design_format' => 'required|string|in:jpg,png,gif,jpeg,webp',
             'cross_sell' => 'nullable',  // Cross-sell products are optional
             'status' => 'required|numeric|in:1,2',  // Status should be a boolean (1 or 0)
             'is_show_home' => 'nullable|boolean',  // Show on home page flag should be a boolean (1 or 0)
@@ -69,10 +73,6 @@ class ProductRequest extends FormRequest
             'standard_shipping' => 'required|regex:/^\d*(\.\d{1,2})?$/',
             'express_shipping' => 'nullable|regex:/^\d*(\.\d{1,2})?$/',
             'international_shipping' => 'nullable|regex:/^\d*(\.\d{1,2})?$/',
-            'design_width' => 'required|integer|min:0',
-            'design_height' => 'required|integer|min:0',
-            'design_ppi' => 'required|integer|min:0',
-            'design_format' => 'required|string|in:jpg,png,gif,jpeg,webp',
             'file_guideline' => 'nullable',
             'guideline_file' => 'nullable|file|mimes:zip|max:10240',
         ];

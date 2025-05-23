@@ -10,8 +10,23 @@ use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductController;
 use App\Http\Controllers\Frontend\App\ProfileController;
 use App\Http\Controllers\Frontend\App\TransactionHistoryController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+route::get('get-ppi-image', function () {
+    return view('get-ppi');
+});
+
+Route::post('get-ppi-image', function (Request $request) {
+    $file = $request->file('file');
+
+try {
+        $result = getImageInfo($file);
+        dd($result);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});
 
 Route::middleware('guest')->controller(AuthController::class)->group(function () {
     Route::get('login', 'login')->name('login');

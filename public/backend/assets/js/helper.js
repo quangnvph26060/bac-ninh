@@ -149,18 +149,16 @@ const removeImage = function (imgId, inputId) {
     showToast("success", "Ảnh đã được xóa thành công.");
 };
 
-const validateAndPreviewImage = function (event, imgId, options) {
-    const {
-        expectedWidth,
-        expectedHeight,
-        expectedPPI,
-        expectedFormat,
-        inputId,
-        imageDefault,
-    } = options;
-
+const validateAndPreviewImage = function (event, imgId, inputContainerId, imageDefault) {
     const file = event.target.files[0];
     const reader = new FileReader();
+
+    const container = document.getElementById(inputContainerId);
+    const expectedWidth = parseInt(container.dataset.width);
+    const expectedHeight = parseInt(container.dataset.height);
+    const expectedPpi = parseInt(container.dataset.ppi);
+    const expectedFormat = container.dataset.format;
+    const inputId = container.dataset.inputId;
 
     reader.onload = function () {
         const imgElement = document.getElementById(imgId);
@@ -169,38 +167,33 @@ const validateAndPreviewImage = function (event, imgId, options) {
         image.onload = function () {
             const width = image.width;
             const height = image.height;
-            const ppi = Math.round(width / 4 / (file.size / 1024 / 1024));
+            const ppi = Math.round(width / 4 / (file.size / 1024 / 1024)); // công thức này có thể tùy chỉnh lại nếu cần
             const fileType = file.type;
 
             if (
                 width === expectedWidth &&
                 height === expectedHeight &&
-                ppi === expectedPPI &&
+                // ppi === expectedPpi && // nếu muốn kiểm tra PPI thì bỏ comment dòng này
                 fileType === "image/" + expectedFormat
             ) {
-                // Hiển thị icon thùng rác khi hover
                 const inputElement = document.getElementById(inputId);
-
                 const parentElement = inputElement.parentElement;
 
                 parentElement.classList.add("has-image");
-
-                // deleteIcon.classList.remove("d-none");
-
                 imgElement.src = reader.result;
             } else {
                 event.target.value = "";
                 imgElement.src = imageDefault;
 
-                // Gọi hàm hiển thị lỗi
                 showToast(
                     "error",
-                    `Thiết kế không khớp với mẫu.
-                    Thiết kế đề xuất: Width: ${expectedWidth}px, Height: ${expectedHeight}px, PPI: ${expectedPPI}, File format: .${expectedFormat}
+                    `Thiết kế không khớp với mẫu.<br>
+                    Thiết kế đề xuất: Width: ${expectedWidth}px, Height: ${expectedHeight}px, PPI: ${expectedPpi}, File format: .${expectedFormat}<br>
                     Thiết kế của bạn: Width: ${width}px, Height: ${height}px, PPI: ${ppi}, File format: ${fileType}.`
                 );
             }
         };
+
         image.src = reader.result;
     };
 

@@ -368,7 +368,7 @@ class OrderController extends Controller
         $ids = $request->input('product_ids');
 
         $products = Product::query()
-            ->select('id', 'image', 'name', 'sku', 'type', 'sale_price', 'discount_price', 'discount_start', 'discount_end', 'stock', 'stock_status', 'design_width', 'design_height', 'design_ppi', 'design_format')
+            ->select('id', 'image', 'name', 'sku', 'type', 'sale_price', 'discount_price', 'discount_start', 'discount_end', 'stock', 'stock_status')
             ->whereIn('id', $ids)
             ->get();
 
@@ -396,10 +396,6 @@ class OrderController extends Controller
                     'name' => $product->name,
                     'attributes' => $attributesFormatted,
                     'type' => $product->type,
-                    'design_width' => $product->design_width,
-                    'design_height' => $product->design_height,
-                    'design_ppi' => $product->design_ppi,
-                    'design_format' => $product->design_format,
                 ];
             } else {
 
@@ -414,10 +410,6 @@ class OrderController extends Controller
                     'price' => formatPrice($price),
                     'type' => $product->type,
                     'sku' => $product->sku,
-                    'design_width' => $product->design_width,
-                    'design_height' => $product->design_height,
-                    'design_ppi' => $product->design_ppi,
-                    'design_format' => $product->design_format,
                 ];
             }
         }
@@ -470,7 +462,11 @@ class OrderController extends Controller
         return response()->json([
             'price' => formatPrice($price),
             'variant_id' => $variant->id,
-            'sku' => $variant->sku
+            'sku' => $variant->sku,
+            'design_width' => $variant->design_width,
+            'design_height' => $variant->design_height,
+            'design_ppi' => $variant->design_ppi,
+            'design_format' => $variant->design_format,
         ]);
     }
 
