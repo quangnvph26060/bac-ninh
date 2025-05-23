@@ -40,10 +40,6 @@ class Product extends Model
         'standard_shipping',
         'express_shipping',
         'international_shipping',
-        'design_width',
-        'design_height',
-        'design_ppi',
-        'design_format',
         'guideline_file',
         'file_guideline'
     ];

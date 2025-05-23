@@ -70,6 +70,10 @@ class ProductService  extends BaseService
                 'standard_shipping'         => $variant->standard_shipping,
                 'express_shipping'          => $variant->express_shipping,
                 'international_shipping'    => $variant->international_shipping,
+                'design_width'              => $variant['design_width'],
+                'design_height'             => $variant['design_height'],
+                'design_ppi'                => $variant['design_ppi'],
+                'design_format'             => $variant['design_format'],
             ];
         });
     }
@@ -329,6 +333,10 @@ class ProductService  extends BaseService
                 'standard_shipping' => $variantData['standard_shipping'] ?? 0,
                 'express_shipping' => $variantData['express_shipping'] ?? 0,
                 'international_shipping' => $variantData['international_shipping'] ?? 0,
+                'design_width' => $variantData['design_width'],
+                'design_height' => $variantData['design_height'],
+                'design_ppi' => $variantData['design_ppi'],
+                'design_format' => $variantData['design_format'],
             ];
 
             if ($existingVariants->has($combineKey)) {

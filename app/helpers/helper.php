@@ -110,6 +110,35 @@ if (!function_exists('hasFile')) {
     }
 }
 
+function getImageInfo($file): array
+{
+    $image = new \Imagick($file->getRealPath());
+
+    $format = $image->getImageFormat();
+    $width = $image->getImageWidth();
+    $height = $image->getImageHeight();
+
+    $resolution = $image->getImageResolution(); // ['x' => ..., 'y' => ...]
+    $unit = $image->getImageUnits(); // 1 = undefined, 2 = dpi, 3 = pixels/cm
+
+    $x_dpi = $resolution['x'];
+    $y_dpi = $resolution['y'];
+
+    if ($unit === \Imagick::RESOLUTION_PIXELSPERCENTIMETER) {
+        $x_dpi = round($x_dpi * 2.54, 2);
+        $y_dpi = round($y_dpi * 2.54, 2);
+    }
+
+    return [
+        'width' => $width,
+        'height' => $height,
+        'x_dpi' => $x_dpi,
+        'y_dpi' => $y_dpi,
+        'unit' => $unit === 2 ? 'dpi' : ($unit === 3 ? 'pixels/cm' : 'unknown'),
+        'format' => $format,
+    ];
+}
+
 if (!function_exists('showImage')) {
     function showImage($image)
     {
