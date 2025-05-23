@@ -380,7 +380,7 @@
 @push('scripts')
     <script src="https://unpkg.com/exifr/dist/lite.umd.js"></script>
 
-    <script src="{{ asset('backend/assets/js/helper.js') }}"></script>
+    <script src="{{ asset('backend/assets/js/helper.js') }}?v={{ filemtime(public_path('backend/assets/js/helper.js')) }}"></script>
 
 
     <script>
