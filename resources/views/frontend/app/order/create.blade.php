@@ -635,26 +635,26 @@
                     <div class="d-flex gap-3">
 
                         ${product.model_image ? `
-                                                                                                                                                                    <div style="width: 103px;">
-                                                                                                                                                                        <div class="fw-semibold">Mockup</div>
-                                                                                                                                                                        <div class="image-container">
-                                                                                                                                                                            <img class="img-thumbnail"
-                                                                                                                                                                                style="cursor: pointer;"
-                                                                                                                                                                                src="${product.model_image}">
-                                                                                                                                                                        </div>
-                                                                                                                                                                    </div>
-                                                                                                                                                                    ` : ''}
+                                                                                                                                                                                                <div style="width: 103px;">
+                                                                                                                                                                                                    <div class="fw-semibold">Mockup</div>
+                                                                                                                                                                                                    <div class="image-container">
+                                                                                                                                                                                                        <img class="img-thumbnail"
+                                                                                                                                                                                                            style="cursor: pointer;"
+                                                                                                                                                                                                            src="${product.model_image}">
+                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                </div>
+                                                                                                                                                                                                ` : ''}
 
                         ${product.design_image ? `
-                                                                                                                                                                    <div style="width: 103px;">
-                                                                                                                                                                        <div class="fw-semibold">Design photo</div>
-                                                                                                                                                                        <div class="image-container">
-                                                                                                                                                                            <img class="img-thumbnail"
-                                                                                                                                                                                style="cursor: pointer;"
-                                                                                                                                                                                src="${product.design_image}">
-                                                                                                                                                                        </div>
-                                                                                                                                                                    </div>
-                                                                                                                                                                    ` : ''}
+                                                                                                                                                                                                <div style="width: 103px;">
+                                                                                                                                                                                                    <div class="fw-semibold">Design photo</div>
+                                                                                                                                                                                                    <div class="image-container">
+                                                                                                                                                                                                        <img class="img-thumbnail"
+                                                                                                                                                                                                            style="cursor: pointer;"
+                                                                                                                                                                                                            src="${product.design_image}">
+                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                </div>
+                                                                                                                                                                                                ` : ''}
                     </div>
                 </div>
 
@@ -1172,15 +1172,15 @@
                 const width = $(this).data('width');
                 const height = $(this).data('height');
                 const dpi = $(this).data('dpi');
-                const type = $(this).data('type');
+                const format = $(this).data('format');
                 let content = '';
 
-                if (width && height && dpi && type) {
+                if (width && height && dpi && format) {
                     content = `
                         <p class="mb-0"><strong>Chiều rộng:</strong>  ${width} px</p>
                         <p class="mb-0"><strong>Chiều cao:</strong>  ${height} px</p>
                         <p class="mb-0"><strong>DPI:</strong>  ${dpi}</p>
-                        <p class="mb-0"><strong>Định dạng tệp:</strong>  ${type}</p>
+                        <p class="mb-0"><strong>Định dạng tệp:</strong>  ${format}</p>
                     `;
                 } else {
                     content = 'Chưa có dữ liệu';
@@ -1305,11 +1305,8 @@
                                                 accept="image/*" onchange="previewImage(event, 'show_model_${product.id}')">
                                         </div>
                                         <div class="design-upload position-relative" style="width: 11%;">
-                                            <div data-width="${product.design_width}"
-                                                data-height="${product.design_height}"
-                                                data-dpi="${product.design_ppi}"
-                                                data-type="${product.design_format}"
-                                                class="design-tooltip position-absolute"
+                                            <div
+                                                class="design-tooltip position-absolute" id="design-tooltip-${product.id}"
                                                 style="top: 31px; right: 5px; z-index: 10; cursor: pointer;">
                                                 <i class="fa-solid fa-circle-info"></i>
 
@@ -1335,21 +1332,12 @@
                                             </div>
 
                                             <input type="file" name="design" id="design_${product.id}" class="form-control d-none"
-                                                accept="image/*" onchange="validateAndPreviewImage(event, 'show_design_${product.id}',
-                                                {
-                                                    expectedWidth: ${product.design_width},
-                                                    expectedHeight: ${product.design_height},
-                                                    expectedPPI: ${product.design_ppi},
-                                                    expectedFormat: '${product.design_format}',
-                                                    inputId: 'show_design_${product.id}',
-                                                    imageDefault: '{{ config('app.url') }}/images/image-default.png'
-                                                })">
+                                                accept="image/*" onchange="validateAndPreviewImage(event, 'show_design_${product.id}', 'design-tooltip-${product.id}', '{{ config('app.url') }}/images/image-default.png')">
                                         </div>
                                     </div>
                                 </div>
                             </div>`;
                     }).join('');
-
                 $('#confirmed-products-wrapper').append(html);
 
                 updateSubtotal()
@@ -1452,6 +1440,7 @@
                         value_ids: selectedValues
                     },
                     success: function(response) {
+
                         const info_variant = $(`#info_variant_${productId}[data-time="${time}"]`);
 
                         // Kiểm tra nếu biến thể này đã được dùng ở 1 sản phẩm khác
@@ -1498,7 +1487,15 @@
                             .text(`${response.price}`);
 
                         const form = $(`.custom-form[data-id="${productId}"][data-time="${time}"]`);
+
                         form.find('.is-variant.d-none').removeClass('d-none').addClass('d-block');
+
+                        form.find('.design-tooltip').attr({
+                            'data-width': response.design_width,
+                            'data-height': response.design_height,
+                            'data-dpi': response.design_ppi,
+                            'data-format': response.design_format
+                        });
 
                         const totalPriceEl = form.find(
                             `.total-price[data-product-id="${productId}"][data-time="${time}"] span`
