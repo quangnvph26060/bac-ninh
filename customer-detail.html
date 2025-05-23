@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Check Image PPI</title>
+        <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    </head>
+    <body>
+        <h2>Chọn ảnh để kiểm tra PPI (DPI):</h2>
+        <input type="file" id="upload" />
+        <pre id="output"></pre>
+
+        <script>
+            const upload = document.getElementById("upload");
+            const output = document.getElementById("output");
+
+            upload.addEventListener("change", function () {
+                const file = this.files[0];
+                if (!file) return;
+
+                EXIF.getData(file, function () {
+                    const xRes = EXIF.getTag(this, "XResolution");
+                    const yRes = EXIF.getTag(this, "YResolution");
+                    const unit = EXIF.getTag(this, "ResolutionUnit"); // 2 = inches, 3 = cm
+
+                    let xDPI = xRes;
+                    let yDPI = yRes;
+
+                    if (unit === 3) {
+                        // Chuyển từ pixels/cm sang dpi
+                        xDPI = Math.round(xRes * 2.54);
+                        yDPI = Math.round(yRes * 2.54);
+                    }
+
+                    output.textContent = `
+                        File: ${file.name}
+                        ----------------------------
+                        X Resolution: ${xRes}
+                        Y Resolution: ${yRes}
+                        Resolution Unit: ${
+                                                unit === 2
+                                                    ? "Inches"
+                                                    : unit === 3
+                                                    ? "Centimeters"
+                                                    : "Unknown"
+                                            }
+                        --> Converted DPI: ${xDPI} x ${yDPI}
+                                `;
+                });
+            });
+        </script>
+    </body>
+</html>
