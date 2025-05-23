@@ -158,7 +158,6 @@ const validateAndPreviewImage = function (event, imgId, inputContainerId, imageD
     const expectedHeight = parseInt(container.dataset.height);
     const expectedPpi = parseInt(container.dataset.ppi);
     const expectedFormat = container.dataset.format;
-    const inputId = container.dataset.inputId;
 
     reader.onload = function () {
         const imgElement = document.getElementById(imgId);
@@ -176,8 +175,8 @@ const validateAndPreviewImage = function (event, imgId, inputContainerId, imageD
                 // ppi === expectedPpi && // nếu muốn kiểm tra PPI thì bỏ comment dòng này
                 fileType === "image/" + expectedFormat
             ) {
-                const inputElement = document.getElementById(inputId);
-                const parentElement = inputElement.parentElement;
+
+                const parentElement = imgElement.parentElement;
 
                 parentElement.classList.add("has-image");
                 imgElement.src = reader.result;
