@@ -13,13 +13,32 @@ use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
     public function detail($prefix, $suffix = null)
     {
         if (!empty($suffix)) {
-            $product = Product::query()->with(['category', 'images', 'attributes', 'variants'])->where('slug', $suffix)->firstOrFail();
+            $product = Product::query()->with(['category', 'images', 'attributes', 'variants.attributeValues.attribute'])->where('slug', $suffix)->firstOrFail();
+
+            $variantRows = $product->variants->map(function ($variant) {
+                $values = [];
+
+                foreach ($variant->attributeValues as $attributeValue) {
+                    $attributeName = $attributeValue->attribute->name;
+                    $values[$attributeName] = $attributeValue->value;
+                }
+
+                return [
+                    'attributes' => $values,
+                    'price' =>  isOnSale($variant) ? $variant->discount_price : $variant->sale_price,
+                    'standard_shipping' => $variant->standard_shipping,
+                    'express_shipping' => $variant->express_shipping,
+                    'international_shipping' => $variant->international_shipping,
+                    'inventory' => Str::of($variant->stock_status)->replace('_', ' ')->title(),
+                ];
+            });
 
             $attributes = $product->attributes->map(function ($attribute) {
                 $valueIds = json_decode($attribute->pivot->attribute_values_ids, true);
@@ -38,7 +57,7 @@ class ProductController extends Controller
                 ->whereIn('id', $product->cross_sell ?? [])
                 ->get();
 
-            return view('frontend.pages.products.detail', compact('product', 'attributes', 'suggestedProducts'));
+            return view('frontend.pages.products.detail', compact('product', 'attributes', 'suggestedProducts', 'variantRows'));
         }
         return redirect()->route('products.category', $prefix);
     }

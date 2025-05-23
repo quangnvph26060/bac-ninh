@@ -88,7 +88,7 @@ header {
 
 .full-screen-dropdown {
     position: absolute;
-    top: 68px;
+    top: 100px;
     left: -20px;
     width: 100vw; /* Chiếm toàn bộ chiều rộng màn hình */
     height: auto;
@@ -99,6 +99,10 @@ header {
     border-radius: 0;
     display: none;
     justify-content: center;
+}
+
+#download-template{
+    cursor: pointer;
 }
 
 .nav-item#catalogDropdown:hover .full-screen-dropdown {
@@ -931,7 +935,7 @@ header {
 .pw_product_wrapper {
     max-width: 1207px;
     margin: 0 auto;
-    padding-top: 90px;
+    padding-top: 115px;
 }
 
 .detail_product .image_product {

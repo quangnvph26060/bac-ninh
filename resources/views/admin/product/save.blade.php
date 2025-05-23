@@ -100,10 +100,8 @@
                                         <label for="images" class="form-label">Album sản phẩm</label>
                                         <div class="input-images pb-3"></div>
                                     </div>
-
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
@@ -609,6 +607,23 @@
                         </div>
                     </div>
 
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h4 class="card-title me-2">
+                                Hướng dẫn tập tin
+                            </h4>
+                            <p class="mb-0 text-muted">
+                                <i class="fa-solid fa-note-sticky me-2" aria-hidden="true"></i> <!-- Icon tải xuống -->
+                                Sao chép nội dung sau và gắn vào văn bản để có thể tải template về máy.
+                                (download-template)
+                            </p>
+                        </div>
+
+                        <div class="card-body">
+                            <textarea name="file_guideline" class="ckeditor" id="file_guideline">{!! optional($product)->file_guideline !!}</textarea>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4 class="card-title">Tối ưu hóa công cụ tìm kiếm</h4>
@@ -717,6 +732,29 @@
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">
+                                <label for="guideline_file" class="form-label required">
+                                    <i class="fa fa-upload me-1"></i> Tải lên tập tin hướng dẫn (.zip)
+                                </label>
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <input type="file" name="guideline_file" id="guideline_file" class="form-control"
+                                accept=".zip">
+
+                            @if (!empty($product?->guideline_file))
+                                <div class="mt-2">
+                                    <a download href="{{ showImage($product->guideline_file) }}" target="_blank"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <i class="fa fa-download me-1"></i> Tải tập tin hiện tại
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
 

@@ -87,6 +87,22 @@ if (!function_exists('uploadImages')) {
     }
 }
 
+function uploadZipFile($fileName, $directory = 'guideline_file')
+{
+    if (!request()->hasFile($fileName)) {
+        return null;
+    }
+
+    $file = request()->file($fileName);
+    $filename = $file->getClientOriginalName();
+    // time() . '_' .
+    // Lưu vào storage/app/public/guideline_file
+    $path = $file->storeAs($directory, $filename, 'public');
+
+    return $path; // trả về đường dẫn để lưu vào DB
+}
+
+
 if (!function_exists('hasFile')) {
     function hasFile($filename)
     {
