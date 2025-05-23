@@ -15,4 +15,8 @@ class AttributeValue extends Model
         'status'
     ];
 
+    public function attribute()
+    {
+        return $this->belongsTo(Attribute::class);
+    }
 }

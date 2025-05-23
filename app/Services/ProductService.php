@@ -132,8 +132,8 @@ class ProductService  extends BaseService
     public function store(array $payload)
     {
         $uploadedImage = null;
-        $uploadedImages = null;
-        return transaction(function () use ($payload, &$uploadedImage, &$uploadedImages) {
+        $uploadTemplate = null;
+        return transaction(function () use ($payload, &$uploadedImage, &$uploadTemplate) {
 
             if (!isset($payload['slug']) || !$payload['slug']) {
                 $payload['slug'] = generateSlug($payload['name']);
@@ -143,6 +143,12 @@ class ProductService  extends BaseService
                 $uploadedImage = uploadImages('image', 'products', true, 800, 800);
                 $payload['image'] = $uploadedImage;
             }
+
+            if (hasFile('guideline_file')) {
+                $uploadTemplate = uploadZipFile('guideline_file', 'guideline_file');
+                $payload['guideline_file'] = $uploadTemplate;
+            }
+
 
             if (!empty($payload['cross_sell'])) {
                 $payload['cross_sell'] = array_map('intval', explode(',', $payload['cross_sell']));
@@ -184,15 +190,13 @@ class ProductService  extends BaseService
             }
 
             return successResponse('Thêm sản phẩm thành công', [], 201);
-        }, function () use ($uploadedImage, $uploadedImages) {
+        }, function () use ($uploadedImage, $uploadTemplate) {
             if ($uploadedImage) {
                 deleteImage($uploadedImage);
             }
 
-            if ($uploadedImages) {
-                foreach ($uploadedImages as $image) {
-                    deleteImage($image);
-                }
+            if ($uploadTemplate) {
+                deleteImage($uploadTemplate);
             }
 
             return errorResponse('Có lỗi xảy ra. Vui lòng thử lại sau!');
@@ -202,8 +206,8 @@ class ProductService  extends BaseService
     public function update(string $id, array $payload)
     {
         $uploadedImage = null;
-        $uploadedImages = null;
-        return transaction(function () use ($id, $payload, &$uploadedImage, &$uploadedImages) {
+        $uploadTemplate = null;
+        return transaction(function () use ($id, $payload, &$uploadedImage, &$uploadTemplate) {
             if (!isset($payload['slug']) || !$payload['slug']) {
                 $payload['slug'] = generateSlug($payload['name']);
             }
@@ -211,6 +215,11 @@ class ProductService  extends BaseService
             if (hasFile('image')) {
                 $uploadedImage = uploadImages('image', 'products', true, 800, 800);
                 $payload['image'] = $uploadedImage;
+            }
+
+            if (hasFile('guideline_file')) {
+                $uploadTemplate = uploadZipFile('guideline_file', 'guideline_file');
+                $payload['guideline_file'] = $uploadTemplate;
             }
 
             if (!empty($payload['tags'])) {
@@ -254,14 +263,12 @@ class ProductService  extends BaseService
             }
 
             return successResponse('Lưu thay đổi thành công', [], 201);
-        }, function () use ($uploadedImage, $uploadedImages) {
+        }, function () use ($uploadedImage, $uploadTemplate) {
             if ($uploadedImage) {
                 deleteImage($uploadedImage);
             }
-            if ($uploadedImages) {
-                foreach ($uploadedImages as $image) {
-                    deleteImage($image);
-                }
+            if ($uploadTemplate) {
+                deleteImage($uploadTemplate);
             }
             return errorResponse('Có lỗi xảy ra. Vui lòng thử lại sau!');
         });

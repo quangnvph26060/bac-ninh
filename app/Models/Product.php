@@ -43,7 +43,9 @@ class Product extends Model
         'design_width',
         'design_height',
         'design_ppi',
-        'design_format'
+        'design_format',
+        'guideline_file',
+        'file_guideline'
     ];
 
     protected $casts = [
@@ -117,6 +119,11 @@ class Product extends Model
             // Nếu có ảnh cũ và ảnh mới khác ảnh cũ
             if (!empty($oldImage) && $oldImage !== $model->image) {
                 deleteImage($oldImage);
+            }
+
+            $oldGuidelineFile = $model->getOriginal('guideline_file');
+            if (!empty($oldGuidelineFile) && $oldGuidelineFile !== $model->guideline_file) {
+                deleteImage($oldGuidelineFile);
             }
         });
     }

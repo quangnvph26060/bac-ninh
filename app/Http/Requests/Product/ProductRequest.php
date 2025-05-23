@@ -73,6 +73,8 @@ class ProductRequest extends FormRequest
             'design_height' => 'required|integer|min:0',
             'design_ppi' => 'required|integer|min:0',
             'design_format' => 'required|string|in:jpg,png,gif,jpeg,webp',
+            'file_guideline' => 'nullable',
+            'guideline_file' => 'nullable|file|mimes:zip|max:10240',
         ];
     }
 

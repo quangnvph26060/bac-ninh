@@ -7,7 +7,10 @@
                 <div>
                     @php
                         $items = [
-                            ['label' => $product->category->name, 'url' => route('products.category', $product->category->slug)],
+                            [
+                                'label' => $product->category->name,
+                                'url' => route('products.category', $product->category->slug),
+                            ],
                             ['label' => $product->name],
                         ];
                     @endphp
@@ -22,7 +25,7 @@
         @endphp
 
         <div class="detail_product mb-5 mt-3">
-            <div class="d-flex justify-content-between gap-4">
+            <div class="d-flex justify-content-between gap-4 align-items-start">
                 <div class="image_product">
                     <div class="swiper swiper-thumbnail">
                         <div class="swiper-wrapper">
@@ -86,38 +89,30 @@
 
 
                         <div class="mb-4">
-                            <p class="price-product pb-0">
+                            <p class="price-product pb-0 mb-0">
+                                Price *
                                 @php
                                     $record = $product->variants->isNotEmpty() ? $product->variants->first() : $product;
                                 @endphp
 
                                 @if (isOnSale($record))
-                                    <h2 class="text_color fs-4 mb-0 fw-bold d-inline">
-                                        {{ finalPrice($record->discount_price) }}</h2>
+                                    <h2 class="text_color fs-3 mb-0 fw-bold d-inline">
+                                        {{ formatPrice($record->discount_price) }} USD</h2>
 
-                                    <small class="text-muted"> <del
-                                            class="ms-2">{{ formatPrice($record->sale_price) }}</del></small>
+                                    <small class="text-muted fs-6"> <del
+                                            class="ms-2">{{ formatPrice($record->sale_price) }} USD</del></small>
                                 @else
-                                    <h2 class="text_color fs-2 mb-0 fw-bold">{{ formatPrice($record->sale_price) }}</h2>
+                                    <h2 class="text_color fs-2 mb-0 fw-bold">${{ formatPrice($record->sale_price) }}</h2>
                                 @endif
                             </p>
 
-                            {{-- <p class="text-success fw-medium">$4.49 with Diamond Tier</p> --}}
                         </div>
 
                         <div class="d-flex flex-column flex-md-row gap-3">
                             <button type="button" class="ant-btn-primary w-50 d-inline" id="btnOrderCreate">
                                 Start new order
                             </button>
-
-                            {{-- <a href="" class="w-100">
-                                <button type="button" class="ant-btn-default text-dark w-100 d-inline">
-                                    Mua ngay
-                                </button>
-                            </a> --}}
                         </div>
-
-
                     </div>
                 </div>
             </div>
@@ -125,6 +120,7 @@
 
         <div class="box_content">
             <div class="textDescription">
+                <h2>About {{ $product->name }}</h2>
                 {!! $product->description !!}
             </div>
         </div>
@@ -137,24 +133,29 @@
                         Description
                     </button>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="pricing-tab" data-bs-toggle="tab" data-bs-target="#pricing" type="button"
-                        role="tab">
-                        Pricing
-                    </button>
-                </li>
+                @if (count($variantRows) > 0)
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pricing-tab" data-bs-toggle="tab" data-bs-target="#pricing"
+                            type="button" role="tab">
+                            Pricing
+                        </button>
+                    </li>
+                @endif
+
                 {{-- <li class="nav-item" role="presentation">
                     <button class="nav-link" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping"
                         type="button" role="tab">
                         Shipping
                     </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="guidelines-tab" data-bs-toggle="tab" data-bs-target="#guidelines"
-                        type="button" role="tab">
-                        File Guidelines
-                    </button>
                 </li> --}}
+                @if (!empty($product->file_guideline))
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="guidelines-tab" data-bs-toggle="tab" data-bs-target="#guidelines"
+                            type="button" role="tab">
+                            File Guidelines
+                        </button>
+                    </li>
+                @endif
             </ul>
 
             <div class="tab-content mt-3" id="myTabContent">
@@ -163,14 +164,53 @@
                         {!! $product->content !!}
                     </div>
                 </div>
+                @php
+                    // Lấy các key thuộc tính đầu tiên làm tên cột (giả định các variant có cùng cấu trúc)
+                    $attributeNames = collect($variantRows)->first()['attributes'] ?? [];
+                @endphp
                 <div class="tab-pane fade" id="pricing" role="tabpanel">
-                    <p>Content for Pricing tab...</p>
+                    <h5 class="mt-3">Price list of variants</h5>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    @foreach ($attributeNames as $attrName => $val)
+                                        <th>{{ $attrName }}</th>
+                                    @endforeach
+                                    <th>Price</th>
+                                    <th>Standard Shipping (US)</th>
+                                    <th>Express Shipping (US)</th>
+                                    <th>International Shipping</th>
+                                    <th>Inventory</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($variantRows as $index => $variant)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        @foreach ($attributeNames as $attrName => $val)
+                                            <td>{{ $variant['attributes'][$attrName] ?? '-' }}</td>
+                                        @endforeach
+                                        <td>{{ formatPrice($variant['price']) }} USD</td>
+                                        <td>{{ formatPrice($variant['standard_shipping']) }} USD</td>
+                                        <td>{{ formatPrice($variant['express_shipping']) }} USD</td>
+                                        <td>{{ formatPrice($variant['international_shipping']) }} USD</td>
+                                        <td>
+                                            {{ $variant['inventory'] }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
-                <div class="tab-pane fade" id="shipping" role="tabpanel">
+                {{-- <div class="tab-pane fade" id="shipping" role="tabpanel">
                     <p>Content for Shipping tab...</p>
-                </div>
+                </div> --}}
                 <div class="tab-pane fade" id="guidelines" role="tabpanel">
-                    <p>Content for File Guidelines tab...</p>
+                    {!! $product->file_guideline !!}
                 </div>
             </div>
         </div>
@@ -178,7 +218,7 @@
         <div class="suggest_product_wrapper my-5">
             <div class="suggest_product_wrapper__inner p-0">
                 <div class="d-flex justify-content-center">
-                    <h2 class="title_suggest_prd">Bạn cũng có thể thích</h2>
+                    <h2 class="title_suggest_prd">You may also like</h2>
                 </div>
                 <div class="list_new_arrival">
                     <div class="mx-auto mt-4 mt-md-8 p-xl-0" style="max-width: 1182px">
@@ -211,14 +251,14 @@
                                                                 @endphp
 
                                                                 @if (isOnSale($record))
-                                                                    <span
-                                                                        class="text_color text-sm mb-2">{{ finalPrice($record->sale_price, $record->discount_price) }}</span>
+                                                                    <span class="text_color text-sm mb-2">Start from
+                                                                        ${{ formatPrice($record->discount_price) }}</span>
 
                                                                     <small class="text-muted"> <del
-                                                                            class="ms-2">{{ formatPrice($record->sale_price) }}</del></small>
+                                                                            class="ms-2">${{ formatPrice($record->sale_price) }}</del></small>
                                                                 @else
-                                                                    <span
-                                                                        class="text_color text-sm mb-2">{{ formatPrice($record->sale_price) }}</span>
+                                                                    <span class="text_color text-sm mb-2">Start from
+                                                                        ${{ formatPrice($record->sale_price) }}</span>
                                                                 @endif
                                                             </p>
 
@@ -293,6 +333,12 @@
 
     <script>
         $(document).ready(function() {
+
+            $('#download-template').attr({
+                href: "{{ showImage($product->guideline_file ?? '') }}",
+                download: ''
+            });
+
             $('.attribute-radio').on('change', function() {
                 const selectedRadios = $('.attribute-radio:checked');
                 $('#btnOrderCreate').prop('disabled', true)
