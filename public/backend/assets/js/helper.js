@@ -175,7 +175,7 @@ const validateAndPreviewImage = function (event, imgId, options) {
             if (
                 width === expectedWidth &&
                 height === expectedHeight &&
-                ppi === expectedPPI &&
+                // ppi === expectedPPI &&
                 fileType === "image/" + expectedFormat
             ) {
                 // Hiển thị icon thùng rác khi hover

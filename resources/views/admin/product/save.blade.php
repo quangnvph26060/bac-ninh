@@ -49,43 +49,6 @@
                                                 {{ config('app.url') . '/' . ($product && $product->category ? $product->category->slug . '/' : '') . optional($product)->slug }}</a></small>
                                     </div>
 
-                                    <div class="mb-3 col-lg-3">
-                                        <label for="design_width" class="form-label required">Chiều rộng ảnh thiết kế
-                                            (px)</label>
-                                        <input type="text" class="form-control" name="design_width" id="design_width"
-                                            value="{{ optional($product)->design_width }}">
-                                    </div>
-
-                                    <div class="mb-3 col-lg-3">
-                                        <label for="design_height" class="form-label required">Chiều cao ảnh thiết kế
-                                            (px)</label>
-                                        <input type="text" class="form-control" name="design_height" id="design_height"
-                                            value="{{ optional($product)->design_height }}">
-                                    </div>
-
-                                    <div class="mb-3 col-lg-3">
-                                        <label for="design_ppi" class="form-label required">Độ phân giải
-                                            (PPI)</label>
-                                        <input type="text" class="form-control" name="design_ppi" id="design_ppi"
-                                            value="{{ optional($product)->design_ppi }}">
-                                    </div>
-
-                                    <div class="mb-3 col-lg-3">
-                                        <label for="design_format" class="form-label required">Định dạng ảnh thiết
-                                            kế</label>
-                                        <input list="design_format_list" type="text" class="form-control"
-                                            name="design_format" id="design_format"
-                                            value="{{ optional($product)->design_format }}">
-                                        <datalist id="design_format_list">
-                                            <option value="jpg">
-                                            <option value="png">
-                                            <option value="gif">
-                                            <option value="jpeg">
-                                            <option value="webp">
-                                        </datalist>
-                                    </div>
-
-
                                     <div class="mb-3 position-relative col-md-12">
                                         <label for="description" class="form-label">Mô tả ngắn</label>
                                         <textarea rows="3" name="description" class="form-control" id="description" placeholder="Mô tả ngắn">{!! optional($product)->description !!}</textarea>
@@ -293,6 +256,10 @@
                                                     <label class="form-label">Lọc theo giá trị thuộc tính</label>
                                                     <select class="form-select" id="filter-attribute-values" multiple>
                                                         <option value="all">Tất cả</option>
+                                                        @foreach ($values as $value)
+                                                            <option value="{{ $value }}" selected>
+                                                                {{ $value }}</option>
+                                                        @endforeach
                                                     </select>
                                                 </div>
                                                 <div class="col-md-2 mb-3">
@@ -307,6 +274,30 @@
                                                 <div class="col-md-2 mb-3">
                                                     <label class="form-label">Đơn vị</label>
                                                     <input type="text" class="form-control" id="filter-unit">
+                                                </div>
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label">Chiều rộng ảnh thiết kế (px)</label>
+                                                    <input type="text" class="form-control" id="filter-design-width">
+                                                </div>
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label">Chiều cao ảnh thiết kế (px)</label>
+                                                    <input type="text" class="form-control" id="filter-design-height">
+                                                </div>
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label">Độ phân giải (PPI)</label>
+                                                    <input type="text" class="form-control" id="filter-design-ppi">
+                                                </div>
+                                                <div class="mb-3 col-lg-3">
+                                                    <label class="form-label">Định dạng ảnh thiết kế</label>
+                                                    <input list="design_format_list" type="text" class="form-control"
+                                                        id="filter-design-format">
+                                                    <datalist id="design_format_list">
+                                                        <option value="jpg">
+                                                        <option value="png">
+                                                        <option value="gif">
+                                                        <option value="jpeg">
+                                                        <option value="webp">
+                                                    </datalist>
                                                 </div>
                                                 <div class="col-md-2 mb-3">
                                                     <label class="form-label">Vận chuyển tiêu chuẩn</label>
@@ -429,6 +420,62 @@
                                                                         value="{{ $variantItem['discount_end'] }}">
                                                                 </div>
                                                             </div>
+                                                            <div class="mb-3 col-lg-3">
+                                                                <label
+                                                                    for="variants-{{ $variantItem['attribute_value_ids'] }}-design-width"
+                                                                    class="form-label required">
+                                                                    Chiều rộng ảnh thiết kế (px)
+                                                                </label>
+                                                                <input type="text" class="form-control"
+                                                                    name="variants[{{ $variantItem['attribute_value_ids'] }}][design_width]"
+                                                                    id="variants-{{ $variantItem['attribute_value_ids'] }}-design-width"
+                                                                    value="{{ $variantItem['design_width'] }}">
+                                                            </div>
+
+                                                            <div class="mb-3 col-lg-3">
+                                                                <label
+                                                                    for="variants-{{ $variantItem['attribute_value_ids'] }}-design-height"
+                                                                    class="form-label required">
+                                                                    Chiều cao ảnh thiết kế (px)
+                                                                </label>
+                                                                <input type="text" class="form-control"
+                                                                    name="variants[{{ $variantItem['attribute_value_ids'] }}][design_height]"
+                                                                    id="variants-{{ $variantItem['attribute_value_ids'] }}-design-height"
+                                                                    value="{{ $variantItem['design_height'] }}">
+                                                            </div>
+
+                                                            <div class="mb-3 col-lg-3">
+                                                                <label
+                                                                    for="variants-{{ $variantItem['attribute_value_ids'] }}-design-ppi"
+                                                                    class="form-label required">
+                                                                    Độ phân giải (PPI)
+                                                                </label>
+                                                                <input type="text" class="form-control"
+                                                                    name="variants[{{ $variantItem['attribute_value_ids'] }}][design_ppi]"
+                                                                    id="variants-{{ $variantItem['attribute_value_ids'] }}-design-ppi"
+                                                                    value="{{ $variantItem['design_ppi'] }}">
+                                                            </div>
+
+                                                            <div class="mb-3 col-lg-3">
+                                                                <label
+                                                                    for="variants-{{ $variantItem['attribute_value_ids'] }}-design-format"
+                                                                    class="form-label required">
+                                                                    Định dạng ảnh thiết kế
+                                                                </label>
+                                                                <input list="design_format_list" type="text"
+                                                                    class="form-control"
+                                                                    name="variants[{{ $variantItem['attribute_value_ids'] }}][design_format]"
+                                                                    id="variants-{{ $variantItem['attribute_value_ids'] }}-design-format"
+                                                                    value="{{ $variantItem['design_format'] }}">
+                                                                <datalist id="design_format_list">
+                                                                    <option value="jpg">
+                                                                    <option value="png">
+                                                                    <option value="gif">
+                                                                    <option value="jpeg">
+                                                                    <option value="webp">
+                                                                </datalist>
+                                                            </div>
+
                                                             <div class="mb-3 position-relative col-md-3">
                                                                 <label
                                                                     for="variants-{{ $variantItem['attribute_value_ids'] }}-stock"
@@ -665,7 +712,8 @@
                                     <div class="mb-3 position-relative col-lg-12">
                                         <label for="seo_title" class="form-label">Tiêu đề SEO</label>
                                         <input type="text" placeholder="Tiêu đề SEO" class="form-control"
-                                            name="seo_title" id="seo_title" value="{{ optional($product)->seo_title }}">
+                                            name="seo_title" id="seo_title"
+                                            value="{{ optional($product)->seo_title }}">
                                     </div>
                                     <div class="mb-3 position-relative col-lg-12">
                                         <label for="seo_description" class="form-label">Mô tả SEO</label>
@@ -709,7 +757,8 @@
                             <select id="category_id" name="category_id" class="form-control form-select">
                                 <option value="">-- Chọn danh mục --</option>
                                 @foreach ($categories as $cId => $cName)
-                                    <option value="{{ $cId }}" @selected($cId == optional($product)->category_id)>{{ $cName }}
+                                    <option value="{{ $cId }}" @selected($cId == optional($product)->category_id)>
+                                        {{ $cName }}
                                     </option>
                                 @endforeach
                             </select>
@@ -728,7 +777,8 @@
                             <select id="brand_id" name="brand_id" class="form-control form-select">
                                 <option value="">-- Chọn thương hiệu --</option>
                                 @foreach ($brands as $bId => $bName)
-                                    <option value="{{ $bId }}" @selected($bId == optional($product)->brand_id)>{{ $bName }}
+                                    <option value="{{ $bId }}" @selected($bId == optional($product)->brand_id)>
+                                        {{ $bName }}
                                     </option>
                                 @endforeach
                             </select>
@@ -757,35 +807,6 @@
                             @endif
                         </div>
                     </div>
-
-                    {{-- <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title">Nhãn sản phẩm</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-check p-0 ms-0">
-                                <input class="form-check-input" name="" type="checkbox" value=""
-                                    id="">
-                                <label class="form-check-label" for="">
-                                    HOT
-                                </label>
-                            </div>
-                            <div class="form-check p-0 ms-0">
-                                <input class="form-check-input" name="" type="checkbox" value=""
-                                    id="">
-                                <label class="form-check-label" for="">
-                                    NEW
-                                </label>
-                            </div>
-                            <div class="form-check p-0 ms-0">
-                                <input class="form-check-input" name="" type="checkbox" value=""
-                                    id="">
-                                <label class="form-check-label" for="">
-                                    SALE
-                                </label>
-                            </div>
-                        </div>
-                    </div> --}}
 
                     <div class="card">
                         <div class="card-header">
@@ -840,6 +861,12 @@
         let ids = [];
 
         let debounceTimer;
+
+        $('#filter-attribute-values').select2({
+            placeholder: "Chọn giá trị thuộc tính",
+            allowClear: true,
+            width: '100%'
+        });
 
         $('#searchInput').on('focus', function() {
             $('#popup-dropdown').show();
@@ -1498,6 +1525,41 @@
                                                             <span class="input-group-text">USD</span>
                                                         </div>
                                                     </div>
+                                                    <div class="mb-3 col-lg-3">
+                                                        <label for="variants-${variant.id}-design-width" class="form-label required">Chiều rộng ảnh thiết kế
+                                                            (px)</label>
+                                                        <input type="text" class="form-control" name="variants[${variant.id}][design_width]" id="variants-${variant.id}-design-width"
+                                                            >
+                                                    </div>
+
+                                                    <div class="mb-3 col-lg-3">
+                                                        <label for="variants-${variant.id}-design-height" class="form-label required">Chiều cao ảnh thiết kế
+                                                            (px)</label>
+                                                        <input type="text" class="form-control" name="variants[${variant.id}][design_height]" id="variants-${variant.id}-design-height"
+                                                            >
+                                                    </div>
+
+                                                    <div class="mb-3 col-lg-3">
+                                                        <label for="variants-${variant.id}-design-ppi" class="form-label required">Độ phân giải
+                                                            (PPI)</label>
+                                                        <input type="text" class="form-control" name="variants[${variant.id}][design_ppi]" id="variants-${variant.id}-design-ppi"
+                                                            >
+                                                    </div>
+
+                                                    <div class="mb-3 col-lg-3">
+                                                        <label for="variants-${variant.id}-design-format" class="form-label required">Định dạng ảnh thiết
+                                                            kế</label>
+                                                        <input list="design_format_list" type="text" class="form-control"
+                                                            name="variants[${variant.id}][design_format]" id="variants-${variant.id}-design-format"
+                                                            >
+                                                        <datalist id="design_format_list">
+                                                            <option value="jpg">
+                                                            <option value="png">
+                                                            <option value="gif">
+                                                            <option value="jpeg">
+                                                            <option value="webp">
+                                                        </datalist>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1586,6 +1648,11 @@
                 let expressShipping = $('#filter-express-shipping').val();
                 let internationalShipping = $('#filter-international-shipping').val();
 
+                let designWidth = $('#filter-design-width').val();
+                let designHeight = $('#filter-design-height').val();
+                let designPpi = $('#filter-design-ppi').val();
+                let designFormat = $('#filter-design-format').val();
+
                 if (!selectedValues || selectedValues.length === 0) {
                     alert('Vui lòng chọn ít nhất một giá trị thuộc tính!');
                     return;
@@ -1617,6 +1684,20 @@
                         if (unit) {
                             $(this).find(`input[name*="[product_unit]"]`).val(unit);
                         }
+
+                        if (designWidth) {
+                            $(this).find(`input[name*="[design_width]"]`).val(designWidth);
+                        }
+                        if (designHeight) {
+                            $(this).find(`input[name*="[design_height]"]`).val(designHeight);
+                        }
+                        if (designPpi) {
+                            $(this).find(`input[name*="[design_ppi]"]`).val(designPpi);
+                        }
+                        if (designFormat) {
+                            $(this).find(`input[name*="[design_format]"]`).val(designFormat);
+                        }
+
                         // Cập nhật vận chuyển tiêu chuẩn nếu có
                         if (standardShipping) {
                             $(this).find(`input[name*="[standard_shipping]"]`).val(
