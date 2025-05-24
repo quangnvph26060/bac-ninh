@@ -20,7 +20,7 @@ route::get('get-ppi-image', function () {
 Route::post('get-ppi-image', function (Request $request) {
     $file = $request->file('file');
 
-try {
+    try {
         $result = getImageInfo($file);
         dd($result);
     } catch (\Exception $e) {
@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
         Route::post('pay-bulk', 'payBulk')->name('payBulk');
         Route::post('cancel-bulk', 'cancelBulk')->name('cancelBulk');
         Route::post('delete-bulk', 'deleteBulk')->name('deleteBulk');
+        Route::post('validate-image', 'validateImage');
     });
 });
 

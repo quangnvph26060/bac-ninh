@@ -43,6 +43,7 @@ class ProductController extends Controller
                 fn($dataTable) =>
                 $dataTable
                     ->editColumn('brand_id', fn($row) => $row->brand->name ?? '-----')
+                    ->editColumn('brand_id', fn($row) => $row->brand->name ?? '-----')
                     ->editColumn('category_id', fn($row) => $row->category->name ?? '-----')
                     ->addColumn('operations', fn($row) => view('admin.components.operation', compact('row'))),
                 ['operations']

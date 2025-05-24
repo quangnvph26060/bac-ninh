@@ -36,6 +36,8 @@
     <link rel="stylesheet"
         href="{{ asset('frontend/assets/css/app.css') }}?v={{ filemtime(public_path('frontend/assets/css/app.css')) }}" />
 
+    <link rel="stylesheet" href="{{ asset('global/css/toastr.css') }}">
+
     @stack('styles')
 </head>
 
@@ -165,7 +167,8 @@
                                     </li>
                                     <li><a href="{{ route('profile') }}"><i class="bi bi-person-fill-check me-2"></i>
                                             My account</a></li>
-                                    <li><a href="{{ route('logout') }}"><i class="bi bi-box-arrow-left me-2"></i>Logout</a></li>
+                                    <li><a href="{{ route('logout') }}"><i
+                                                class="bi bi-box-arrow-left me-2"></i>Logout</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -287,7 +290,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script src="{{ asset('global/js/toastr.js') }}"></script>
 
     <script src="{{ asset('frontend/assets/js/app.js') }}"></script>
 
@@ -298,15 +301,6 @@
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
-        });
-
-        const notyf = new Notyf({
-            duration: 5000,
-            ripple: true,
-            position: {
-                x: "center",
-                y: "top",
-            },
         });
     </script>
     @stack('scripts')

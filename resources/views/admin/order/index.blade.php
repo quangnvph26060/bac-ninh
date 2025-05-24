@@ -61,6 +61,36 @@
 
         let oldCode = null;
 
+        $(document).on('click', '.download-barcode', function(e) {
+            e.preventDefault();
+            const barcode = $(this).data('barcode');
+
+            $.ajax({
+                url: `/admin/orders/download-barcode/${barcode}`,
+                method: 'GET',
+                xhrFields: {
+                    responseType: 'blob' // Đảm bảo nhận dữ liệu kiểu blob
+                },
+                headers: {
+                    'Accept': 'application/pdf'
+                },
+                success: function(data) {
+                    const url = window.URL.createObjectURL(data);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `barcode-${barcode}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Download error:', xhr);
+                    alert('Tải file thất bại!');
+                }
+            });
+        });
+
         $(document).on('click', '.btn-operation-show', function() {
             let code = $(this).data('code')
 

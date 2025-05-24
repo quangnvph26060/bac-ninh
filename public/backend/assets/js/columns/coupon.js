@@ -1,9 +1,10 @@
 const columns = [
     {
-        data: "code",
-        name: "code",
-        title: "code",
-        width: "10%",
+        data: "DT_RowIndex",
+        name: "DT_RowIndex",
+        title: "SST",
+        orderable: false,
+        searchable: false,
     },
     {
         data: "type",

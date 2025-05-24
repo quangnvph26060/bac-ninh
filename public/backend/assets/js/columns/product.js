@@ -1,15 +1,23 @@
 const columns = [
     {
-        data: "id",
-        name: "id",
-        title: "id",
-        width: "5%",
+        data: "DT_RowIndex",
+        name: "DT_RowIndex",
+        title: "SST",
+        orderable: false,
+        searchable: false,
     },
     {
         data: "name",
         name: "name",
         title: "tên sản phẩm",
         width: "15%",
+        orderable: false,
+    },
+    {
+        data: "sku",
+        name: "sku",
+        title: "sku",
+        sortable: false,
     },
     {
         data: "brand_id",
@@ -44,26 +52,29 @@ const columns = [
         },
         searchable: false,
     },
-    {
-        data: "stock_status",
-        name: "stock_status",
-        title: "tttk",
-        render(data) {
-            if (data == "in_stock") {
-                return `<span class="badge" style="background-color: rgb(47, 179, 68);">Còn hàng</span>`;
-            } else if (data == "out_of_stock") {
-                return `<span class="badge" style="background-color: rgb(247, 103, 7);">Hết hàng</span>`;
-            } else {
-                return `<span class="badge" style="background-color: rgb(247, 103, 7);">Sắp có hàng</span>`;
-            }
-        },
-        searchable: false,
-    },
+    // {
+    //     data: "stock_status",
+    //     name: "stock_status",
+    //     title: "tttk",
+    //     render(data) {
+    //         if (data == "in_stock") {
+    //             return `<span class="badge" style="background-color: rgb(47, 179, 68);">Còn hàng</span>`;
+    //         } else if (data == "out_of_stock") {
+    //             return `<span class="badge" style="background-color: rgb(247, 103, 7);">Hết hàng</span>`;
+    //         } else {
+    //             return `<span class="badge" style="background-color: rgb(247, 103, 7);">Sắp có hàng</span>`;
+    //         }
+    //     },
+    //     searchable: false,
+    // },
     {
         data: "type",
         name: "type",
         title: "loại",
         searchable: false,
+        render(data, type, row) {
+            return data === "variant" ? "biến thể" : "đơn giản";
+        },
     },
     {
         data: "status",

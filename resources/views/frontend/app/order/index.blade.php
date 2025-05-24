@@ -130,7 +130,7 @@
                             ids: ids,
                         },
                         success: function(response) {
-                            notyf.success(response.message);
+                            datgin.success(response.message);
                             fetchOrders(lastOrdersUrl)
                         },
                         error: function(xhr) {
@@ -218,11 +218,11 @@
                             $('#loading').show();
                         },
                         success: function(response) {
-                            notyf.success(response.message);
+                            datgin.success(response.message);
                             fetchOrders(lastOrdersUrl)
                         },
                         error: function(xhr) {
-                            notyf.error(xhr.responseJSON.message || "Something went wrong")
+                            datgin.error(xhr.responseJSON.message || "Something went wrong")
                         },
                         complete: () => {
                             $('#loading').hide();
@@ -260,11 +260,11 @@
                             $('#loading').show();
                         },
                         success: function(response) {
-                            notyf.success(response.message);
+                            datgin.success(response.message);
                             fetchOrders(lastOrdersUrl)
                         },
                         error: function(xhr) {
-                            notyf.error(xhr.responseJSON.message || "Something went wrong")
+                            datgin.error(xhr.responseJSON.message || "Something went wrong")
                         },
                         complete: () => {
                             $('#loading').hide();

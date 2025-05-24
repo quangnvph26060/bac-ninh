@@ -211,11 +211,11 @@
                     method: "POST",
                     data: $formData,
                     success(response) {
-                        notyf.success(response.message || "Gửi mã OTP thành công!");
+                        datgin.success(response.message || "Gửi mã OTP thành công!");
                         renderOtpForm();
                     },
                     error(xhr) {
-                        notyf.error(xhr.responseJSON?.message || "Lỗi khi gửi OTP.");
+                        datgin.error(xhr.responseJSON?.message || "Lỗi khi gửi OTP.");
                     }
                 });
             };
@@ -270,7 +270,7 @@
                 if ($this.hasClass("disabled")) return;
 
                 const email = localStorage.getItem("reset_password_email");
-                if (!email) return notyf.error("Không tìm thấy email để gửi lại mã OTP!");
+                if (!email) return datgin.error("Không tìm thấy email để gửi lại mã OTP!");
 
                 $.ajax({
                     url: "{{ route('resend.otp') }}",
@@ -280,7 +280,7 @@
                         email
                     },
                     success(response) {
-                        notyf.success(response.message || "Đã gửi lại mã OTP!");
+                        datgin.success(response.message || "Đã gửi lại mã OTP!");
 
                         let timeLeft = 60;
                         $this.addClass("disabled text-gray-500").removeClass("text-blue-600").text(
@@ -297,7 +297,7 @@
                         }, 1000);
                     },
                     error(xhr) {
-                        notyf.error(xhr.responseJSON?.message || "Lỗi khi gửi lại mã OTP!");
+                        datgin.error(xhr.responseJSON?.message || "Lỗi khi gửi lại mã OTP!");
                     }
                 });
             };
@@ -321,12 +321,12 @@
                         email,
                     },
                     success(response) {
-                        notyf.success(response.message || "Đổi mật khẩu thành công!");
+                        datgin.success(response.message || "Đổi mật khẩu thành công!");
                         localStorage.removeItem("reset_password_email");
                         setTimeout(() => window.location.href = "{{ route('home') }}", 2000);
                     },
                     error(xhr) {
-                        notyf.error(xhr.responseJSON?.message || "Lỗi khi đổi mật khẩu.");
+                        datgin.error(xhr.responseJSON?.message || "Lỗi khi đổi mật khẩu.");
                     }
                 });
             };

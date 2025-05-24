@@ -380,7 +380,8 @@
 @push('scripts')
     <script src="https://unpkg.com/exifr/dist/lite.umd.js"></script>
 
-    <script src="{{ asset('backend/assets/js/helper.js') }}?v={{ filemtime(public_path('backend/assets/js/helper.js')) }}"></script>
+    <script src="{{ asset('backend/assets/js/helper.js') }}?v={{ filemtime(public_path('backend/assets/js/helper.js')) }}">
+    </script>
 
 
     <script>
@@ -472,7 +473,7 @@
                 error: function(xhr) {
                     isApplyCoupon = false;
 
-                    notyf.error(xhr.responseJSON.message);
+                    datgin.error(xhr.responseJSON.message);
 
                     $input_coupon.val('');
 
@@ -568,7 +569,7 @@
 
                 window.location.href = '{{ route('orders.index') }}';
             } catch (error) {
-                notyf.error(error.responseJSON?.message || "Đã xảy ra lỗi.");
+                datgin.error(error.responseJSON?.message || "Đã xảy ra lỗi.");
             } finally {
                 $('#loading').hide();
             }
@@ -635,26 +636,26 @@
                     <div class="d-flex gap-3">
 
                         ${product.model_image ? `
-                                                                                                                                                                                                <div style="width: 103px;">
-                                                                                                                                                                                                    <div class="fw-semibold">Mockup</div>
-                                                                                                                                                                                                    <div class="image-container">
-                                                                                                                                                                                                        <img class="img-thumbnail"
-                                                                                                                                                                                                            style="cursor: pointer;"
-                                                                                                                                                                                                            src="${product.model_image}">
-                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                </div>
-                                                                                                                                                                                                ` : ''}
+                                                                                                                                                                                                        <div style="width: 103px;">
+                                                                                                                                                                                                            <div class="fw-semibold">Mockup</div>
+                                                                                                                                                                                                            <div class="image-container">
+                                                                                                                                                                                                                <img class="img-thumbnail"
+                                                                                                                                                                                                                    style="cursor: pointer;"
+                                                                                                                                                                                                                    src="${product.model_image}">
+                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                        ` : ''}
 
                         ${product.design_image ? `
-                                                                                                                                                                                                <div style="width: 103px;">
-                                                                                                                                                                                                    <div class="fw-semibold">Design photo</div>
-                                                                                                                                                                                                    <div class="image-container">
-                                                                                                                                                                                                        <img class="img-thumbnail"
-                                                                                                                                                                                                            style="cursor: pointer;"
-                                                                                                                                                                                                            src="${product.design_image}">
-                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                </div>
-                                                                                                                                                                                                ` : ''}
+                                                                                                                                                                                                        <div style="width: 103px;">
+                                                                                                                                                                                                            <div class="fw-semibold">Design photo</div>
+                                                                                                                                                                                                            <div class="image-container">
+                                                                                                                                                                                                                <img class="img-thumbnail"
+                                                                                                                                                                                                                    style="cursor: pointer;"
+                                                                                                                                                                                                                    src="${product.design_image}">
+                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                        ` : ''}
                     </div>
                 </div>
 
@@ -750,7 +751,7 @@
 
         function goToTransportStep() {
             if (!checkAllProductsSelected()) {
-                notyf.error('Vui lòng chọn đầy đủ các thuộc tính.');
+                datgin.error('Vui lòng chọn đầy đủ các thuộc tính.');
                 return;
             }
 
@@ -780,7 +781,7 @@
 
                 // 🔎 Kiểm tra ảnh "Design photo" đã chọn chưa
                 if (designImageInput.get(0).files.length === 0) {
-                    notyf.error(`Please select a design image for the product: ${name}`);
+                    datgin.error(`Please select a design image for the product: ${name}`);
                     productEl.css('border', '1px solid red');
                     allImagesSelected = false;
                 } else {
@@ -907,7 +908,7 @@
             });
 
             if (!isValid) {
-                notyf.error("Vui lòng điền đầy đủ thông tin bắt buộc.");
+                datgin.error("Vui lòng điền đầy đủ thông tin bắt buộc.");
                 return;
             }
 
@@ -965,7 +966,7 @@
                     $('#shipping-method-fee').text(`${formatCurrency(response.shipping_fee)}`)
                 },
                 error: function(error) {
-                    notyf.error(error.responseJSON.message);
+                    datgin.error(error.responseJSON.message);
                 }
             })
 
@@ -1177,10 +1178,10 @@
 
                 if (width && height && dpi && format) {
                     content = `
-                        <p class="mb-0"><strong>Chiều rộng:</strong>  ${width} px</p>
-                        <p class="mb-0"><strong>Chiều cao:</strong>  ${height} px</p>
+                        <p class="mb-0"><strong>Width:</strong>  ${width} px</p>
+                        <p class="mb-0"><strong>Height:</strong>  ${height} px</p>
                         <p class="mb-0"><strong>DPI:</strong>  ${dpi}</p>
-                        <p class="mb-0"><strong>Định dạng tệp:</strong>  ${format}</p>
+                        <p class="mb-0"><strong>File format:</strong>  ${format}</p>
                     `;
                 } else {
                     content = 'Chưa có dữ liệu';
@@ -1452,7 +1453,7 @@
                         }).length > 0;
 
                         if (isUsedElsewhere) {
-                            notyf.error('Biến thể bạn chọn đã được sử dụng!');
+                            datgin.error('Biến thể bạn chọn đã được sử dụng!');
 
                             $(`#sku_${productId}_${time}`).text('');
 
@@ -1506,7 +1507,7 @@
                         toggleShippingButton()
                     },
                     error: function(xhr) {
-                        notyf.error(xhr.responseJSON?.message || "Đã xảy ra lỗi.");
+                        datgin.error(xhr.responseJSON?.message || "Đã xảy ra lỗi.");
 
                         const info_variant = $(`#info_variant_${productId}[data-time="${time}"]`);
                         info_variant.removeAttr('data-variant-id');
@@ -1516,7 +1517,7 @@
                                 $(this).val("").trigger("change");
                             });
 
-                        $(`.custom-form[data-id="${productId}"][data-time="${time}"] input`).val(1);
+                        // $(`.custom-form[data-id="${productId}"][data-time="${time}"] input`).val(1);
 
                         $(`#sku_${productId}_${time}`).text('');
 
@@ -1592,7 +1593,7 @@
                         }
                     },
                     error: function(xhr) {
-                        notyf.error(xhr.responseJSON?.message ||
+                        datgin.error(xhr.responseJSON?.message ||
                             "Đã có lỗi xảy ra khi kiểm tra tồn kho!");
 
                         $input.val(oldQuantity);
@@ -1768,7 +1769,6 @@
 @endpush
 
 @push('styles')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
     <style>

@@ -9,7 +9,7 @@
     ];
 
     function getContainer(position) {
-        if (!positions.includes(position)) position = "top-right";
+        if (!positions.includes(position)) position = "top-center";
         const id = "toastr-container-" + position;
         let container = document.getElementById(id);
         if (!container) {
@@ -23,7 +23,7 @@
     const toastr = {
         show(message, type = "info", options = {}) {
             const delay = options.time || 5000;
-            const position = options.position || "top-right";
+            const position = options.position || "top-center";
 
             const container = getContainer(position);
 
@@ -46,10 +46,7 @@
 
             toast.innerHTML = `
             <span class="icon">${iconMap[type]}</span>
-            <div class="content">
-                <div class="title">${type}</div>
-                <span>${message}</span>
-            </div>
+            <span>${message}</span>
             <span class="close-btn"><i class="fa-solid fa-xmark"></i></span>
             <div class="progress-bar"></div>
         `;

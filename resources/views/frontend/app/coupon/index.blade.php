@@ -47,7 +47,7 @@
                             'bi-clipboard text-primary');
                     }, 1500);
 
-                    notyf.success('📋 Đã sao chép mã giảm giá!');
+                    datgin.success('📋 Đã sao chép mã giảm giá!');
 
                     // Hiển thị toast thông báo
                     // const $toast = $('#copy-toast');
@@ -109,8 +109,7 @@
                     $('#loading').hide();
                 },
                 error: function(xhr) {
-                    console.error("Lỗi khi lọc:", xhr);
-                    notyf.error('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
+                    datgin.error('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
                 },
                 complete: () => {
                     $('#loading').hide();

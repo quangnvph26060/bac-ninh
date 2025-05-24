@@ -138,13 +138,12 @@
                     $('#loading').show();
                 },
                 success: function(response) {
-                    notyf.success(response.message);
+                    datgin.success(response.message);
                     $('.avatar__info .avata_image img').attr('src', response.data.image)
                     $('.user__info_name .info_name').text(response.data.name)
                 },
                 error: function(xhr) {
-                    console.log('Error:', xhr);
-                    notyf.error(xhr.responseJSON.message);
+                    datgin.error(xhr.responseJSON.message);
                 },
                 complete: function() {
                     $('#loading').hide();
@@ -167,13 +166,13 @@
                     $('#loading').show();
                 },
                 success: function(response) {
-                    notyf.success(response.message);
+                    datgin.success(response.message);
                     $old_password.val(''); // Xóa input
                     $new_password.val(''); // Xóa input
                 },
                 error: function(xhr) {
                     console.log(xhr.responseJSON.message);
-                    notyf.error(xhr.responseJSON.message);
+                    datgin.error(xhr.responseJSON.message);
                 },
                 complete: function() {
                     $('#loading').hide();

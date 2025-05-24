@@ -1,9 +1,10 @@
 const columns = [
     {
-        data: "id",
-        name: "id",
-        title: "id",
-        width: "5%",
+        data: "DT_RowIndex",
+        name: "DT_RowIndex",
+        title: "SST",
+        orderable: false,
+        searchable: false,
     },
     {
         data: "user",

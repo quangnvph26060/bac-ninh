@@ -25,7 +25,8 @@ class OrderService extends BaseService
             'payment_status',
             'payment_method',
             'created_at',
-            'reason'
+            'reason',
+            'barcode'
         ];
 
         return $this->queryBuilder(

@@ -8,9 +8,11 @@ use App\Models\Order;
 use App\Models\Wallet;
 use App\Services\OrderService;
 use App\Traits\PaginateTrait;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Milon\Barcode\Facades\DNS1DFacade;
 
 class OrderController extends Controller
 {
@@ -33,13 +35,14 @@ class OrderController extends Controller
                 $dataTable
                     ->editColumn('product_count', fn($row) => $row->orderItems->sum('quantity'))
                     ->editColumn('created_at', fn($row) => $row->created_at->format('d-m-Y H:i'))
+                    ->addColumn('barcode', fn($row) => "<button class='download-barcode' data-barcode='$row->barcode'><i class='fas fa-file-pdf'></i> Pdf file</button>")
                     ->editColumn('status', fn($row) => view('components.status', ['status' => $row->status]))
                     ->editColumn('customer_information', function ($row) {
                         return '<strong>' . e($row->full_name) . '</strong><br>' .
                             '<a href="mailto:' . e($row->email) . '">' . e($row->email) . '</a><br>' .
                             e($row->phone_number);
                     })->addColumn('operations', fn($row) => view('admin.components.operation', compact('row'))),
-                ['operations', 'customer_information', 'status']
+                ['operations', 'customer_information', 'status', 'barcode']
             );
         }
         return view('admin.order.index');
@@ -78,7 +81,7 @@ class OrderController extends Controller
 
         return DB::transaction(function () use ($credentials) {
             $order = Order::query()->with('user')->where('order_code', $credentials['code'])->firstOrFail();
-// || $order->payment_method !== "pending"
+            // || $order->payment_method !== "pending"
             if ($order->status !== "pending") {
                 return errorResponse("Đơn hàng của bạn không thể bị hủy!", true, 400);
             }
@@ -155,6 +158,20 @@ class OrderController extends Controller
         }
 
         return successResponse("Lấy đơn hàng thành công!", route('admin.orders.edit', $order->id), 200, true);
+    }
+
+    public function download($barcode)
+    {
+        $barcodeHtml = DNS1DFacade::getBarcodeHTML($barcode, 'C128', 2, 60);
+
+        $pdf = Pdf::loadView('admin.pdf.barcode', [
+            'barcode' => $barcode,
+            'barcodeHtml' => $barcodeHtml
+        ]);
+
+        return response($pdf->output(), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', "attachment; filename=barcode-{$barcode}.pdf");
     }
 }
 

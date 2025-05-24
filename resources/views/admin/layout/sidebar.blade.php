@@ -84,8 +84,15 @@
                                                 $isChildActive = request()->routeIs($child['url']) ? 'active' : '';
                                             @endphp
                                             <li class="nav-item {{ $isChildActive }}">
-                                                <a href="{{ route($child['url']) }}">
+                                                <a href="{{ route($child['url']) }}"
+                                                    @isset($child['id'])
+                                                        class="d-flex justify-content-between"
+                                                @endisset>
                                                     <span class="sub-item">{{ $child['title'] }}</span>
+                                                    @isset($child['id'])
+                                                        <span class="badge bg-secondary">{{ $result['total_orders'] }}</span>
+                                                    @endisset
+
                                                 </a>
                                             </li>
                                         @else
