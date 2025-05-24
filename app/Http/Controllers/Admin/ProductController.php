@@ -93,14 +93,18 @@ class ProductController extends Controller
         $productCrossSell = $this->productService->getProductCrossSell($product);
         $preloadedImages = $this->productService->getProductImages($product);
 
-        $values = collect($attributesWithValues)
-            ->map(function ($value) {
-                return $value['values']; // mỗi phần tử là 1 mảng con
-            })
-            ->flatten(1) // gộp các mảng con lại thành 1 mảng
-            ->all();     // chuyển về mảng PHP thông thường nếu cần
+        $selectedValues = collect($attributesWithValues)
+        ->flatMap(function ($item) {
+                return collect($item['selected'])
+                    ->map(function ($id) use ($item) {
+                        return $item['values'][$id] ?? null;
+                    })
+                    ->filter(); // loại bỏ null nếu có key không tồn tại
+                })
+                ->values() // reset lại index nếu muốn
+                ->all();
 
-        return view('admin.product.save', compact('product', 'brands', 'categories', 'attributesWithValues', 'title', 'selectedAttributes', 'attributes', 'variants', 'productCrossSell', 'preloadedImages', 'values'));
+        return view('admin.product.save', compact('product', 'brands', 'categories', 'attributesWithValues', 'title', 'selectedAttributes', 'attributes', 'variants', 'productCrossSell', 'preloadedImages', 'selectedValues'));
     }
 
     public function update(string $id, ProductRequest $request)

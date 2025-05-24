@@ -4,7 +4,7 @@
             <th><input type="checkbox" class="form-check-input" id="select-all"></th>
             <th scope="col" style="width: 10%;">Order Code</th>
             <th scope="col">Information recipient</th>
-            <th scope="col">Order Name</th>
+            {{-- <th scope="col">Order Name</th> --}}
             <th scope="col">Status</th>
             <th scope="col">Payment</th>
             <th scope="col">Tracking</th>
@@ -29,6 +29,8 @@
 
                 <td>
                     <a href="{{ route('orders.show', $order->order_code) }}" class="name">{{ $order->order_code }}</a>
+
+                    <p class="text-muted"> {{ $order->order_name }}</p>
                 </td>
                 <td>
                     <div class="d-flex flex-column">
@@ -37,9 +39,6 @@
                         <a href="mailto:{{ $order->user?->email }}">{{ $order->user?->email }}</a>
                         <p>{{ $order->phone_number ?? $order->user?->phone }}</p>
                     </div>
-                </td>
-                <td>
-                    {{ $order->order_name }}
                 </td>
                 <td>@include('frontend.components.switch-status', ['status' => $order->status])</td>
                 <td>

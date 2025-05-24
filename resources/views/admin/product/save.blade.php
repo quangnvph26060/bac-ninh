@@ -256,8 +256,8 @@
                                                     <label class="form-label">Lọc theo giá trị thuộc tính</label>
                                                     <select class="form-select" id="filter-attribute-values" multiple>
                                                         <option value="all">Tất cả</option>
-                                                        @foreach ($values as $value)
-                                                            <option value="{{ $value }}" selected>
+                                                        @foreach ($selectedValues as $value)
+                                                            <option value="{{ $value }}">
                                                                 {{ $value }}</option>
                                                         @endforeach
                                                     </select>
@@ -299,17 +299,17 @@
                                                         <option value="webp">
                                                     </datalist>
                                                 </div>
-                                                <div class="col-md-2 mb-3">
+                                                <div class="col-md-3 mb-3">
                                                     <label class="form-label">Vận chuyển tiêu chuẩn</label>
                                                     <input type="text" class="form-control usd-price-format"
                                                         id="filter-standard-shipping">
                                                 </div>
-                                                <div class="col-md-2 mb-3">
+                                                <div class="col-md-3 mb-3">
                                                     <label class="form-label">Vận chuyển nhanh</label>
                                                     <input type="text" class="form-control usd-price-format"
                                                         id="filter-express-shipping">
                                                 </div>
-                                                <div class="col-md-2">
+                                                <div class="col-md-3">
                                                     <label class="form-label">Vận chuyển quốc tế</label>
                                                     <input type="text" class="form-control usd-price-format"
                                                         id="filter-international-shipping">
@@ -334,7 +334,7 @@
                                                         data-bs-target="#v{{ $variantItem['attribute_value_ids'] }}">
                                                         <span class="fw-bold">{{ $variantItem['variant_name'] }}</span>
                                                         <span class="ms-2 delete-variant text-danger position-absolute"
-                                                            data-index="{{ $variantItem['attribute_value_ids'] }}">Xóa</span>
+                                                            data-index="{{ $variantItem['attribute_value_ids'] }}"><i class="far fa-trash-alt me-2"></i></span>
                                                     </button>
                                                 </h2>
                                                 <div id="v{{ $variantItem['attribute_value_ids'] }}"
@@ -1291,8 +1291,8 @@
                             (); // Hàm kiểm tra để kích hoạt nút "Lưu thuộc tính"
                     });
                 });
-            });
 
+            });
 
             $('#save-attributes').on('click', function() {
                 let selectedAttributesData = {}; // Để lưu dữ liệu thuộc tính đã chọn
@@ -1380,13 +1380,6 @@
                 filterSelect.append('<option value="all">Tất cả</option>');
                 allAttributeValues.forEach(value => {
                     filterSelect.append(`<option value="${value.name}">${value.name}</option>`);
-                });
-
-                // Khởi tạo select2 cho filter
-                filterSelect.select2({
-                    placeholder: "Chọn giá trị thuộc tính",
-                    allowClear: true,
-                    width: '100%'
                 });
 
                 // Xử lý sự kiện khi chọn option "All"

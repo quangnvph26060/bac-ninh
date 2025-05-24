@@ -4,21 +4,20 @@
 
 <script src="{{ asset('backend/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
 <script src="{{ asset('backend/assets/js/plugin/chart.js/chart.min.js') }}"></script>
-<script src="{{ asset('backend/assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script>
-<script src="{{ asset('backend/assets/js/plugin/chart-circle/circles.min.js') }}"></script>
+{{-- <script src="{{ asset('backend/assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script> --}}
+{{-- <script src="{{ asset('backend/assets/js/plugin/chart-circle/circles.min.js') }}"></script> --}}
 
-{{-- <script src="{{ asset('backend/assets/js/plugin/jsvectormap/jsvectormap.min.js') }}"></script> --}}
-{{-- <script src="{{ asset('backend/assets/js/plugin/jsvectormap/world.js') }}"></script> --}}
 <script src="{{ asset('backend/assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
 <script src="{{ asset('backend/assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
 <script src="{{ asset('backend/assets/js/plugin/webfont/webfont.min.js') }}"></script>
-<script src="{{ asset('backend/assets/js/kaiadmin.min.js') }}"></script>kai
+<script src="{{ asset('backend/assets/js/kaiadmin.min.js') }}"></script>
 <script src="{{ asset('backend/assets/js/kaiadmin.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script src="{{ asset('backend/assets/js/setting-demo.js') }}"></script>
 <script src="{{ asset('backend/assets/js/setting-demo2.js') }}"></script>
 <script src="{{ asset('backend/library/ckeditor/ckeditor.js') }}"></script>
+<script src="{{ asset('global/js/toastr.js') }}"></script>
 <script src="{{ asset('global/js/validate.js') }}?v={{ filemtime(public_path('global/js/validate.js')) }}"></script>
 <script
     src="{{ asset('backend/assets/js/helper.js') }}?v={{ filemtime(public_path('backend/assets/js/helper.js')) }}">

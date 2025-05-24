@@ -35,7 +35,7 @@ class OrderController extends Controller
                 $dataTable
                     ->editColumn('product_count', fn($row) => $row->orderItems->sum('quantity'))
                     ->editColumn('created_at', fn($row) => $row->created_at->format('d-m-Y H:i'))
-                    ->addColumn('barcode', fn($row) => "<button class='download-barcode' data-barcode='$row->barcode'><i class='fas fa-file-pdf'></i> Pdf file</button>")
+                    ->addColumn('barcode', fn($row) => "<button class='download-barcode btn btn-sm btn-primary' data-barcode='$row->barcode'><i class='fas fa-file-pdf'></i> Pdf file</button>")
                     ->editColumn('status', fn($row) => view('components.status', ['status' => $row->status]))
                     ->editColumn('customer_information', function ($row) {
                         return '<strong>' . e($row->full_name) . '</strong><br>' .
@@ -172,6 +172,20 @@ class OrderController extends Controller
         return response($pdf->output(), 200)
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', "attachment; filename=barcode-{$barcode}.pdf");
+    }
+
+    public function changeTracking(Request $request)
+    {
+        $request->validate([
+            'tracking' => 'required|string|max:255',
+            'orderId' => 'required|exists:orders,id'
+        ]);
+
+        $order = Order::query()->find($request->orderId);
+
+        $order->update(['tracking' => $request->tracking]);
+
+        return successResponse("Cập nhật tracking thành công.", '', 200, true);
     }
 }
 
