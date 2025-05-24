@@ -16,9 +16,10 @@
 <link rel="stylesheet" href="{{ asset('backend/assets/css/sweetalert2.min.css') }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <link rel="stylesheet" href="{{ asset('frontend/assets/fonts/icomoon/style.css') }}">
+<link rel="stylesheet" href="{{ asset('global/css/toastr.css') }}">
 
-
-<link rel="stylesheet" href="{{ asset('backend/assets/css/global.css') }}?v={{ filemtime(public_path('backend/assets/css/global.css')) }}">
+<link rel="stylesheet"
+    href="{{ asset('backend/assets/css/global.css') }}?v={{ filemtime(public_path('backend/assets/css/global.css')) }}">
 
 <style>
     .collapse {

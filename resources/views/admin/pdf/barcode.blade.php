@@ -2,33 +2,24 @@
 <html>
 
 <head>
-    <style>
-        body {
-            text-align: center;
-            background: white;
-            font-family: Arial, sans-serif;
-            margin: 50px;
-        }
-
-        .barcode {
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .number {
-            font-family: monospace;
-            font-size: 18px;
-            letter-spacing: 2px;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <title>Barcode PDF</title>
 </head>
 
-<body>
-    <div class="barcode">
-        {!! $barcodeHtml !!}
+<body style="background: white; font-family: Arial, sans-serif; margin: 50px; text-align: center;">
+
+    <!-- Barcode hiển thị ở giữa -->
+    <div style="width: 100%; text-align: center; margin-bottom: 20px;">
+        <div style="display: inline-block;">
+            {!! $barcodeHtml !!}
+        </div>
     </div>
-    <div class="number">{{ chunk_split($barcode, 4, ' ') }}</div>
+
+    <!-- Mã số hiển thị dưới barcode -->
+    <div style="font-family: Courier, monospace; font-size: 18px;">
+        {{ chunk_split($barcode, 4, ' ') }}
+    </div>
+
 </body>
 
 </html>

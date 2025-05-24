@@ -78,6 +78,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update-status/{id}', 'updateStatus')->name('update.status');
             Route::get('barcode-scanner', 'barcodeScanner')->name('barcode.scanner');
             Route::post('get-by-barcode', 'getByBarcode')->name('get.by.barcode');
+            Route::post('change-tracking', 'changeTracking')->name('change-tracking');
             Route::view('view-barcode-pdf', 'admin.pdf.barcode');
         });
 

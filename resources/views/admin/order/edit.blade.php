@@ -220,6 +220,19 @@
 
                 <div class="card mt-4">
                     <div class="card-header">
+                        <h2 class="fs-exact-18 mb-0 fw-bold">Tracking</h2>
+                    </div>
+                    <div class="card-body pt-4 fs-exact-16">
+                        <div class="input-group-custom">
+                            <input type="text" class="form-control input-custom" name="tracking" id="tracking" value="{{ $order->tracking }}">
+                            <button class="btn btn-primary btn-sm button-custom">Lưu</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
                         <h5 class="card-title mb-0">Cập nhật trạng thái</h5>
                     </div>
                     <div class="card-body d-flex flex-wrap gap-2 justify-content-between align-items-center">
@@ -320,6 +333,34 @@
                 window.open(pdf.output("bloburl"), "_blank");
             });
         }
+
+        $('.button-custom').click(function() {
+            let tracking = $('#tracking').val();
+            let orderId = "{{ $order->id }}"
+
+            $.ajax({
+                url: "{{ route('admin.orders.change-tracking') }}",
+                method: "POST",
+                data: {
+                    tracking,
+                    orderId
+                },
+                beforeSend: () => {
+                    $("#loadingSpinner").fadeIn();
+                },
+                success: (response) => {
+                    datgin.success(response.message)
+                },
+                error: (xhr) => {
+                    datgin.error(xhr.responseJSON.message)
+                    $('#tracking').val('{{ $order->tracking }}')
+                },
+                complete: () => {
+                    $("#loadingSpinner").fadeOut();
+                }
+
+            })
+        })
 
         $('#status-select').on('focus', function() {
             originalStatus = $(this).val();
@@ -640,6 +681,30 @@
 
         .sa-table__group tr td {
             border: none
+        }
+
+        .input-custom {
+            border-top-left-radius: 0.5rem;
+            border-bottom-left-radius: 0.5rem;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: none;
+        }
+
+        .button-custom {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-top-right-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+        }
+
+        .input-group-custom {
+            display: flex;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-group-custom input:focus {
+            box-shadow: none;
         }
     </style>
 @endpush
