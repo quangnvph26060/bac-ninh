@@ -176,9 +176,9 @@ class OrderController extends Controller
         $subTotal = $this->calculateSubTotal($productDetails);
 
         if ($coupon && $coupon->min_order_value >= $subTotal)
-            return errorResponse("Giá trị đơn hàng chưa đáp ứng điều kiện mã giảm giá!", true, 400);
+            return errorResponse("Order value does not meet discount code conditions!", true, 400);
 
-        $discountAmount = $this->calculateDiscount($coupon, $productDetails, $subTotal);
+        $discountAmount = $this->calculateDiscount($coupon, $productDetails);
 
         if ($discountAmount === false) {
             return errorResponse("Products do not meet the coupon requirements.", true);
@@ -280,7 +280,7 @@ class OrderController extends Controller
 
     // Hàm tính giảm giá dựa trên coupon
     // Hàm tính giảm giá dựa trên coupon
-    private function calculateDiscount($coupon, $productDetails, $subTotal)
+    private function calculateDiscount($coupon, $productDetails)
     {
         $discountAmount = 0;
 
@@ -593,6 +593,7 @@ class OrderController extends Controller
 
             $this->calculateShippingFee($shippingMethod, $request['products'], $shippingFee);
 
+
             // Kiểm tra mã giảm giá nếu có
             $coupon = $this->checkCoupon($request['orderInfo']['coupon'] ?? null);
 
@@ -603,14 +604,15 @@ class OrderController extends Controller
             $productDetails = $this->getProductDetails($request['products']);
 
             $subTotal = $this->calculateSubTotal($productDetails);
+
             $totals = $this->calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee);
-            if (isset($totals['success']) && $totals['success'] === false)
-                return errorResponse($totals['message'], true, $totals['code']);
-            extract($totals);
+
 
             // Tạo đơn hàng và lưu các sản phẩm
-            $order = $this->storeOrderDetails($request['orderInfo'], $grandTotal, $discountAmount, $shippingFee, $shippingAddress);
+            $order = $this->storeOrderDetails($request['orderInfo'], $totals['grandTotal'], $totals['discountAmount'], $shippingFee, $shippingAddress);
+
             $this->storeOrderItems($order, $productDetails);
+
             $this->couponUser($coupon, $order);
 
             if ($request['orderInfo']['paymentMethod'] === "wallet") {
@@ -619,7 +621,7 @@ class OrderController extends Controller
                     ['balance' => 0]
                 );
 
-                if ($wallet->balance < $grandTotal)
+                if ($wallet->balance < $totals['grandTotal'])
                     return errorResponse("Insufficient balance, please top up to continue payment", true, 400);
 
                 $this->paymentViaWallet($order, $wallet);
@@ -701,14 +703,15 @@ class OrderController extends Controller
     private function calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee)
     {
 
-        $discountAmount = $this->calculateDiscount($coupon ?? null, $productDetails, $subTotal);
-
-        if ($discountAmount === false)
-            return errorResponse("Các sản phẩm không đủ điều kiện áp dụng mã giảm giá này!", false, 400);
+        $discountAmount = $this->calculateDiscount($coupon ?? null, $productDetails);
 
         $grandTotal = $this->calculateGrandTotal($subTotal, $discountAmount, $shippingFee);
 
-        return compact('subTotal', 'discountAmount', 'grandTotal');
+        return [
+            'subTotal' => $subTotal,
+            'discountAmount' => $discountAmount,
+            'grandTotal' =>  $grandTotal
+        ];
     }
 
     private function storeOrderDetails($orderInfo, $grandTotal, $discountAmount, $shippingFee, $shippingAddress)
@@ -844,7 +847,7 @@ class OrderController extends Controller
                     ->first();
 
                 if (!$variant) {
-                    return "Không tìm thấy biến thể sản phẩm với ID: {$product['variant_id']}";
+                    return "Cannot find product with ID: {$product['variant_id']}";
                 }
 
                 $sum += $variant->$shippingMethod * $product['qty'];
@@ -852,7 +855,7 @@ class OrderController extends Controller
                 $productModel = Product::query()->find($product['productId']);
 
                 if (!$productModel) {
-                    return "Không tìm thấy sản phẩm với ID: {$product['productId']}";
+                    return "No products found with ID: {$product['productId']}";
                 }
 
                 $sum += $productModel->$shippingMethod * $product['qty'];
@@ -968,6 +971,45 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return errorResponse("An error occurred while deleting the order, please try again later!", true, 500);
+        }
+    }
+
+    public function validateImage(Request $request)
+    {
+        // dd($request->toArray());
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp,gif,bmp,tiff|max:10240',
+            'expectedWidth' => 'required|integer',
+            'expectedHeight' => 'required|integer',
+            'expectedPpi' => 'required|integer',
+            'expectedFormat' => 'required|string',
+        ]);
+
+        $file = $request->file('image');
+
+        try {
+            $info = getImageInfo($file); // trả về width, height, x_dpi, y_dpi, format
+
+            $valid =
+                $info['width'] === (int) $request->expectedWidth &&
+                $info['height'] === (int) $request->expectedHeight &&
+                abs($info['x_dpi'] - (float) $request->expectedPpi) <= 5 &&
+                strtolower($info['format']) === strtolower($request->expectedFormat);
+
+            return response()->json([
+                'valid' => $valid,
+                'width' => $info['width'],
+                'height' => $info['height'],
+                'ppi' => $info['x_dpi'],
+                'format' => strtolower($info['format']),
+                'expectedWidth' => (int) $request->expectedWidth,
+                'expectedHeight' => (int) $request->expectedHeight,
+                'expectedPpi' => (int) $request->expectedPpi,
+                'expectedFormat' => strtolower($request->expectedFormat),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }

@@ -73,10 +73,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('edit/{id}', 'update')->name('update');
             Route::post('items', 'getItemByCode')->name('get.item.by.code');
             Route::post('cancel', 'cancelOrder')->name('cancel');
+            Route::get('download-barcode/{barcode}', 'download')->name('barcode.download');
             Route::get('invoice/preview/{id}', 'printInvoice')->name('invoice.print');
             Route::post('update-status/{id}', 'updateStatus')->name('update.status');
             Route::get('barcode-scanner', 'barcodeScanner')->name('barcode.scanner');
             Route::post('get-by-barcode', 'getByBarcode')->name('get.by.barcode');
+            Route::view('view-barcode-pdf', 'admin.pdf.barcode');
         });
 
         // Product Router

@@ -38,7 +38,7 @@ $(document).ready(function () {
                 }
             },
             error(xhr) {
-                notyf.error(
+                datgin.error(
                     xhr.responseJSON?.message ||
                         "Đã có lỗi xảy ra. Vui lòng thử lại sau!"
                 );

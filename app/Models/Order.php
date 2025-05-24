@@ -68,7 +68,7 @@ class Order extends Model
     {
         static::creating(function ($order) {
             do {
-                $barcode = 'ORDER-' . strtoupper(Str::random(8));
+                $barcode = (string) mt_rand(100000000000, 999999999999);
             } while (Order::where('barcode', $barcode)->exists());
 
             $order->barcode = $barcode;

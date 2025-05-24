@@ -291,7 +291,7 @@
                                 icon: "success"
                             });
 
-                            notyf.success(response.message);
+                            datgin.success(response.message);
 
                             $('.money__amount.balance').text(`$${response.data.amount}`)
 
@@ -310,7 +310,7 @@
                             $('#btn-cansel-order').show()
                         },
                         error: (xhr) => {
-                            notyf.error(xhr.responseJSON.message);
+                            datgin.error(xhr.responseJSON.message);
                         },
                         complete: () => {
                             $('#loading').hide();
@@ -345,7 +345,7 @@
                     $('#loading').show();
                 },
                 success: (response) => {
-                    notyf.success(response.message);
+                    datgin.success(response.message);
 
                     $('#btn-cansel-order').hide()
 
@@ -363,7 +363,7 @@
                     $('#cancelOrder').modal('hide');
                 },
                 error: (xhr) => {
-                    notyf.error(xhr.responseJSON.message);
+                    datgin.error(xhr.responseJSON.message);
                 },
                 complete: () => {
                     $('#loading').hide();

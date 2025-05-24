@@ -12,7 +12,8 @@
         "children": [
             {
                 "title": "Quản lý đơn hàng",
-                "url": "admin.orders.index"
+                "url": "admin.orders.index",
+                "id": "total-order"
             },
             {
                 "title": "Tra cứu đơn hàng",

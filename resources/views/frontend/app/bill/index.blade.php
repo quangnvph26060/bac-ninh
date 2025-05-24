@@ -269,8 +269,7 @@
                     $('#loading').hide();
                 },
                 error: function(xhr) {
-                    console.error("Lỗi khi lọc:", xhr);
-                    notyf.error('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
+                    datgin.error('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
                 },
                 complete: () => {
                     $('#loading').hide();
@@ -364,13 +363,13 @@
                         $('#confirmTopupBtn').prop('disabled', true);
                     },
                     success: function(response) {
-                        notyf.success(response.message);
+                        datgin.success(response.message);
                         if (isTopupRequest) fetchWalletTransaction();
                         resetForm();
                         $('#modalTopupForm').modal('hide');
                     },
                     error: function(xhr) {
-                        notyf.error(xhr.responseJSON.message);
+                        datgin.error(xhr.responseJSON.message);
                     },
                     complete: () => {
                         $('#loading').hide();
@@ -416,11 +415,11 @@
                         if (response.approval_url) {
                             window.location.href = response.approval_url
                         } else {
-                            notyf.error('Đã có lỗi xảy ra, vui lòng thử lại sau!');
+                            datgin.error('Đã có lỗi xảy ra, vui lòng thử lại sau!');
                         }
                     },
                     error: function(xhr) {
-                        notyf.error(xhr.responseJSON.message);
+                        datgin.error(xhr.responseJSON.message);
                     }
                 });
             })

@@ -25,6 +25,7 @@ trait PaginateTrait
 
         return $dataTable
             ->addColumn('checkbox', fn($row) => "<input type='checkbox' class='row-checkbox form-check-input' value='{$row->id}'>")
+            ->addIndexColumn()
             ->make(true);
     }
 }

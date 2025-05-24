@@ -54,13 +54,18 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
+            // Đảm bảo chỉ thực hiện một lần mỗi request
+            static $shared = false;
+
+            if ($shared) return;
+            $shared = true;
+
             $wallet = null;
             $user = null;
 
             if (Auth::guard('web')->check()) {
                 $user = Auth::guard('web')->user();
 
-                // Chỉ áp dụng nếu không phải admin
                 if ($user->role !== 'admin') {
                     $wallet = Wallet::firstOrCreate(
                         ['user_id' => $user->id],
@@ -69,12 +74,12 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
 
-            $config = Config::query()->firstOrCreate();
+            $config = Config::firstOrCreate();
 
-            $view->with([
+            View::share([
                 'config' => $config,
                 'wallet' => $wallet,
-                'authUser' => $user
+                'authUser' => $user,
             ]);
         });
 
@@ -90,12 +95,17 @@ class AppServiceProvider extends ServiceProvider
 
         $ordersCountByStatus = Order::select('status', DB::raw('count(*) as total'))
             ->whereIn('status', $statuses)
+            ->where('payment_status', '!=', 'pending') // 👉 thêm điều kiện tại đây
             ->groupBy('status')
             ->pluck('total', 'status');
 
         $result = collect($statuses)->mapWithKeys(function ($status) use ($ordersCountByStatus) {
             return [$status => $ordersCountByStatus->get($status, 0)];
         });
+
+        // 👉 Tính tổng đơn hàng (đã lọc payment_status != pending)
+        $totalOrders = $result->sum();
+        $result->put('total_orders', $totalOrders);
 
         view()->composer('admin.layout.sidebar', function ($view) use ($result) {
             $view->with(['result' => $result]);

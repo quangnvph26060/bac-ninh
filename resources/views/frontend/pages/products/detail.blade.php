@@ -400,14 +400,14 @@
                                     // Ví dụ: cập nhật giá, ảnh, tồn kho,...
                                 },
                                 error: function(xhr) {
-                                    notyf.error(xhr.responseJSON?.message ||
+                                    datgin.error(xhr.responseJSON?.message ||
                                         'Không tìm thấy biến thể phù hợp!');
                                 }
                             });
                         }
                     },
                     error: function(xhr) {
-                        notyf.error(xhr.responseJSON?.message || 'Đã có lỗi xảy ra!');
+                        datgin.error(xhr.responseJSON?.message || 'Đã có lỗi xảy ra!');
                         $('.attribute-radio').prop('disabled', false);
                     }
                 });
@@ -435,7 +435,7 @@
                 });
 
                 if (!allSelected) {
-                    notyf.error(
+                    datgin.error(
                         "Vui lòng chọn đầy đủ các thuộc tính sản phẩm trước khi thêm vào giỏ hàng.");
                     return;
                 }
@@ -477,7 +477,7 @@
                 //         $('.cart-icon span').text(response.count)
                 //     },
                 //     error: function(xhr) {
-                //         notyf.error(xhr.responseJSON.message ||
+                //         datgin.error(xhr.responseJSON.message ||
                 //             "Đã xảy ra lỗi khi thêm vào giỏ hàng.");
                 //     }
                 // });

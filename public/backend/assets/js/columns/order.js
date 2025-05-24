@@ -1,15 +1,22 @@
 const columns = [
     {
-        data: "id",
-        name: "id",
-        title: "id",
-        width: "5%",
+        data: "DT_RowIndex",
+        name: "DT_RowIndex",
+        title: "SST",
+        orderable: false,
+        searchable: false,
     },
     {
         data: "order_code",
         name: "order_code",
         title: "Mã đơn hàng",
-        width: "5%",
+        width: "15%",
+        render(data, type, row) {
+            return `
+            <p class='mb-0'>${data}</p>
+            <p class='mb-0 text-muted'>${row.order_name}</p>
+            `;
+        },
     },
     {
         data: "customer_information",
@@ -19,18 +26,18 @@ const columns = [
         searchable: false,
     },
     {
-        data: "order_name",
-        name: "order_name",
-        title: "Tên đơn hàng",
+        data: "barcode",
+        name: "barcode",
+        title: "tải mã vạch",
     },
     {
         data: "product_count",
         name: "product_count",
-        title: "Số lượng sản phẩm",
+        title: "Số lượng",
         orderable: false,
         searchable: false,
         render: (data) => {
-            return `${data} product`;
+            return `${data} sản phẩm`;
         },
     },
     {
@@ -50,7 +57,7 @@ const columns = [
         orderable: false,
         searchable: false,
         render: (data) => {
-            return data ? data : 'N/A';
+            return data ? data : "N/A";
         },
     },
     {

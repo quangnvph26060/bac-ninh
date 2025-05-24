@@ -146,59 +146,76 @@ const removeImage = function (imgId, inputId) {
     // document.querySelector(`#delete_icon_${result}`).classList.add("d-none");
 
     // Hiển thị thông báo
-    showToast("success", "Ảnh đã được xóa thành công.");
+    datgin.success("Ảnh đã được xóa thành công.");
 };
 
-const validateAndPreviewImage = function (event, imgId, inputContainerId, imageDefault) {
+const validateAndPreviewImage = function (
+    event,
+    imgId,
+    inputContainerId,
+    imageDefault
+) {
     const file = event.target.files[0];
-    const reader = new FileReader();
-
     const container = document.getElementById(inputContainerId);
     const expectedWidth = parseInt(container.dataset.width);
     const expectedHeight = parseInt(container.dataset.height);
-    const expectedPpi = parseInt(container.dataset.ppi);
+    const expectedPpi = parseInt(container.dataset.dpi);
     const expectedFormat = container.dataset.format;
 
+    if (!file) return;
+
+    const reader = new FileReader();
     reader.onload = function () {
         const imgElement = document.getElementById(imgId);
-        const image = new Image();
+        const parentElement = imgElement.parentElement;
 
-        image.onload = function () {
-            const width = image.width;
-            const height = image.height;
-            const ppi = Math.round(width / 4 / (file.size / 1024 / 1024)); // công thức này có thể tùy chỉnh lại nếu cần
-            const fileType = file.type;
+        // Tạo formData
+        const formData = new FormData();
+        formData.append("image", file);
+        formData.append("expectedWidth", expectedWidth);
+        formData.append("expectedHeight", expectedHeight);
+        formData.append("expectedPpi", expectedPpi);
+        formData.append("expectedFormat", expectedFormat);
 
-            if (
-                width === expectedWidth &&
-                height === expectedHeight &&
-                // ppi === expectedPpi && // nếu muốn kiểm tra PPI thì bỏ comment dòng này
-                fileType === "image/" + expectedFormat
-            ) {
+        $.ajax({
+            url: "/orders/validate-image",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (data) {
+                if (data.valid) {
+                    // Chỉ hiện ảnh khi valid
+                    parentElement.classList.add("has-image");
+                    imgElement.src = reader.result;
+                } else {
+                    // Nếu không valid thì reset về mặc định
+                    event.target.value = "";
+                    imgElement.src = imageDefault;
+                    parentElement.classList.remove("has-image");
 
-                const parentElement = imgElement.parentElement;
-
-                parentElement.classList.add("has-image");
-                imgElement.src = reader.result;
-            } else {
+                    datgin.error(
+                        `
+                            Design does not match sample.
+                            Proposed design: Width: ${data.expectedWidth}px, Height: ${data.expectedHeight}px, PPI: ${data.expectedPpi}, File format: .${data.expectedFormat}
+                            Your design: Width: ${data.width}px, Height: ${data.height}px, PPI: ${data.ppi}, File format: ${data.format}.
+                        `
+                    );
+                }
+            },
+            error: function (xhr) {
+                datgin.error(xhr.responseJSON.message);
                 event.target.value = "";
                 imgElement.src = imageDefault;
-
-                showToast(
-                    "error",
-                    `Thiết kế không khớp với mẫu.<br>
-                    Thiết kế đề xuất: Width: ${expectedWidth}px, Height: ${expectedHeight}px, PPI: ${expectedPpi}, File format: .${expectedFormat}<br>
-                    Thiết kế của bạn: Width: ${width}px, Height: ${height}px, PPI: ${ppi}, File format: ${fileType}.`
-                );
-            }
-        };
-
-        image.src = reader.result;
+                parentElement.classList.remove("has-image");
+            },
+        });
     };
 
-    if (file) {
-        reader.readAsDataURL(file);
-    }
+    reader.readAsDataURL(file);
 };
 
 // Hàm mở popup và hiển thị hình ảnh
@@ -211,22 +228,6 @@ function viewImage(productId) {
     // Hiển thị modal Bootstrap thông qua jQuery
     $("#imagePreviewModal").modal("show");
 }
-
-const showToast = (type, message) => {
-    const toast = notyf[type](message);
-
-    // Khi hover vào, xóa bộ đếm thời gian
-    toast.on("mouseenter", () => {
-        console.log(123);
-
-        toast.dismissible = false;
-    });
-
-    // Khi rời khỏi hover, thiết lập lại thời gian biến mất
-    toast.on("mouseleave", () => {
-        toast.dismissible = true;
-    });
-};
 
 function generateSlug(text) {
     return text

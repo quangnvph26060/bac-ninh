@@ -1,9 +1,10 @@
 const columns = [
     {
-        data: "id",
-        name: "id",
-        title: "id",
-        width: "5%",
+        data: "DT_RowIndex",
+        name: "DT_RowIndex",
+        title: "SST",
+        orderable: false,
+        searchable: false,
     },
     {
         data: "name",
@@ -39,7 +40,7 @@ const columns = [
         name: "type",
         title: "loại",
         render: function (data) {
-            if (data == 'variant') {
+            if (data == "variant") {
                 return `<span class="badge" style="background-color: #0d6efd;" >Biến thể</span>`;
             } else {
                 return `<span class="badge" style="background-color: #6c757d;">Loại thường</span>`;

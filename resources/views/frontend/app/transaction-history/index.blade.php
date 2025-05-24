@@ -109,7 +109,7 @@
                 },
                 error: function(xhr) {
                     console.error("Lỗi khi lọc:", xhr);
-                    notyf.error('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
+                    datgin.error('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
                 },
                 complete: () => {
                     $('#loading').hide();

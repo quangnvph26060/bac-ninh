@@ -1,9 +1,10 @@
 const columns = [
     {
-        data: "id",
-        name: "id",
-        title: "id",
-        width: "5%",
+        data: "DT_RowIndex",
+        name: "DT_RowIndex",
+        title: "SST",
+        orderable: false,
+        searchable: false,
     },
     {
         data: "employee_id",
@@ -12,7 +13,7 @@ const columns = [
         orderable: false,
         searchable: false,
         render(data, type, row) {
-            return row.employee.full_name + ` (${row.employee.employee_code })`;
+            return row.employee.full_name + ` (${row.employee.employee_code})`;
         },
     },
     {

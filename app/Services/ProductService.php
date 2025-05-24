@@ -26,7 +26,9 @@ class ProductService  extends BaseService
             'stock',
             'status',
             'type',
-            'stock_status'
+            'stock_status',
+            'sku',
+            'barcode'
         ];
 
         $relations = ['company', 'brand', 'category'];

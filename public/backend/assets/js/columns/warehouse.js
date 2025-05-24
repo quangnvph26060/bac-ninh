@@ -5,7 +5,6 @@ const columns = [
         title: "code",
         width: "25%",
     },
-
     {
         data: "price_vnd",
         name: "price_vnd",
