@@ -3,20 +3,20 @@
 @section('content')
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Xin chào, {{ auth()->guard('web')->user()->name }}</h2>
+            <h2>Hello, {{ auth()->guard('web')->user()->name }}</h2>
             <div class="input-group w-auto">
                 <input type="text" id="date-range" name="date_range" class="form-control" placeholder="Select date range" />
                 <span class="input-group-text"><i class="bi bi-calendar"></i></span>
             </div>
         </div>
 
-        <h4 class="mb-3 fw-bold">Tổng quan</h4>
+        <h4 class="mb-3 fw-bold">Overview</h4>
 
         <div class="row">
             <div class="col-md-6 col-lg-3 mb-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h6 class="card-subtitle mb-2 title">Tổng đơn hàng</h6>
+                        <h6 class="card-subtitle mb-2 title">Total order</h6>
                         <h3 class="card-title mb-0 fw-bold order-all">{{ $orderCounts['all'] ?? 0 }}</h3>
                     </div>
                 </div>
@@ -24,7 +24,7 @@
             <div class="col-md-6 col-lg-3 mb-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h6 class="card-subtitle mb-2 title">Chưa thanh toán</h6>
+                        <h6 class="card-subtitle mb-2 title">Not yet paid</h6>
                         <h3 class="card-title mb-0 fw-bold order-unpaid">{{ $orderCounts['unpaid'] ?? 0 }}</h3>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
             <div class="col-md-6 col-lg-3 mb-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h6 class="card-subtitle mb-2 title">Đang sản xuất</h6>
+                        <h6 class="card-subtitle mb-2 title">In production</h6>
                         <h3 class="card-title mb-0 fw-bold order-in-production">{{ $orderCounts['in_production'] ?? 0 }}
                         </h3>
                     </div>
@@ -43,7 +43,7 @@
             <div class="col-md-6 col-lg-3 mb-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h6 class="card-subtitle mb-2 title">Đang vận chuyển</h6>
+                        <h6 class="card-subtitle mb-2 title">Shipping</h6>
                         <h3 class="card-title mb-0 fw-bold order-shipping">{{ $orderCounts['shipping'] ?? 0 }}</h3>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
             <div class="col-md-6 col-lg-3 mb-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h6 class="card-subtitle mb-2 title">Đã giao hàng</h6>
+                        <h6 class="card-subtitle mb-2 title">Delivered</h6>
                         <h3 class="card-title mb-0 fw-bold order-shipped">{{ $orderCounts['shipped'] ?? 0 }}</h3>
                     </div>
                 </div>
@@ -60,7 +60,7 @@
             <div class="col-md-6 col-lg-3 mb-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h6 class="card-subtitle mb-2 title">Đã hủy</h6>
+                        <h6 class="card-subtitle mb-2 title">Canceled</h6>
                         <h3 class="card-title mb-0 fw-bold order-cancelled">{{ $orderCounts['cancelled'] ?? 0 }}</h3>
                     </div>
                 </div>

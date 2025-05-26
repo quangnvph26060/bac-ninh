@@ -35,8 +35,8 @@
                 <td>
                     <div class="d-flex flex-column">
                         <a href="{{ route('orders.show', $order->order_code) }}"
-                            class="name">{{ $order->user?->name }}</a>
-                        <a href="mailto:{{ $order->user?->email }}">{{ $order->user?->email }}</a>
+                            class="name">{{ $order->full_name }}</a>
+                        <a href="mailto:{{ $order->email ?? $order->user?->email }}">{{ $order->user?->email }}</a>
                         <p>{{ $order->phone_number ?? $order->user?->phone }}</p>
                     </div>
                 </td>

@@ -10,23 +10,20 @@ use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductController;
 use App\Http\Controllers\Frontend\App\ProfileController;
 use App\Http\Controllers\Frontend\App\TransactionHistoryController;
+use App\Imports\OrderImport;
+use App\Jobs\ImportOrdersFromExcel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
-route::get('get-ppi-image', function () {
-    return view('get-ppi');
-});
+// route::get('get-ppi-image', function () {
+//     return view('get-ppi');
+// });
 
-Route::post('get-ppi-image', function (Request $request) {
-    $file = $request->file('file');
+// Route::get('/import-progress/{jobId}', fn($jobId) => response()->json(Cache::get("import_progress_$jobId")));
 
-    try {
-        $result = getImageInfo($file);
-        dd($result);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
-    }
-});
 
 Route::middleware('guest')->controller(AuthController::class)->group(function () {
     Route::get('login', 'login')->name('login');
@@ -83,6 +80,10 @@ Route::middleware('auth')->group(function () {
         Route::post('pay-bulk', 'payBulk')->name('payBulk');
         Route::post('cancel-bulk', 'cancelBulk')->name('cancelBulk');
         Route::post('delete-bulk', 'deleteBulk')->name('deleteBulk');
+        Route::get('import-order', 'importOrder')->name('import-order');
+        Route::post('import-order', 'import')->name('import');
+        Route::get('import-progress/{jobId}', 'importProgress')->name('import-progress');
+        Route::post('export', 'export')->name('export');
         Route::post('validate-image', 'validateImage');
     });
 });

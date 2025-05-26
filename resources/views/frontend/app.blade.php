@@ -210,31 +210,33 @@
                             <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                                 <a href="{{ route('dashboard') }}" class="nav-link">
                                     <i class="bi bi-speedometer2"></i>
-                                    <span>Bảng tin</span>
+                                    <span>Message board</span>
                                 </a>
                             </li>
                             <li class="nav-item {{ request()->routeIs('orders.index') ? 'active' : '' }}">
                                 <a href="{{ route('orders.index') }}" class="nav-link">
                                     <i class="bi bi-bag"></i>
-                                    <span>Đơn hàng</span>
+                                    <span>
+                                        Order</span>
                                 </a>
                             </li>
                             <li class="nav-item {{ request()->routeIs('bills.index') ? 'active' : '' }}">
                                 <a href="{{ route('bills.index') }}" class="nav-link">
                                     <i class="bi bi-receipt-cutoff"></i>
-                                    <span>Hóa đơn</span>
+                                    <span>Bill</span>
                                 </a>
                             </li>
                             <li class="nav-item {{ request()->routeIs('coupons.index') ? 'active' : '' }}">
                                 <a href="{{ route('coupons.index') }}" class="nav-link ">
                                     <i class="bi-tags"></i>
-                                    <span>Giảm giá</span>
+                                    <span>
+                                        Discount</span>
                                 </a>
                             </li>
                             <li class="nav-item {{ request()->routeIs('profile') ? 'active' : '' }}">
                                 <a href="{{ route('profile') }}" class="nav-link">
                                     <i class="bi bi-person-bounding-box"></i>
-                                    <span>Hồ sơ</span>
+                                    <span>Profile</span>
                                 </a>
                             </li>
                             {{-- <li class="nav-item {{ request()->routeIs('transaction.history') ? 'active' : '' }}">
@@ -250,8 +252,8 @@
                         <ul class="nav flex-column">
                             <li class="nav-item active">
                                 <a target="_blank" href="{{ url('/') }}" class="nav-link">
-                                    <i class="bi bi-speedometer2"></i>
-                                    <span>Trang chủ</span>
+                                    <i class="bi bi-house-down"></i>
+                                    <span>Home page</span>
                                 </a>
                             </li>
                             <li class="nav-item active">
