@@ -62,32 +62,32 @@
                         @break
 
                         @case('pending')
-                            <button type="button" class="ant-btn ant-btn-warning h-auto d-flex align-items-center gap-1"
+                            <button type="button" class="ant-btn rounded-pill ant-btn-warning h-auto d-flex align-items-center gap-1"
                                 id="btn-status">
                                 <span><i class="bi bi-clock me-1"></i>Pending</span>
                             </button>
                         @break
 
                         @case('processing')
-                            <button type="button" class="ant-btn ant-btn-info h-auto d-flex align-items-center gap-1">
+                            <button type="button" class="ant-btn rounded-pill ant-btn-info h-auto d-flex align-items-center gap-1">
                                 <span><i class="bi bi-gear me-1"></i>Confirmed</span>
                             </button>
                         @break
 
                         @case('completed')
-                            <button type="button" class="ant-btn ant-btn-success h-auto d-flex align-items-center gap-1">
+                            <button type="button" class="ant-btn rounded-pill ant-btn-success h-auto d-flex align-items-center gap-1">
                                 <span><i class="bi bi-check-circle me-1"></i>Completed</span>
                             </button>
                         @break
 
                         @case('cancelled')
-                            <button type="button" class="ant-btn ant-btn-danger h-auto d-flex align-items-center gap-1">
+                            <button type="button" class="ant-btn rounded-pill ant-btn-danger h-auto d-flex align-items-center gap-1">
                                 <span><i class="bi bi-x-circle me-2"></i>Cancelled</span>
                             </button>
                         @break
                     @endswitch
 
-                    <button class="ant-btn ant-btn-danger h-auto" data-bs-toggle="modal" data-bs-target="#cancelOrder"
+                    <button class="ant-btn rounded-pill ant-btn-danger h-auto" data-bs-toggle="modal" data-bs-target="#cancelOrder"
                         id="btn-cansel-order"
                         style="{{ $order->status === 'pending' && $order->status !== 'cancelled' ? '' : 'display: none' }}">Cancel
                         Order</button>
@@ -208,9 +208,9 @@
                     <p class="mb-2"><span class="fw-semibold me-2">Email:</span> {{ $order->email }}</p>
                     <p class="mb-2"><span class="fw-semibold me-2">Mobile:</span> {{ $order->phone_number }}</p>
                     <p class="mb-2"><span class="fw-semibold me-2">Address:</span> {{ $order->shipping_address }}</p>
-                    <p class="mb-0"><span class="fw-semibold me-2">Payment method:</span>
+                    {{-- <p class="mb-0"><span class="fw-semibold me-2">Payment method:</span>
                         {{ $order->payment_method === 'bank_transfer' ? 'via wallet' : 'Not updated...' }}
-                    </p>
+                    </p> --}}
                 </div>
             </div>
 
@@ -383,10 +383,6 @@
     <style>
         .ant-btn {
             font-size: 11px !important;
-        }
-
-        .ant-btn {
-            border-radius: 100px !important;
         }
 
         .swal2-cancel.btn.btn-danger {

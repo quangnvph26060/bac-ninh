@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Frontend\App;
 
+use App\Exports\OrderExport;
 use App\Http\Controllers\Controller;
+use App\Jobs\ImportOrdersFromExcel;
 use App\Models\AttributeValue;
 use App\Models\City;
 use App\Models\Country;
@@ -16,7 +18,12 @@ use App\Models\User;
 use App\Models\Wallet;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
 
 class OrderController extends Controller
 {
@@ -710,7 +717,7 @@ class OrderController extends Controller
         return [
             'subTotal' => $subTotal,
             'discountAmount' => $discountAmount,
-            'grandTotal' =>  $grandTotal
+            'grandTotal' => $grandTotal
         ];
     }
 
@@ -749,12 +756,12 @@ class OrderController extends Controller
                 $designImagePath = null;
 
                 if (isset($product['model_image']) && $product['model_image'] instanceof \Illuminate\Http\UploadedFile) {
-                    $modelImagePath = uploadImages("products.$index.model_image", 'model_images', false, 150, 150, false);
+                    $modelImagePath = uploadImages("products.$index.model_image", 'mockup', false, 150, 150, false);
                     $uploadedImages[] = $modelImagePath;
                 }
 
                 if (isset($product['design_image']) && $product['design_image'] instanceof \Illuminate\Http\UploadedFile) {
-                    $designImagePath = uploadImages("products.$index.design_image", 'design_images', false, 150, 150, false);
+                    $designImagePath = uploadImages("products.$index.design_image", 'design', false, 150, 150, false);
                     $uploadedImages[] = $designImagePath;
                 }
 
@@ -1011,5 +1018,50 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function importOrder()
+    {
+        return view('frontend.app.order.import-order');
+    }
+
+    public function import(Request $request)
+    {
+        $file = $request->file('file');
+        $path = $file->store('temp');
+
+        $jobId = Str::uuid()->toString();
+
+        ImportOrdersFromExcel::dispatch($path, auth()->guard('web')->id(), $jobId);
+
+        return response()->json([
+            'message' => 'Import started',
+            'job_id' => $jobId
+        ]);
+    }
+
+    public function export(Request $request): BinaryFileResponse
+    {
+        $request->validate([
+            'type' => 'required|in:all,selected',
+            'order_ids' => 'required_if:type,selected|array'
+        ]);
+
+        $orderIds = $request->type === 'selected' ? $request->order_ids : [];
+
+        $fileName = 'order_exported_data_' . now()->format('Y-n-j') . '.xlsx';
+
+        return Excel::download(new OrderExport($orderIds), $fileName);
+    }
+    public function importProgress(string $jobId)
+    {
+        $progress = Cache::get("import_progress_{$jobId}");
+
+        return response()->json($progress ?? [
+            'current' => 0,
+            'total' => 0,
+            'percent' => 0,
+            'status' => 'pending'
+        ]);
     }
 }

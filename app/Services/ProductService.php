@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\AttributeValue;
 use App\Models\Product;
+use App\Models\ProductVariant;
+use Illuminate\Support\Str;
 
 class ProductService  extends BaseService
 {
@@ -63,7 +65,7 @@ class ProductService  extends BaseService
                 'discount_start'            => optional($variant->discount_start)->format('d-m-Y H:i'),
                 'discount_end'              => optional($variant->discount_end)->format('d-m-Y H:i'),
                 'product_unit'              => $variant->product_unit,
-                // 'stock_status'              => $variant->stock_status,
+                'stock_status'              => $variant->stock_status,
                 'status'                    => $variant->status,
                 'id'                        => $variant->id,
                 'attribute_value_ids'       => $variant->attributeValues->pluck('id')->implode('-'), // nếu bạn muốn dùng lại key
@@ -210,6 +212,7 @@ class ProductService  extends BaseService
 
     public function update(string $id, array $payload)
     {
+
         $uploadedImage = null;
         $uploadTemplate = null;
         return transaction(function () use ($id, $payload, &$uploadedImage, &$uploadTemplate) {
@@ -264,7 +267,8 @@ class ProductService  extends BaseService
             }
 
             if (!empty($payload['variants'])) {
-                $this->productVariants($product, $payload);
+                $result = $this->productVariants($product, $payload);
+                if ($result !== true) return $result; // Trả lỗi nếu SKU trùng
             }
 
             return successResponse('Lưu thay đổi thành công', [], 201);
@@ -306,30 +310,78 @@ class ProductService  extends BaseService
     protected function productVariants($product, $payload)
     {
         $newVariants = collect($payload['variants']);
-        $newKeys = $newVariants->keys()->toArray();
         $qty = 0;
 
-        // Lấy các biến thể hiện tại
+        // Các biến thể hiện tại, key theo combineKey
         $existingVariants = $product->variants()->get()->keyBy('attribute_value_combine');
-
-        $variantsToCreate = [];
         $newVariantIds = [];
 
-        foreach ($newVariants as $key => $variantData) {
-            $valueIds = explode('-', string: $key); // Lấy ra mảng attribute_value_id
-            sort($valueIds); // Sort để đồng bộ so sánh
+        // 👉 Lấy toàn bộ ID attribute_value
+        $allValueIds = $newVariants->keys()
+            ->flatMap(fn($key) => explode('-', $key))
+            ->unique()
+            ->values();
 
+        $attributeValues = AttributeValue::whereIn('id', $allValueIds)->get()->keyBy('id');
+
+        // 👉 Sinh trước toàn bộ SKU
+        $generatedSkus = [];
+        foreach ($newVariants as $key => $variantData) {
+            $valueIds = explode('-', $key);
+            sort($valueIds);
             $combineKey = implode('-', $valueIds);
 
+            $skuParts = [];
+            foreach ($valueIds as $id) {
+                $value = $attributeValues[$id]->value ?? null;
+                if ($value) {
+                    $words = explode(' ', trim($value));
+                    if (count($words) === 1) {
+                        $skuParts[] = strtoupper(removeVietnameseTones($words[0]));
+                    } else {
+                        $wordsUpper = array_map(function ($w) {
+                            return strtoupper(removeVietnameseTones($w));
+                        }, $words);
+                        $skuParts[] = implode(' ', $wordsUpper);
+                    }
+                }
+            }
+
+            $variantSku = strtoupper(removeVietnameseTones($product->sku)) . '-' . implode('-', $skuParts);
+            $generatedSkus[$combineKey] = $variantSku;
+        }
+
+
+        // 👉 Kiểm tra trùng SKU trong DB, loại trừ variant hiện tại
+        $existingSkuRecords = ProductVariant::whereIn('sku', array_values($generatedSkus))->get();
+        $existingSkuMap = $existingSkuRecords->keyBy('sku');
+
+        foreach ($newVariants as $key => $variantData) {
+            $valueIds = explode('-', $key);
+            sort($valueIds);
+            $combineKey = implode('-', $valueIds);
+
+            $variantSku = $generatedSkus[$combineKey];
+
+            // ❌ Nếu SKU đã tồn tại (và không phải của variant hiện tại)
+            if (
+                isset($existingSkuMap[$variantSku]) &&
+                (!isset($existingVariants[$combineKey]) || $existingVariants[$combineKey]->id !== $existingSkuMap[$variantSku]->id)
+            ) {
+                return errorResponse("SKU biến thể [$variantSku] đã tồn tại.", false, 422);
+            }
+
+
+            // 📦 Dữ liệu variant
             $data = [
-                'sku'            => $variantData['sku'],
-                'sale_price'     => $variantData['sale_price'],
+                'sku' => $variantSku,
+                'sale_price' => $variantData['sale_price'],
                 'discount_price' => $variantData['discount_price'] ?? null,
-                'product_unit'   => $variantData['product_unit'] ?? null,
+                'product_unit' => $variantData['product_unit'] ?? null,
                 'discount_start' => $variantData['discount_start'] ?? null,
-                'discount_end'   => $variantData['discount_end'] ?? null,
-                'stock'          => $variantData['stock'] ?? 0,
-                'status'         => $variantData['status'] ?? 1,
+                'discount_end' => $variantData['discount_end'] ?? null,
+                'stock' => $variantData['stock'] ?? 0,
+                'status' => $variantData['status'] ?? 1,
                 'attribute_value_combine' => $combineKey,
                 'standard_shipping' => $variantData['standard_shipping'] ?? 0,
                 'express_shipping' => $variantData['express_shipping'] ?? 0,
@@ -340,20 +392,13 @@ class ProductService  extends BaseService
                 'design_format' => $variantData['design_format'],
             ];
 
-            if ($existingVariants->has($combineKey)) {
+            // ✅ Update hoặc tạo mới
+            if (isset($existingVariants[$combineKey])) {
                 $variant = $existingVariants[$combineKey];
 
-                // Kiểm tra xem có thay đổi gì không
-                $hasChanges = false;
-                foreach ($data as $key => $value) {
+                // So sánh dữ liệu thay đổi
+                $hasChanges = collect($data)->some(fn($v, $k) => $variant->$k != $v);
 
-                    if ($variant->$key != $value) {
-                        $hasChanges = true;
-                        break;
-                    }
-                }
-
-                // Chỉ update nếu có thay đổi
                 if ($hasChanges) {
                     $variant->update($data);
                 }
@@ -361,16 +406,15 @@ class ProductService  extends BaseService
                 $variant = $product->variants()->create($data);
             }
 
-            // Sync các giá trị attribute_value cho variant
+            // Gán thuộc tính
             $variant->attributeValues()->sync($valueIds);
             $newVariantIds[] = $variant->id;
-
-            $qty += $variantData['stock'] ?? 0;
+            $qty += $data['stock'];
         }
 
+        // ✅ Cập nhật lại product chính
         $minSalePriceVariant = $this->getMinSalePriceVariant($product);
 
-        // Kiểm tra xem có cần update product không
         $productData = [
             'stock' => $qty,
             'sale_price' => $minSalePriceVariant->sale_price,
@@ -379,25 +423,24 @@ class ProductService  extends BaseService
             'discount_end' => $minSalePriceVariant->discount_end,
         ];
 
-        $hasProductChanges = false;
-        foreach ($productData as $key => $value) {
-            if ($product->$key != $value) {
-                $hasProductChanges = true;
-                break;
-            }
-        }
-
+        $hasProductChanges = collect($productData)->some(fn($v, $k) => $product->$k != $v);
         if ($hasProductChanges) {
             $product->update($productData);
         }
 
-        // Xóa các biến thể không còn
-        $variantsToDelete = $product->variants()->whereNotIn('id', $newVariantIds)->get();
-        foreach ($variantsToDelete as $variant) {
-            $variant->attributeValues()->detach();
-            $variant->delete();
-        }
+        // 🗑 Xoá variant cũ không còn dùng
+        $product->variants()
+            ->whereNotIn('id', $newVariantIds)
+            ->get()
+            ->each(function ($variant) {
+                $variant->attributeValues()->detach();
+                $variant->delete();
+            });
+
+        return true;
     }
+
+
 
     protected function getMinSalePriceVariant($product)
     {

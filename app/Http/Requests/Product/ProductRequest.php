@@ -47,13 +47,14 @@ class ProductRequest extends FormRequest
             'product_unit' => 'nullable|string|max:255',  // Product unit is optional, but if provided, it should be a string
             'sku' => 'nullable|string|max:255',  // SKU is optional, but if provided, it should be a string
             'variants' => ($this->input('type') == 'variant' ? 'required' : 'nullable') . '|array',  // Variants are optional but should be an array if present
-            'variants.*.sku' => 'required|string|max:255',  // Each variant must have a SKU (string)
+            // 'variants.*.sku' => 'required|string|max:255',  
             'variants.*.sale_price' => 'required|numeric|min:1|regex:/^\d*(\.\d{1,2})?$/',  // Each variant must have a sale price (numeric, >= 0)
             'variants.*.product_unit' => 'nullable|string|min:0|max:100',  // Each variant must have a sale price (numeric, >= 0)
             'variants.*.discount_price' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',  // Discount price for each variant (optional but should be numeric if provided)
             'variants.*.discount_start' => 'nullable|date_format:d-m-Y',  // Discount start date for each variant
             'variants.*.discount_end' => 'nullable|date_format:d-m-Y|after_or_equal:variants.*.discount_start',  // Discount end date for each variant
             'variants.*.stock' => 'nullable|numeric|min:0',  // Variant stock status should be one of the defined values
+            'variants.*.stock_status' => 'required|string|in:out_of_stock,waiting_for_goods,in_stock',
             'variants.*.status' => 'nullable|numeric|in:1',  // Variant stock status should be one of the defined values
             'variants.*.standard_shipping' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
             'variants.*.express_shipping' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',

@@ -6,7 +6,17 @@
             <h1 class="billing__title__content">Orders</h1>
 
             <div class="d-flex gap-2 align-items-center">
-                <a href="{{ route('orders.create') }}" id="headerOrder__createOrder_btn" class="ant-btn ant-btn-primary px-2 ">
+                <button class="ant-btn ant-btn-default px-3 text-f06022 border-f06022">Create ticket <i
+                        class="bi bi-plus-circle-dotted ms-2"></i></button>
+                <button type="submit" class="ant-btn ant-btn-default px-3 " data-bs-toggle="modal"
+                    data-bs-target="#exportOrderModal">
+                    Export Order
+                </button>
+                <a href="{{ route('orders.import-order') }}" class="ant-btn ant-btn-default px-3 ">
+                    Import Order
+                </a>
+                <a href="{{ route('orders.create') }}" id="headerOrder__createOrder_btn"
+                    class="ant-btn ant-btn-primary px-3 ">
                     Create Order <i class="bi bi-plus-circle ms-2"></i>
                 </a>
             </div>
@@ -77,6 +87,39 @@
         <div id="order-content">
         </div>
     </div>
+
+    <div class="modal fade" id="exportOrderModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="exportOrderLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-3">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="exportOrderLabel">Export Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="fw-bold mb-2">Export by filter</div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="exportOption" id="exportSelectedOrders"
+                            value="selected">
+                        <label class="form-check-label fw-semibold" for="exportSelectedOrders">
+                            Export selected order(s).
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="exportOption" id="exportAll" value="all"
+                            checked>
+                        <label class="form-check-label fw-semibold" for="exportAll">
+                            Export all orders.
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="ant-btn ant-btn-default px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="ant-btn ant-btn-primary px-3" id="export-now-btn">Export Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('styles')
@@ -102,6 +145,61 @@
             });
 
             $('#total-amount').text(`${formatCurrency(total)}`);
+        });
+
+        $('#export-now-btn').on('click', function() {
+            const exportType = $('input[name="exportOption"]:checked').val();
+
+            let data = {
+                type: exportType
+            };
+
+            if (exportType === 'selected') {
+                const selectedOrderIds = $('.order-checkbox:checked').map(function() {
+                    return $(this).val();
+                }).get();
+
+                if (selectedOrderIds.length === 0) {
+                    datgin.error("Please select at least one order.");
+                    return;
+                }
+
+                data.order_ids = selectedOrderIds;
+            }
+
+            $.ajax({
+                url: '{{ route('orders.export') }}',
+                method: 'POST',
+                data: data,
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                beforeSend: () => {
+                    $('#loading').show();
+                },
+                success: function(response, status, xhr) {
+                    const disposition = xhr.getResponseHeader('Content-Disposition');
+                    const fileName = disposition ? disposition.split('filename=')[1].replace(/"/g, '') :
+                        'orders.xlsx';
+                    const blob = new Blob([response], {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    });
+
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = fileName;
+                    link.click();
+
+                    $('#exportOrderModal').modal('hide');
+                },
+                error: function() {
+                    datgin.error('Export failed!');
+                    $('#loading').hide();
+                },
+                complete: () => {
+                    $('#loading').hide();
+                }
+            });
         });
 
         $('#pay-now').click(function() {
@@ -152,6 +250,16 @@
             $('.order-checkbox').prop('checked', isChecked).trigger('change');
         });
 
+        function updateExportOptionState() {
+            const anyChecked = $('.order-checkbox:checked').length > 0;
+            $('#exportSelectedOrders').prop('disabled', !anyChecked);
+
+            // Nếu đang chọn "Export selected order(s)" mà không còn đơn nào, chuyển sang export all
+            if (!anyChecked && $('#exportSelectedOrders').is(':checked')) {
+                $('#exportByFilter').prop('checked', true);
+            }
+        }
+
         function bindEventHandlers() {
             const $selectAll = $('#select-all');
             const $checkboxes = $('.order-checkbox');
@@ -175,7 +283,10 @@
                 const allChecked = $checkboxes.length === $checkboxes.filter(':checked').length;
                 $selectAll.prop('checked', allChecked);
                 updateBulkActionVisibility();
+                updateExportOptionState();
             });
+
+            updateExportOptionState();
         }
 
         $('#bulk-select').change(function() {
@@ -281,6 +392,7 @@
 
 
         $(function() {
+            bindEventHandlers();
             // Initialize date range picker
             $('#date-range').daterangepicker({
                 autoUpdateInput: false,

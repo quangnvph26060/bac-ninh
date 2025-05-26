@@ -1,9 +1,9 @@
 // $('#confirmTopupBtn').on('click', function() {
-            //     var amount = $('#amount').val();
-            //     var note = $('#note').val();
-            //     var accountNumber = $('.account-number-copy').attr('data-clipboard-text');
-            //     var bin = $('.swiper-slide.active').attr('data-bin');
-            //     var contentBank = $('.content-bank').attr('data-clipboard-text');
+// var amount = $('#amount').val();
+// var note = $('#note').val();
+// var accountNumber = $('.account-number-copy').attr('data-clipboard-text');
+// var bin = $('.swiper-slide.active').attr('data-bin');
+// var contentBank = $('.content-bank').attr('data-clipboard-text');
 
             //     if (!amount.trim()) {
             //         notyf.error('Vui lòng nhập số tiền muốn nạp!');
@@ -133,64 +133,57 @@
             //     $(this).addClass('active');
             // });
 
-
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 /// sql vật liệu kho
 
 CREATE TABLE materials (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NULL,
-    price_usd DECIMAL(15, 2) NULL,
-    price_vnd DECIMAL(15, 0) NULL,
-    distributor VARCHAR(255) NULL,
-    stock INT NULL,
-    sku VARCHAR(100) NULL UNIQUE,
-    type VARCHAR(100) NULL,
-    status TINYINT NULL,
-    created_at TIMESTAMP NULL,
-    updated_at TIMESTAMP NULL
+id INT AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(255) NULL,
+price_usd DECIMAL(15, 2) NULL,
+price_vnd DECIMAL(15, 0) NULL,
+distributor VARCHAR(255) NULL,
+stock INT NULL,
+sku VARCHAR(100) NULL UNIQUE,
+type VARCHAR(100) NULL,
+status TINYINT NULL,
+created_at TIMESTAMP NULL,
+updated_at TIMESTAMP NULL
 );
 
 CREATE TABLE material_variants (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    material_id INT NOT NULL,
-    sku VARCHAR(100) NULL ,
-    price DECIMAL(15, 2) NULL,
-    product_unit VARCHAR(50) NULL,
-    attribute_value_combine TEXT NULL,
-    stock INT NULL,
-    created_at TIMESTAMP NULL,
-    updated_at TIMESTAMP NULL,
-    CONSTRAINT fk_material FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
+id INT AUTO_INCREMENT PRIMARY KEY,
+material_id INT NOT NULL,
+sku VARCHAR(100) NULL ,
+price DECIMAL(15, 2) NULL,
+product_unit VARCHAR(50) NULL,
+attribute_value_combine TEXT NULL,
+stock INT NULL,
+created_at TIMESTAMP NULL,
+updated_at TIMESTAMP NULL,
+CONSTRAINT fk_material FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
 );
 
 CREATE TABLE material_attributes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    material_id INT NOT NULL,
-    attribute_id INT NULL,
-    attribute_values_ids TEXT NULL,
-    created_at TIMESTAMP NULL,
-    updated_at TIMESTAMP NULL,
-    CONSTRAINT fk_material_attr_material FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
+id INT AUTO_INCREMENT PRIMARY KEY,
+material_id INT NOT NULL,
+attribute_id INT NULL,
+attribute_values_ids TEXT NULL,
+created_at TIMESTAMP NULL,
+updated_at TIMESTAMP NULL,
+CONSTRAINT fk_material_attr_material FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
 );
 
 CREATE TABLE attribute_value_material_variants (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    material_variant_id INT NOT NULL,
-    attribute_value_id INT NULL,
-    created_at TIMESTAMP NULL,
-    updated_at TIMESTAMP NULL,
-    CONSTRAINT fk_avmv_variant FOREIGN KEY (material_variant_id) REFERENCES material_variants(id) ON DELETE CASCADE
+id INT AUTO_INCREMENT PRIMARY KEY,
+material_variant_id INT NOT NULL,
+attribute_value_id INT NULL,
+created_at TIMESTAMP NULL,
+updated_at TIMESTAMP NULL,
+CONSTRAINT fk_avmv_variant FOREIGN KEY (material_variant_id) REFERENCES material_variants(id) ON DELETE CASCADE
 );
-
-
-
-
 
 ALTER TABLE warehouse_details
 ADD COLUMN note TEXT NULL;
-
-
 
             // var swiper = new Swiper('.swiper-container', {
             //     // loop: true,
@@ -339,3 +332,8 @@ ADD COLUMN note TEXT NULL;
         </div>
     </div>
 
+<div class="mb-3 position-relative col-md-3">
+                                                <label for="variants-${variant.id}-sku" class="form-label required">Mã sản phẩm</label>
+                                                <input type="text" class="form-control" id="variants-${variant.id}-sku" name="variants[${variant.id}][sku]"
+                                                    aria-required="true" required="required" value="${convertToSKU(variant.name)}">
+                                            </div>

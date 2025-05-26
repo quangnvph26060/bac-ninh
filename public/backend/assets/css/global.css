@@ -420,7 +420,7 @@ input:checked + .slider:before {
 .form-label-description {
     color: #6c7a91;
     float: right;
-    font-weight: 400;
+    font-weight: 600;
     cursor: pointer;
 }
 
@@ -438,6 +438,7 @@ table.dataTable td.dt-type-date {
 .select-all.position-absolute {
     top: 15px;
     right: 20px;
+    font-weight: bold;
 }
 
 #myTab .nav-item {
