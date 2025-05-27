@@ -35,7 +35,7 @@ class OrderController extends Controller
                 $dataTable
                     ->editColumn('product_count', fn($row) => $row->orderItems->sum('quantity'))
                     ->editColumn('created_at', fn($row) => $row->created_at->format('d-m-Y H:i'))
-                    ->addColumn('barcode', fn($row) => "<button class='download-barcode btn btn-sm btn-primary' data-barcode='$row->barcode'><i class='fas fa-file-pdf'></i> Pdf file</button>")
+                    ->addColumn('barcode', fn($row) => "<button class='download-barcode btn btn-sm btn-primary' data-barcode='$row->order_code'><i class='fas fa-file-pdf'></i> Pdf file</button>")
                     ->editColumn('status', fn($row) => view('components.status', ['status' => $row->status]))
                     ->editColumn('customer_information', function ($row) {
                         return '<strong>' . e($row->full_name) . '</strong><br>' .
@@ -162,11 +162,18 @@ class OrderController extends Controller
 
     public function download($barcode)
     {
+        $order = Order::query()->where('order_code', $barcode)->first();
+
+        if (!$order) {
+            return errorResponse('Không tìm thấy đơn hàng!', true, 404);
+        }
+
         $barcodeHtml = DNS1DFacade::getBarcodeHTML($barcode, 'C128', 2, 60);
 
         $pdf = Pdf::loadView('admin.pdf.barcode', [
             'barcode' => $barcode,
-            'barcodeHtml' => $barcodeHtml
+            'barcodeHtml' => $barcodeHtml,
+            'orderName' => $order->order_name
         ]);
 
         return response($pdf->output(), 200)

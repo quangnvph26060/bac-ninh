@@ -66,12 +66,12 @@ class Order extends Model
 
     protected static function booted()
     {
-        static::creating(function ($order) {
-            do {
-                $barcode = (string) mt_rand(100000000000, 999999999999);
-            } while (Order::where('barcode', $barcode)->exists());
+        // static::creating(function ($order) {
+        //     do {
+        //         $barcode = (string) mt_rand(100000000000, 999999999999);
+        //     } while (Order::where('barcode', $barcode)->exists());
 
-            $order->barcode = $barcode;
-        });
+        //     $order->barcode = $barcode;
+        // });
     }
 }

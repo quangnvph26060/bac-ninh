@@ -32,7 +32,7 @@ class ProductController extends Controller
 
                 return [
                     'attributes' => $values,
-                    'price' =>  isOnSale($variant) ? $variant->discount_price : $variant->sale_price,
+                    'price' => isOnSale($variant) ? $variant->discount_price : $variant->sale_price,
                     'standard_shipping' => $variant->standard_shipping,
                     'express_shipping' => $variant->express_shipping,
                     'international_shipping' => $variant->international_shipping,
@@ -253,7 +253,7 @@ class ProductController extends Controller
         if (request()->ajax()) {
             return response()->json([
                 'html' => view('frontend.pages.products._product-list', compact('products'))->render(),
-                'pagination' =>  $products->links('vendor.pagination.custom')->render(),
+                'pagination' => $products->links('vendor.pagination.custom')->render(),
                 'total' => $total,
             ]);
         }
@@ -388,6 +388,7 @@ class ProductController extends Controller
         $valueIds = $request->input('value_ids'); // array
 
         $variant = ProductVariant::where('product_id', $productId)
+            ->select(['sale_price', 'discount_end', 'discount_price', 'discount_start'])
             ->whereHas('attributeValues', function ($q) use ($valueIds) {
                 $q->whereIn('attribute_value_id', $valueIds);
             }, '=', count($valueIds))
@@ -397,6 +398,16 @@ class ProductController extends Controller
             return response()->json(['message' => 'Không tìm thấy biến thể phù hợp'], 404);
         }
 
-        return response()->json($variant);
+        if (isOnSale($variant)) {
+            return response()->json([
+                'price' => formatPrice($variant->discount_price),
+                'originalPrice' => formatPrice($variant->sale_price)
+            ]);
+        }
+
+        return response()->json([
+            'price' => formatPrice($variant->sale_price),
+        ]);
+
     }
 }

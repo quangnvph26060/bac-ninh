@@ -13,14 +13,14 @@
                         <p class="price-product pb-0">
 
                             @if (isOnSale($product))
-                                <span class="text_color text-sm mb-2">Start from
-                                    {{ finalPrice($product->discount_price) }}</span>
+                                <span class="text_color text-sm mb-2">
+                                    {{ formatPrice($product->discount_price) }} USD</span>
 
                                 <small class="text-muted"> <del
-                                        class="ms-2">{{ formatPrice($product->sale_price) }}</del></small>
+                                        class="ms-2">{{ formatPrice($product->sale_price) }} USD</del></small>
                             @else
-                                <span class="text_color text-sm mb-2">Start from
-                                    {{ formatPrice($product->sale_price) }}</span>
+                                <span class="text_color text-sm mb-2">
+                                    {{ formatPrice($product->sale_price) }} USD</span>
                             @endif
                         </p>
 

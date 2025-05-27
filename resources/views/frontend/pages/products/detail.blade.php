@@ -87,7 +87,6 @@
                             </div>
                         </div>
 
-
                         <div class="mb-4">
                             <p class="price-product pb-0 mb-0">
                                 Price *
@@ -96,13 +95,13 @@
                                 @endphp
 
                                 @if (isOnSale($record))
-                                    <h2 class="text_color fs-3 mb-0 fw-bold d-inline">
+                                    <h2 class="text_color fs-3 mb-0 fw-bold d-inline" id="price">
                                         {{ formatPrice($record->discount_price) }} USD</h2>
 
-                                    <small class="text-muted fs-6"> <del
-                                            class="ms-2">{{ formatPrice($record->sale_price) }} USD</del></small>
+                                    <small class="text-muted fs-6"> <del class="ms-2"
+                                            id="original-price">{{ formatPrice($record->sale_price) }} USD</del></small>
                                 @else
-                                    <h2 class="text_color fs-2 mb-0 fw-bold">${{ formatPrice($record->sale_price) }}</h2>
+                                    <h2 class="text_color fs-2 mb-0 fw-bold"> {{ formatPrice($record->sale_price) }} USD</h2>
                                 @endif
                             </p>
 
@@ -341,7 +340,8 @@
 
             $('.attribute-radio').on('change', function() {
                 const selectedRadios = $('.attribute-radio:checked');
-                $('#btnOrderCreate').prop('disabled', true)
+                $('#btnOrderCreate').prop('disabled', true);
+
                 // Disable những radio không được chọn
                 $('.attribute-radio').each(function() {
                     const input = $(this);
@@ -365,9 +365,6 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
-                        $('.attribute-radio').prop('disabled', false);
-                        $('#btnOrderCreate').prop('disabled', false)
-
                         $('.form-check').removeClass('disabled-option');
 
                         if (response.ids && Array.isArray(response.ids)) {
@@ -381,37 +378,53 @@
                             });
                         }
 
-                        // ✅ Nếu đã chọn đủ số lượng nhóm thuộc tính thì gửi request tìm biến thể
-                        if (selectedRadios.length === ATTRIBUTES_COUNT) {
-                            $.ajax({
-                                url: '/find-variant',
-                                method: 'POST',
-                                data: {
-                                    product_id: PRODUCT_ID,
-                                    value_ids: selectedIds
-                                },
-                                headers: {
-                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-                                        'content')
-                                },
-                                success: function(variant) {
-                                    // ✅ Ở đây bạn xử lý biến thể được tìm thấy
-                                    console.log('Biến thể phù hợp:', variant);
-                                    // Ví dụ: cập nhật giá, ảnh, tồn kho,...
-                                },
-                                error: function(xhr) {
-                                    datgin.error(xhr.responseJSON?.message ||
-                                        'Không tìm thấy biến thể phù hợp!');
-                                }
-                            });
+                        // Nếu chưa chọn đủ số lượng nhóm thuộc tính thì enable lại radio
+                        if (selectedRadios.length !== ATTRIBUTES_COUNT) {
+                            $('.attribute-radio').prop('disabled', false);
+                            $('#btnOrderCreate').prop('disabled', false);
+                            return;
                         }
+
+                        // Nếu đã chọn đủ số lượng nhóm thuộc tính thì gọi API find-variant
+                        $.ajax({
+                            url: '/find-variant',
+                            method: 'POST',
+                            data: {
+                                product_id: PRODUCT_ID,
+                                value_ids: selectedIds
+                            },
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                                    'content')
+                            },
+                            success: function(variant) {
+                                $('#price').text(`${variant.price} USD`);
+                                if (variant.originalPrice) {
+                                    $('#original-price').text(
+                                        `${variant.originalPrice} USD`);
+                                } else {
+                                    $('#original-price').hide();
+                                }
+                            },
+                            error: function(xhr) {
+                                datgin.error(xhr.responseJSON?.message ||
+                                    'Không tìm thấy biến thể phù hợp!');
+                            },
+                            complete: function() {
+                                // Chỉ enable lại radio khi API find-variant đã hoàn thành (success hoặc error)
+                                $('.attribute-radio').prop('disabled', false);
+                                $('#btnOrderCreate').prop('disabled', false);
+                            }
+                        });
                     },
                     error: function(xhr) {
                         datgin.error(xhr.responseJSON?.message || 'Đã có lỗi xảy ra!');
                         $('.attribute-radio').prop('disabled', false);
+                        $('#btnOrderCreate').prop('disabled', false);
                     }
                 });
             });
+
 
 
             $('#btnOrderCreate').on('click', function() {

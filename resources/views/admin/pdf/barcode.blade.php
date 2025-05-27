@@ -20,6 +20,10 @@
         {{ chunk_split($barcode, 4, ' ') }}
     </div>
 
+    <div style="font-family: Courier, monospace; font-size: 16px; margin-top: 10px;">
+        {{ $orderName }}
+    </div>
+
 </body>
 
 </html>

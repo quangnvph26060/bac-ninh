@@ -13,11 +13,11 @@
 
             @if (isOnSale($record))
                 <span
-                    class="text_color text-sm mb-2">{{ finalPrice($record->sale_price, $record->discount_price) }}</span>
+                    class="text_color text-sm mb-2">{{ formatPrice($record->discount_price) }} USD</span>
 
-                <small class="text-muted"> <del class="ms-2">{{ formatPrice($record->sale_price) }}</del></small>
+                <small class="text-muted"> <del class="ms-2">{{ formatPrice($record->sale_price) }} USD</del></small>
             @else
-                <span class="text_color text-sm mb-2">{{ formatPrice($record->sale_price) }}</span>
+                <span class="text_color text-sm mb-2">{{ formatPrice($record->sale_price) }} USD</span>
             @endif
         </p>
 
