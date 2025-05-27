@@ -101,7 +101,7 @@
                                     <small class="text-muted fs-6"> <del class="ms-2"
                                             id="original-price">{{ formatPrice($record->sale_price) }} USD</del></small>
                                 @else
-                                    <h2 class="text_color fs-2 mb-0 fw-bold"> {{ formatPrice($record->sale_price) }} USD</h2>
+                                    <h2 class="text_color fs-2 mb-0 fw-bold" id="price"> {{ formatPrice($record->sale_price) }} USD</h2>
                                 @endif
                             </p>
 
