@@ -10,4 +10,16 @@
 
 <script src="{{ asset('frontend/assets/js/script.js') }}"></script>
 
+<script src="{{ asset('frontend/assets/js/chat.js') }}"></script>
+
+<script>
+    window.Laravel = {
+        csrfToken: '{{ csrf_token() }}',
+        adminId: {{ auth('admin')->id() ?? 'null' }},
+        userId: {{ auth('web')->id() ?? 'null' }}
+    };
+</script>
+
+@vite('resources/js/app.js')
+
 @stack('scripts')

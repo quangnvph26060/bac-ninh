@@ -7,8 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <link rel="apple-touch-icon" href="{{ showImage($config->favicon) }}" />
-    <link rel="icon" href="{{ showImage($config->favicon) }}" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="{{ showImage($config['favicon']) }}" />
+    <link rel="icon" href="{{ showImage($config['favicon']) }}" type="image/x-icon" />
 
     <title>document</title>
 

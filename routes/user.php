@@ -1,5 +1,6 @@
 <?php
 
+
 use App\Http\Controllers\Frontend\App\BillController;
 use App\Http\Controllers\Frontend\App\CouponController;
 use App\Http\Controllers\Frontend\App\DashboardController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductController;
 use App\Http\Controllers\Frontend\App\ProfileController;
 use App\Http\Controllers\Frontend\App\TransactionHistoryController;
+use App\Http\Controllers\Frontend\ChatController;
 use App\Imports\OrderImport;
 use App\Jobs\ImportOrdersFromExcel;
 use Illuminate\Http\Request;
@@ -23,7 +25,6 @@ use Maatwebsite\Excel\Facades\Excel;
 // });
 
 // Route::get('/import-progress/{jobId}', fn($jobId) => response()->json(Cache::get("import_progress_$jobId")));
-
 
 Route::middleware('guest')->controller(AuthController::class)->group(function () {
     Route::get('login', 'login')->name('login');
@@ -89,6 +90,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
+Route::get('recent-messages', [ChatController::class, 'recentMessages'])->name('recent.messages');
+Route::post('send-messages', [ChatController::class, 'sendMessage']);
 
 Route::controller(CartController::class)->name('carts.')->group(function () {
     Route::post('add-to-cart', 'addToCart')->name('add.to.cart');
@@ -103,3 +106,4 @@ Route::controller(ProductController::class)->name('products.')->group(function (
     Route::post('find-variant', 'findVariant')->name('find-variant');
     Route::get('{prefix}/{suffix?}', 'detail')->name('detail');
 });
+

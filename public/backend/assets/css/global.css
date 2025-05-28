@@ -5,7 +5,7 @@ body {
 
     font-size: 0.875rem;
     font-weight: 400;
-    color: rgb(24, 36, 51);
+    color: #42526e;
 }
 
 .breadcrumb {
@@ -16,6 +16,22 @@ body {
 .card {
     border-radius: 4px !important;
     margin-bottom: 10px !important;
+    color: #42526e;
+}
+
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #42526e;
 }
 
 /* #myTable tbody tr:nth-child(odd) {
@@ -318,7 +334,7 @@ input:checked + .slider:before {
 
 .seo-edit-section,
 .existed-seo-meta {
-    display: none;
+    /* display: none; */
 }
 .seo-preview * {
     word-break: break-all;

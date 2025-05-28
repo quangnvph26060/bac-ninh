@@ -23,6 +23,15 @@
     src="{{ asset('backend/assets/js/helper.js') }}?v={{ filemtime(public_path('backend/assets/js/helper.js')) }}">
 </script>
 
+<script>
+    window.Laravel = {
+        csrfToken: '{{ csrf_token() }}',
+        adminId: {{ auth('admin')->id() ?? 'null' }},
+        userId: {{ auth('web')->id() ?? 'null' }}
+    };
+</script>
+
+@vite('resources/js/app.js')
 
 <script>
     $.ajaxSetup({

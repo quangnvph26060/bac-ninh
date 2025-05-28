@@ -49,7 +49,7 @@
                     @endphp
 
                     @switch($order->status)
-                        @case('draft')
+                        {{-- @case('draft')
                             @if ($order->payment_status === 'pending')
                                 <button type="button" id="confirm-paymant"
                                     class="ant-btn ant-btn-{{ $wallet->balance <= 0 || $wallet->balance < $order->total ? 'default' : 'primary' }} h-auto d-flex align-items-center gap-1"
@@ -59,13 +59,23 @@
                                     <span>Pay Now</span>
                                 </button>
                             @endif
-                        @break
-
+                        @break --}}
                         @case('pending')
-                            <button type="button" class="ant-btn rounded-pill ant-btn-warning h-auto d-flex align-items-center gap-1"
-                                id="btn-status">
-                                <span><i class="bi bi-clock me-1"></i>Pending</span>
-                            </button>
+                            @if ($order->payment_status === 'pending' && $order->status === 'pending')
+                                <button type="button" id="confirm-paymant"
+                                    class="ant-btn ant-btn-{{ $wallet->balance <= 0 || $wallet->balance < $order->total ? 'default' : 'primary' }} h-auto d-flex align-items-center gap-1"
+                                    @disabled($wallet->balance <= 0 || $wallet->balance < $order->total)>
+                                    <span>${{ formatPrice($order->total) }}</span>
+                                    <span class="bg-white rounded w-1 h-1"></span>
+                                    <span>Pay Now</span>
+                                </button>
+                            @else
+                                <button type="button"
+                                    class="ant-btn rounded-pill ant-btn-warning h-auto d-flex align-items-center gap-1"
+                                    id="btn-status">
+                                    <span><i class="bi bi-clock me-1"></i>Pending</span>
+                                </button>
+                            @endif
                         @break
 
                         @case('processing')
@@ -75,20 +85,22 @@
                         @break
 
                         @case('completed')
-                            <button type="button" class="ant-btn rounded-pill ant-btn-success h-auto d-flex align-items-center gap-1">
+                            <button type="button"
+                                class="ant-btn rounded-pill ant-btn-success h-auto d-flex align-items-center gap-1">
                                 <span><i class="bi bi-check-circle me-1"></i>Completed</span>
                             </button>
                         @break
 
                         @case('cancelled')
-                            <button type="button" class="ant-btn rounded-pill ant-btn-danger h-auto d-flex align-items-center gap-1">
+                            <button type="button"
+                                class="ant-btn rounded-pill ant-btn-danger h-auto d-flex align-items-center gap-1">
                                 <span><i class="bi bi-x-circle me-2"></i>Cancelled</span>
                             </button>
                         @break
                     @endswitch
 
-                    <button class="ant-btn rounded-pill ant-btn-danger h-auto" data-bs-toggle="modal" data-bs-target="#cancelOrder"
-                        id="btn-cansel-order"
+                    <button class="ant-btn rounded-pill ant-btn-danger h-auto" data-bs-toggle="modal"
+                        data-bs-target="#cancelOrder" id="btn-cansel-order"
                         style="{{ $order->status === 'pending' && $order->status !== 'cancelled' ? '' : 'display: none' }}">Cancel
                         Order</button>
                 </div>
@@ -97,32 +109,84 @@
         </div>
     </div>
 
+    @php
+        $steps = [
+            'pending',
+            'confirmed_pending_production',
+            'in_production',
+            'produced_awaiting_completion',
+            'completed_waiting_for_shipment',
+            'shipped',
+        ];
+
+        $statusIndex = array_search($order->status, $steps);
+    @endphp
+
     <ul id="progressbar" class="my-5">
-        <li class="active" id="step1">
-            <div class="icon-wrapper"><i class="bi bi-calendar"></i></div>
-            <strong>Choose Date</strong>
-        </li>
-        <li id="step2">
-            <div class="icon-wrapper"><i class="bi bi-tree"></i></div>
-            <strong>Choose Campsite</strong>
-        </li>
-        <li id="step3">
-            <div class="icon-wrapper"><i class="bi bi-truck-front"></i></div>
-            <strong>Choose RV</strong>
-        </li>
-        <li id="step4">
-            <div class="icon-wrapper"><i class="bi bi-geo-alt"></i></div>
-            <strong>Booking Check</strong>
-        </li>
-        <li id="step5">
-            <div class="icon-wrapper"><i class="bi bi-geo-alt"></i></div>
-            <strong>Booking Check</strong>
-        </li>
-        <li id="step6">
-            <div class="icon-wrapper"><i class="bi bi-geo-alt"></i></div>
-            <strong>Booking Check</strong>
-        </li>
+        @foreach ($steps as $index => $stepKey)
+            <li id="step{{ $index + 1 }}" class="{{ $index <= $statusIndex ? 'active' : '' }}">
+                <div class="icon-wrapper">
+                    @switch($stepKey)
+                        @case('pending')
+                            <i class="bi bi-clock"></i>
+                        @break
+
+                        @case('confirmed_pending_production')
+                            <i class="bi bi-check2-circle"></i>
+                        @break
+
+                        @case('in_production')
+                            <i class="bi bi-gear"></i>
+                        @break
+
+                        @case('produced_awaiting_completion')
+                            <i class="bi bi-eye"></i>
+                        @break
+
+                        @case('completed_waiting_for_shipment')
+                            <i class="bi bi-box-seam"></i>
+                        @break
+
+                        @case('shipped')
+                            <i class="bi bi-truck"></i>
+                        @break
+                    @endswitch
+                </div>
+                <strong>
+                    @switch($stepKey)
+                        @case('pending')
+                            Pending
+                        @break
+
+                        @case('confirmed_pending_production')
+                            Confirmed
+                        @break
+
+                        @case('in_production')
+                            Production
+                        @break
+
+                        @case('produced_awaiting_completion')
+                            Awaiting Check
+                        @break
+
+                        @case('completed_waiting_for_shipment')
+                            Ready to Ship
+                        @break
+
+                        @case('shipped')
+                            Shipped
+                        @break
+
+                        @case('cancelled')
+                            Cancelled
+                        @break
+                    @endswitch
+                </strong>
+            </li>
+        @endforeach
     </ul>
+
 
     <div class="row">
         <div class="col-lg-9">
@@ -183,6 +247,10 @@
                                 <tr>
                                     <th scope="row" colspan="6" class="text-end">Discount :</th>
                                     <td>- ${{ formatPrice($order->discount) }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" colspan="6" class="text-end">Tax :</th>
+                                    <td> ${{ formatPrice($order->tax) }}</td>
                                 </tr>
                                 <tr>
                                     <th scope="row" colspan="6" class="text-end">Total :</th>
@@ -256,8 +324,8 @@
         $('#confirm-paymant').on('click', function() {
             const swalWithBootstrapButtons = Swal.mixin({
                 customClass: {
-                    confirmButton: "btn btn-success",
-                    cancelButton: "btn btn-danger"
+                    confirmButton: "ant-btn ant-btn-primary px-3",
+                    cancelButton: "ant-btn ant-btn-default px-3 me-2"
                 },
                 buttonsStyling: false
             });
@@ -285,11 +353,6 @@
                             $('#loading').show();
                         },
                         success: (response) => {
-                            swalWithBootstrapButtons.fire({
-                                title: "Payment Successful!",
-                                text: "Your order has been paid successfully.",
-                                icon: "success"
-                            });
 
                             datgin.success(response.message);
 
@@ -319,11 +382,11 @@
                     })
 
                 } else if (result.dismiss === Swal.DismissReason.cancel) {
-                    swalWithBootstrapButtons.fire({
-                        title: "Cancelled",
-                        text: "Payment has been cancelled. Your order is still pending.",
-                        icon: "error"
-                    });
+                    // swalWithBootstrapButtons.fire({
+                    //     title: "Cancelled",
+                    //     text: "Payment has been cancelled. Your order is still pending.",
+                    //     icon: "error"
+                    // });
                 }
             });
         })

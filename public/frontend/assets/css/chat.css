@@ -1,0 +1,124 @@
+#chat-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1050;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #f26722;
+    color: white;
+    font-size: 24px;
+    border: none;
+    transition: transform 0.3s ease;
+}
+
+#chat-button:hover {
+    transform: scale(1.1);
+}
+
+#chat-popup {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 320px;
+    max-height: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: none;
+    flex-direction: column;
+    z-index: 1040;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#chat-popup.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.chat-header {
+    background: #f26722;
+    color: white;
+    padding: 12px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    font-weight: bold;
+}
+
+.chat-messages {
+    padding: 10px;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+}
+
+.message-out {
+    background-color: #f26722;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 18px 18px 0 18px;
+    max-width: 95%;
+    margin-left: auto;
+    margin-bottom: 8px;
+    display: block;
+    align-self: flex-end;
+    animation: slideInRight 0.3s ease;
+}
+
+.message-in {
+    background-color: #eeeeee;
+    padding: 8px 12px;
+    border-radius: 18px 18px 18px 0;
+    max-width: 95%;
+    margin-bottom: 8px;
+    display: block;
+    align-self: flex-start;
+    animation: slideInLeft 0.3s ease;
+}
+
+.chat-input {
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    background: #fff;
+    border-radius: 0 0 10px 10px;
+}
+
+.chat-input textarea {
+    resize: none;
+}
+
+.message-out,
+.message-in {
+    max-width: 95%;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

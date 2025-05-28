@@ -196,5 +196,11 @@
             }
         ],
         "inRoutes": ["admin.materials.index", "admin.warehouse.index"]
+    },
+    {
+        "title": "Tin nhắn",
+        "icon": "far fa-comment-dots",
+        "route": "admin.chats.index",
+        "id": "message"
     }
 ]

@@ -311,7 +311,7 @@
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Thuế</span>
-                            <span id="tax-amount">$0</span>
+                            <span id="tax-amount">${{ formatPrice($config['tax_rate']) }}</span>
                         </div>
                         <hr class="my-2">
                         <div class="d-flex justify-content-between fw-bold">
@@ -636,26 +636,26 @@
                     <div class="d-flex gap-3">
 
                         ${product.model_image ? `
-                                                                                                                                                                                                        <div style="width: 103px;">
-                                                                                                                                                                                                            <div class="fw-semibold">Mockup</div>
-                                                                                                                                                                                                            <div class="image-container">
-                                                                                                                                                                                                                <img class="img-thumbnail"
-                                                                                                                                                                                                                    style="cursor: pointer;"
-                                                                                                                                                                                                                    src="${product.model_image}">
-                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                        ` : ''}
+                                                                                                                                                                                                                <div style="width: 103px;">
+                                                                                                                                                                                                                    <div class="fw-semibold">Mockup</div>
+                                                                                                                                                                                                                    <div class="image-container">
+                                                                                                                                                                                                                        <img class="img-thumbnail"
+                                                                                                                                                                                                                            style="cursor: pointer;"
+                                                                                                                                                                                                                            src="${product.model_image}">
+                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                ` : ''}
 
                         ${product.design_image ? `
-                                                                                                                                                                                                        <div style="width: 103px;">
-                                                                                                                                                                                                            <div class="fw-semibold">Design photo</div>
-                                                                                                                                                                                                            <div class="image-container">
-                                                                                                                                                                                                                <img class="img-thumbnail"
-                                                                                                                                                                                                                    style="cursor: pointer;"
-                                                                                                                                                                                                                    src="${product.design_image}">
-                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                        ` : ''}
+                                                                                                                                                                                                                <div style="width: 103px;">
+                                                                                                                                                                                                                    <div class="fw-semibold">Design photo</div>
+                                                                                                                                                                                                                    <div class="image-container">
+                                                                                                                                                                                                                        <img class="img-thumbnail"
+                                                                                                                                                                                                                            style="cursor: pointer;"
+                                                                                                                                                                                                                            src="${product.design_image}">
+                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                ` : ''}
                     </div>
                 </div>
 
