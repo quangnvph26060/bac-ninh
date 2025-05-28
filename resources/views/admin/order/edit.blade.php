@@ -21,9 +21,10 @@
                         {{-- {{ $order->created_at->format('F j, Y \a\t g:i a') }} --}}
                         {{ $order->created_at->format('d/m/Y H:i') }}
                     </div>
-                    <div class="sa-page-meta__item">{{ $order->orderItems->count() }} items</div>
-                    <div class="sa-page-meta__item">Total ${{ formatPrice($order->total) }}</div>
+                    <div class="sa-page-meta__item">{{ $order->orderItems->count() }} mặt hàng</div>
+                    <div class="sa-page-meta__item">Tổng {{ formatPrice($order->total) }} USD</div>
                     <div class="sa-page-meta__item d-flex align-items-center fs-6">
+
                         {{-- Payment Status --}}
                         @if ($order->payment_status == 'pending')
                             <span class="badge bg-secondary me-2" id="payment-status">Chờ thanh toán</span>
@@ -122,7 +123,7 @@
                             </tbody>
                             <tbody class="sa-table__group">
                                 <tr>
-                                    <td colspan="5">Tổng phụ</td>
+                                    <td colspan="5" class="fw-semibold">Tổng phụ</td>
                                     <td class="text-end">
                                         <div class="sa-price">
                                             <span class="sa-price__symbol">$</span><span
@@ -131,34 +132,45 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colspan="5">Phí vận chuyển</td>
+                                    <td colspan="5" class="fw-semibold">Phí vận chuyển</td>
                                     <td class="text-end">
                                         <div class="sa-price">
                                             <span
-                                                class="sa-price__integer">${{ formatNumber($order->shipping_fee) }}</span>
+                                                class="sa-price__integer">${{ formatPrice($order->shipping_fee) }}</span>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colspan="5">
+                                    <td colspan="5" class="fw-semibold">
                                         Giảm giá
                                     </td>
                                     <td class="text-end">
                                         <div class="sa-price">
                                             <span class="sa-price__symbol">-</span>
                                             <span class="sa-price__symbol">$</span><span
-                                                class="sa-price__integer">{{ formatNumber($order->discount) }}</span>
+                                                class="sa-price__integer">{{ formatPrice($order->discount) }}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5" class="fw-semibold">
+                                        Thuế
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="sa-price">
+                                            <span class="sa-price__symbol">$</span><span
+                                                class="sa-price__integer">{{ formatPrice($order->tax) }}</span>
                                         </div>
                                     </td>
                                 </tr>
                             </tbody>
                             <tbody>
                                 <tr>
-                                    <td colspan="5">Tổng cộng</td>
+                                    <td colspan="5" class="fw-semibold">Tổng cộng</td>
                                     <td class="text-end">
                                         <div class="sa-price">
                                             <span class="sa-price__symbol">$</span><span
-                                                class="sa-price__integer">{{ formatNumber($order->total) }}</span>
+                                                class="sa-price__integer">{{ formatPrice($order->total) }}</span>
                                         </div>
                                     </td>
                                 </tr>
@@ -224,7 +236,8 @@
                     </div>
                     <div class="card-body pt-4 fs-exact-16">
                         <div class="input-group-custom">
-                            <input type="text" class="form-control input-custom" name="tracking" id="tracking" value="{{ $order->tracking }}">
+                            <input type="text" class="form-control input-custom" name="tracking" id="tracking"
+                                value="{{ $order->tracking }}">
                             <button class="btn btn-primary btn-sm button-custom">Lưu</button>
                         </div>
                     </div>

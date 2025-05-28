@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\ImportOrdersFromExcel;
 use App\Models\AttributeValue;
 use App\Models\City;
+use App\Models\Config;
 use App\Models\Country;
 use App\Models\Coupon;
 use App\Models\Order;
@@ -86,7 +87,7 @@ class OrderController extends Controller
             return errorResponse("Order not found!", true);
         }
 
-        if ($order->payment_status === "completed" || $order->status !== "draft") {
+        if ($order->payment_status === "completed" || $order->status !== "pending") {
             return errorResponse("Order has already been paid!", true);
         }
 
@@ -102,7 +103,6 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
             $order->payment_status = "completed";
-            $order->status = "pending";
             $order->payment_method = "bank_transfer";
 
             $order->save();
@@ -191,7 +191,9 @@ class OrderController extends Controller
             return errorResponse("Products do not meet the coupon requirements.", true);
         }
 
-        $grandTotal = $this->calculateGrandTotal($subTotal, $discountAmount, $shippingFee);
+        $tax = Config::query()->first()->tax_rate;
+
+        $grandTotal = $this->calculateGrandTotal($subTotal, $discountAmount, $shippingFee, $tax);
 
         return response()->json([
             'subTotal' => $subTotal,
@@ -334,9 +336,9 @@ class OrderController extends Controller
     }
 
     // Hàm tính tổng tiền đơn hàng (grandTotal)
-    private function calculateGrandTotal($subTotal, $discountAmount, $shippingFee)
+    private function calculateGrandTotal($subTotal, $discountAmount, $shippingFee, float $tax)
     {
-        return max(0, $subTotal - $discountAmount + $shippingFee);
+        return max(0, $subTotal - $discountAmount + $shippingFee + $tax);
     }
 
     public function getStates($country_id)
@@ -592,6 +594,8 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
+            $tax = Config::query()->first()->tax_rate;
+
             // Lấy thông tin vận chuyển
             $shippingAddress = $this->getShippingDetails($request['orderInfo']);
 
@@ -612,11 +616,10 @@ class OrderController extends Controller
 
             $subTotal = $this->calculateSubTotal($productDetails);
 
-            $totals = $this->calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee);
-
+            $totals = $this->calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee, $tax);
 
             // Tạo đơn hàng và lưu các sản phẩm
-            $order = $this->storeOrderDetails($request['orderInfo'], $totals['grandTotal'], $totals['discountAmount'], $shippingFee, $shippingAddress);
+            $order = $this->storeOrderDetails($request['orderInfo'], $totals['grandTotal'], $totals['discountAmount'], $shippingFee, $shippingAddress, $tax);
 
             $this->storeOrderItems($order, $productDetails);
 
@@ -707,12 +710,12 @@ class OrderController extends Controller
         return "{$orderInfo['shipping_address']}, {$orderInfo['city']}, {$orderInfo['state']}, {$orderInfo['country']}";
     }
 
-    private function calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee)
+    private function calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee, $tax)
     {
 
         $discountAmount = $this->calculateDiscount($coupon ?? null, $productDetails);
 
-        $grandTotal = $this->calculateGrandTotal($subTotal, $discountAmount, $shippingFee);
+        $grandTotal = $this->calculateGrandTotal($subTotal, $discountAmount, $shippingFee, $tax);
 
         return [
             'subTotal' => $subTotal,
@@ -721,7 +724,7 @@ class OrderController extends Controller
         ];
     }
 
-    private function storeOrderDetails($orderInfo, $grandTotal, $discountAmount, $shippingFee, $shippingAddress)
+    private function storeOrderDetails($orderInfo, $grandTotal, $discountAmount, $shippingFee, $shippingAddress, $tax)
     {
         return Order::create(
             [
@@ -739,7 +742,8 @@ class OrderController extends Controller
                 'note' => $orderInfo['note'],
                 'total' => $grandTotal,
                 'discount' => $discountAmount,
-                'shipping_fee' => $shippingFee
+                'shipping_fee' => $shippingFee,
+                'tax' => $tax
             ]
         );
     }
@@ -983,7 +987,6 @@ class OrderController extends Controller
 
     public function validateImage(Request $request)
     {
-        // dd($request->toArray());
 
         $request->validate([
             'image' => 'required|image|mimes:jpg,jpeg,png,webp,gif,bmp,tiff|max:10240',

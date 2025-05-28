@@ -3,15 +3,15 @@
         <div class="d-flex container px-4 pt-5 pt-sm-3 pt-md-0 mx-auto" style="max-width: 1182px">
             <div class="logo__footer__content w-100 w-md-55">
                 <div class="d-flex align-items-center justify-content-center justify-content-md-start">
-                    <a href="#"><img loading="lazy" class="custom-width" src="{{ showImage($config->logo) }}"
-                            alt="{{ $config->company }}" /></a>
+                    <a href="#"><img loading="lazy" class="custom-width" src="{{ showImage($config['logo']) }}"
+                            alt="{{ $config['company'] }}" /></a>
                 </div>
 
                 <div class="logo__footer__content__company mt-3 d-flex flex-column gap-1 gap-lg-4">
                     <div
                         class="social__logo__wrapper d-flex justify-content-center justify-content-md-start mb-3 mb-md-0 gap-4">
-                        @if ($config->facebook)
-                            <a href="{{ $config->facebook }}" alt="dsd" target="_blank" rel="noreferrer">
+                        @if ($config['facebook'])
+                            <a href="{{ $config['facebook'] }}" alt="dsd" target="_blank" rel="noreferrer">
                                 <svg width="24" height="24" class="icon_fb_footer" viewBox="0 0 24 24"
                                     fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <g clip-path="url(#clip0_159_5231)">
@@ -28,8 +28,8 @@
                             </a>
                         @endif
 
-                        @if ($config->youtobe)
-                            <a href="{{ $config->youtobe }}" alt="dsd" target="_blank" rel="noreferrer"><svg
+                        @if ($config['youtobe'])
+                            <a href="{{ $config['youtobe'] }}" alt="dsd" target="_blank" rel="noreferrer"><svg
                                     width="24" height="24" class="icon_shared icon_twitter_footer"
                                     viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -39,8 +39,8 @@
                             </a>
                         @endif
 
-                        @if ($config->email)
-                            <a href="mailto:{{ $config->email }}" alt="dsd" target="_blank" rel="noreferrer"><svg
+                        @if ($config['email'])
+                            <a href="mailto:{{ $config['email'] }}" alt="dsd" target="_blank" rel="noreferrer"><svg
                                     width="24" height="24" class="icon_shared icon_pin_footer"
                                     viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <g clip-path="url(#clip0_159_5240)">
@@ -57,8 +57,8 @@
                             </a>
                         @endif
 
-                        @if ($config->tiktok)
-                            <a href="{{ $config->tiktok }}" alt="dsd" target="_blank" rel="noreferrer"><svg
+                        @if ($config['tiktok'])
+                            <a href="{{ $config['tiktok'] }}" alt="dsd" target="_blank" rel="noreferrer"><svg
                                     width="24" height="24" class="icon_shared icon_email_footer"
                                     viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -71,34 +71,34 @@
                     </div>
 
                     <div class="title_wrapp">
-                        <span class="custom-text"><span class="title_address">{{ $config->company }}</span></span>
+                        <span class="custom-text"><span class="title_address">{{ $config['company'] }}</span></span>
                     </div>
 
                     <div class="title_wrapp">
-                        <span class="custom-text"><span class="title_address">{{ $config->address }}</span></span>
+                        <span class="custom-text"><span class="title_address">{{ $config['address'] }}</span></span>
                     </div>
 
                     <div class="title_wrapp">
                         <div class="flex flex-col">
-                            <a href="tel:+{{ preg_replace('/[^0-9+]/', '', $config->hotline) }}" rel="noreferrer"
+                            <a href="tel:+{{ preg_replace('/[^0-9+]/', '', $config['hotline']) }}" rel="noreferrer"
                                 class="title_text_footer">
-                                <span class="title_address">Hotline: {{ $config->hotline }}</span>
+                                <span class="title_address">Hotline: {{ $config['hotline'] }}</span>
                             </a>
                         </div>
                     </div>
 
 
                     <div class="title_wrapp">
-                        <span class="custom-text"><a href="mailto:{{ $config->email }}" rel="noreferrer"
+                        <span class="custom-text"><a href="mailto:{{ $config['email'] }}" rel="noreferrer"
                                 class="title_text_footer"><span class="title_address">Email:
-                                    {{ $config->email }}</span></a></span>
+                                    {{ $config['email'] }}</span></a></span>
                     </div>
 
                     <div class="title_wrapp">
                         <span class="custom-text"><span class="title_address">Groups:</span><a
-                                href="{{ $config->groups }}" target="_blank" rel="noreferrer"
+                                href="{{ $config['groups'] }}" target="_blank" rel="noreferrer"
                                 class="text-decoration-underline">
-                                {{ $config->groups }}</a></span>
+                                {{ $config['groups'] }}</a></span>
                     </div>
                 </div>
             </div>

@@ -7,7 +7,7 @@
 
         <!-- Logo (Giữa màn hình mobile) -->
         <a class="navbar-brand" href="{{ url('/') }}">
-            <img src="{{ showImage($config->logo) }}" alt="{{ $config->company }}" />
+            <img src="{{ showImage($config['logo']) }}" alt="{{ $config['company'] }}" />
         </a>
 
         <!-- Navbar Links -->

@@ -11,4 +11,6 @@
 <link rel="stylesheet"
     href="{{ asset('frontend/assets/css/style.css') }}?v={{ filemtime(public_path('frontend/assets/css/style.css')) }}" />
 
+<link rel="stylesheet" href="{{ asset('frontend/assets/css/chat.css') }}">
+
 @stack('styles')

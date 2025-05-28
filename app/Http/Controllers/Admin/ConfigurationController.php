@@ -23,37 +23,38 @@ class ConfigurationController extends Controller
 
         $credentials = $request->validate(
             [
-                'title'             => 'nullable|string|max:255',
-                'company'           => 'nullable|string|max:255',
-                'logo'              => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                'favicon'           => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:1024',
-                'address'           => 'nullable|string|max:255',
-                'email'             => 'nullable|email|max:255',
-                'hotline'           => 'nullable|string|max:15',
-                'groups'            => 'nullable|string|max:255',
-                'facebook'          => 'nullable|url|max:255',
-                'youtobe'           => 'nullable|url|max:255',
-                'tiktok'            => 'nullable|url|max:255',
-                'copyright'         => 'nullable|string|max:255',
-                'seo_title'         => 'nullable|string|max:255',
-                'seo_description'   => 'nullable|string|max:500',
+                'title' => 'nullable|string|max:255',
+                'company' => 'nullable|string|max:255',
+                'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'favicon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:1024',
+                'address' => 'nullable|string|max:255',
+                'email' => 'nullable|email|max:255',
+                'hotline' => 'nullable|string|max:15',
+                'groups' => 'nullable|string|max:255',
+                'facebook' => 'nullable|url|max:255',
+                'youtobe' => 'nullable|url|max:255',
+                'tiktok' => 'nullable|url|max:255',
+                'copyright' => 'nullable|string|max:255',
+                'seo_title' => 'nullable|string|max:255',
+                'seo_description' => 'nullable|string|max:500',
+                'tax_rate' => 'nullable|numeric|min:1|regex:/^\d*(\.\d{1,2})?$/'
             ],
             __('request.messages'),
             [
-                'title'             => 'Tiêu đề',
-                'company'           => 'Công ty',
-                'logo'              => 'Logo',
-                'favicon'           => 'Favicon',
-                'address'           => 'Địa chỉ',
-                'email'             => 'Email',
-                'hotline'           => 'Hotline',
-                'groups'            => 'Nhóm',
-                'facebook'          => 'Facebook',
-                'youtobe'           => 'YouTube',
-                'tiktok'            => 'TikTok',
-                'copyright'         => 'Bản quyền',
-                'seo_title'         => 'Tiêu đề SEO',
-                'seo_description'   => 'Mô tả SEO',
+                'title' => 'Tiêu đề',
+                'company' => 'Công ty',
+                'logo' => 'Logo',
+                'favicon' => 'Favicon',
+                'address' => 'Địa chỉ',
+                'email' => 'Email',
+                'hotline' => 'Hotline',
+                'groups' => 'Nhóm',
+                'facebook' => 'Facebook',
+                'youtobe' => 'YouTube',
+                'tiktok' => 'TikTok',
+                'copyright' => 'Bản quyền',
+                'seo_title' => 'Tiêu đề SEO',
+                'seo_description' => 'Mô tả SEO',
             ]
         );
 
@@ -150,7 +151,7 @@ class ConfigurationController extends Controller
         }
 
         $configPayments = ConfigPayment::query()->latest()->get()->map(function ($item) {
-            $item->image = showImage($item->image);
+            $item['image'] = showImage($item->image);
             return $item;
         });
 
@@ -185,7 +186,7 @@ class ConfigurationController extends Controller
         ConfigPayment::query()->where('id', $credentials['id'])->delete();
 
         $configPayments = ConfigPayment::query()->latest()->get()->map(function ($item) {
-            $item->image = showImage($item->image);
+            $item['image'] = showImage($item->image);
             return $item;
         });
 

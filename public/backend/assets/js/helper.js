@@ -149,12 +149,7 @@ const removeImage = function (imgId, inputId) {
     datgin.success("Ảnh đã được xóa thành công.");
 };
 
-const validateAndPreviewImage = function (
-    event,
-    imgId,
-    inputContainerId,
-    imageDefault
-) {
+function validateAndPreviewImage(event, imgId, inputContainerId, imageDefault) {
     const file = event.target.files[0];
     const container = document.getElementById(inputContainerId);
     const expectedWidth = parseInt(container.dataset.width);
@@ -199,10 +194,10 @@ const validateAndPreviewImage = function (
 
                     datgin.error(
                         `
-                            Design does not match sample.
-                            Proposed design: Width: ${data.expectedWidth}px, Height: ${data.expectedHeight}px, PPI: ${data.expectedPpi}, File format: .${data.expectedFormat}
-                            Your design: Width: ${data.width}px, Height: ${data.height}px, PPI: ${data.ppi}, File format: ${data.format}.
-                        `
+                    Design does not match sample.
+                    Proposed design: Width: ${data.expectedWidth}px, Height: ${data.expectedHeight}px, PPI: ${data.expectedPpi}, File format: .${data.expectedFormat}
+                    Your design: Width: ${data.width}px, Height: ${data.height}px, PPI: ${data.ppi}, File format: ${data.format}.
+                `
                     );
                 }
             },
@@ -216,7 +211,7 @@ const validateAndPreviewImage = function (
     };
 
     reader.readAsDataURL(file);
-};
+}
 
 // Hàm mở popup và hiển thị hình ảnh
 function viewImage(productId) {

@@ -135,41 +135,61 @@ if (!function_exists('hasFile')) {
 function getImageInfo($fileOrPath): array
 {
     if (is_string($fileOrPath)) {
-        // Nếu truyền đường dẫn string
         $filePath = $fileOrPath;
     } elseif (method_exists($fileOrPath, 'getRealPath')) {
-        // Nếu là đối tượng file upload
         $filePath = $fileOrPath->getRealPath();
     } else {
-        throw new InvalidArgumentException('Tham số truyền vào phải là đường dẫn file hoặc đối tượng file có phương thức getRealPath().');
+        throw new InvalidArgumentException('Tham số phải là đường dẫn hoặc file upload.');
     }
 
-    $image = new \Imagick($filePath);
-
-    $format = $image->getImageFormat();
-    $width = $image->getImageWidth();
-    $height = $image->getImageHeight();
-
-    $resolution = $image->getImageResolution(); // ['x' => ..., 'y' => ...]
-    $unit = $image->getImageUnits(); // 1 = undefined, 2 = dpi, 3 = pixels/cm
-
-    $x_dpi = $resolution['x'];
-    $y_dpi = $resolution['y'];
-
-    if ($unit === \Imagick::RESOLUTION_PIXELSPERCENTIMETER) {
-        $x_dpi = round($x_dpi * 2.54, 2);
-        $y_dpi = round($y_dpi * 2.54, 2);
+    // ✅ Bước 1: kiểm tra nhanh bằng getimagesize()
+    $info = @getimagesize($filePath);
+    if (!$info) {
+        throw new \Exception("Không thể đọc thông tin ảnh.");
     }
 
-    return [
-        'width' => $width,
-        'height' => $height,
-        'x_dpi' => $x_dpi,
-        'y_dpi' => $y_dpi,
-        'unit' => $unit === 2 ? 'dpi' : ($unit === 3 ? 'pixels/cm' : 'unknown'),
-        'format' => $format,
-    ];
+    $width = $info[0];
+    $height = $info[1];
+
+    // Giới hạn size ảnh: tránh ảnh cực lớn làm treo Imagick
+    if ($width > 8000 || $height > 8000) {
+        throw new \Exception("Ảnh vượt quá kích thước tối đa cho phép.");
+    }
+
+    // ✅ Bước 2: dùng Imagick để lấy DPI & format
+    try {
+        $image = new \Imagick($filePath);
+
+        // Giới hạn tài nguyên để tránh treo server
+        $image->setResourceLimit(\Imagick::RESOURCETYPE_MEMORY, 64); // 64MB
+        $image->setResourceLimit(\Imagick::RESOURCETYPE_MAP, 64);
+        $image->setResourceLimit(\Imagick::RESOURCETYPE_THREAD, 1);
+
+        $format = $image->getImageFormat();
+        $resolution = $image->getImageResolution();
+        $unit = $image->getImageUnits();
+
+        $x_dpi = $resolution['x'] ?? 72;
+        $y_dpi = $resolution['y'] ?? 72;
+
+        if ($unit === \Imagick::RESOLUTION_PIXELSPERCENTIMETER) {
+            $x_dpi = round($x_dpi * 2.54, 2);
+            $y_dpi = round($y_dpi * 2.54, 2);
+        }
+
+        return [
+            'width' => $width,
+            'height' => $height,
+            'x_dpi' => $x_dpi,
+            'y_dpi' => $y_dpi,
+            'unit' => $unit === 2 ? 'dpi' : ($unit === 3 ? 'pixels/cm' : 'unknown'),
+            'format' => $format,
+        ];
+    } catch (\Exception $e) {
+        throw new \Exception("Lỗi xử lý ảnh: " . $e->getMessage());
+    }
 }
+
 
 
 if (!function_exists('showImage')) {
@@ -253,23 +273,24 @@ if (!function_exists('successResponse')) {
     function successResponse($message, $data = null, $code = 200, bool $isResponse = false)
     {
         $response = ['success' => true, 'message' => $message, 'data' => $data, 'code' => $code];
-        return  $isResponse ? response()->json($response, $code) : $response;
+        return $isResponse ? response()->json($response, $code) : $response;
     }
 }
 
 if (!function_exists('handleResponse')) {
-    function handleResponse($message, $success, $code = 200, $data = [], $isToast  = true)
+    function handleResponse($message, $success, $code = 200, $data = [], $isToast = true)
     {
         $type = $success ? 'success' : 'error';
 
-        if ($isToast) sessionFlash($type, $message);
+        if ($isToast)
+            sessionFlash($type, $message);
 
         return response()->json(['success' => $success, 'message' => $message, 'data' => $data], $code);
     }
 }
 
 if (!function_exists('errorResponse')) {
-    function errorResponse(string $message, bool $isResponse = false,  $code = 500)
+    function errorResponse(string $message, bool $isResponse = false, $code = 500)
     {
         $response = [
             'success' => false,
@@ -291,7 +312,7 @@ if (!class_exists('formatNumber')) {
     function formatNumber($number)
     {
         if (!empty($number)) {
-            return  number_format((float)$number, 2, '.', ',');
+            return number_format((float) $number, 2, '.', ',');
         }
         return 0.00;
     }
@@ -311,7 +332,7 @@ function isOnSale($record)
         if ($record->discount_start && $record->discount_end) {
             // Chuyển đổi discount_start và discount_end thành định dạng Carbon (d-m-Y)
             $discountStart = $record->discount_start;
-            $discountEnd =  $record->discount_end;
+            $discountEnd = $record->discount_end;
             $now = Carbon::now(); // Thời gian hiện tại
 
             // Kiểm tra điều kiện giảm giá hợp lệ
@@ -351,7 +372,7 @@ function formatPrice($price)
 {
     if (!empty($price)) {
         // Format số với 2 chữ số thập phân
-        $formatted = number_format((float)$price, 2, '.', ',');
+        $formatted = number_format((float) $price, 2, '.', ',');
 
         // Nếu phần thập phân là .00 thì bỏ đi
         if (substr($formatted, -3) === '.00') {

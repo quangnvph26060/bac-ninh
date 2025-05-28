@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\BulkActionController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ChatController;
 use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\ConfigurationController;
@@ -33,7 +34,6 @@ use App\Http\Controllers\Admin\StorageController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\Admin\TransferHistoryController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
@@ -63,6 +63,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Route::post('create', 'store')->name('store');
             // Route::get('edit/{id}', 'edit')->name('edit');
             // Route::put('edit/{id}', 'update')->name('update');
+        });
+
+        Route::prefix('chats')->controller(ChatController::class)->name('chats.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('load-more-users', 'loadMoreUsers')->name('loadMoreUsers');
+            Route::post('send-message', 'sendMessage')->name('sendMessage');
+            Route::get('messages/{userId}', 'getMessages')->name('messages');
         });
 
         Route::prefix('orders')->controller(OrderController::class)->name('orders.')->group(function () {
@@ -304,3 +311,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 Route::post('/submit-table', [WarehouseController::class, 'store']);
+
+

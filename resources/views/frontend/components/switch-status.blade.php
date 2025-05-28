@@ -34,7 +34,7 @@
     @break
 
     @case('shipped')
-        <span class="badge bg-success">
+        <span class="badge bg-success text-white">
             <i class="fas fa-truck me-1"></i>Shipped
         </span>
     @break

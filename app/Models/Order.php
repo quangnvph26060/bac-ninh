@@ -30,6 +30,7 @@ class Order extends Model
         'note',
         'discount',
         'shipping_fee',
+        'tax',
         'barcode',
         'tracking',
         'canceled_by'

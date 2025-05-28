@@ -387,12 +387,17 @@ class ProductController extends Controller
         $productId = $request->input('product_id');
         $valueIds = $request->input('value_ids'); // array
 
-        $variant = ProductVariant::where('product_id', $productId)
-            ->select(['sale_price', 'discount_end', 'discount_price', 'discount_start'])
-            ->whereHas('attributeValues', function ($q) use ($valueIds) {
-                $q->whereIn('attribute_value_id', $valueIds);
-            }, '=', count($valueIds))
+        // DB::enableQueryLog();
+        
+        $variant = ProductVariant::select(['sale_price', 'discount_end', 'discount_price', 'discount_start'])
+            ->where('product_id', $productId)
+            ->join('attribute_value_variants', 'product_variants.id', '=', 'attribute_value_variants.product_variant_id')
+            ->whereIn('attribute_value_variants.attribute_value_id', $valueIds)
+            ->groupBy('product_variants.id')
+            ->havingRaw('COUNT(DISTINCT attribute_value_variants.attribute_value_id) = ?', [count($valueIds)])
             ->first();
+
+        // dd(DB::getQueryLog());
 
         if (!$variant) {
             return response()->json(['message' => 'Không tìm thấy biến thể phù hợp'], 404);

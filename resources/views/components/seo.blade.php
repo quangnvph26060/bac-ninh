@@ -1,7 +1,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Tối ưu hóa công cụ tìm kiếm</h4>
-        <p id="toggle-seo-fields" class="text-primary mb-0">Ẩn/Hiện SEO Fields</p>
+        {{-- <p id="toggle-seo-fields" class="text-primary mb-0">Ẩn/Hiện SEO Fields</p> --}}
     </div>
     <div class="card-body">
         <div class="seo-preview" v-pre="">
