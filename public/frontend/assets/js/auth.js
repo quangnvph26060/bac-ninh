@@ -1,11 +1,9 @@
-const notyf = new Notyf();
 let eye = $(".fa-regular.fa-eye");
 let eye_invisible = $(".far.fa-eye-slash");
 
 let input = $('input[name="password"]');
 
 eye.click(function () {
-    console.log("eye clicked");
 
     eye.hide();
     eye_invisible.show();
@@ -31,7 +29,6 @@ $(document).ready(function () {
             method: "POST",
             data: $form,
             success(response) {
-                console.log(response);
 
                 if (response.success) {
                     window.location.href = response.data.redirect;

@@ -108,11 +108,21 @@ function escapeHtml(text) {
     return $("<div>").text(text).html();
 }
 
+$("#chat-input").keypress(function (e) {
+    if (e.which == 13 && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
 chatForm.addEventListener("submit", function (e) {
     e.preventDefault();
+    sendMessage();
+});
+
+function sendMessage() {
     const text = chatInput.value.trim();
     if (text) {
-        // Gửi tin nhắn lên server qua API
         fetch("/send-messages", {
             method: "POST",
             headers: {
@@ -122,25 +132,20 @@ chatForm.addEventListener("submit", function (e) {
             body: JSON.stringify({ message: text, receiver_id: 1 }),
         })
             .then((response) => {
-                if (!response.ok) {
+                if (!response.ok)
                     throw new Error("Network response was not ok");
-                }
                 return response.json();
             })
             .then((data) => {
-                // Nếu gửi thành công thì hiển thị tin nhắn lên UI
                 const msg = document.createElement("div");
                 msg.className = "message-out";
                 msg.textContent = text;
                 chatMessages.appendChild(msg);
                 chatInput.value = "";
                 chatMessages.scrollTop = chatMessages.scrollHeight;
-
-                console.log("Message sent successfully:", data);
             })
             .catch((error) => {
                 console.error("Error sending message:", error);
-                // Có thể hiển thị alert hoặc thông báo lỗi tại đây
             });
     }
-});
+}

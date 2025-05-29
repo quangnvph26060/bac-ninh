@@ -107,11 +107,16 @@
 
             // Handle contact selection
             $('#contactList').on('click', 'li', function() {
+
+                if ($(this).hasClass('active')) return
+
                 const userId = $(this).data('user-id');
                 const userName = $(this).find('.user_info span').text();
 
                 $('#contactList li').removeClass('active');
                 $(this).addClass('active');
+
+                $(this).find('p').removeClass('fw-bold')
 
                 $('.msg_head .user_info span').text(userName);
 
@@ -155,10 +160,10 @@
                             const messageHtml = `
                         <div class="d-flex justify-content-${isAdmin ? 'end' : 'start'} mb-4">
                             ${!isAdmin ? `
-                                                                                        <div class="img_cont_msg">
-                                                                                            <img src="${avatar}" class="rounded-circle user_img_msg">
-                                                                                        </div>
-                                                                                    ` : ''}
+                                                                                                                <div class="img_cont_msg">
+                                                                                                                    <img src="${avatar}" class="rounded-circle user_img_msg">
+                                                                                                                </div>
+                                                                                                            ` : ''}
                             <div class="${isAdmin ? 'me-3' : 'ms-3'}" style="max-width: 75%">
                                 <div class="msg_cotainer${isAdmin ? '_send' : ''}">
                                     ${message.message}
@@ -166,10 +171,10 @@
                                 <span class="msg_time${isAdmin ? '_send' : ''}">${formatDate(message.created_at)}</span>
                             </div>
                             ${isAdmin ? `
-                                                                                        <div class="img_cont_sharer">
-                                                                                            <img src="${avatar}" class="rounded-circle user_img_msg">
-                                                                                        </div>
-                                                                                    ` : ''}
+                                                                                                                <div class="img_cont_sharer">
+                                                                                                                    <img src="${avatar}" class="rounded-circle user_img_msg">
+                                                                                                                </div>
+                                                                                                            ` : ''}
                         </div>
                     `;
 
@@ -192,9 +197,11 @@
         });
 
         function loadMessages(userId) {
+
+            const container = $('#messageContainer');
+
             $.get(`{{ route('admin.chats.messages', '') }}/${userId}`, function(response) {
 
-                const container = $('#messageContainer');
                 container.empty();
 
                 response.messages.forEach(message => {
@@ -206,10 +213,10 @@
                     const messageHtml = `
                         <div class="d-flex justify-content-${isAdmin ? 'end' : 'start'} mb-4">
                             ${!isAdmin ? `
-                                                                                                                                                            <div class="img_cont_msg">
-                                                                                                                                                                <img src="${avatar}" class="rounded-circle user_img_msg">
-                                                                                                                                                            </div>
-                                                                                                                                                        ` : ''}
+                                                                                                                                                                                    <div class="img_cont_msg">
+                                                                                                                                                                                        <img src="${avatar}" class="rounded-circle user_img_msg">
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                ` : ''}
 
                             <div class="${isAdmin ? 'me-3' : 'ms-3'}" style="max-width: 75%">
                                 <div class="msg_cotainer${isAdmin ? '_send' : ''}">
@@ -219,15 +226,17 @@
                             </div>
 
                             ${isAdmin ? `
-                                                                                                                                                            <div class="img_cont_sharer">
-                                                                                                                                                                <img src="${avatar}" class="rounded-circle user_img_msg">
-                                                                                                                                                            </div>
-                                                                                                                                                        ` : ''}
+                                                                                                                                                                                    <div class="img_cont_sharer">
+                                                                                                                                                                                        <img src="${avatar}" class="rounded-circle user_img_msg">
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                ` : ''}
                         </div>
                     `;
 
                     container.append(messageHtml);
                 });
+
+                container.attr('data-id', userId);
 
                 // Cuộn xuống cuối
                 container.scrollTop(container[0].scrollHeight);
@@ -549,11 +558,11 @@
             width: 100%;
             margin-top: auto;
             margin-bottom: auto;
-            margin-left: 15px;
+            margin-left: 10px;
         }
 
         .user_info span {
-            font-size: 16px;
+            font-size: 14px;
             /* Smaller font size */
             color: #495057;
             /* Dark text color */
@@ -606,8 +615,8 @@
 
         .msg_time {
             /* position: absolute;
-                                                                                                                                                                                left: 0;
-                                                                                                                                                                                bottom: -15px; */
+                                                                                                                                                                                                        left: 0;
+                                                                                                                                                                                                        bottom: -15px; */
             color: #6c757d;
             /* Muted text color */
             font-size: 10px;

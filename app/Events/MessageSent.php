@@ -8,9 +8,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 class MessageSent implements ShouldBroadcast
 {
 
-    public function __construct(public $message)
-    {
-    }
+    public function __construct(public $message) {}
 
     public function broadcastOn()
     {
@@ -43,7 +41,9 @@ class MessageSent implements ShouldBroadcast
             'receiver_id' => $this->message->receiver_id,
             'receiver_type' => $this->message->receiver_type,
             'created_at' => $this->message->created_at->format('d/m/Y H:i'),
+            'date' => $this->message->created_at->diffForHumans(),
             'avatar' => $avatar,
+            'sender_name' => !empty($sender) && $sender->name ? $sender->name : null,
         ];
     }
 }

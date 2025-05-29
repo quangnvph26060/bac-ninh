@@ -17,7 +17,7 @@
                                 {{ $user->last_message_at ? \Carbon\Carbon::parse($user->last_message_at)->diffForHumans() : '' }}
                             </small>
                         </div>
-                        <p class="text-truncate {{ $user->is_read ? 'fw-bold' : '' }}" style="max-width: 230px;">
+                        <p class="text-truncate {{ $user->is_read ? '' : 'fw-bold' }}" style="max-width: 230px;">
                             {{ $user->last_message ?? 'Chưa có tin nhắn' }}
                         </p>
                     </div>

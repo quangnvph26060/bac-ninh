@@ -196,7 +196,7 @@ function validateAndPreviewImage(event, imgId, inputContainerId, imageDefault) {
                         `
                     Design does not match sample.
                     Proposed design: Width: ${data.expectedWidth}px, Height: ${data.expectedHeight}px, PPI: ${data.expectedPpi}, File format: .${data.expectedFormat}
-                    Your design: Width: ${data.width}px, Height: ${data.height}px, PPI: ${data.ppi}, File format: ${data.format}.
+                    Your design: Width: ${data.width}px, Height: ${data.height}px, PPI: ${data.ppi}, File format: .${data.format}
                 `
                     );
                 }
