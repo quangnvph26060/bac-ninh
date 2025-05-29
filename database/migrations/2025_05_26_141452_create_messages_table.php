@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            
+
             // Quan hệ morph đến employee/user
             $table->morphs('sender');   // sender_id, sender_type
             $table->morphs('receiver'); // receiver_id, receiver_type

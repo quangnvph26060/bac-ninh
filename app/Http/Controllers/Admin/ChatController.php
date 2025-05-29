@@ -99,6 +99,14 @@ class ChatController extends Controller
         $limit = (int) $request->get('limit', 20);
         $offset = ($page - 1) * $limit;
 
+        // Cập nhật trạng thái đã đọc các tin nhắn user gửi cho admin mà chưa đọc
+        Message::where('sender_type', User::class)
+            ->where('sender_id', $userId)
+            ->where('receiver_type', get_class($admin))
+            ->where('receiver_id', $admin->id)
+            ->where('is_read', 0)  // chỉ các tin nhắn chưa đọc
+            ->update(['is_read' => 1]);
+
         $query = Message::with(['sender', 'receiver'])
             ->where(function ($query) use ($userId, $admin) {
                 $query->where('sender_type', get_class($admin))
