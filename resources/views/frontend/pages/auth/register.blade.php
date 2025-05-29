@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ asset('frontend/assets/css/notyf.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('global/css/toastr.css') }}">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
@@ -208,8 +208,10 @@
     </main>
 
     <script src="{{ asset('frontend/assets/js/jquery-3.3.1.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/notyf.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/auth.js') }}"></script>
+    <script src="{{ asset('global/js/toastr.js') }}"></script>
+    <script src="{{ asset('frontend/assets/js/auth.js') }}?v={{ filemtime(public_path('frontend/assets/js/auth.js')) }}">
+    </script>
+    
 </body>
 
 </html>

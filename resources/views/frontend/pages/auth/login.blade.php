@@ -195,7 +195,7 @@
 
     <script src="{{ asset('frontend/assets/js/jquery-3.3.1.min.js') }}"></script>
     <script src="{{ asset('global/js/toastr.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/auth.js') }}"></script>
+    <script src="{{ asset('frontend/assets/js/auth.js') }}?v={{ filemtime(public_path('frontend/assets/js/auth.js')) }}"></script>
 </body>
 
 </html>
