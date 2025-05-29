@@ -10,7 +10,8 @@
 
 <script src="{{ asset('frontend/assets/js/script.js') }}"></script>
 
-<script src="{{ asset('frontend/assets/js/chat.js') }}"></script>
+<script src="{{ asset('frontend/assets/js/chat.js') }}?v={{ filemtime(public_path('frontend/assets/js/chat.js')) }}">
+</script>
 
 <script>
     window.Laravel = {
