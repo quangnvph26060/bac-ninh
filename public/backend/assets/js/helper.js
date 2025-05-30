@@ -173,7 +173,7 @@ function validateAndPreviewImage(event, imgId, inputContainerId, imageDefault) {
         formData.append("expectedFormat", expectedFormat);
 
         $.ajax({
-            url: "https://api.artyland.vn/api/orders/validate-image",
+            url: "http://api.artyland.vn/api/orders/validate-image",
             type: "POST",
             data: formData,
             contentType: false,
