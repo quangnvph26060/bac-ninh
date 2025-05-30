@@ -47,7 +47,7 @@ if (window.Laravel.adminId) {
                     .text(e.message)
                     .toggleClass("fw-bold", !isCurrentChatOpen); // In đậm nếu không phải chat đang mở
 
-                existingItem.find("small.time").text(e.created_at);
+                existingItem.find("small.time").text(e.date);
 
                 // Nếu không phải phần tử đầu tiên, di chuyển lên đầu với hiệu ứng
                 if (!existingItem.is(contactList.children("li").first())) {

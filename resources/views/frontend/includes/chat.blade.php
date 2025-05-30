@@ -20,11 +20,12 @@
          </div> --}}
      </div>
      <form id="chat-form" class="chat-input">
-         <div class="input-group">
-             <textarea id="chat-input" class="form-control" rows="1" placeholder="Nhập tin nhắn..."></textarea>
-             <button class="btn" style="background-color: #f26722; color: white" type="submit">
+         <div class="input-group chat-group">
+             <textarea id="chat-input" class="form-control auto-expand" rows="1" placeholder="Nhập tin nhắn..."></textarea>
+             <button class="btn send-btn" type="submit">
                  <i class="bi bi-send"></i>
              </button>
          </div>
      </form>
+
  </div>

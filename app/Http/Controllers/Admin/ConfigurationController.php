@@ -37,7 +37,7 @@ class ConfigurationController extends Controller
                 'copyright' => 'nullable|string|max:255',
                 'seo_title' => 'nullable|string|max:255',
                 'seo_description' => 'nullable|string|max:500',
-                'tax_rate' => 'nullable|numeric|min:1|regex:/^\d*(\.\d{1,2})?$/'
+                'tax_rate' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/'
             ],
             __('request.messages'),
             [

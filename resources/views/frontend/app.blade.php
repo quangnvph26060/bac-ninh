@@ -239,6 +239,12 @@
                                     <span>Profile</span>
                                 </a>
                             </li>
+                            <li class="nav-item {{ request()->routeIs('tickets.index') ? 'active' : '' }}">
+                                <a href="{{ route('tickets.index') }}" class="nav-link">
+                                    <i class="bi bi-ticket-perforated-fill"></i>
+                                    <span>Ticket</span>
+                                </a>
+                            </li>
                             {{-- <li class="nav-item {{ request()->routeIs('transaction.history') ? 'active' : '' }}">
                                 <a href="{{ route('transaction.history') }}" class="nav-link">
                                     <i class="bi bi-wallet2"></i>
@@ -280,17 +286,14 @@
     </div>
 
     <script src="{{ asset('frontend/assets/js/jquery-3.3.1.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous">
-    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
-        integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous">
-    </script>
+    <script src="{{ asset('frontend/assets/js/popper.min.js') }}"></script>
 
-    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script src="{{ asset('frontend/assets/js/bootstrap.min.js') }}"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script src="{{ asset('frontend/assets/js/moment.min.js') }}"></script>
+
+    <script src="{{ asset('frontend/assets/js/daterangepicker.min.js') }}"></script>
 
     <script src="{{ asset('global/js/toastr.js') }}"></script>
 

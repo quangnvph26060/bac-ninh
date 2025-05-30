@@ -19,19 +19,13 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AuthController;
-use App\Http\Controllers\Admin\DailyReportController;
-use App\Http\Controllers\Admin\DebtClientController;
-use App\Http\Controllers\Admin\DebtNccController;
-use App\Http\Controllers\Admin\ExpenseController;
-use App\Http\Controllers\Admin\importCouponController;
-use App\Http\Controllers\Admin\ImportProductController;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\PasswordChangeRequestController;
 use App\Http\Controllers\Admin\ReceiptController;
-use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReportdebtController;
 use App\Http\Controllers\Admin\StorageController;
 use App\Http\Controllers\Admin\SupplierController;
+use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\Admin\TransferHistoryController;
 use Illuminate\Support\Facades\Route;
@@ -63,6 +57,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Route::post('create', 'store')->name('store');
             // Route::get('edit/{id}', 'edit')->name('edit');
             // Route::put('edit/{id}', 'update')->name('update');
+        });
+
+        Route::prefix('subjects')->controller(SubjectController::class)->name('subjects.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('/', 'store');
+            Route::put('/', 'update');
         });
 
         Route::prefix('chats')->controller(ChatController::class)->name('chats.')->group(function () {
@@ -234,30 +234,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('filter', [CompanyController::class, 'companyFilter'])->name('filter');
     });
 
-    Route::prefix('profit')->name('profit.')->group(function () {
-        Route::get('', [ReportController::class, 'profitIndex'])->name('index');
-        Route::post('/profit-report', [ReportController::class, 'getProfitReportByFilterNew'])->name('getProfitReportByFilter');
-        Route::post('/profit-report-pdf', [ReportController::class, 'getProfitReportByFilterPDF'])->name('getProfitReportByFilterPDF');
-    });
-
-    Route::prefix('inventory')->name('inventory.')->group(function () {
-        Route::get('', [ReportController::class, 'index'])->name('index');
-        Route::post('report', [ReportController::class, 'getReportByStorage'])->name('getReportByStorage');
-        Route::get('exportPdf', [ReportController::class, 'exportPdf'])->name('exportPdf');
-    });
-
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
         Route::get('/detail/{id}', [OrderController::class, 'detail'])->name('detail');
         // Route::get('/find/phone', [OrderController::class, 'getOrderbyPhone'])->name('findByPhone');
         Route::get('/admin/order/filter', [OrderController::class, 'filterOrder'])->name('filter');
-    });
-
-    Route::prefix('debts')->name('debts.')->group(function () {
-        Route::get('/client', [DebtClientController::class, 'index'])->name('client');
-        Route::get('/client/detail/{id}', [DebtClientController::class, 'detail'])->name('client.detail');
-        Route::get('/supplier', [DebtNccController::class, 'index'])->name('supplier');
-        Route::get('/supplier/detail/{id}', [DebtNccController::class, 'detail'])->name('supplier.detail');
     });
 
     Route::prefix('quanlythuchi')->name('quanlythuchi.')->group(function () {
@@ -267,13 +248,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/add', [ReceiptController::class, 'add'])->name('add');
             Route::post('/add', [ReceiptController::class, 'addSubmit'])->name('addSubmit');
             Route::post('/debt', [ReceiptController::class, 'debt'])->name('debt');
-        });
-        Route::prefix('expense')->name('expense.')->group(function () { // phiếu chi
-            Route::get('/', [ExpenseController::class, 'index'])->name('index');
-            Route::get('/detail/{id}', [ExpenseController::class, 'detail'])->name('detail');
-            Route::get('/add', [ExpenseController::class, 'add'])->name('add');
-            Route::post('/add', [ExpenseController::class, 'addSubmit'])->name('addSubmit');
-            Route::post('/debt', [ExpenseController::class, 'debt'])->name('debt');
         });
     });
 
@@ -293,14 +267,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [ReportdebtController::class, 'index'])->name('index');
             Route::get('/print', [ReportdebtController::class, 'print'])->name('print');
         });
-        Route::prefix('orders')->name('orders.')->group(function () {
-            Route::get('', [DailyReportController::class, 'getDailyOrder'])->name('getDailyOrder');
-            Route::get('get-daily-order-data', [DailyReportController::class, 'getDailyOrderData'])->name('getDailyOrderData');
-        });
-        Route::prefix('imports')->name('imports.')->group(function () {
-            Route::get('', [DailyReportController::class, 'getDailyImport'])->name('getDailyImport');
-            Route::get('get-daily-import-data', [DailyReportController::class, 'getDailyImportData'])->name('getDailyImportData');
-        });
     });
 
     Route::prefix('warehouse')->name('warehouse.')->group(function () {
@@ -311,5 +277,3 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 Route::post('/submit-table', [WarehouseController::class, 'store']);
-
-

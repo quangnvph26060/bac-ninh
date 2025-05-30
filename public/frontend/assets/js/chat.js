@@ -141,7 +141,11 @@ function sendMessage() {
                 msg.className = "message-out";
                 msg.textContent = text;
                 chatMessages.appendChild(msg);
+
+                // Reset textarea
                 chatInput.value = "";
+                autosize.update(chatInput); // 👈 reset chiều cao về mặc định
+
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             })
             .catch((error) => {

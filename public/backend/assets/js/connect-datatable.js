@@ -233,37 +233,37 @@ const dataTables = (
         row.child.hide();
     });
 
-    $(document).on("submit", "#myForm", function (e) {
-        e.preventDefault();
+    // $(document).on("submit", "#myForm", function (e) {
+    //     e.preventDefault();
 
-        let formData = new FormData(this),
-            row = table.row($(this).closest("tr"));
+    //     let formData = new FormData(this),
+    //         row = table.row($(this).closest("tr"));
 
-        formData.append("id", row.data().id);
-        formData.append("_method", "PUT");
-        formData.append("model", model);
+    //     formData.append("id", row.data().id);
+    //     formData.append("_method", "PUT");
+    //     formData.append("model", model);
 
-        $.post({
-            url: "/admin/handle-fast-update",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (res) {
-                if (res.success) {
-                    Toast.fire({
-                        icon: "success",
-                        title: res.message,
-                    });
-                    table.draw();
-                }
-            },
-            error: (xhr) =>
-                Toast.fire({
-                    icon: "error",
-                    title: xhr.responseJSON.message,
-                }),
-        });
-    });
+    //     $.post({
+    //         url: "/admin/handle-fast-update",
+    //         data: formData,
+    //         processData: false,
+    //         contentType: false,
+    //         success: function (res) {
+    //             if (res.success) {
+    //                 Toast.fire({
+    //                     icon: "success",
+    //                     title: res.message,
+    //                 });
+    //                 table.draw();
+    //             }
+    //         },
+    //         error: (xhr) =>
+    //             Toast.fire({
+    //                 icon: "error",
+    //                 title: xhr.responseJSON.message,
+    //             }),
+    //     });
+    // });
 
     table.on("requestChild.dt", function (e, row) {
         row.child(format(row.data())).show();

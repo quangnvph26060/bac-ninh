@@ -10,6 +10,8 @@
 
 <script src="{{ asset('frontend/assets/js/script.js') }}"></script>
 
+<script src="{{ asset('frontend/assets/js/autosize.min.js') }}"></script>
+
 <script src="{{ asset('frontend/assets/js/chat.js') }}?v={{ filemtime(public_path('frontend/assets/js/chat.js')) }}">
 </script>
 
@@ -19,6 +21,8 @@
         adminId: {{ auth('admin')->id() ?? 'null' }},
         userId: {{ auth('web')->id() ?? 'null' }}
     };
+
+    autosize(document.querySelectorAll('textarea'));
 </script>
 
 @vite('resources/js/app.js')

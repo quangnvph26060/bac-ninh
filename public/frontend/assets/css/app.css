@@ -212,6 +212,87 @@ video {
     max-width: 100%;
 }
 
+.badge-soft {
+    display: inline-block;
+    padding: 0.35em 0.75em;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 50rem;
+    border: 1px solid transparent;
+    background-color: rgba(0, 0, 0, 0.05); /* fallback */
+}
+
+.badge-soft-primary {
+    color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.1);
+    border-color: rgba(13, 110, 253, 0.25);
+}
+
+.badge-soft-success {
+    color: #198754;
+    background-color: rgba(25, 135, 84, 0.1);
+    border-color: rgba(25, 135, 84, 0.25);
+}
+
+.badge-soft-danger {
+    color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+    border-color: rgba(220, 53, 69, 0.25);
+}
+
+.badge-soft-warning {
+    color: #ffc107;
+    background-color: rgba(255, 193, 7, 0.1);
+    border-color: rgba(255, 193, 7, 0.25);
+}
+
+.badge-soft-info {
+    color: #0dcaf0;
+    background-color: rgba(13, 202, 240, 0.1);
+    border-color: rgba(13, 202, 240, 0.25);
+}
+
+.badge-soft-secondary {
+    color: #6c757d;
+    background-color: rgba(108, 117, 125, 0.1);
+    border-color: rgba(108, 117, 125, 0.25);
+}
+
+.badge-soft-light {
+    color: #f8f9fa;
+    background-color: rgba(248, 249, 250, 0.1);
+    border-color: rgba(248, 249, 250, 0.25);
+}
+
+.badge-soft-dark {
+    color: #212529;
+    background-color: rgba(33, 37, 41, 0.1);
+    border-color: rgba(33, 37, 41, 0.25);
+}
+
+.filter-btn {
+    padding: 6px 16px;
+    border-radius: 999px;
+    background-color: #f8f9fa;
+    border: 1px solid #dcdcdc;
+    color: #1b2e4b;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+    display: inline-block;
+}
+
+.filter-btn:hover {
+    background-color: #e9ecef;
+    text-decoration: none;
+}
+
+.filter-btn.active {
+    background-color: #061336; /* màu xanh đậm */
+    color: #fff;
+    border-color: #061336;
+}
+
 .text-ellipsis,
 .truncate {
     text-overflow: ellipsis;
@@ -1012,7 +1093,7 @@ main::-webkit-scrollbar-thumb:hover {
     font-size: 14px;
     font-weight: 400;
     line-height: 1.5;
-    padding: 6px 16px; 
+    padding: 6px 16px;
     position: relative;
     text-align: center;
     touch-action: manipulation;

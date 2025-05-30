@@ -39,7 +39,7 @@ class AuthController extends Controller
             /**
              * @var User $account
              */
-            $account = Auth::user();
+            $account = auth('web')->user();
 
             if ($account->isAdmin()) {
                 return errorResponse('Tài khoản admin không thể truy cập!', true, 400);

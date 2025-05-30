@@ -101,6 +101,37 @@
     word-wrap: break-word;
 }
 
+.chat-group {
+    display: flex;
+    align-items: flex-end; /* Đảm bảo nút gửi nằm dưới cùng */
+    gap: 8px;
+}
+
+textarea.form-control {
+    flex: 1;
+    overflow: hidden;
+    resize: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    min-height: 38px;
+    line-height: 1.5;
+    transition: height 0.2s ease;
+    max-height: 200px;
+}
+
+button.send-btn {
+    background-color: #f26722;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px; /* Giữ cố định để không bị kéo dãn */
+    flex-shrink: 0;
+}
+
 @keyframes slideInRight {
     from {
         opacity: 0;

@@ -10,6 +10,7 @@ use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductController;
 use App\Http\Controllers\Frontend\App\ProfileController;
+use App\Http\Controllers\Frontend\App\TicketController;
 use App\Http\Controllers\Frontend\App\TransactionHistoryController;
 use App\Http\Controllers\Frontend\ChatController;
 use App\Imports\OrderImport;
@@ -65,6 +66,10 @@ Route::middleware('auth')->group(function () {
         Route::post('change-password', 'changePassword')->name('change.password');
     });
 
+    Route::group(['controller' => TicketController::class], function () {
+        Route::get('tickets', 'index')->name('tickets.index');
+    });
+
     Route::prefix('orders')->name('orders.')->controller(OrderController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('show/{code}', 'show')->name('show');
@@ -85,7 +90,7 @@ Route::middleware('auth')->group(function () {
         Route::post('import-order', 'import')->name('import');
         Route::get('import-progress/{jobId}', 'importProgress')->name('import-progress');
         Route::post('export', 'export')->name('export');
-        Route::post('validate-image', 'validateImage');
+        // Route::post('validate-image', 'validateImage');
     });
 });
 
@@ -106,4 +111,3 @@ Route::controller(ProductController::class)->name('products.')->group(function (
     Route::post('find-variant', 'findVariant')->name('find-variant');
     Route::get('{prefix}/{suffix?}', 'detail')->name('detail');
 });
-
