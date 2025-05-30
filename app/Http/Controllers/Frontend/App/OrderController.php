@@ -1007,6 +1007,9 @@ class OrderController extends Controller
                 abs($info['x_dpi'] - (float) $request->expectedPpi) <= 5 &&
                 strtolower($info['format']) === strtolower($request->expectedFormat);
 
+            // $start = microtime(true);
+            // \Log::info('Time to process image: ' . (microtime(true) - $start) . 's');
+
             return response()->json([
                 'valid' => $valid,
                 'width' => $info['width'],

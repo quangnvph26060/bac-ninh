@@ -119,9 +119,13 @@
             {
                 "title": "Mã giảm giá",
                 "url": "admin.coupons.index"
+            },
+            {
+                "title": "Chủ thể",
+                "url": "admin.subjects.index"
             }
         ],
-        "inRoutes": ["admin.coupons.index"]
+        "inRoutes": ["admin.coupons.index", "admin.subjects.index"]
     },
     {
         "title": "Nhà cung cấp",

@@ -13,15 +13,15 @@
                             <path d="M9.85718 17L4.85718 12L9.85718 7" stroke="#42526E" stroke-width="2"
                                 stroke-miterlimit="10" stroke-linecap="square"></path>
                         </svg>
-                        <p class="order-back__text">Trở lại Đơn hàng</p>
+                        <p class="order-back__text">Return to Orders</p>
                     </a>
                 </div>
 
                 <div class="text-center w-100">
                     <div class="d-flex align-items-center justify-content-center gap-3" style="color: #091E42">
-                        <p class="required fw-bold fs-6">Tên Đơn Hàng
+                        <p class="required fw-bold fs-6">Order Name
                         </p>
-                        <input type="text" placeholder="Tên đơn hàng" class="input_order_name text-center p-2">
+                        <input type="text" placeholder="Order Name" class="input_order_name text-center p-2">
                     </div>
                     {{-- <p class="mb-0 mt-1">{{ \Carbon\Carbon::now()->translatedFormat('j \t\h\á\n\g n \n\ă\m Y') }}</p> --}}
                     <p class="mb-0 mt-1" style="color: #5e6c84; font-weight: 400;">{{ now()->format('M jS Y') }}</p>
@@ -30,7 +30,7 @@
                 <div class="d-flex align-items-center gap-3 w-25">
                     <div class="d-flex flex-column justify-content-center align-items-center">
                         <span class="text-center fw-normal" style="color: #5E6C84; font-size: 14px;">
-                            Tổng
+                            Total
                         </span>
                         <div class="d-flex gap-3">
                             <p class="fw-bold text-center " style="color: #42526E; font-size: 14px;">
@@ -40,7 +40,7 @@
                     </div>
                     <button type="button" class="ant-btn ant-btn-default py-2 px-4 h-auto" id="top-main-button"
                         disabled="">
-                        <span>Vận chuyển</span>
+                        <span>Transport</span>
                     </button>
                 </div>
             </div>
@@ -50,17 +50,17 @@
     <div class="d-flex align-items-center gap-3 steps-nav justify-content-center p-5">
         <div class="step active" data-step="1">
             <span class="step-number">1</span>
-            <span class="step-title">Sản phẩm</span>
+            <span class="step-title">Product</span>
         </div>
         <span class="divider">–</span>
         <div class="step" data-step="2">
             <span class="step-number">2</span>
-            <span class="step-title">Vận chuyển</span>
+            <span class="step-title">Transport</span>
         </div>
         <span class="divider">–</span>
         <div class="step" data-step="3">
             <span class="step-number">3</span>
-            <span class="step-title">Đánh giá đơn hàng</span>
+            <span class="step-title">Rate your order</span>
         </div>
     </div>
 
@@ -71,9 +71,8 @@
                     <button class="d-flex my-4 align-items-center justify-content-center w-100 border rounded"
                         style="border-color: #5BB7AF !important; padding-top: 21px; padding-bottom: 21px;"
                         data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottom" aria-controls="offcanvasBottom">
-                        <p class="d-flex align-items-center fw-bold mb-0 me-2" style="color: #5BB7AF; font-size: 14px;">Thêm
-                            sản
-                            phẩm</p>
+                        <p class="d-flex align-items-center fw-bold mb-0 me-2" style="color: #5BB7AF; font-size: 14px;">Add
+                            products</p>
                         <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 8V16" stroke="#1ABC9C" stroke-width="2" stroke-miterlimit="10"
@@ -92,7 +91,7 @@
                     <div class="p-3">
                         <div class="d-flex justify-content-between">
                             <p class="fw-bold" style="color: #42526E; font-size: 14px;">
-                                Tổng phụ (<span id="qty-order-item"></span> cái)
+                                Subtotal (<span id="qty-order-item"></span> pieces)
                             </p>
                             <p class="fw-bold" style="color: #42526E; font-size: 14px;"><span class="final-price">$0</span>
                             </p>
@@ -103,7 +102,7 @@
                 <div class="d-flex flex-column justify-content-center align-items-center my-3 mt-5 gap-3">
                     <button type="button" class="ant-btn ant-btn-default py-2 px-4 h-auto " disabled=""
                         id="btn-to-shipping">
-                        <span>Vận chuyển</span>
+                        <span>Transport</span>
                     </button>
                 </div>
             </div>
@@ -115,15 +114,15 @@
                 <form>
                     <div class="my-4 mx-auto border rounded p-3 step_shipping">
                         <div class="row">
-                            <h1 class="fw-bold text-base mb-4" style="color: #091E42">Người nhận</h1>
+                            <h1 class="fw-bold text-base mb-4" style="color: #091E42">Receiver</h1>
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="first_name" class="required form-label">Họ</label>
+                                <label for="first_name" class="required form-label">First Name</label>
                                 <input type="text" class="form-control" name="first_name" id="first_name"
                                     placeholder="Họ" data-required="true">
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="last_name" class="required form-label">Tên</label>
+                                <label for="last_name" class="required form-label">Last Name</label>
                                 <input type="text" class="form-control" name="last_name" id="last_name"
                                     placeholder="Tên" data-required="true">
                             </div>
@@ -135,51 +134,51 @@
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="phone_number" class="form-label">Số điện thoại</label>
+                                <label for="phone_number" class="form-label">Phone number</label>
                                 <input type="text" name="phone_number" class="form-control" id="phone_number"
-                                    placeholder="Số điện thoại" pattern="^\d{8,15}$"
-                                    title="Số điện thoại phải chứa từ 8 đến 15 chữ số, không bao gồm dấu cách hoặc ký tự đặc biệt.">
+                                    placeholder="Phone number" pattern="^\d{8,15}$"
+                                    title="Phone number must contain 8 to 15 digits, no spaces or special characters.">
                             </div>
 
                             <hr class="my-3">
 
-                            <h1 class="fw-bold text-base mb-4" style="color: #091E42">Địa chỉ giao hàng</h1>
+                            <h1 class="fw-bold text-base mb-4" style="color: #091E42">Delivery address</h1>
 
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="country" class="required form-label">Quốc gia</label>
+                                <label for="country" class="required form-label">Nation</label>
                                 <input type="text" name="country" id="country" class="form-control"
                                     placeholder="Nation" data-required="true">
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="state" class="form-label required">Tiểu bang</label>
+                                <label for="state" class="form-label required">State</label>
                                 <input type="text" name="state" id="state" class="form-control"
                                     placeholder="State" data-required="true">
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="city" class="form-label">Thành phố</label>
+                                <label for="city" class="form-label">City</label>
                                 <input type="text" name="city" id="city" class="form-control"
                                     placeholder="City" data-required="true">
                             </div>
 
                             <div class="form-group mb-3 col-lg-6">
-                                <label for="zip_code" class="required form-label">Mã zip</label>
+                                <label for="zip_code" class="required form-label">Zip code</label>
                                 <input type="text" name="zip_code" class="form-control" id="zip_code"
-                                    placeholder="Mã zip">
+                                    placeholder="Zip code">
                             </div>
                             <div class="form-group mb-3 col-lg-12">
-                                <label for="shipping_address" class="required form-label">Địa chỉ chi tiết</label>
+                                <label for="shipping_address" class="required form-label">Detailed address</label>
                                 <textarea name="shipping_address" id="shipping_address" class="form-control" data-required="true"></textarea>
                             </div>
                             <div class="form-group mb-3 col-lg-12">
-                                <label for="note" class="form-label">Ghi chú</label>
-                                <textarea name="note" id="note" class="form-control" placeholder="Ghi chú"></textarea>
+                                <label for="note" class="form-label">Note</label>
+                                <textarea name="note" id="note" class="form-control" placeholder="Note"></textarea>
                             </div>
 
                             <hr class="my-3">
 
-                            <h1 class="fw-bold text-base mb-3" style="color: #091E42">Phương thức giao hàng</h1>
+                            <h1 class="fw-bold text-base mb-3" style="color: #091E42">Delivery method</h1>
 
                             <div style="padding: 0 0.85rem" id="shipping-methods-wrapper">
                                 @php
@@ -205,9 +204,9 @@
 
                     <div class="d-flex flex-column justify-content-center align-items-center my-3 mt-5 gap-3">
                         <button type="button" class="ant-btn ant-btn-primary py-2 px-4 h-auto" id="btn-to-review-order">
-                            <span>Đánh giá đơn hàng</span>
+                            <span>Rate your order</span>
                         </button>
-                        <a href="" class="fw-bold" id="back-step-1">Quay lại</a>
+                        <a href="" class="fw-bold" id="back-step-1">Come back</a>
                     </div>
                 </form>
             </div>
@@ -218,7 +217,7 @@
 
                 <div class="card px-3 pt-3 mb-3">
                     <div class="card-header">
-                        <h5 class="fs-6 fw-bold">Sản phẩm</h5>
+                        <h5 class="fs-6 fw-bold">Product</h5>
                     </div>
                     <div class="card-body">
                         <div id="review-product-list">
@@ -229,7 +228,7 @@
 
                 <div class="card px-3 pt-3 mb-3">
                     <div class="card-header">
-                        <h5 class="fw-bold fs-6">Giao hàng đến</h5>
+                        <h5 class="fw-bold fs-6">Delivery arrives</h5>
                     </div>
                     <div class="card-body card-shipping">
 
@@ -238,7 +237,7 @@
 
                 <div class="card px-3 pt-3 mb-3">
                     <div class="card-header">
-                        <h5 class="fw-bold fs-6">Phương thức thanh toán</h5>
+                        <h5 class="fw-bold fs-6">Payment method</h5>
                     </div>
                     <div class="card-body">
                         <div class="card-payment">
@@ -246,19 +245,19 @@
                                 <input class="form-check-input me-2" type="radio" name="paymentMethod"
                                     id="paymentWallet" value="wallet" onclick="showWalletBalance()">
                                 <label class="form-check-label" for="paymentWallet">
-                                    Thanh toán ví
+                                    Wallet payment
                                 </label>
                             </div>
                             <div id="walletBalance" class="ms-4" style="display: none;">
                                 <div class="d-flex justify-content-between align-items-center border px-3 py-2 rounded">
                                     <div class="">
-                                        <p class="mb-0 fw-bold">Số dư</p>
+                                        <p class="mb-0 fw-bold">Balance</p>
                                         <p class="mb-0 fw-bold">${{ formatPrice($wallet->balance) }}</p>
                                     </div>
-                                    <button type="button" class="ant-btn-primary text-white px-3 py-1">Nạp tiền</button>
+                                    <button type="button" class="ant-btn-primary text-white px-3 py-1">Deposit money</button>
                                 </div>
                                 <div class="alert alert-danger mt-2" role="alert">
-                                    Số dư của bạn không đủ, nạp tiền ngay hoặc chọn phương thức thanh toán khác.
+                                    Your balance is insufficient, top up now or choose another payment method.
                                 </div>
                             </div>
 
@@ -266,7 +265,7 @@
                                 <input class="form-check-input me-2" type="radio" name="paymentMethod"
                                     id="paymentLater" value="later" onclick="hideWalletBalance()" checked>
                                 <label class="form-check-label" for="paymentLater">
-                                    Thanh toán sau
+                                    Pay later
                                 </label>
                             </div>
                         </div>
@@ -275,18 +274,17 @@
 
                 <div class="card px-3 pt-3 mb-3">
                     <div class="card-header">
-                        <h5 class="fw-bold fs-6">Mã giảm giá</h5>
+                        <h5 class="fw-bold fs-6">Discount code</h5>
                     </div>
                     <div class="card-body">
-                        <label for="input_coupon" class="form-label">Nhập mã giảm giá của bạn</label>
+                        <label for="input_coupon" class="form-label">Enter your coupon code</label>
                         <div class="input-group gap-2">
-                            <input type="text" id="input_coupon" placeholder="Nhập mã giảm giá của bạn"
+                            <input type="text" id="input_coupon" placeholder="Enter your coupon code"
                                 class="form-control rounded-start">
                             <button type="button" onclick="applyCoupon()"
-                                class="ant-btn-primary text-white px-3 py-1 rounded-end">Áp
-                                dụng</button>
+                                class="ant-btn-primary text-white px-3 py-1 rounded-end">Apply</button>
                             <button type="button" id="remove_coupon" style="display: none;"
-                                class="btn btn-outline-danger">Hủy mã</button>
+                                class="btn btn-outline-danger">Cancel code</button>
 
                         </div>
                     </div>
@@ -294,28 +292,28 @@
 
                 <div class="card px-3 pt-3 mb-3">
                     <div class="card-header">
-                        <h5 class="fw-bold fs-6">Phân tích đơn hàng</h5>
+                        <h5 class="fw-bold fs-6">Order analysis</h5>
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Giá sản phẩm</span>
+                            <span>Product price</span>
                             <span class="final-price">$0</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Phí vận chuyển</span>
+                            <span>Shipping fee</span>
                             <span id="shipping-method-fee">$0</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Giảm giá</span>
+                            <span>Discount</span>
                             <span id="discount">$0</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Thuế</span>
+                            <span>Tax</span>
                             <span id="tax-amount">${{ formatPrice($config['tax_rate']) }}</span>
                         </div>
                         <hr class="my-2">
                         <div class="d-flex justify-content-between fw-bold">
-                            <span>Tổng</span>
+                            <span>Total</span>
                             <span id="order-total-amount">$0</span>
                         </div>
                     </div>
@@ -324,11 +322,11 @@
                 <div class="d-flex flex-column justify-content-center align-items-center my-3 mt-5 gap-3">
                     <div class="d-flex gap-3">
                         <button type="button" class="ant-btn ant-btn-primary py-2 px-4 h-auto" id="btn-save-order">
-                            <span>Lưu đơn hàng</span>
+                            <span>Save order</span>
                         </button>
                     </div>
 
-                    <a href="#" class="fw-bold" id="back-step-2">Quay lại</a>
+                    <a href="#" class="fw-bold" id="back-step-2">Come back</a>
                 </div>
             </div>
         </div>
@@ -339,12 +337,12 @@
     <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottom" aria-labelledby="offcanvasBottomLabel"
         style="height: 100vh;">
         <div class="offcanvas-header ant-drawer-header">
-            <h5 class="offcanvas-title ant-drawer-title" id="offcanvasBottomLabel">Thêm sản phẩm</h5>
+            <h5 class="offcanvas-title ant-drawer-title" id="offcanvasBottomLabel">Add products</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
             <div class="px-4">
-                <input type="search" name="search_text" placeholder="Tìm sản phẩm..." class="form-control me-2">
+                <input type="search" name="search_text" placeholder="Find products..." class="form-control me-2">
             </div>
 
             <div class="result-product p-4">
@@ -354,7 +352,7 @@
             <div id="selected-products-wrapper" class="selected-wrapper">
                 <div id="selected-products-images" class="d-flex gap-3 flex-wrap"></div>
                 <div class="text-end">
-                    <button class="btn btn-orange">Bắt đầu tạo đơn hàng mới</button>
+                    <button class="btn btn-orange">Start creating a new order</button>
                 </div>
             </div>
         </div>
@@ -636,26 +634,26 @@
                     <div class="d-flex gap-3">
 
                         ${product.model_image ? `
-                                                                                                                                                                                                                <div style="width: 103px;">
-                                                                                                                                                                                                                    <div class="fw-semibold">Mockup</div>
-                                                                                                                                                                                                                    <div class="image-container">
-                                                                                                                                                                                                                        <img class="img-thumbnail"
-                                                                                                                                                                                                                            style="cursor: pointer;"
-                                                                                                                                                                                                                            src="${product.model_image}">
+                                                                                                                                                                                                                    <div style="width: 103px;">
+                                                                                                                                                                                                                        <div class="fw-semibold">Mockup</div>
+                                                                                                                                                                                                                        <div class="image-container">
+                                                                                                                                                                                                                            <img class="img-thumbnail"
+                                                                                                                                                                                                                                style="cursor: pointer;"
+                                                                                                                                                                                                                                src="${product.model_image}">
+                                                                                                                                                                                                                        </div>
                                                                                                                                                                                                                     </div>
-                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                ` : ''}
+                                                                                                                                                                                                                    ` : ''}
 
                         ${product.design_image ? `
-                                                                                                                                                                                                                <div style="width: 103px;">
-                                                                                                                                                                                                                    <div class="fw-semibold">Design photo</div>
-                                                                                                                                                                                                                    <div class="image-container">
-                                                                                                                                                                                                                        <img class="img-thumbnail"
-                                                                                                                                                                                                                            style="cursor: pointer;"
-                                                                                                                                                                                                                            src="${product.design_image}">
+                                                                                                                                                                                                                    <div style="width: 103px;">
+                                                                                                                                                                                                                        <div class="fw-semibold">Design photo</div>
+                                                                                                                                                                                                                        <div class="image-container">
+                                                                                                                                                                                                                            <img class="img-thumbnail"
+                                                                                                                                                                                                                                style="cursor: pointer;"
+                                                                                                                                                                                                                                src="${product.design_image}">
+                                                                                                                                                                                                                        </div>
                                                                                                                                                                                                                     </div>
-                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                ` : ''}
+                                                                                                                                                                                                                    ` : ''}
                     </div>
                 </div>
 
@@ -1298,7 +1296,7 @@
                                                 <!-- Icon thùng rác -->
                                                 <div class="image-hover-actions" id="delete_icon_${product.id}">
                                                     <i class="fa-solid fa-eye" onclick="viewImage('show_model_${product.id}')"></i>
-                                                    <i class="fa-solid fa-trash" onclick="removeImage('show_model_${product.id}', 'model_${product.id}')"></i>
+                                                    <i class="fa-solid fa-trash" onclick="removeImage('show_model_${product.id}', 'model_${product.id}', '{{ showImage('') }}')"></i>
                                                 </div>
                                             </div>
 
@@ -1328,7 +1326,7 @@
                                                 <!-- Icon thùng rác -->
                                                 <div class="image-hover-actions" id="delete_icon_${product.id}">
                                                     <i class="fa-solid fa-eye" onclick="viewImage('show_design_${product.id}')"></i>
-                                                    <i class="fa-solid fa-trash" onclick="removeImage('show_design_${product.id}', 'design_${product.id}')"></i>
+                                                    <i class="fa-solid fa-trash" onclick="removeImage('show_design_${product.id}', 'design_${product.id}', '{{ showImage('') }}')"></i>
                                                 </div>
                                             </div>
 

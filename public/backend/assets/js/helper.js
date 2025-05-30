@@ -130,14 +130,14 @@ const previewImage = function (event, imgId) {
     }
 };
 
-const removeImage = function (imgId, inputId) {
+const removeImage = function (imgId, inputId, imageDefault) {
     const imgElement = document.getElementById(imgId);
     const inputElement = document.getElementById(inputId);
     const parentElement = imgElement.parentElement;
     // const result = inputId.split("_").pop();
 
     // Set lại ảnh mặc định
-    imgElement.src = "http://127.0.0.1:8000/images/image-default.png";
+    imgElement.src = imageDefault;
 
     // Clear giá trị của input file
     inputElement.value = "";
@@ -173,7 +173,7 @@ function validateAndPreviewImage(event, imgId, inputContainerId, imageDefault) {
         formData.append("expectedFormat", expectedFormat);
 
         $.ajax({
-            url: "/orders/validate-image",
+            url: "https://api.artyland.vn/api/orders/validate-image",
             type: "POST",
             data: formData,
             contentType: false,
@@ -316,6 +316,9 @@ function submitForm(formId, successCallback, url = null, errorCallback = null) {
                 if (typeof errorCallback === "function") {
                     errorCallback(xhr);
                 }
+
+                $("#loadingSpinner").fadeOut();
+
                 Notifications(xhr.responseJSON.message, "danger");
             },
             complete: function () {
