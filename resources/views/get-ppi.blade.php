@@ -1,146 +1,70 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Import đơn hàng</title>
-    <style>
-        .error-list {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ffcdd2;
-            background-color: #ffebee;
-            border-radius: 4px;
-            color: #c62828;
-        }
+    <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-        .error-item {
-            margin-bottom: 8px;
-            padding-left: 20px;
-            position: relative;
-        }
-
-        .error-item:before {
-            content: "•";
-            position: absolute;
-            left: 0;
-        }
-
-        .success-message {
-            color: #2e7d32;
-            font-weight: bold;
-        }
-    </style>
+    <!-- Bootstrap CSS v5.2.1 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
 </head>
 
 <body>
 
-    <div id="progress"></div>
-    <div id="result"></div>
+    <div class="container">
+        <form enctype="multipart/form-data" id="myForm">
+            <div class="form-group mb-3">
+                <label for="file" class="form-label">Ảnh</label>
+                <input type="file" class="form-control" name="file" id="file">
+            </div>
 
-    <form id="uploadForm" enctype="multipart/form-data">
-        @csrf
-        <input type="file" name="file" required />
-        <button type="submit">Submit</button>
-    </form>
+            <button type="submitF" class="btn btn-primary btn-sm">Submit</button>
+        </form>
+    </div>
 
-    <script>
-        const progressDiv = document.getElementById('progress');
-        const resultDiv = document.getElementById('result');
-        const form = document.getElementById('uploadForm');
-        let interval;
-        let jobId;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            resultDiv.innerHTML = ''; // Clear previous results
-
-            const formData = new FormData(form);
-
-            // Gửi file lên server qua fetch POST (AJAX)
-            const res = await fetch('/import-orders', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                }
-            });
-
-            const data = await res.json();
-
-            if (data.job_id) {
-                jobId = data.job_id;
-                progressDiv.innerText = 'Bắt đầu import...';
-
-                // Bắt đầu poll mỗi 2s để lấy tiến trình
-                interval = setInterval(async () => {
-                    try {
-                        const progressRes = await fetch(`/import-progress/${jobId}`);
-                        const progressData = await progressRes.json();
-
-                        if (!progressData) {
-                            progressDiv.innerText = `Lỗi: Không nhận được phản hồi từ server`;
-                            clearInterval(interval);
-                            return;
-                        }
-
-                        if (progressData.status === 'success') {
-                            progressDiv.innerText = `Hoàn tất! ✅`;
-                            resultDiv.innerHTML =
-                                '<div class="success-message">Import thành công!</div>';
-                            clearInterval(interval);
-                        } else if (progressData.status === 'completed_with_errors' || progressData
-                            .status === 'completed') {
-                            progressDiv.innerText = `Hoàn tất với lỗi! ⚠️`;
-                            displayFailures(progressData.failures);
-                            clearInterval(interval);
-                        } else if (progressData.status === 'failed') {
-                            progressDiv.innerText = `Lỗi! ❌`;
-                            resultDiv.innerHTML =
-                                `<div class="error-list">Lỗi: ${progressData.error}</div>`;
-                            clearInterval(interval);
-                        } else {
-                            progressDiv.innerText =
-                                `${progressData.current}/${progressData.total} (${progressData.percent}%)`;
-                        }
-                    } catch (error) {
-                        progressDiv.innerText = `Lỗi: ${error.message}`;
-                        clearInterval(interval);
-                    }
-                }, 2000);
-
-                // Safety timeout - stop polling after 5 minutes
-                setTimeout(() => {
-                    if (interval) {
-                        clearInterval(interval);
-                        progressDiv.innerText = `Đã hết thời gian chờ`;
-                    }
-                }, 5 * 60 * 1000);
-            } else {
-                progressDiv.innerText = 'Lỗi khi bắt đầu import';
-            }
-        });
-
-        function displayFailures(failures) {
-            if (!failures || failures.length === 0) return;
-
-            const errorList = document.createElement('div');
-            errorList.className = 'error-list';
-            errorList.innerHTML = '<strong>Danh sách lỗi:</strong>';
-
-            failures.forEach(error => {
-                const errorItem = document.createElement('div');
-                errorItem.className = 'error-item';
-                errorItem.textContent = error;
-                errorList.appendChild(errorItem);
-            });
-
-            resultDiv.innerHTML = '';
-            resultDiv.appendChild(errorList);
-        }
+    <!-- Bootstrap JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous">
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+        integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous">
+    </script>
+
+    <script>
+        $(function() {
+
+            $('#myForm').on('submit', function(e) {
+                console.log(123);
+
+                e.preventDefault();
+
+                let formData = new FormData(this);
+
+                formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+
+                $.ajax({
+                    url: "{{ route('upload-image') }}",
+                    method: "POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success: (response) => {
+                        console.log(response);
+                    },
+                    error: (xhr) => {
+                        console.log(xhr.responseJSON.message);
+                    }
+                });
+            })
+        })
+    </script>
 </body>
 
 </html>

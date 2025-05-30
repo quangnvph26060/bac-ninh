@@ -98,6 +98,12 @@ Route::middleware('auth')->group(function () {
     Route::domain('api.artyland.vn')->group(function () {
         Route::post('orders/validate-image', [OrderController::class, 'validateImage']);
     });
+
+    Route::view('upload', 'get-ppi');
+    Route::post('upload', function (Request $request) {
+        $infoImage = getImageInfo($request->file('file'));
+        return response()->json($infoImage);
+    })->name('upload-image');
 });
 
 Route::get('/', [HomeController::class, 'home'])->name('home');

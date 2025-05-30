@@ -142,7 +142,6 @@ function getImageInfo($fileOrPath): array
         throw new InvalidArgumentException('Tham số phải là đường dẫn hoặc file upload.');
     }
 
-    // ✅ Bước 1: kiểm tra nhanh bằng getimagesize()
     $info = @getimagesize($filePath);
     if (!$info) {
         throw new \Exception("Không thể đọc thông tin ảnh.");
@@ -151,19 +150,13 @@ function getImageInfo($fileOrPath): array
     $width = $info[0];
     $height = $info[1];
 
-    // Giới hạn size ảnh: tránh ảnh cực lớn làm treo Imagick
     if ($width > 8000 || $height > 8000) {
         throw new \Exception("Ảnh vượt quá kích thước tối đa cho phép.");
     }
 
-    // ✅ Bước 2: dùng Imagick để lấy DPI & format
     try {
-        $image = new \Imagick($filePath);
-
-        // Giới hạn tài nguyên để tránh treo server
-        $image->setResourceLimit(\Imagick::RESOURCETYPE_MEMORY, 64); // 64MB
-        $image->setResourceLimit(\Imagick::RESOURCETYPE_MAP, 64);
-        $image->setResourceLimit(\Imagick::RESOURCETYPE_THREAD, 1);
+        $image = new \Imagick();
+        $image->pingImage($filePath); // ⚡ SIÊU NHANH
 
         $format = $image->getImageFormat();
         $resolution = $image->getImageResolution();
@@ -189,6 +182,7 @@ function getImageInfo($fileOrPath): array
         throw new \Exception("Lỗi xử lý ảnh: " . $e->getMessage());
     }
 }
+
 
 
 
