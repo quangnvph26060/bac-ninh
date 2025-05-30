@@ -90,7 +90,7 @@ Route::middleware('auth')->group(function () {
         Route::post('import-order', 'import')->name('import');
         Route::get('import-progress/{jobId}', 'importProgress')->name('import-progress');
         Route::post('export', 'export')->name('export');
-        // Route::post('validate-image', 'validateImage');
+        Route::post('validate-image', 'validateImage');
     });
 });
 
