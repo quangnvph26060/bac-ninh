@@ -19,12 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        'https://artyland.vn',
-        'http://artyland.vn',
-        'http://api.artyland.vn',
-        'https://api.artyland.vn',
-    ],
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 

@@ -161,7 +161,7 @@ function validateAndPreviewImage(event, imgId, inputContainerId, imageDefault) {
 
     const reader = new FileReader();
     reader.onload = function () {
-        const imgElement = document.getElementById(imgId);
+        const imgElement = document.getElementById(imgId);  
         const parentElement = imgElement.parentElement;
 
         // Tạo formData
@@ -173,14 +173,11 @@ function validateAndPreviewImage(event, imgId, inputContainerId, imageDefault) {
         formData.append("expectedFormat", expectedFormat);
 
         $.ajax({
-            url: "https://api.artyland.vn/orders/validate-image",
+            url: urlApi,
             type: "POST",
             data: formData,
             contentType: false,
             processData: false,
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
             success: function (data) {
                 if (data.valid) {
                     // Chỉ hiện ảnh khi valid
