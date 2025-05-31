@@ -222,6 +222,10 @@ function validateAndPreviewImage(event, imgId, inputContainerId, imageDefault) {
                 data: formData,
                 contentType: false,
                 processData: false,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest", // giúp phân biệt Ajax request
+                    Accept: "application/json", // server sẽ trả JSON
+                },
                 success: function (data) {
                     if (data.valid) {
                         $imgElement.attr("src", e.target.result);
