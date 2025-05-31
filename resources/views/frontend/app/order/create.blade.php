@@ -254,7 +254,8 @@
                                         <p class="mb-0 fw-bold">Balance</p>
                                         <p class="mb-0 fw-bold">${{ formatPrice($wallet->balance) }}</p>
                                     </div>
-                                    <button type="button" class="ant-btn-primary text-white px-3 py-1">Deposit money</button>
+                                    <button type="button" class="ant-btn-primary text-white px-3 py-1">Deposit
+                                        money</button>
                                 </div>
                                 <div class="alert alert-danger mt-2" role="alert">
                                     Your balance is insufficient, top up now or choose another payment method.
@@ -634,26 +635,26 @@
                     <div class="d-flex gap-3">
 
                         ${product.model_image ? `
-                                                                                                                                                                                                                    <div style="width: 103px;">
-                                                                                                                                                                                                                        <div class="fw-semibold">Mockup</div>
-                                                                                                                                                                                                                        <div class="image-container">
-                                                                                                                                                                                                                            <img class="img-thumbnail"
-                                                                                                                                                                                                                                style="cursor: pointer;"
-                                                                                                                                                                                                                                src="${product.model_image}">
+                                                                                                                                                                                                                        <div style="width: 103px;">
+                                                                                                                                                                                                                            <div class="fw-semibold">Mockup</div>
+                                                                                                                                                                                                                            <div class="image-container">
+                                                                                                                                                                                                                                <img class="img-thumbnail"
+                                                                                                                                                                                                                                    style="cursor: pointer;"
+                                                                                                                                                                                                                                    src="${product.model_image}">
+                                                                                                                                                                                                                            </div>
                                                                                                                                                                                                                         </div>
-                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                    ` : ''}
+                                                                                                                                                                                                                        ` : ''}
 
                         ${product.design_image ? `
-                                                                                                                                                                                                                    <div style="width: 103px;">
-                                                                                                                                                                                                                        <div class="fw-semibold">Design photo</div>
-                                                                                                                                                                                                                        <div class="image-container">
-                                                                                                                                                                                                                            <img class="img-thumbnail"
-                                                                                                                                                                                                                                style="cursor: pointer;"
-                                                                                                                                                                                                                                src="${product.design_image}">
+                                                                                                                                                                                                                        <div style="width: 103px;">
+                                                                                                                                                                                                                            <div class="fw-semibold">Design photo</div>
+                                                                                                                                                                                                                            <div class="image-container">
+                                                                                                                                                                                                                                <img class="img-thumbnail"
+                                                                                                                                                                                                                                    style="cursor: pointer;"
+                                                                                                                                                                                                                                    src="${product.design_image}">
+                                                                                                                                                                                                                            </div>
                                                                                                                                                                                                                         </div>
-                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                    ` : ''}
+                                                                                                                                                                                                                        ` : ''}
                     </div>
                 </div>
 
@@ -1303,36 +1304,41 @@
                                             <input type="file" name="model" id="model_${product.id}" class="form-control d-none"
                                                 accept="image/*" onchange="previewImage(event, 'show_model_${product.id}')">
                                         </div>
-                                        <div class="design-upload position-relative" style="width: 11%;">
-                                            <div
-                                                class="design-tooltip position-absolute" id="design-tooltip-${product.id}"
+                                        <form class="design-upload position-relative" style="width: 11%;" enctype="multipart/form-data" id="design_form_${product.id}">
+                                            <div class="design-tooltip position-absolute"
+                                                id="design-tooltip-${product.id}"
+                                                data-width="${product.expected_width}"
+                                                data-height="${product.expected_height}"
+                                                data-dpi="${product.expected_dpi}"
+                                                data-format="${product.expected_format}"
                                                 style="top: 31px; right: 5px; z-index: 10; cursor: pointer;">
                                                 <i class="fa-solid fa-circle-info"></i>
-
-                                                <!-- Đây là tooltip sẽ hiển thị khi hover -->
-                                                <div class="design-tooltip-content">
-                                                </div>
+                                                <div class="design-tooltip-content"></div>
                                             </div>
 
                                             <label class="form-label fw-bold d-block required">Design photo</label>
 
-                                            <!-- Thẻ bao ngoài để làm container -->
                                             <div class="image-container">
-                                                <img class="img-thumbnail" id="show_design_${product.id}"
+                                                <img class="img-thumbnail"
+                                                    id="show_design_${product.id}"
                                                     style="cursor: pointer;"
-                                                    src="{{ showImage('') }}" alt=""
+                                                    src="${product.image_preview || '/images/image-default.png'}"
+                                                    alt=""
                                                     onclick="document.getElementById('design_${product.id}').click();">
 
-                                                <!-- Icon thùng rác -->
                                                 <div class="image-hover-actions" id="delete_icon_${product.id}">
                                                     <i class="fa-solid fa-eye" onclick="viewImage('show_design_${product.id}')"></i>
-                                                    <i class="fa-solid fa-trash" onclick="removeImage('show_design_${product.id}', 'design_${product.id}', '{{ showImage('') }}')"></i>
+                                                    <i class="fa-solid fa-trash" onclick="removeImage('show_design_${product.id}', 'design_${product.id}', '${product.image_default || '/images/image-default.png'}')"></i>
                                                 </div>
                                             </div>
 
-                                            <input type="file" name="design" id="design_${product.id}" class="form-control d-none"
-                                                accept="image/*" onchange="validateAndPreviewImage(event, 'show_design_${product.id}', 'design-tooltip-${product.id}', '{{ config('app.url') }}/images/image-default.png')">
-                                        </div>
+                                            <input type="file"
+                                                name="design"
+                                                id="design_${product.id}"
+                                                class="form-control d-none"
+                                                accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.tiff"
+                                                onchange="validateAndPreviewImage(event, 'show_design_${product.id}', 'design-tooltip-${product.id}', '${product.image_default || '/images/image-default.png'}')">
+                                        </form>
                                     </div>
                                 </div>
                             </div>`;

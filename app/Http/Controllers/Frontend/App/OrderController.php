@@ -990,36 +990,29 @@ class OrderController extends Controller
 
         $request->validate([
             'image' => 'required|image|mimes:jpg,jpeg,png,webp,gif,bmp,tiff|max:10240',
-            'expectedWidth' => 'required|integer',
-            'expectedHeight' => 'required|integer',
             'expectedPpi' => 'required|integer',
-            'expectedFormat' => 'required|string',
         ]);
 
         $file = $request->file('image');
 
         try {
-            $info = getImageInfo($file); // trả về width, height, x_dpi, y_dpi, format
+            $info = getImageInfo($file, false);
 
-            $valid =
-                $info['width'] === (int) $request->expectedWidth &&
-                $info['height'] === (int) $request->expectedHeight &&
-                abs($info['x_dpi'] - (float) $request->expectedPpi) <= 5 &&
-                strtolower($info['format']) === strtolower($request->expectedFormat);
+            // $valid =
+            //     $info['width'] === (int) $request->expectedWidth &&
+            //     $info['height'] === (int) $request->expectedHeight &&
+            //     abs($info['x_dpi'] - (float) $request->expectedPpi) <= 5 &&
+            //     strtolower($info['format']) === strtolower($request->expectedFormat);
+
+            $valid = abs($info['x_dpi'] - (float) $request->expectedPpi) <= 5;
 
             // $start = microtime(true);
             // \Log::info('Time to process image: ' . (microtime(true) - $start) . 's');
 
             return response()->json([
                 'valid' => $valid,
-                'width' => $info['width'],
-                'height' => $info['height'],
                 'ppi' => $info['x_dpi'],
-                'format' => strtolower($info['format']),
-                'expectedWidth' => (int) $request->expectedWidth,
-                'expectedHeight' => (int) $request->expectedHeight,
                 'expectedPpi' => (int) $request->expectedPpi,
-                'expectedFormat' => strtolower($request->expectedFormat),
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

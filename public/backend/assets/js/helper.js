@@ -150,64 +150,111 @@ const removeImage = function (imgId, inputId, imageDefault) {
 };
 
 function validateAndPreviewImage(event, imgId, inputContainerId, imageDefault) {
-    const file = event.target.files[0];
-    const container = document.getElementById(inputContainerId);
-    const expectedWidth = parseInt(container.dataset.width);
-    const expectedHeight = parseInt(container.dataset.height);
-    const expectedPpi = parseInt(container.dataset.dpi);
-    const expectedFormat = container.dataset.format;
+    const $fileInput = $(event.target);
+    const file = $fileInput[0].files[0];
+    const $container = $("#" + inputContainerId);
+    const expectedWidth = parseInt($container.data("width"));
+    const expectedHeight = parseInt($container.data("height"));
+    const expectedFormat = $container.data("format").toLowerCase();
+    const maxFileSizeMB = 10;
 
     if (!file) return;
 
+    const $imgElement = $("#" + imgId);
+    const $parentElement = $imgElement.parent();
+
+    // 📦 File size check
+    if (file.size > maxFileSizeMB * 1024 * 1024) {
+        datgin.error("The image exceeds the maximum allowed size (10MB).");
+        resetImageInput();
+        return;
+    }
+
+    // 🖼️ File type check
+    const fileType = file.type;
+    if (!fileType.startsWith("image/")) {
+        datgin.error("The selected file is not a valid image.");
+        resetImageInput();
+        return;
+    }
+
+    const actualFormat = fileType.split("/")[1].toLowerCase();
+    const allowedFormats = ["jpg", "jpeg", "png", "webp", "gif", "bmp", "tiff"];
+
+    if (!allowedFormats.includes(actualFormat)) {
+        datgin.error("Unsupported image format.");
+        resetImageInput();
+        return;
+    }
+
+    if (
+        actualFormat !== expectedFormat &&
+        !(actualFormat === "jpeg" && expectedFormat === "jpg")
+    ) {
+        datgin.error(
+            `Invalid image format.\nExpected: .${expectedFormat}\nYour file: .${actualFormat}`
+        );
+        resetImageInput();
+        return;
+    }
+
+    // 📏 Check image dimensions
     const reader = new FileReader();
-    reader.onload = function () {
-        const imgElement = document.getElementById(imgId);  
-        const parentElement = imgElement.parentElement;
+    reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+            if (img.width !== expectedWidth || img.height !== expectedHeight) {
+                datgin.error(
+                    `Invalid image dimensions.\nExpected: ${expectedWidth}x${expectedHeight}\nYour image: ${img.width}x${img.height}`
+                );
+                resetImageInput();
+                return;
+            }
 
-        // Tạo formData
-        const formData = new FormData();
-        formData.append("image", file);
-        formData.append("expectedWidth", expectedWidth);
-        formData.append("expectedHeight", expectedHeight);
-        formData.append("expectedPpi", expectedPpi);
-        formData.append("expectedFormat", expectedFormat);
+            // ✅ Valid → check PPI with server
+            const formData = new FormData();
+            formData.append("image", file);
+            formData.append("expectedPpi", $container.data("dpi"));
 
-        $.ajax({
-            url: urlApi,
-            type: "POST",
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function (data) {
-                if (data.valid) {
-                    // Chỉ hiện ảnh khi valid
-                    parentElement.classList.add("has-image");
-                    imgElement.src = reader.result;
-                } else {
-                    // Nếu không valid thì reset về mặc định
-                    event.target.value = "";
-                    imgElement.src = imageDefault;
-                    parentElement.classList.remove("has-image");
-
+            $.ajax({
+                url: "/orders/validate-image",
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data.valid) {
+                        $imgElement.attr("src", e.target.result);
+                        $parentElement.addClass("has-image");
+                    } else {
+                        datgin.error(
+                            `Incorrect image PPI.\nExpected: ${data.expectedPpi} dpi\nYour image: ${data.ppi} dpi`
+                        );
+                        resetImageInput();
+                    }
+                },
+                error: function (xhr) {
                     datgin.error(
-                        `
-                    Design does not match sample.
-                    Proposed design: Width: ${data.expectedWidth}px, Height: ${data.expectedHeight}px, PPI: ${data.expectedPpi}, File format: .${data.expectedFormat}
-                    Your design: Width: ${data.width}px, Height: ${data.height}px, PPI: ${data.ppi}, File format: .${data.format}
-                `
+                        xhr.responseJSON?.message ||
+                            "An error occurred while validating the image."
                     );
-                }
-            },
-            error: function (xhr) {
-                datgin.error(xhr.responseJSON.message);
-                event.target.value = "";
-                imgElement.src = imageDefault;
-                parentElement.classList.remove("has-image");
-            },
-        });
+                    resetImageInput();
+                },
+            });
+        };
+        img.onerror = function () {
+            datgin.error("Failed to read image dimensions.");
+            resetImageInput();
+        };
+        img.src = e.target.result;
     };
-
     reader.readAsDataURL(file);
+
+    function resetImageInput() {
+        $fileInput.val("");
+        $imgElement.attr("src", imageDefault);
+        $parentElement.removeClass("has-image");
+    }
 }
 
 // Hàm mở popup và hiển thị hình ảnh
