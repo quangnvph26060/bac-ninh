@@ -132,33 +132,33 @@ if (!function_exists('hasFile')) {
     }
 }
 
-function getImageInfo($fileOrPath): array
+function getImageInfo($file, bool $fullInfo = true): array
 {
-    if (is_string($fileOrPath)) {
-        $filePath = $fileOrPath;
-    } elseif (method_exists($fileOrPath, 'getRealPath')) {
-        $filePath = $fileOrPath->getRealPath();
-    } else {
-        throw new InvalidArgumentException('Tham số phải là đường dẫn hoặc file upload.');
-    }
+    $filePath = is_string($file) ? $file : $file->getRealPath();
 
-    $info = @getimagesize($filePath);
-    if (!$info) {
-        throw new \Exception("Không thể đọc thông tin ảnh.");
-    }
+    $result = [];
 
-    $width = $info[0];
-    $height = $info[1];
+    if ($fullInfo) {
+        $info = @getimagesize($filePath);
+        if (!$info) {
+            throw new \Exception("Không thể đọc thông tin ảnh.");
+        }
 
-    if ($width > 8000 || $height > 8000) {
-        throw new \Exception("Ảnh vượt quá kích thước tối đa cho phép.");
+        $width = $info[0];
+        $height = $info[1];
+
+        if ($width > 8000 || $height > 8000) {
+            throw new \Exception("Ảnh vượt quá kích thước tối đa cho phép.");
+        }
+
+        $result['width'] = $width;
+        $result['height'] = $height;
     }
 
     try {
         $image = new \Imagick();
-        $image->pingImage($filePath); // ⚡ SIÊU NHANH
+        $image->pingImage($filePath);
 
-        $format = $image->getImageFormat();
         $resolution = $image->getImageResolution();
         $unit = $image->getImageUnits();
 
@@ -170,18 +170,20 @@ function getImageInfo($fileOrPath): array
             $y_dpi = round($y_dpi * 2.54, 2);
         }
 
-        return [
-            'width' => $width,
-            'height' => $height,
-            'x_dpi' => $x_dpi,
-            'y_dpi' => $y_dpi,
-            'unit' => $unit === 2 ? 'dpi' : ($unit === 3 ? 'pixels/cm' : 'unknown'),
-            'format' => $format,
-        ];
+        $result['x_dpi'] = $x_dpi;
+        $result['y_dpi'] = $y_dpi;
+
+        if ($fullInfo) {
+            $result['format'] = $image->getImageFormat();
+            $result['unit'] = $unit === 2 ? 'dpi' : ($unit === 3 ? 'pixels/cm' : 'unknown');
+        }
+
+        return $result;
     } catch (\Exception $e) {
         throw new \Exception("Lỗi xử lý ảnh: " . $e->getMessage());
     }
 }
+
 
 
 
