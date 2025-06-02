@@ -37,8 +37,12 @@
                                     <div class="mb-3 position-relative col-md-4">
                                         <label for="type" class="form-label">Loại vật liệu</label>
                                         <select class="form-select" id="type" name="type">
-                                            <option value="normal" {{ optional($material)->type == 'normal' ? 'selected' : '' }}>Loại thường</option>
-                                            <option value="variant" {{ optional($material)->type == 'variant' ? 'selected' : '' }}>Biến thể</option>
+                                            <option value="normal"
+                                                {{ optional($material)->type == 'normal' ? 'selected' : '' }}>Loại thường
+                                            </option>
+                                            <option value="variant"
+                                                {{ optional($material)->type == 'variant' ? 'selected' : '' }}>Biến thể
+                                            </option>
                                         </select>
                                     </div>
 
@@ -52,17 +56,19 @@
                             <div class="form-body" id="normal">
                                 <div class="row">
                                     <div class="mb-3 position-relative col-md-4">
-                                        <label for="price_vnd" class="form-label ">Giá (Vnđ)</label>
-                                        <input type="text" placeholder="Giá bán" class="form-control format-price"
+                                        <label for="price_vnd" class="form-label">Giá (Vnđ)</label>
+                                        <input type="text" placeholder="Giá bán" class="form-control format-price-vnd"
                                             name="price_vnd" id="price_vnd"
-                                            value="{{ $material ? optional($material)->price_vnd : '' }}">
+                                            value="{{ $material ? number_format(optional($material)->price_vnd, 0, '.', '.') : '' }}">
                                     </div>
+
                                     <div class="mb-3 position-relative col-md-4">
-                                        <label for="price_usd" class="form-label ">Giá ($) </label>
-                                        <input type="text" placeholder="Giá bán" class="form-control format-price"
-                                            name="price_usd" id="price_vnd"
-                                            value="{{ $material ? optional($material)->price_usd : '' }}">
+                                        <label for="price_usd" class="form-label">Giá ($)</label>
+                                        <input type="text" placeholder="Giá bán" class="form-control format-price-usd"
+                                            name="price_usd" id="price_usd"
+                                            value="{{ $material ? number_format(optional($material)->price_usd, 2, '.', ',') : '' }}">
                                     </div>
+
                                     <div class="mb-3 position-relative col-md-4">
                                         <label for="stock" class="form-label">Tồn kho</label>
                                         <input type="text" placeholder="Tồn kho" class="form-control" name="stock"
@@ -127,7 +133,6 @@
 
                                 <div class="accordion" id="variantAccordion">
                                     @foreach ($variants ?? [] as $index => $variantItem)
-
                                         <div class="accordion-item"
                                             data-variant-id="{{ $variantItem['attribute_value_combine'] }}">
                                             <h2 class="accordion-header">
@@ -163,7 +168,7 @@
                                                             <input type="text" class="form-control format-price"
                                                                 id="variants-{{ $index }}-price"
                                                                 name="variants[{{ $index }}][price]"
-                                                                value="{{ formatNumber($variantItem['price']) }}">
+                                                                value="{{ number_format($variantItem['price'], 0, ',', '.') }}">
                                                         </div>
                                                         <div class="mb-3 position-relative col-md-3">
                                                             <label for="variants-{{ $index }}-product-unit"
@@ -207,8 +212,10 @@
                         </div>
                         <div class="card-body">
                             <select name="status" class="form-select form-control" id="status">
-                                <option value="1" {{ optional($material)->status == 1 ? 'selected' : '' }}>Xuất bản </option>
-                                <option value="2" {{ optional($material)->status == 2 ? 'selected' : '' }}>Chưa xuất bản </option>
+                                <option value="1" {{ optional($material)->status == 1 ? 'selected' : '' }}>Xuất bản
+                                </option>
+                                <option value="2" {{ optional($material)->status == 2 ? 'selected' : '' }}>Chưa xuất
+                                    bản </option>
                             </select>
                         </div>
                     </div>
@@ -482,8 +489,8 @@
                                 <div class="accordion-body">
                                     <div class="row">
                                         ${variant.attribute_value_ids.map(valueId => `
-                                                                            <input type="hidden" name="variants[${index}][attribute_value_ids][]" value="${valueId}" />
-                                                                        `).join('')}
+                                                                                            <input type="hidden" name="variants[${index}][attribute_value_ids][]" value="${valueId}" />
+                                                                                        `).join('')}
 
                                         <div class="mb-3 position-relative col-md-3">
                                             <label for="variants-${index}-sku" class="form-label ">Mã sản phẩm</label>
@@ -539,6 +546,40 @@
             })
 
 
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const priceInputs = document.querySelectorAll('.format-price, .format-price-vnd');
+
+            priceInputs.forEach(function(input) {
+
+                input.addEventListener('input', function(e) {
+
+                    let value = e.target.value;
+                    value = value.replace(/[^0-9]/g, '');
+                    value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    e.target.value = value;
+                });
+            });
+
+
+            const priceInput = document.getElementById('price_usd');
+
+            if (priceInput) {
+                priceInput.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    value = value.replace(/[^0-9.]/g, '');
+
+                    const parts = value.split('.');
+                    const integerPart = parts[0];
+                    const decimalPart = parts[1] ? '.' + parts[1].replace(/\./g, '') : '';
+
+                    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+                    e.target.value = formattedInteger + decimalPart;
+                });
+            }
         });
     </script>
 @endpush
