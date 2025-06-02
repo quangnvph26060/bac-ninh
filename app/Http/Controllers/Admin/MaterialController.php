@@ -68,11 +68,11 @@ class MaterialController extends Controller
         $material = Material::create([
             'name'         => $request->name,
             'type'         => $request->type,
-            'price_usd'    => $request->type == 'normal' ? $request->price_usd : null,
-            'price_vnd'    => $request->type == 'normal' ? $request->price_vnd : null,
+            'price_usd' => $request->type == 'normal' ? (float) str_replace([','], '', $request->price_usd): null,
+            'price_vnd' => $request->type == 'normal' ? (int) str_replace(['.'], '', $request->price_vnd) : null,
             'distributor'  => $request->distributor,
             'stock'        => $request->type == 'normal' ? $request->stock : null,
-            'status'        => $request->status ,
+            'status'        => $request->status,
         ]);
 
         // Nếu là variant, xử lý thêm
@@ -96,7 +96,7 @@ class MaterialController extends Controller
 
                     $variant = $material->variants()->create([
                         'sku'                    => $variantData['sku'] ?? $variantName,
-                        'price'                  => $variantData['price'],
+                        'price'                  => (int) str_replace(['.'], '', $variantData['price'] ),
                         'stock'                  => $variantData['stock'],
                         'product_unit'           => $variantData['product_unit'],
                         'attribute_value_combine' => $idString
@@ -138,73 +138,82 @@ class MaterialController extends Controller
 
     public function update(MaterialRequest $request, $id)
     {
-        // Tìm material theo ID
-        // dd($request->all());
+        // 1️⃣ Tìm material theo ID
         $material = Material::findOrFail($id);
 
+        // 2️⃣ Cập nhật thông tin chung
         $material->update([
-            'name'          => $request->name,
-            'price_usd'     => $request->price_usd,
-            'price_vnd'     => $request->price_vnd,
-            'distributor'   => $request->distributor,
-            'stock'         => $request->stock,
-            'type'          => $request->type,
-            'status'        => $request->status,
+            'name'         => $request->name,
+            'type'         => $request->type,
+            'price_usd' => $request->type == 'normal' ? (float) str_replace([','], '', $request->price_usd): null,
+            'price_vnd' => $request->type == 'normal' ? (int) str_replace(['.'], '', $request->price_vnd) : null,
+            'distributor'  => $request->distributor,
+            'stock'        => $request->type === 'normal' ? $request->stock : null,
+            'status'       => $request->status,
         ]);
 
-
-        if ($request->attributes) {
-
+        // 3️⃣ Nếu là 'variant', xử lý attributes và variants
+        if ($request->type === 'variant') {
+            // Xóa toàn bộ attributes cũ
             $material->attributes()->delete();
 
             // Lưu các thuộc tính mới
-            foreach ($request->input('attributes') as $key => $attribute) {
-                MaterialAttribute::create([
-                    'material_id' => $material->id,
-                    'attribute_id' => $key,
-                    'attribute_values_ids' => array_map('intval', $attribute)
-                ]);
+            if ($request->has('attributes')) {
+                foreach ($request->input('attributes') as $key => $attributeId) {
+                    MaterialAttribute::create([
+                        'material_id'          => $material->id,
+                        'attribute_id'         => $key,
+                        'attribute_values_ids' => array_map('intval', $attributeId)
+                    ]);
+                }
             }
-        }
 
-        if ($request->variants) {
+            // Xóa toàn bộ variants cũ
             $material->variants()->delete();
-            $stock = 0;
-            foreach ($request->variants as $variantData) {
-                $idString = implode('-', $variantData['attribute_value_ids']);
-                $existingVariant = $material->variants()->where('sku', $variantData['sku'])->first();
-                if ($existingVariant) {
 
-                    continue;
+            // Lưu các variants mới
+            if ($request->has('variants') && is_array($request->variants)) {
+                $stock = 0;
+                foreach ($request->variants as $variantData) {
+                    $valueNames  = AttributeValue::whereIn('id', $variantData['attribute_value_ids'])->pluck('value')->toArray();
+                    $variantName = implode(' - ', $valueNames);
+                    $idString    = implode('-', $variantData['attribute_value_ids']);
+
+                    $variant = $material->variants()->create([
+                        'sku'                    => $variantData['sku'] ?? $variantName,
+                        'price'                  => (int) str_replace(['.'], '', $variantData['price'] ),
+                        'stock'                  => $variantData['stock'],
+                        'product_unit'           => $variantData['product_unit'],
+                        'attribute_value_combine' => $idString
+                    ]);
+
+                    $stock += $variantData['stock'];
+
+                    $variant->attributeValues()->attach(array_map('intval', $variantData['attribute_value_ids']));
                 }
 
-                $variant = $material->variants()->create([
-                    'sku' => $variantData['sku'],
-                    'price' => $variantData['price'],
-                    'stock' => $variantData['stock'],
-                    'product_unit' => $variantData['product_unit'],
-                    'attribute_value_combine' => $idString
+                // Update tổng stock
+                $material->update([
+                    'stock' => $stock
                 ]);
-                $stock += $variantData['stock'];
-                $variant->attributeValues()->attach(array_map('intval', $variantData['attribute_value_ids']));
             }
-            $material->update([
-                'stock' => $stock
-            ]);
+        } else {
+            // Nếu không phải variant, xóa toàn bộ attributes và variants
+            // $material->attributes()->delete();
+            // $material->variants()->delete();
         }
 
         return response()->json([
             'message' => 'Material updated successfully!',
-            'data' => $material
+            'data'    => $material
         ], 200);
     }
+
 
 
     public function list()
     {
         $material = Material::get();
-        dd($material[0]->variants);
         return view('admin.material.index');
     }
-
 }
