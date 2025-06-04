@@ -11,6 +11,7 @@ use App\Models\Config;
 use App\Models\Country;
 use App\Models\Coupon;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
@@ -729,7 +730,8 @@ class OrderController extends Controller
         return Order::create(
             [
                 'user_id' => auth()->id(),
-                'full_name' => $orderInfo['first_name'] . ' ' . $orderInfo['last_name'],
+                'first_name' => $orderInfo['first_name'],
+                'last_name' => $orderInfo['last_name'],
                 'email' => $orderInfo['email'],
                 'zip_code' => $orderInfo['zip_code'],
                 'order_code' => generateOrderCode(),
@@ -1062,5 +1064,125 @@ class OrderController extends Controller
             'percent' => 0,
             'status' => 'pending'
         ]);
+    }
+
+    public function handleChangeNote(Request $request)
+    {
+        $credentials = $request->validate([
+            'note' => 'nullable|max:255',
+            'orderId' => 'required|exists:orders,id'
+        ]);
+
+        try {
+            $order = Order::query()->find($credentials['orderId']);
+
+
+            if ($order->status !== 'pending')
+                return errorResponse('Order has been confirmed, information cannot be changed!', true);
+
+            $order->update(['note' => $credentials['note']]);
+
+            return successResponse('Note change successful', null, 200, true);
+        } catch (\Exception $e) {
+            logger($e->getMessage());
+            return errorResponse('update note failed', true);
+        }
+    }
+
+    public function handleChangeInfo(Request $request)
+    {
+        $credentials = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone_number' => 'nullable|string|max:20',
+            'shipping_address' => 'required|string|max:500',
+            'orderId' => 'required|exists:orders,id'
+        ]);
+
+        try {
+            $order = Order::query()->find($credentials['orderId']);
+
+            if ($order->status !== 'pending')
+                return errorResponse('Order has been confirmed, information cannot be changed!', true);
+
+            $order->update([
+                'first_name' => $credentials['first_name'],
+                'last_name' => $credentials['last_name'],
+                'email' => $credentials['email'],
+                'phone_number' => $credentials['phone_number'],
+                'shipping_address' => $credentials['shipping_address']
+            ]);
+
+            return successResponse('Shipping information updated successfully', null, 200, true);
+        } catch (\Exception $e) {
+            logger($e->getMessage());
+            return errorResponse('Update shipping information failed', true);
+        }
+    }
+
+    public function handleChangeImage(Request $request)
+    {
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp,gif,bmp,tiff|max:10240',
+            'order_item_id' => 'required|exists:order_items,id',
+            'type' => 'required|in:model_image,design_image'
+        ]);
+
+        try {
+            $orderItem = OrderItem::with('productVariant')->findOrFail($request->order_item_id);
+
+            if ($orderItem->order->status !== 'pending')
+                return errorResponse('Order has been confirmed, images cannot be changed!', true);
+
+            if ($request->type === 'design_image') {
+                $variant = $orderItem->productVariant;
+                if (!$variant) {
+                    return errorResponse('Product variant not found.', true);
+                }
+
+                $image = $request->file('image');
+
+                $info = getImageInfo($image, true);
+
+                $valid =
+                    $info['width'] === (int) $variant->design_width &&
+                    $info['height'] === (int) $variant->design_height &&
+                    abs($info['x_dpi'] - (float) $variant->design_ppi) <= 5 &&
+                    strtolower($info['format']) === strtolower($variant->design_format);
+
+                if (!$valid) {
+                    return errorResponse(
+                        "Invalid image specifications.\n" .
+                        "Expected: width: {$variant->design_width}px, height: {$variant->design_height}px, PPI: {$variant->design_ppi}, format: {$variant->design_format}.\n" .
+                        "Your image: width: {$info['width']}px, height: {$info['height']}px, PPI: {$info['x_dpi']}, format: {$info['format']}.",
+                        true
+                    );
+                }
+            }
+
+            // Upload ảnh mới
+            $imagePath = uploadImages('image', $request->type);
+
+            // Xóa ảnh cũ nếu có
+            if ($request->type === 'model_image' && $orderItem->model_image) {
+                deleteImage($orderItem->model_image);
+            } elseif ($request->type === 'design_image' && $orderItem->design_image) {
+                deleteImage($orderItem->design_image);
+            }
+
+            // Cập nhật đường dẫn ảnh mới
+            $orderItem->update([
+                $request->type => $imagePath
+            ]);
+
+            return successResponse('Image updated successfully', [
+                'image_url' => showImage($imagePath)
+            ], 200, true);
+        } catch (\Exception $e) {
+            logger($e->getMessage());
+            return errorResponse('Update image failed', true);
+        }
     }
 }

@@ -1,7 +1,7 @@
 @extends('frontend.app')
 
 @section('content')
-    <div class="header_steps_create_order position-relative ">
+    <div class="header_steps_create_order position-relative container">
         <div class="header_step_order">
             <div class=" w-100 d-flex align-items-center gap-4 justify-content-between">
                 <div class="d-flex gap-2">
@@ -49,17 +49,6 @@
                     @endphp
 
                     @switch($order->status)
-                        {{-- @case('draft')
-                            @if ($order->payment_status === 'pending')
-                                <button type="button" id="confirm-paymant"
-                                    class="ant-btn ant-btn-{{ $wallet->balance <= 0 || $wallet->balance < $order->total ? 'default' : 'primary' }} h-auto d-flex align-items-center gap-1"
-                                    @disabled($wallet->balance <= 0 || $wallet->balance < $order->total)>
-                                    <span>${{ formatPrice($order->total) }}</span>
-                                    <span class="bg-white rounded w-1 h-1"></span>
-                                    <span>Pay Now</span>
-                                </button>
-                            @endif
-                        @break --}}
                         @case('pending')
                             @if ($order->payment_status === 'pending' && $order->status === 'pending')
                                 <button type="button" id="confirm-paymant"
@@ -110,6 +99,8 @@
     </div>
 
     @php
+        $valid = $order->status === 'pending';
+
         $steps = [
             'pending',
             'confirmed_pending_production',
@@ -122,7 +113,12 @@
         $statusIndex = array_search($order->status, $steps);
     @endphp
 
-    <ul id="progressbar" class="my-5">
+    {{-- <button class="custom-btn btn">
+        <span class="plus-sign">+</span>
+        Thêm Mockup
+    </button> --}}
+
+    <ul id="progressbar" class="my-5 container">
         @foreach ($steps as $index => $stepKey)
             <li id="step{{ $index + 1 }}" class="{{ $index <= $statusIndex ? 'active' : '' }}">
                 <div class="icon-wrapper">
@@ -187,106 +183,193 @@
         @endforeach
     </ul>
 
-
-    <div class="row">
-        <div class="col-lg-9">
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-centered mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Product name</th>
-                                    <th>Image</th>
-                                    <th>Mockup</th>
-                                    <th>Design</th>
-                                    <th>Quantity</th>
-                                    <th>Price</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                                @php($total = 0)
-                                @foreach ($order->orderItems as $item)
-                                    @php($total += $item->price * $item->quantity)
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-centered mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <th scope="row">
-                                            <p>{{ $item->product_name }}</p>
-                                            <small class="fw-medium">
-                                                {{ implode(' - ', $item->productVariant?->attributeValues->pluck('value')->toArray() ?? []) }}
-                                            </small>
-                                        </th>
-                                        <td style="width: 5%; text-align: center;"><img src="{{ showImage($item->image) }}"
-                                                alt="{{ $item->product_name }}" width="32" height="32">
-                                        </td>
-                                        <td style="width: 5%; text-align: center;"><img
-                                                src="{{ showImage($item->model_image) }}" alt="{{ $item->product_name }}"
-                                                width="32" height="32">
-                                        </td>
-                                        <td style="width: 5%; text-align: center;"><img
-                                                src="{{ showImage($item->design_image) }}" alt="{{ $item->product_name }}"
-                                                width="32" height="32">
-                                        </td>
-                                        <td><small>x</small>{{ $item->quantity }}</td>
-                                        <td>${{ formatPrice($item->price) }}</td>
-                                        <td>${{ formatPrice($item->price * $item->quantity) }}</td>
+                                        <th>Product name</th>
+                                        <th>Image</th>
+                                        <th>Mockup</th>
+                                        <th>Design</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
                                     </tr>
-                                @endforeach
+                                </thead>
+                                <tbody>
 
-                                <tr>
-                                    <th scope="row" colspan="6" class="text-end">Sub Total :</th>
-                                    <td>
-                                        <div class="fw-bold">${{ formatPrice($total) }}</div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row" colspan="6" class="text-end">Shipping Charge :</th>
-                                    <td>${{ formatPrice($order->shipping_fee) }}</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row" colspan="6" class="text-end">Discount :</th>
-                                    <td>- ${{ formatPrice($order->discount) }}</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row" colspan="6" class="text-end">Tax :</th>
-                                    <td> ${{ formatPrice($order->tax) }}</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row" colspan="6" class="text-end">Total :</th>
-                                    <td>
-                                        <div class="fw-bold">${{ formatPrice($order->total) }}</div>
-                                    </td>
-                                </tr>
+                                    @php($total = 0)
+                                    @foreach ($order->orderItems as $item)
+                                        @php($total += $item->price * $item->quantity)
+                                        <tr>
+                                            <th scope="row">
+                                                <p>{{ $item->product_name }}</p>
+                                                <small class="fw-medium">
+                                                    {{ implode(' - ', $item->productVariant?->attributeValues->pluck('value')->toArray() ?? []) }}
+                                                </small>
+                                            </th>
+                                            <td style="width: 8%; text-align: center;"><img
+                                                    src="{{ showImage($item->image) }}" alt="{{ $item->product_name }}">
+                                            </td>
+                                            <td style="width: 8%; text-align: center;">
+                                                <div class="image-wrapper position-relative d-inline-block">
+                                                    <img src="{{ showImage($item->model_image) }}" alt=""
+                                                        class="img-fluid rounded image-preview model-image-{{ $item->id }}"
+                                                        style="width: 100%; object-fit: cover;">
 
-                            </tbody>
-                        </table>
+                                                    <div
+                                                        class="image-overlay d-flex justify-content-center align-items-center gap-2">
+                                                        @if ($valid)
+                                                            <!-- Button đổi ảnh -->
+                                                            <i class="fas fa-sync-alt icon-btn"
+                                                                onclick="document.getElementById('modelFileInput-{{ $item->id }}').click()"></i>
+                                                        @endif
+
+
+                                                        <!-- Button xem ảnh -->
+                                                        <i class="fas fa-eye icon-btn"
+                                                            onclick="zoomImage('model-image-{{ $item->id }}')"></i>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Ẩn input file -->
+                                                <input type="file" id="modelFileInput-{{ $item->id }}"
+                                                    accept="image/*" class="d-none"
+                                                    onchange="handleImageChange(event, 'model-image-{{ $item->id }}', '{{ $item->id }}', 'model_image')">
+                                            </td>
+                                            <td style="width: 8%; text-align: center;">
+                                                <div class="image-wrapper position-relative d-inline-block">
+                                                    <img src="{{ showImage($item->design_image) }}" alt=""
+                                                        class="img-fluid rounded image-preview design-image-{{ $item->id }}"
+                                                        style="width: 100%; object-fit: cover;">
+
+                                                    <div
+                                                        class="image-overlay d-flex justify-content-center align-items-center gap-2">
+                                                        @if ($valid)
+                                                            <!-- Button đổi ảnh -->
+                                                            <i class="fas fa-sync-alt icon-btn"
+                                                                onclick="document.getElementById('designFileInput-{{ $item->id }}').click()"></i>
+                                                        @endif
+                                                        <!-- Button xem ảnh -->
+                                                        <i class="fas fa-eye icon-btn"
+                                                            onclick="zoomImage('design-image-{{ $item->id }}')"></i>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Ẩn input file -->
+                                                <input type="file" id="designFileInput-{{ $item->id }}"
+                                                    accept="image/*" class="d-none"
+                                                    onchange="handleImageChange(event, 'design-image-{{ $item->id }}', '{{ $item->id }}', 'design_image')">
+                                            </td>
+                                            <td style="width: 5%; text-align: center;">
+                                                <small>x</small>{{ $item->quantity }}
+                                            </td>
+                                            <td>${{ formatPrice($item->price) }}</td>
+                                            <td>${{ formatPrice($item->price * $item->quantity) }}</td>
+                                        </tr>
+                                    @endforeach
+
+                                    <tr>
+                                        <th scope="row" colspan="6" class="text-end">Sub Total :</th>
+                                        <td>
+                                            <div class="fw-bold">${{ formatPrice($total) }}</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" colspan="6" class="text-end">Shipping Charge :</th>
+                                        <td>${{ formatPrice($order->shipping_fee) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" colspan="6" class="text-end">Discount :</th>
+                                        <td>- ${{ formatPrice($order->discount) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" colspan="6" class="text-end">Tax :</th>
+                                        <td> ${{ formatPrice($order->tax) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" colspan="6" class="text-end">Total :</th>
+                                        <td>
+                                            <div class="fw-bold">${{ formatPrice($order->total) }}</div>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-3">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="header-title fw-bold">Shipping Information</h4>
-                    <hr class="mt-2 mb-3">
-                    <h5 class="font-family-primary fw-semibold mb-2">{{ $order->full_name }}</h5>
+            <div class="col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="header-title fw-bold">Shipping Information</h4>
 
-                    <p class="mb-2"><span class="fw-semibold me-2">Email:</span> {{ $order->email }}</p>
-                    <p class="mb-2"><span class="fw-semibold me-2">Mobile:</span> {{ $order->phone_number }}</p>
-                    <p class="mb-2"><span class="fw-semibold me-2">Address:</span> {{ $order->shipping_address }}</p>
-                    {{-- <p class="mb-0"><span class="fw-semibold me-2">Payment method:</span>
-                        {{ $order->payment_method === 'bank_transfer' ? 'via wallet' : 'Not updated...' }}
-                    </p> --}}
+                            @if ($valid)
+                                <div id="toggle-info">
+                                    <i class="bi bi-pencil-square cursor" id="btn-pencil-info"></i>
+                                </div>
+                            @endif
+                        </div>
+                        <hr class="mt-2 mb-3">
+                        <div id="preview-info">
+                            <h5 class="font-family-primary fw-semibold mb-2">{{ "$order->first_name $order->last_name" }}
+                            </h5>
+                            <p class="mb-2"><span class="fw-semibold me-2">Email:</span> {{ $order->email }}</p>
+                            <p class="mb-2"><span class="fw-semibold me-2">Mobile:</span> {{ $order->phone_number }}
+                            </p>
+                            <p class="mb-2"><span class="fw-semibold me-2">Address:</span>
+                                {{ $order->shipping_address }}</p>
+                        </div>
+                        <div id="edit-info" style="display: none">
+                            <div class="mb-3">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name"
+                                    value="{{ $order->first_name }}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name"
+                                    value="{{ $order->last_name }}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" value="{{ $order->email }}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" id="phone_number"
+                                    value="{{ $order->phone_number }}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Address</label>
+                                <textarea class="form-control" id="shipping_address" rows="2">{{ $order->shipping_address }}</textarea>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h4 class="header-title mb-3">Note</h4>
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="header-title mb-3 fw-bold">Note</h4>
+                            @if ($valid)
+                                <div id="toggle-note">
+                                    <i class="bi bi-pencil-square cursor" id="btn-pencil-note"></i>
+                                </div>
+                            @endif
+                        </div>
 
-                    <textarea class="form-control" disabled rows="4">{{ $order->note }}</textarea>
+                        <span id="preview-note">{{ $order->note }}</span>
+                        <textarea id="text-note" class="form-control" style="display: none" @disabled(!$valid)>{{ $order->note }}</textarea>
+                    </div>
                 </div>
             </div>
         </div>
@@ -314,6 +397,16 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-transparent border-0">
+                <div class="modal-body text-center">
+                    <img src="" id="modalImage" class="img-fluid rounded" style="max-height: 80vh;" />
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 
@@ -321,6 +414,170 @@
     <script src="{{ asset('backend/assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
 
     <script>
+        function zoomImage(imageId) {
+            const src = document.querySelector(`.${imageId}`).getAttribute("src");
+            document.getElementById("modalImage").setAttribute("src", src);
+            const modal = new bootstrap.Modal(document.getElementById("imageModal"));
+            modal.show();
+        }
+
+        function handleImageChange(event, imageId, orderItemId, type) {
+            const file = event.target.files[0];
+
+            if (!file) return;
+
+            // Lưu lại ảnh cũ để có thể khôi phục nếu có lỗi
+            const oldImageSrc = document.querySelector(`.${imageId}`).src;
+
+            // Tạo FormData để gửi file
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('order_item_id', orderItemId);
+            formData.append('type', type);
+
+            // Hiển thị loading
+            const $image = document.querySelector(`.${imageId}`);
+            $image.style.opacity = '0.5';
+
+            // Gọi API để cập nhật ảnh
+            $.ajax({
+                url: '/orders/handle-change-image',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: () => {
+                    $('#loading').show();
+                },
+                success: (response) => {
+                    datgin.success(response.message);
+                    // Cập nhật ảnh với URL mới từ server
+                    $image.src = response.data.image_url;
+                    $image.style.opacity = '1';
+                },
+                error: (xhr) => {
+                    datgin.error(xhr.responseJSON.message || "Update image failed");
+                    // Khôi phục lại ảnh cũ nếu có lỗi
+                    $image.src = oldImageSrc;
+                    $image.style.opacity = '1';
+                },
+                complete: () => {
+                    $('#loading').hide();
+                }
+            });
+        }
+
+        $(document).on('click', '#btn-pencil-note', function() {
+            $('#preview-note').hide()
+            $('#text-note').show()
+
+            $('#toggle-note').html(
+                "<i class='bi bi-x-square cursor me-2' id='btn-x-note'></i><i class='bi bi-floppy cursor' id='btn-save-note'></i>"
+            )
+        })
+
+        $(document).on('click', '#btn-x-note', function() {
+            $('#preview-note').show()
+            $('#text-note').hide()
+
+            $('#toggle-note').html(
+                " <i class='bi bi-pencil-square cursor' id='btn-pencil-note'></i>"
+            )
+        })
+
+        $(document).on('click', '#btn-save-note', function() {
+            let note = $('#text-note').val();
+
+            $.ajax({
+                url: '/orders/handle-change-note',
+                method: "POST",
+                data: {
+                    note,
+                    orderId: "{{ $order->id }}"
+                },
+                beforeSend: () => {
+                    $('#loading').show();
+                },
+                success: (response) => {
+                    datgin.success(response.message);
+                    $('#preview-note').text(note)
+
+                    $('#preview-note').show()
+                    $('#text-note').hide()
+                    $('#toggle-note').html(
+                        " <i class='bi bi-pencil-square cursor' id='btn-pencil-note'></i>"
+                    )
+                },
+                error: (xhr) => {
+                    datgin.error(xhr.responseJSON.message || "update note failed")
+                },
+                complete: () => {
+                    $('#loading').hide();
+                }
+            })
+        })
+
+        $(document).on('click', '#btn-pencil-info', function() {
+            $('#preview-info').hide()
+            $('#edit-info').show()
+
+            $('#toggle-info').html(
+                "<i class='bi bi-x-square cursor me-2' id='btn-x-info'></i><i class='bi bi-floppy cursor' id='btn-save-info'></i>"
+            )
+        })
+
+        $(document).on('click', '#btn-x-info', function() {
+            $('#preview-info').show()
+            $('#edit-info').hide()
+
+            $('#toggle-info').html(
+                "<i class='bi bi-pencil-square cursor' id='btn-pencil-info'></i>"
+            )
+        })
+
+        $(document).on('click', '#btn-save-info', function() {
+            let data = {
+                first_name: $('#first_name').val(),
+                last_name: $('#last_name').val(),
+                email: $('#email').val(),
+                phone_number: $('#phone_number').val(),
+                shipping_address: $('#shipping_address').val(),
+                orderId: "{{ $order->id }}"
+            }
+
+            $.ajax({
+                url: '/orders/handle-change-info',
+                method: "POST",
+                data: data,
+                beforeSend: () => {
+                    $('#loading').show();
+                },
+                success: (response) => {
+                    datgin.success(response.message);
+
+                    // Update preview info
+                    $('#preview-info').html(`
+                        <h5 class="font-family-primary fw-semibold mb-2">${data.first_name} ${data.last_name}</h5>
+                        <p class="mb-2"><span class="fw-semibold me-2">Email:</span> ${data.email}</p>
+                        <p class="mb-2"><span class="fw-semibold me-2">Mobile:</span> ${data.phone_number}</p>
+                        <p class="mb-2"><span class="fw-semibold me-2">Address:</span> ${data.shipping_address}</p>
+                    `)
+
+                    $('#preview-info').show()
+                    $('#edit-info').hide()
+                    $('#toggle-info').html(
+                        "<i class='bi bi-pencil-square cursor' id='btn-pencil-info'></i>"
+                    )
+                },
+                error: (xhr) => {
+                    datgin.error(xhr.responseJSON.message || "Update failed")
+                },
+                complete: () => {
+                    $('#loading').hide();
+                }
+            })
+        })
+
         $('#confirm-paymant').on('click', function() {
             const swalWithBootstrapButtons = Swal.mixin({
                 customClass: {
@@ -462,7 +719,7 @@
 
         #progressbar li {
             list-style-type: none;
-            width: 25%;
+            width: 17%;
             position: relative;
             text-align: center;
             font-weight: 400;
@@ -522,6 +779,32 @@
         .header-title {
             font-size: 1rem;
             margin: 0 0 7px 0;
+        }
+
+        .custom-btn {
+            background-color: #2c3e50;
+            /* Dark blue background */
+            color: white;
+            font-size: 1.2rem;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 150px;
+            height: 150px;
+            border: 2px dashed #3498db;
+            /* Dashed border */
+        }
+
+        .custom-btn:hover {
+            background-color: #34495e;
+        }
+
+        .plus-sign {
+            font-size: 2rem;
+            margin-bottom: 5px;
         }
     </style>
 @endpush

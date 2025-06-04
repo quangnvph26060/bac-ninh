@@ -47,7 +47,7 @@ class ProductRequest extends FormRequest
             'product_unit' => 'nullable|string|max:255',  // Product unit is optional, but if provided, it should be a string
             'sku' => 'nullable|string|max:255',  // SKU is optional, but if provided, it should be a string
             'variants' => ($this->input('type') == 'variant' ? 'required' : 'nullable') . '|array',  // Variants are optional but should be an array if present
-            // 'variants.*.sku' => 'required|string|max:255',  
+            // 'variants.*.sku' => 'required|string|max:255',
             'variants.*.sale_price' => 'required|numeric|min:1|regex:/^\d*(\.\d{1,2})?$/',  // Each variant must have a sale price (numeric, >= 0)
             'variants.*.product_unit' => 'nullable|string|min:0|max:100',  // Each variant must have a sale price (numeric, >= 0)
             'variants.*.discount_price' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',  // Discount price for each variant (optional but should be numeric if provided)
@@ -59,10 +59,10 @@ class ProductRequest extends FormRequest
             'variants.*.standard_shipping' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
             'variants.*.express_shipping' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
             'variants.*.international_shipping' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
-            'variants.*.design_width' => 'required|integer|min:0',
-            'variants.*.design_height' => 'required|integer|min:0',
-            'variants.*.design_ppi' => 'required|integer|min:0',
-            'variants.*.design_format' => 'required|string|in:jpg,png,gif,jpeg,webp',
+            'variants.*.design_width' => 'nullable|integer|min:0',
+            'variants.*.design_height' => 'nullable|integer|min:0',
+            'variants.*.design_ppi' => 'nullable|integer|min:0',
+            'variants.*.design_format' => 'nullable|string|in:jpg,png,gif,jpeg,webp',
             'cross_sell' => 'nullable',  // Cross-sell products are optional
             'status' => 'required|numeric|in:1,2',  // Status should be a boolean (1 or 0)
             'is_show_home' => 'nullable|boolean',  // Show on home page flag should be a boolean (1 or 0)

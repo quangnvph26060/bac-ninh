@@ -72,12 +72,12 @@
 
                                                 @if (isOnSale($product))
                                                     <span
-                                                        class="text-danger fs-6">{{ finalPrice($product->discount_price) }}</span>
+                                                        class="text-danger fs-6">{{ formatPrice($product->discount_price) }} USD</span>
                                                     <del
-                                                        class="ms-2 text-muted">{{ formatPrice($product->sale_price) }}</del>
+                                                        class="ms-2 text-muted">{{ formatPrice($product->sale_price) }} USD</del>
                                                 @else
                                                     <span
-                                                        class="text-danger fs-6">{{ formatPrice($product->sale_price) }}</span>
+                                                        class="text-danger fs-6">{{ formatPrice($product->sale_price) }} USD</span>
                                                 @endif
 
                                             </p>

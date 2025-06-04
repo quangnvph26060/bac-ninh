@@ -10,60 +10,73 @@
             </div>
         </div>
 
+        {{-- @dd($orderCounts) --}}
         <h4 class="mb-3 fw-bold">Overview</h4>
 
         <div class="row">
             <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 title">Total order</h6>
-                        <h3 class="card-title mb-0 fw-bold order-all">{{ $orderCounts['all'] ?? 0 }}</h3>
+                <a href="{{ route('orders.index') }}">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 title">Total order</h6>
+                            <h3 class="card-title mb-0 fw-bold order-all">{{ $orderCounts['all'] ?? 0 }}</h3>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 title">Not yet paid</h6>
-                        <h3 class="card-title mb-0 fw-bold order-unpaid">{{ $orderCounts['unpaid'] ?? 0 }}</h3>
+                <a href="{{ route('orders.index', ['payment_status' => 'pending']) }}">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 title">Not yet paid</h6>
+                            <h3 class="card-title mb-0 fw-bold order-unpaid">{{ $orderCounts['unpaid'] ?? 0 }}</h3>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 title">In production</h6>
-                        <h3 class="card-title mb-0 fw-bold order-in-production">{{ $orderCounts['in_production'] ?? 0 }}
-                        </h3>
-                    </div>
-                </div>
+                </a>
             </div>
 
             <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 title">Shipping</h6>
-                        <h3 class="card-title mb-0 fw-bold order-shipping">{{ $orderCounts['shipping'] ?? 0 }}</h3>
+                <a href="{{ route('orders.index', ['status' => 'in_production']) }}">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 title">In production</h6>
+                            <h3 class="card-title mb-0 fw-bold order-in-production">{{ $orderCounts['in_production'] ?? 0 }}
+                            </h3>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 title">Delivered</h6>
-                        <h3 class="card-title mb-0 fw-bold order-shipped">{{ $orderCounts['shipped'] ?? 0 }}</h3>
+                <a href="{{ route('orders.index', ['status' => 'completed_waiting_for_shipment']) }}">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 title">Shipping</h6>
+                            <h3 class="card-title mb-0 fw-bold order-shipping">{{ $orderCounts['shipping'] ?? 0 }}</h3>
+                        </div>
                     </div>
-                </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-3 mb-4">
+                <a href="{{ route('orders.index', ['status' => 'shipped']) }}">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 title">Delivered</h6>
+                            <h3 class="card-title mb-0 fw-bold order-shipped">{{ $orderCounts['delivered'] ?? 0 }}</h3>
+                        </div>
+                    </div>
+                </a>
             </div>
             <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 title">Canceled</h6>
-                        <h3 class="card-title mb-0 fw-bold order-cancelled">{{ $orderCounts['cancelled'] ?? 0 }}</h3>
+                <a href="{{ route('orders.index', ['status' => 'cancelled']) }}">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 title">Canceled</h6>
+                            <h3 class="card-title mb-0 fw-bold order-cancelled">{{ $orderCounts['cancelled'] ?? 0 }}</h3>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </div>
@@ -128,4 +141,45 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('frontend/assets/fonts/icomoon/style.css') }}">
+
+    <style>
+        /* Thiết lập mặc định cho thẻ card */
+        .row a .card {
+            transition: transform .3s ease, box-shadow .3s ease;
+            /* mượt hơn khi hover ra vào */
+        }
+
+        /* Hiệu ứng khi hover */
+        .row a:hover .card {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, .12);
+        }
+
+        /* Nhấn mạnh tiêu đề khi hover */
+        .row a:hover .card .title {
+            color: #0d6efd;
+            /* màu chính Bootstrap */
+            transition: color .3s ease;
+        }
+
+        /* Nhấn mạnh số lượng khi hover */
+        .row a:hover .card .card-title {
+            animation: pulse 0.6s forwards;
+        }
+
+        /* Keyframes cho hiệu ứng pulse nhẹ */
+        @keyframes pulse {
+            0% {
+                letter-spacing: normal;
+            }
+
+            50% {
+                letter-spacing: 1px;
+            }
+
+            100% {
+                letter-spacing: normal;
+            }
+        }
+    </style>
 @endpush

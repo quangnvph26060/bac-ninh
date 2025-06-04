@@ -677,9 +677,8 @@ video {
     display: inline-block;
     font-size: 14px;
     font-weight: 400;
-    height: 40px;
     line-height: 1.5715;
-    padding: 4px 15px;
+    padding: 6px 15px;
     position: relative;
     text-align: center;
     touch-action: manipulation;

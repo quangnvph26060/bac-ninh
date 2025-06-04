@@ -18,12 +18,6 @@
     @break
 
     @case('produced_awaiting_completion')
-        <span class="badge bg-info text-dark rounded-pill">
-            <i class="fas fa-industry me-1"></i> Đang sản xuất
-        </span>
-    @break
-
-    @case('produced_awaiting_completion')
         <span class="badge bg-secondary rounded-pill">
             <i class="fas fa-box-open me-1"></i> Đã sản xuất xong, chờ hoàn thiện
         </span>
@@ -32,6 +26,12 @@
     @case('completed_waiting_for_shipment')
         <span class="badge bg-dark rounded-pill">
             <i class="fas fa-truck-loading me-1"></i> Đã hoàn thiện, chờ giao hàng
+        </span>
+    @break
+
+    @case('shipped')
+        <span class="badge bg-success rounded-pill">
+            <i class="fas fa-truck me-1"></i> Đã giao hàng
         </span>
     @break
 

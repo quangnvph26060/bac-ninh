@@ -5,7 +5,7 @@
     z-index: 1050;
     width: 60px;
     height: 60px;
-    border-radius: 50%;
+    border-radius: 50% !important;
     background-color: #f26722;
     color: white;
     font-size: 24px;

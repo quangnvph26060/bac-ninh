@@ -15,9 +15,10 @@
         </tr>
     </thead>
     <tbody>
+        {{-- {{ !($order->status === 'pending' && $order->payment_status === 'pending') ? 'disabled-row' : '' }} --}}
         @forelse ($orders as $order)
             <tr
-                class="align-middle {{ !($order->status === 'pending' && $order->payment_status === 'pending') ? 'disabled-row' : '' }}">
+                class="align-middle ">
                 <td>
                     @if ($order->status === 'pending' && $order->payment_status === 'pending')
                         <input type="checkbox" class="order-checkbox form-check-input" data-total="{{ $order->total }}"
@@ -35,7 +36,7 @@
                 <td>
                     <div class="d-flex flex-column">
                         <a href="{{ route('orders.show', $order->order_code) }}"
-                            class="name">{{ $order->full_name }}</a>
+                            class="name">{{ "$order->first_name $order->last_name" }}</a>
                         <a href="mailto:{{ $order->email ?? $order->user?->email }}">{{ $order->user?->email }}</a>
                         <p>{{ $order->phone_number ?? $order->user?->phone }}</p>
                     </div>
