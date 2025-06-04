@@ -219,7 +219,7 @@
                         {{-- <a href="#" class="fs-exact-14">Edit</a> --}}
                     </div>
                     <div class="card-body pt-4 fs-exact-16">
-                        <div><strong>{{ $order->full_name }}</strong></div>
+                        <div><strong>{{ "$order->first_name $order->last_name" }}</strong></div>
                         <div class="mt-1">
                             <a href="#"><strong>Email</strong>: {{ $order->email }}</a>
                         </div>

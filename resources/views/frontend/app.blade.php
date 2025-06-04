@@ -38,6 +38,8 @@
 
     <link rel="stylesheet" href="{{ asset('global/css/toastr.css') }}">
 
+    <link rel="stylesheet" href="{{ asset('frontend/assets/css/chat.css') }}">
+
     @stack('styles')
 </head>
 
@@ -285,9 +287,7 @@
         </div>
     </div>
 
-    <script>
-        const urlApi = "{{ config('app.url_api') }}/validate-image"
-    </script>
+    @include('frontend.includes.chat')
 
     <script src="{{ asset('frontend/assets/js/jquery-3.3.1.min.js') }}"></script>
 
@@ -304,6 +304,9 @@
     <script src="{{ asset('frontend/assets/js/app.js') }}"></script>
 
     <script src="{{ asset('frontend/assets/js/main.js') }}"></script>
+
+    <script src="{{ asset('frontend/assets/js/chat.js') }}?v={{ filemtime(public_path('frontend/assets/js/chat.js')) }}">
+    </script>
 
     <script>
         $.ajaxSetup({

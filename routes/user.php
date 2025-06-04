@@ -91,13 +91,11 @@ Route::middleware('auth')->group(function () {
         Route::get('import-progress/{jobId}', 'importProgress')->name('import-progress');
         Route::post('export', 'export')->name('export');
         Route::post('validate-image', 'validateImage');
+
+        Route::post('handle-change-note', 'handleChangeNote');
+        Route::post('handle-change-info', 'handleChangeInfo');
+        Route::post('handle-change-image', 'handleChangeImage');
     });
-
-    // routes/web.php
-
-    // Route::domain('api.artyland.vn')->group(function () {
-    //     Route::post('orders/validate-image', [OrderController::class, 'validateImage']);
-    // });
 
     Route::view('upload', 'get-ppi');
     Route::post('upload', function (Request $request) {

@@ -185,9 +185,6 @@ function getImageInfo($file, bool $fullInfo = true): array
 }
 
 
-
-
-
 if (!function_exists('showImage')) {
     function showImage($image)
     {

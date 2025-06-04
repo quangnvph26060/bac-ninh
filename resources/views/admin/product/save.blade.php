@@ -540,7 +540,7 @@
                                                                     id="variants-{{ $variantItem['attribute_value_ids'] }}-stock-status"
                                                                     class="form-select">
                                                                     <option value="in_stock" @selected($variantItem['stock_status'] === 'in_stock')>
-                                                                        Còn hàng</option>
+                                                                        Còn hàng</option>stock_status
                                                                     <option value="out_of_stock"
                                                                         @selected($variantItem['stock_status'] === 'out_of_stock')>Hết hàng</option>
                                                                     <option value="waiting_for_goods"

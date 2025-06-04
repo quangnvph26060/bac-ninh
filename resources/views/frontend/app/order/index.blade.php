@@ -39,22 +39,21 @@
                 <option value="">All</option>
                 <option value="pending">Pending</option>
                 <option value="confirmed_pending_production">Confirmed Pending Production</option>
-                <option value="in_production">In Production</option>
+                <option value="in_production" @selected(request('status') === 'in_production')>In Production</option>
                 <option value="produced_awaiting_completion">Produced Awaiting Completion</option>
-                <option value="completed_waiting_for_shipment">Completed Waiting For Shipment</option>
-                <option value="shipped">Shipped</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="completed_waiting_for_shipment" @selected(request('status') === 'completed_waiting_for_shipment')>Completed Waiting For Shipment</option>
+                <option value="shipped" @selected(request('status') === 'shipped')>Shipped</option>
+                <option value="cancelled" @selected(request('status') === 'cancelled')>Cancelled</option>
             </select>
         </div>
-
         <!-- Payment Status -->
         <div class="form-group">
             <label class="form-label fw-bold">Payment Status</label>
             <select class="form-select" name="payment_status">
                 <option value="">All</option>
-                <option value="pending">Unpaid</option>
-                <option value="completed">Paid</option>
-                <option value="refunded">Refunded</option>
+                <option value="pending" @selected(request('payment_status') === 'pending')>Unpaid</option>
+                <option value="completed" @selected(request('payment_status')  === 'completed')>Paid</option>
+                <option value="refunded" @selected(request('payment_status' ) === 'refunded')>Refunded</option>
             </select>
         </div>
 

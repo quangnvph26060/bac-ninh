@@ -155,7 +155,8 @@ function validateAndPreviewImage(event, imgId, inputContainerId, imageDefault) {
     const $container = $("#" + inputContainerId);
     const expectedWidth = parseInt($container.data("width"));
     const expectedHeight = parseInt($container.data("height"));
-    const expectedFormat = $container.data("format").toLowerCase();
+    const expectedFormat = ($container.data("format") || "").toLowerCase();
+    const expectedPpi = $container.data("dpi");
     const maxFileSizeMB = 10;
 
     if (!file) return;
@@ -187,64 +188,81 @@ function validateAndPreviewImage(event, imgId, inputContainerId, imageDefault) {
         return;
     }
 
-    if (
-        actualFormat !== expectedFormat &&
-        !(actualFormat === "jpeg" && expectedFormat === "jpg")
-    ) {
-        datgin.error(
-            `Invalid image format.\nExpected: .${expectedFormat}\nYour file: .${actualFormat}`
-        );
-        resetImageInput();
+    // 🧠 Nếu không có thông tin nào cần validate → hiển thị luôn
+    const noValidationRequired =
+        !expectedWidth && !expectedHeight && !expectedFormat && !expectedPpi;
+    if (noValidationRequired) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            showImagePreview(e.target.result);
+        };
+        reader.readAsDataURL(file);
         return;
     }
 
-    // 📏 Check image dimensions
+    // Nếu có ít nhất 1 trong các thông số, thực hiện kiểm tra chi tiết
     const reader = new FileReader();
     reader.onload = function (e) {
         const img = new Image();
         img.onload = function () {
-            if (img.width !== expectedWidth || img.height !== expectedHeight) {
-                datgin.error(
-                    `Invalid image dimensions.\nExpected: ${expectedWidth}x${expectedHeight}\nYour image: ${img.width}x${img.height}`
-                );
-                resetImageInput();
-                return;
-            }
+            // Kiểm tra kích thước & định dạng nếu có
+            const shouldValidateSize =
+                expectedWidth && expectedHeight && expectedFormat;
 
-            // ✅ Valid → check PPI with server
-            const formData = new FormData();
-            formData.append("image", file);
-            formData.append("expectedPpi", $container.data("dpi"));
-
-            $.ajax({
-                url: "/orders/validate-image",
-                type: "POST",
-                data: formData,
-                contentType: false,
-                processData: false,
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest", // giúp phân biệt Ajax request
-                    Accept: "application/json", // server sẽ trả JSON
-                },
-                success: function (data) {
-                    if (data.valid) {
-                        $imgElement.attr("src", e.target.result);
-                        $parentElement.addClass("has-image");
-                    } else {
-                        datgin.error(
-                            `Incorrect image PPI.\nExpected: ${data.expectedPpi} dpi\nYour image: ${data.ppi} dpi`
-                        );
-                        resetImageInput();
-                    }
-                },
-                error: function (xhr) {
+            if (shouldValidateSize) {
+                if (
+                    (actualFormat !== expectedFormat &&
+                        !(
+                            actualFormat === "jpeg" && expectedFormat === "jpg"
+                        )) ||
+                    img.width !== expectedWidth ||
+                    img.height !== expectedHeight
+                ) {
                     datgin.error(
-                        xhr.responseJSON?.message ||
-                            "An error occurred while validating the image."
+                        `Invalid image.\nExpected: ${expectedWidth}x${expectedHeight} .${expectedFormat}\nYour image: ${img.width}x${img.height} .${actualFormat}`
                     );
                     resetImageInput();
-                },
-            });
+                    return;
+                }
+            }
+
+            // Kiểm tra PPI nếu có
+            if (expectedPpi) {
+                const formData = new FormData();
+                formData.append("image", file);
+                formData.append("expectedPpi", expectedPpi);
+
+                $.ajax({
+                    url: "/orders/validate-image",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        Accept: "application/json",
+                    },
+                    success: function (data) {
+                        if (data.valid) {
+                            showImagePreview(e.target.result);
+                        } else {
+                            datgin.error(
+                                `Incorrect image PPI.\nExpected: ${data.expectedPpi} dpi\nYour image: ${data.ppi} dpi`
+                            );
+                            resetImageInput();
+                        }
+                    },
+                    error: function (xhr) {
+                        datgin.error(
+                            xhr.responseJSON?.message ||
+                                "An error occurred while validating the image."
+                        );
+                        resetImageInput();
+                    },
+                });
+            } else {
+                showImagePreview(e.target.result);
+            }
         };
         img.onerror = function () {
             datgin.error("Failed to read image dimensions.");
@@ -258,6 +276,11 @@ function validateAndPreviewImage(event, imgId, inputContainerId, imageDefault) {
         $fileInput.val("");
         $imgElement.attr("src", imageDefault);
         $parentElement.removeClass("has-image");
+    }
+
+    function showImagePreview(src) {
+        $imgElement.attr("src", src);
+        $parentElement.addClass("has-image");
     }
 }
 
