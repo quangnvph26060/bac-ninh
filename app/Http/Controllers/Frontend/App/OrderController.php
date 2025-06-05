@@ -575,7 +575,7 @@ class OrderController extends Controller
                 'orderInfo' => 'required|array',
                 'orderInfo.first_name' => 'required|string|max:255',
                 'orderInfo.last_name' => 'required|string|max:255',
-                'orderInfo.email' => 'required|email|max:255',
+                'orderInfo.email' => 'nullable|email|max:255',
                 'orderInfo.phone_number' => 'nullable|string|max:20',
                 'orderInfo.country' => 'required|string|max:255',
                 'orderInfo.state' => 'required|string|max:255',
@@ -1074,7 +1074,7 @@ class OrderController extends Controller
                 (int) $photo->height === (int) $request->height &&
                 abs($photo->ppi - (float) $request->dpi) <= 5 &&
                 strtolower($photo->format) === strtolower($request->format);
-                
+
             // $start = microtime(true);
             // \Log::info('Time to process image: ' . (microtime(true) - $start) . 's');
 

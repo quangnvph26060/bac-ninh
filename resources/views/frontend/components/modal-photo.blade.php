@@ -99,6 +99,22 @@
 
             if (!currentProductId || !imageUrl) return;
 
+            const isMissingExpected = !expectedWidth || !expectedHeight || !expectedFormat || !expectedPpi;
+
+            const $container = $(`#image_container_${currentProductId}`);
+            const $img = $container.find(`#show_design_${currentProductId}`);
+            const $zoomLink = $container.find('.image-zoom-link');
+
+            if (isMissingExpected) {
+                // Nếu thiếu thông số, gán ảnh luôn mà không gọi API
+                $container.addClass('has-image');
+                $img.attr('src', imageUrl);
+                $zoomLink.attr('href', imageUrl);
+                $('#mockupModal').modal('hide');
+                return;
+            }
+
+            // Nếu có đủ thông số, gọi API kiểm tra
             $.ajax({
                 url: '/orders/validate-image',
                 type: 'POST',
@@ -111,16 +127,12 @@
                 },
                 success: function(res) {
                     let photo = res.photo;
-                    const $container = $(`#image_container_${currentProductId}`);
-                    const $img = $container.find(`#show_design_${currentProductId}`);
-                    const $zoomLink = $container.find('.image-zoom-link');
-
                     if (res.valid) {
                         $container.addClass('has-image');
                         $img.attr('src', imageUrl);
                         $zoomLink.attr('href', imageUrl);
                     } else {
-                        const imageDefault = "{{ showImage('') }}"
+                        const imageDefault = "{{ showImage('') }}";
                         $img.attr('src', imageDefault);
                         $zoomLink.attr('href', imageDefault);
                         datgin.error(
@@ -128,13 +140,13 @@
                         );
                     }
                     $('#mockupModal').modal('hide');
-
                 },
                 error: function() {
                     datgin.error('Đã xảy ra lỗi khi kiểm tra ảnh.');
                 }
             });
         });
+
 
         $(document).on('click', '.remove-image', function() {
             const $wrapper = $(this).closest('.image-preview-wrapper');

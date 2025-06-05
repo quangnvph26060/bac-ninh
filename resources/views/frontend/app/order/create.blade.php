@@ -1317,7 +1317,7 @@
 
                                             <div class="position-relative image-preview-wrapper" id="image_container_${product.id}">
                                                 <button class="custom-btn btn open-mockup-modal w-100" data-bs-toggle="modal" data-bs-target="#mockupModal" data-product-id="${product.id}">
-                                                    <img src="{{ showImage('') }}" class="img-fluid rounded" alt="" id="show_design_${product.id}">
+                                                    <img src="{{ showImage('') }}" class="img-fluid rounded h-100" alt="" id="show_design_${product.id}">
                                                 </button>
 
                                                 <div class="image-hover-icons justify-content-center align-items-center position-absolute top-0 start-0 w-100 h-100" style="pointer-events: auto;">

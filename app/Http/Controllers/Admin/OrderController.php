@@ -38,7 +38,7 @@ class OrderController extends Controller
                     ->addColumn('barcode', fn($row) => "<button class='download-barcode btn btn-sm btn-primary' data-barcode='$row->order_code'><i class='fas fa-file-pdf'></i> Pdf file</button>")
                     ->editColumn('status', fn($row) => view('components.status', ['status' => $row->status]))
                     ->editColumn('customer_information', function ($row) {
-                        return '<strong>' . e($row->full_name) . '</strong><br>' .
+                        return '<strong>' . e($row->first_name . ' ' . $row->last_name) . '</strong><br>' .
                             '<a href="mailto:' . e($row->email) . '">' . e($row->email) . '</a><br>' .
                             e($row->phone_number);
                     })->addColumn('operations', fn($row) => view('admin.components.operation', compact('row'))),
