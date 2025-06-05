@@ -13,6 +13,7 @@ class CouponController extends Controller
     {
 
         $search = $request->search;
+        $perPage = $request->input('per_page', 10);
 
         $query = Coupon::with(['users' => function ($query) {
             $query->where('user_id', auth()->id());
@@ -22,7 +23,7 @@ class CouponController extends Controller
             $query->where('code', 'like', "%{$search}%");
         }
 
-        $coupons = $query->where('start_date', '<=', now())->orderBy('created_at', 'desc')->paginate(10);
+        $coupons = $query->where('start_date', '<=', now())->orderBy('created_at', 'desc')->paginate($perPage);
 
         if ($request->ajax()) {
             $html = view('frontend.app.coupon._coupon_table', compact('coupons'))->render();

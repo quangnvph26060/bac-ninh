@@ -24,11 +24,6 @@
             </div>
         </div>
     </div>
-
-    {{-- <div id="copy-toast" class="position-fixed top-0 end-0 m-3 p-3 bg-success text-white rounded shadow d-none"
-        style="z-index: 1055;">
-        📋 Đã sao chép mã giảm giá!
-    </div> --}}
 @endsection
 
 @push('scripts')
@@ -92,13 +87,16 @@
                 .search); // Tạo đối tượng để truy xuất tham số query string
             const pageParam = searchParams.get('page') ||
                 page; // Nếu có 'page' trong URL thì lấy, nếu không thì dùng giá trị mặc định
+            const per_page = $('.per-page-selector').val() || 10;
+
 
             $.ajax({
                 url: urlWithParams.pathname,
                 method: 'GET',
                 data: {
                     search: search,
-                    page: pageParam // Truyền 'page' vào data của AJAX
+                    page: pageParam,
+                    per_page
                 },
                 beforeSend: () => {
                     $('#coupon-content').hide();

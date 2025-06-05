@@ -134,16 +134,12 @@ const removeImage = function (imgId, inputId, imageDefault) {
     const imgElement = document.getElementById(imgId);
     const inputElement = document.getElementById(inputId);
     const parentElement = imgElement.parentElement;
-    // const result = inputId.split("_").pop();
 
-    // Set lại ảnh mặc định
     imgElement.src = imageDefault;
 
-    // Clear giá trị của input file
     inputElement.value = "";
 
     parentElement.classList.remove("has-image");
-    // document.querySelector(`#delete_icon_${result}`).classList.add("d-none");
 
     // Hiển thị thông báo
     datgin.success("Ảnh đã được xóa thành công.");

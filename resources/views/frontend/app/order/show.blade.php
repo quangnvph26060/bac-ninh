@@ -113,11 +113,6 @@
         $statusIndex = array_search($order->status, $steps);
     @endphp
 
-    {{-- <button class="custom-btn btn">
-        <span class="plus-sign">+</span>
-        Thêm Mockup
-    </button> --}}
-
     <ul id="progressbar" class="my-5 container">
         @foreach ($steps as $index => $stepKey)
             <li id="step{{ $index + 1 }}" class="{{ $index <= $statusIndex ? 'active' : '' }}">
@@ -779,32 +774,6 @@
         .header-title {
             font-size: 1rem;
             margin: 0 0 7px 0;
-        }
-
-        .custom-btn {
-            background-color: #2c3e50;
-            /* Dark blue background */
-            color: white;
-            font-size: 1.2rem;
-            padding: 15px;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 150px;
-            height: 150px;
-            border: 2px dashed #3498db;
-            /* Dashed border */
-        }
-
-        .custom-btn:hover {
-            background-color: #34495e;
-        }
-
-        .plus-sign {
-            font-size: 2rem;
-            margin-bottom: 5px;
         }
     </style>
 @endpush

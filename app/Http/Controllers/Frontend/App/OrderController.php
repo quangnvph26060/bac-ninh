@@ -12,6 +12,7 @@ use App\Models\Country;
 use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Photo;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
@@ -22,6 +23,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -144,7 +146,6 @@ class OrderController extends Controller
             return view('frontend.app.order._product_list', compact('products'))->render();
         }
 
-        // $shippingMethods = ShippingMethod::query()->latest()->get();
         $countries = Country::query()->orderBy('name', 'asc')->get();
 
         return view('frontend.app.order.create', compact('products', 'countries'));
@@ -206,54 +207,71 @@ class OrderController extends Controller
     // Hàm lấy thông tin sản phẩm chi tiết
     private function getProductDetails($items)
     {
+        $variantIds = collect($items)->pluck('variant_id')->filter()->all();
+        $productIds = collect($items)->pluck('productId')->all();
+
+        // Lấy batch ProductVariants có eager load product
+        $variants = ProductVariant::whereIn('id', $variantIds)
+            ->with('product')
+            ->get()
+            ->keyBy('id');
+
+        // Lấy batch Products
+        $products = Product::whereIn('id', $productIds)
+            ->get()
+            ->keyBy('id');
+
         $productDetails = [];
 
         foreach ($items as $item) {
-            $productId = $item['productId'];
             $qty = $item['qty'];
-            $variantId = $item['variant_id'] ?? null;
             $modelImage = $item['model_image'] ?? null;
             $designImage = $item['design_image'] ?? null;
 
-            if ($variantId) {
-                $variant = ProductVariant::find($variantId);
-                $product = $variant->product; // Lấy sản phẩm từ biến thể
+            if (!empty($item['variant_id']) && $variants->has($item['variant_id'])) {
+                $variant = $variants->get($item['variant_id']);
+                $product = $variant->product;
                 $price = isOnSale($variant) ? $variant->discount_price : $variant->sale_price;
-                $originalPrice = $variant->sale_price; // Giá gốc
+                $originalPrice = $variant->sale_price;
+
                 $productDetails[] = [
                     'name' => $product->name,
-                    'id' => $productId,
-                    'variant_id' => $variantId,
+                    'id' => $product->id,
+                    'variant_id' => $variant->id,
                     'price' => $price,
                     'original_price' => $originalPrice,
                     'qty' => $qty,
                     'total' => $price * $qty,
-                    'image' => $product->image, // Ảnh sản phẩm (ưu tiên ảnh của biến thể)
+                    'image' => $product->image,
+                    'model_image' => $modelImage,
+                    'design_image' => $designImage,
+                ];
+            } elseif (!empty($item['productId']) && $products->has($item['productId'])) {
+                $product = $products->get($item['productId']);
+                $price = isOnSale($product) ? $product->discount_price : $product->sale_price;
+                $originalPrice = $product->sale_price;
+
+                $productDetails[] = [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'variant_id' => null,
+                    'price' => $price,
+                    'original_price' => $originalPrice,
+                    'qty' => $qty,
+                    'total' => $price * $qty,
+                    'image' => $product->image,
                     'model_image' => $modelImage,
                     'design_image' => $designImage,
                 ];
             } else {
-                $product = Product::find($productId);
-                $price = isOnSale($product) ? $product->discount_price : $product->sale_price;
-                $originalPrice = $product->sale_price; // Giá gốc
-
-                $productDetails[] = [
-                    'id' => $productId,
-                    'name' => $product->name,
-                    'variant_id' => null,
-                    'price' => $price,
-                    'original_price' => $originalPrice, // Giá gốc
-                    'qty' => $qty,
-                    'total' => $price * $qty,
-                    'image' => $product->image, // Ảnh sản phẩm
-                    'model_image' => $modelImage,
-                    'design_image' => $designImage,
-                ];
+                // Có thể throw exception hoặc log nếu không tìm thấy product/variant
+                logger()->warning("Product or variant not found for item", ['item' => $item]);
             }
         }
 
         return $productDetails;
     }
+
 
     // Hàm kiểm tra tính hợp lệ của coupon
     protected function isCouponValid($coupon): bool
@@ -543,7 +561,7 @@ class OrderController extends Controller
         }
     }
 
-    public function storeOrder(Request $request)
+    private function validation($request)
     {
         $request->validate(
             [
@@ -551,11 +569,10 @@ class OrderController extends Controller
                 'products.*.productId' => 'required|integer|exists:products,id',
                 'products.*.qty' => 'required|integer|min:1',
                 'products.*.variant_id' => 'nullable|integer|exists:product_variants,id',
+                'products.*.model_image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif,bmp,tiff|max:10240',
+                'products.*.design_image' => 'required|string',
 
                 'orderInfo' => 'required|array',
-                'orderInfo.coupon' => 'nullable|string|max:255|exists:coupons,code',
-                'orderInfo.paymentMethod' => 'required|string|in:later,wallet',
-                'orderInfo.shipping_method' => 'required|string|in:standard_shipping,express_shipping,international_shipping',
                 'orderInfo.first_name' => 'required|string|max:255',
                 'orderInfo.last_name' => 'required|string|max:255',
                 'orderInfo.email' => 'required|email|max:255',
@@ -565,8 +582,11 @@ class OrderController extends Controller
                 'orderInfo.city' => 'required|string|max:255',
                 'orderInfo.zip_code' => 'required|string|max:20',
                 'orderInfo.shipping_address' => 'required|string|max:500',
+                'orderInfo.coupon' => 'nullable|string|max:255|exists:coupons,code',
+                'orderInfo.payment_method' => 'required|string|in:later,wallet',
+                'orderInfo.shipping_method' => 'required|string|in:standard_shipping,express_shipping,international_shipping',
                 'orderInfo.note' => 'nullable|string|max:255',
-                'orderInfo.orderName' => 'required|max:255|unique:orders,order_name',
+                'orderInfo.order_name' => 'required|max:255|unique:orders,order_name',
             ],
             __('request.messages'),
             [
@@ -576,7 +596,7 @@ class OrderController extends Controller
                 'products.*.variant_id' => 'product variant',
 
                 'orderInfo.coupon' => 'coupon',
-                'orderInfo.paymentMethod' => 'payment method',
+                'orderInfo.payment_method' => 'payment method',
                 'orderInfo.shipping_method' => 'shipping method',
                 'orderInfo.first_name' => 'first name',
                 'orderInfo.last_name' => 'last name',
@@ -587,70 +607,83 @@ class OrderController extends Controller
                 'orderInfo.city' => 'city',
                 'orderInfo.zip_code' => 'zip code',
                 'orderInfo.shipping_address' => 'shipping address',
-                'orderInfo.orderName' => 'Order Name',
+                'orderInfo.order_name' => 'Order Name',
                 'orderInfo.note' => 'Note'
             ]
         );
+    }
+
+    public function storeOrder(Request $request)
+    {
+        $this->validation($request);
+
+        // Kiểm tra ảnh tồn tại
+        $designImages = collect($request->products)
+            ->filter(fn($item) => !empty($item['design_image']));
+
+        foreach ($designImages as $item) {
+            if (!Storage::disk('public')->exists($item['design_image'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Ảnh thiết kế {$item['design_image']} không tồn tại trên hệ thống!"
+                ], 404);
+            }
+        }
 
         try {
             DB::beginTransaction();
 
-            $tax = Config::query()->first()->tax_rate;
+            $tax = Cache::remember('tax_rate', 60 * 60, function () {
+                $config = Config::query()->first();
+                return $config ? $config->tax_rate : 0;
+            });
 
-            // Lấy thông tin vận chuyển
             $shippingAddress = $this->getShippingDetails($request['orderInfo']);
 
             $shippingFee = 0;
             $shippingMethod = $request['orderInfo']['shipping_method'];
 
-            $this->calculateShippingFee($shippingMethod, $request['products'], $shippingFee);
+            $errorShippingFee = $this->calculateShippingFee($shippingMethod, $request['products'], $shippingFee);
+            if ($errorShippingFee) {
+                DB::rollBack();
+                return errorResponse($errorShippingFee, true);
+            }
 
-
-            // Kiểm tra mã giảm giá nếu có
             $coupon = $this->checkCoupon($request['orderInfo']['coupon'] ?? null);
-
-            if ($coupon === false)
+            if ($coupon === false) {
+                DB::rollBack();
                 return errorResponse("Coupon has expired or does not exist!", true);
+            }
 
-            // Lấy chi tiết sản phẩm và tính toán tổng đơn hàng
             $productDetails = $this->getProductDetails($request['products']);
-
             $subTotal = $this->calculateSubTotal($productDetails);
-
             $totals = $this->calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee, $tax);
 
-            // Tạo đơn hàng và lưu các sản phẩm
             $order = $this->storeOrderDetails($request['orderInfo'], $totals['grandTotal'], $totals['discountAmount'], $shippingFee, $shippingAddress, $tax);
 
             $this->storeOrderItems($order, $productDetails);
 
             $this->couponUser($coupon, $order);
 
-            if ($request['orderInfo']['paymentMethod'] === "wallet") {
+            if ($request['orderInfo']['payment_method'] === "wallet") {
                 $wallet = Wallet::firstOrCreate(
                     ['user_id' => auth()->id()],
                     ['balance' => 0]
                 );
 
-                if ($wallet->balance < $totals['grandTotal'])
-                    return errorResponse("Insufficient balance, please top up to continue payment", true, 400);
-
-                $this->paymentViaWallet($order, $wallet);
+                $wallet->decrement('balance', $totals['grandTotal']);
             }
 
             DB::commit();
 
-            // OrderCreated.php (Event)
-            // UpdateStockOnOrderCreated (Listener)
-
-            return handleResponse('Order created successfully.', 'success', 201);
+            return response()->json(['success' => true, 'message' => 'Order successfully created']);
         } catch (\Exception $e) {
-            logger("message: " . $e->getMessage() . "line: " . $e->getLine());
-
             DB::rollBack();
-            return errorResponse('An error occurred while creating the order, please try again later!', true);
+            logger("Lỗi khi tạo đơn hàng: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
 
     private function paymentViaWallet($order, $wallet, string $type = 'withdraw')
     {
@@ -735,10 +768,10 @@ class OrderController extends Controller
                 'email' => $orderInfo['email'],
                 'zip_code' => $orderInfo['zip_code'],
                 'order_code' => generateOrderCode(),
-                'order_name' => $orderInfo['orderName'],
+                'order_name' => $orderInfo['order_name'],
                 'status' => 'pending',
-                'payment_status' => $orderInfo['paymentMethod'] !== 'later' ? 'completed' : 'pending',
-                'payment_method' => $orderInfo['paymentMethod'] !== 'later' ? 'bank_transfer' : null,
+                'payment_status' => $orderInfo['payment_method'] !== 'later' ? 'completed' : 'pending',
+                'payment_method' => $orderInfo['payment_method'] !== 'later' ? 'bank_transfer' : null,
                 'phone_number' => $orderInfo['phone_number'],
                 'shipping_address' => $shippingAddress,
                 'note' => $orderInfo['note'],
@@ -750,28 +783,37 @@ class OrderController extends Controller
         );
     }
 
+    private function uploadProductImages($product, $index)
+    {
+        $modelImagePath = null;
+        $designImagePath = null;
+
+        if (isset($product['model_image']) && $product['model_image'] instanceof \Illuminate\Http\UploadedFile) {
+            $modelImagePath = uploadImages("products.$index.model_image", 'mockup', false, 150, 150, false);
+        }
+
+        if (isset($product['design_image']) && is_string($product['design_image'])) {
+            $designImagePath = $product['design_image'];
+        }
+
+        return [$modelImagePath, $designImagePath];
+    }
+
     private function storeOrderItems($order, $productDetails)
     {
-        // Mảng để lưu lại các hình ảnh đã upload thành công
         $uploadedImages = [];
+        $orderItems = [];
 
         try {
             foreach ($productDetails as $index => $product) {
-                // Lấy đường dẫn ảnh cho từng sản phẩm
-                $modelImagePath = null;
-                $designImagePath = null;
+                [$modelImagePath, $designImagePath] = $this->uploadProductImages($product, $index);
 
-                if (isset($product['model_image']) && $product['model_image'] instanceof \Illuminate\Http\UploadedFile) {
-                    $modelImagePath = uploadImages("products.$index.model_image", 'mockup', false, 150, 150, false);
-                    $uploadedImages[] = $modelImagePath;
-                }
+                // Lưu tạm đường dẫn ảnh gốc để copy sau
+                if ($modelImagePath) $uploadedImages[$index]['model_image'] = $modelImagePath;
+                if ($designImagePath) $uploadedImages[$index]['design_image'] = $designImagePath;
 
-                if (isset($product['design_image']) && $product['design_image'] instanceof \Illuminate\Http\UploadedFile) {
-                    $designImagePath = uploadImages("products.$index.design_image", 'design', false, 150, 150, false);
-                    $uploadedImages[] = $designImagePath;
-                }
-
-                $order->orderItems()->create([
+                // Tạo orderItem với ảnh gốc trước
+                $orderItems[$index] = $order->orderItems()->create([
                     'product_id' => $product['id'],
                     'product_variant_id' => $product['variant_id'] ?? null,
                     'product_name' => $product['name'],
@@ -783,18 +825,42 @@ class OrderController extends Controller
                     'design_image' => $designImagePath,
                 ]);
             }
-        } catch (\Exception $e) {
-            logger("Lỗi xảy ra khi lưu sản phẩm: " . $e->getMessage());
 
-            // Nếu lỗi xảy ra, xóa tất cả ảnh đã upload
-            foreach ($uploadedImages as $path) {
-                deleteImage($path);
+            // Tạo thư mục nếu chưa tồn tại
+            if (!Storage::disk('public')->exists('order_design_images')) {
+                Storage::disk('public')->makeDirectory('order_design_images');
             }
 
-            throw new \Exception("Đã có lỗi xảy ra khi lưu sản phẩm. Ảnh đã được rollback.");
+            // Copy ảnh design_image rồi update lại đường dẫn trong DB
+            foreach ($uploadedImages as $index => $images) {
+                if (isset($images['design_image'])) {
+                    $oldPath = $images['design_image'];
+                    $extension = pathinfo($oldPath, PATHINFO_EXTENSION);
+                    $filename = pathinfo($oldPath, PATHINFO_FILENAME);
+
+                    // Tạo tên file mới, ví dụ nối thêm uuid hoặc time()
+                    $newFilename = $filename . '_' . Str::uuid() . '.' . $extension;
+
+                    $newPath = "order_design_images/$newFilename";
+
+                    Storage::disk('public')->copy($oldPath, $newPath);
+
+                    // Update lại design_image của orderItem trong DB
+                    $orderItems[$index]->update([
+                        'design_image' => $newPath,
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            logger("Lỗi khi lưu sản phẩm: " . $e->getMessage());
+            foreach ($uploadedImages as $images) {
+                foreach ($images as $path) {
+                    deleteImage($path);
+                }
+            }
+            throw new \Exception("Lỗi xảy ra khi lưu sản phẩm, rollback ảnh.");
         }
     }
-
 
     public function orderCancel(Request $request)
     {
@@ -852,31 +918,33 @@ class OrderController extends Controller
 
     private function calculateShippingFee($shippingMethod, $products, &$sum)
     {
+        $variantIds = collect($products)->pluck('variant_id')->filter()->all();
+        $productIds = collect($products)->pluck('productId')->all();
+
+        $variants = ProductVariant::whereIn('id', $variantIds)->get()->keyBy('id');
+        $productsModels = Product::whereIn('id', $productIds)->get()->keyBy('id');
+
         foreach ($products as $product) {
-            if (isset($product['variant_id'])) {
-                $variant = ProductVariant::query()
-                    ->where('product_id', $product['productId'])
-                    ->where('id', $product['variant_id'])
-                    ->first();
-
-                if (!$variant) {
-                    return "Cannot find product with ID: {$product['variant_id']}";
+            if (!empty($product['variant_id']) && $variants->has($product['variant_id'])) {
+                $variant = $variants->get($product['variant_id']);
+                if (!isset($variant->$shippingMethod)) {
+                    return "Shipping method '{$shippingMethod}' not defined on variant ID {$variant->id}";
                 }
-
                 $sum += $variant->$shippingMethod * $product['qty'];
-            } else {
-                $productModel = Product::query()->find($product['productId']);
-
-                if (!$productModel) {
-                    return "No products found with ID: {$product['productId']}";
+            } elseif (!empty($product['productId']) && $productsModels->has($product['productId'])) {
+                $productModel = $productsModels->get($product['productId']);
+                if (!isset($productModel->$shippingMethod)) {
+                    return "Shipping method '{$shippingMethod}' not defined on product ID {$productModel->id}";
                 }
-
                 $sum += $productModel->$shippingMethod * $product['qty'];
+            } else {
+                return "Product or variant not found for shipping fee calculation";
             }
         }
 
-        return null; // Không có lỗi
+        return null; // Không lỗi
     }
+
 
     public function payBulk(Request $request)
     {
@@ -991,30 +1059,28 @@ class OrderController extends Controller
     {
 
         $request->validate([
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp,gif,bmp,tiff|max:10240',
-            'expectedPpi' => 'required|integer',
+            'image_id' => 'required|integer|exists:photos,id',
+            'width' => 'required|integer',
+            'height' => 'required|integer',
+            'format' => 'nullable|string',
+            'dpi' => 'nullable|integer',
         ]);
 
-        $file = $request->file('image');
-
         try {
-            $info = getImageInfo($file, false);
+            $photo = Photo::query()->findOrFail($request->image_id);
 
-            // $valid =
-            //     $info['width'] === (int) $request->expectedWidth &&
-            //     $info['height'] === (int) $request->expectedHeight &&
-            //     abs($info['x_dpi'] - (float) $request->expectedPpi) <= 5 &&
-            //     strtolower($info['format']) === strtolower($request->expectedFormat);
-
-            $valid = abs($info['x_dpi'] - (float) $request->expectedPpi) <= 5;
-
+            $valid =
+                (int) $photo->width === (int) $request->width &&
+                (int) $photo->height === (int) $request->height &&
+                abs($photo->ppi - (float) $request->dpi) <= 5 &&
+                strtolower($photo->format) === strtolower($request->format);
+                
             // $start = microtime(true);
             // \Log::info('Time to process image: ' . (microtime(true) - $start) . 's');
 
             return response()->json([
                 'valid' => $valid,
-                'ppi' => $info['x_dpi'],
-                'expectedPpi' => (int) $request->expectedPpi,
+                'photo' => $photo
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -1155,8 +1221,8 @@ class OrderController extends Controller
                 if (!$valid) {
                     return errorResponse(
                         "Invalid image specifications.\n" .
-                        "Expected: width: {$variant->design_width}px, height: {$variant->design_height}px, PPI: {$variant->design_ppi}, format: {$variant->design_format}.\n" .
-                        "Your image: width: {$info['width']}px, height: {$info['height']}px, PPI: {$info['x_dpi']}, format: {$info['format']}.",
+                            "Expected: width: {$variant->design_width}px, height: {$variant->design_height}px, PPI: {$variant->design_ppi}, format: {$variant->design_format}.\n" .
+                            "Your image: width: {$info['width']}px, height: {$info['height']}px, PPI: {$info['x_dpi']}, format: {$info['format']}.",
                         true
                     );
                 }
