@@ -132,12 +132,14 @@ if (!function_exists('hasFile')) {
     }
 }
 
-function getImageInfo($file, bool $fullInfo = true): array
+function getImageInfo($filePathOrFile, bool $fullInfo = true): array
 {
-    $filePath = is_string($file) ? $file : $file->getRealPath();
+    // Nhận vào instance hoặc đường dẫn string
+    $filePath = is_string($filePathOrFile) ? $filePathOrFile : $filePathOrFile->getRealPath();
 
     $result = [];
 
+    // Lấy kích thước ảnh (width, height)
     if ($fullInfo) {
         $info = @getimagesize($filePath);
         if (!$info) {
@@ -147,6 +149,7 @@ function getImageInfo($file, bool $fullInfo = true): array
         $width = $info[0];
         $height = $info[1];
 
+        // Giới hạn ảnh quá lớn
         if ($width > 8000 || $height > 8000) {
             throw new \Exception("Ảnh vượt quá kích thước tối đa cho phép.");
         }
@@ -155,6 +158,7 @@ function getImageInfo($file, bool $fullInfo = true): array
         $result['height'] = $height;
     }
 
+    // Dùng Imagick để lấy DPI & định dạng
     try {
         $image = new \Imagick();
         $image->pingImage($filePath);
@@ -165,6 +169,7 @@ function getImageInfo($file, bool $fullInfo = true): array
         $x_dpi = $resolution['x'] ?? 72;
         $y_dpi = $resolution['y'] ?? 72;
 
+        // Nếu đơn vị là pixels/cm, chuyển đổi sang DPI
         if ($unit === \Imagick::RESOLUTION_PIXELSPERCENTIMETER) {
             $x_dpi = round($x_dpi * 2.54, 2);
             $y_dpi = round($y_dpi * 2.54, 2);
@@ -174,15 +179,16 @@ function getImageInfo($file, bool $fullInfo = true): array
         $result['y_dpi'] = $y_dpi;
 
         if ($fullInfo) {
-            $result['format'] = $image->getImageFormat();
+            $result['format'] = $image->getImageFormat(); // JPEG, PNG...
             $result['unit'] = $unit === 2 ? 'dpi' : ($unit === 3 ? 'pixels/cm' : 'unknown');
         }
 
         return $result;
     } catch (\Exception $e) {
-        throw new \Exception("Lỗi xử lý ảnh: " . $e->getMessage());
+        throw new \Exception("Lỗi khi đọc thông tin ảnh: " . $e->getMessage());
     }
 }
+
 
 
 if (!function_exists('showImage')) {

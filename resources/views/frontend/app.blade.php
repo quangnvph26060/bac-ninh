@@ -222,6 +222,12 @@
                                         Order</span>
                                 </a>
                             </li>
+                            <li class="nav-item {{ request()->routeIs('photos.index') ? 'active' : '' }}">
+                                <a href="{{ route('photos.index') }}" class="nav-link">
+                                    <i class="bi bi-images"></i>
+                                    <span>Design library</span>
+                                </a>
+                            </li>
                             <li class="nav-item {{ request()->routeIs('bills.index') ? 'active' : '' }}">
                                 <a href="{{ route('bills.index') }}" class="nav-link">
                                     <i class="bi bi-receipt-cutoff"></i>

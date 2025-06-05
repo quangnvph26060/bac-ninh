@@ -373,6 +373,8 @@
             </div>
         </div>
     </div>
+
+    @include('frontend.components.modal-photo')
 @endsection
 
 
@@ -399,31 +401,36 @@
                 let variantId = $form.find('[id^="info_variant_"]').attr('data-variant-id');
                 let qty = $form.find('.step_product_input').val();
 
-                // Get image files using native DOM
+                // Lấy model image từ input file (nếu có)
                 let modelImageInput = document.getElementById(`model_${productId}`);
-                let designImageInput = document.getElementById(`design_${productId}`);
-
-                // Lấy file từ input nếu có, nếu không sẽ là null
                 let modelImage = (modelImageInput && modelImageInput.files.length > 0) ? modelImageInput.files[0] :
                     null;
-                let designImage = (designImageInput && designImageInput.files.length > 0) ? designImageInput.files[
-                    0] : null;
+
+                // 🔍 Lấy đường dẫn ảnh design từ <img src="">
+                let designImageElement = document.getElementById(`show_design_${productId}`);
+                let designImage = designImageElement ? designImageElement.getAttribute('src') : null;
+
+                // ✅ Kiểm tra nếu chưa có ảnh design hoặc chưa có class has-image thì bỏ qua
+                let imageWrapper = document.getElementById(`image_container_${productId}`);
+                let hasImage = imageWrapper?.classList.contains('has-image');
+
+                if (!hasImage || !designImage || designImage === '{{ showImage('') }}') {
+                    datgin.error(`Please select image design for product ID: ${productId}`);
+                    return; // Bỏ qua sản phẩm này
+                }
 
                 let item = {
                     productId: productId,
-                    qty: qty
+                    qty: qty,
+                    design_image: designImage.split('/storage/')[1]
                 };
 
                 if (variantId !== undefined) {
                     item.variant_id = variantId;
                 }
 
-                // Add image data if exists
                 if (modelImage) {
                     item.model_image = modelImage;
-                }
-                if (designImage) {
-                    item.design_image = designImage;
                 }
 
                 result.push(item);
@@ -431,6 +438,7 @@
 
             return result;
         }
+
 
         function applyCoupon(forceApply = false) {
             let $input_coupon = $('#input_coupon');
@@ -506,19 +514,20 @@
 
         $('#btn-save-order').on('click', async function() {
             const formData = new FormData();
-            let products = getFormData();
+            let products =
+                getFormData();
 
-            // ✅ Thêm từng ảnh vào FormData
             products.forEach((product, index) => {
-
+                // ✅ Nếu model_image là Base64 hoặc URL (tuỳ bạn), giữ nguyên
                 if (product.model_image) {
                     formData.append(`products[${index}][model_image]`, product.model_image);
                 }
+
+                // ✅ design_image giờ là URL ảnh
                 if (product.design_image) {
                     formData.append(`products[${index}][design_image]`, product.design_image);
                 }
 
-                // ✅ Thêm các trường thông tin sản phẩm vào FormData
                 formData.append(`products[${index}][productId]`, product.productId);
                 formData.append(`products[${index}][qty]`, product.qty);
                 if (product.variant_id) {
@@ -536,22 +545,21 @@
                 orderName: $('.input_order_name').val()
             };
 
-            // ✅ Thêm thông tin khách hàng
             let inputIds = [
                 'first_name', 'last_name', 'email', 'phone_number', 'country', 'state', 'city',
-                'zip_code', 'shipping_address', 'tax_code', 'note'
+                'zip_code', 'shipping_address', 'note'
             ];
             inputIds.forEach(function(id) {
                 formData.append(`orderInfo[${id}]`, $(`#${id}`).val());
             });
 
-            // ✅ Thêm các thông tin khác vào FormData
+            // Lặp lại thông tin order vào formData
             formData.append('orderInfo[coupon]', coupon);
-            formData.append('orderInfo[paymentMethod]', paymentMethod);
-            formData.append('orderInfo[shipping_method]', $('input[name="shipping_method"]:checked').val());
-            formData.append('orderInfo[orderName]', $('.input_order_name').val());
+            formData.append('orderInfo[payment_method]', paymentMethod);
+            formData.append('orderInfo[shipping_method]', orderInfo.shipping_method);
+            formData.append('orderInfo[order_name]', orderInfo.orderName);
 
-            // 🚀 AJAX Request
+            // 🚀 Gửi AJAX
             try {
                 $('#loading').show();
 
@@ -564,13 +572,14 @@
                 });
 
                 window.location.href = '{{ route('orders.index') }}';
+
+                localStorage.clear();
             } catch (error) {
                 datgin.error(error.responseJSON?.message || "Đã xảy ra lỗi.");
             } finally {
                 $('#loading').hide();
             }
         });
-
 
         function cleanCurrency(value) {
             return parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
@@ -628,30 +637,29 @@
 
                     <hr class="my-3">
 
-
                     <div class="d-flex gap-3">
 
                         ${product.model_image ? `
-                                                                                                                                                                                                                                                    <div style="width: 103px;">
-                                                                                                                                                                                                                                                        <div class="fw-semibold">Mockup</div>
-                                                                                                                                                                                                                                                        <div class="image-container">
-                                                                                                                                                                                                                                                            <img class="img-thumbnail"
-                                                                                                                                                                                                                                                                style="cursor: pointer;"
-                                                                                                                                                                                                                                                                src="${product.model_image}">
-                                                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                                    ` : ''}
+                                                        <div style="width: 103px;">
+                                                            <div class="fw-semibold">Mockup</div>
+                                                            <div class="image-container">
+                                                                <img class="img-thumbnail"
+                                                                    style="cursor: pointer;"
+                                                                    src="${product.model_image}">
+                                                            </div>
+                                                        </div>
+                                                        ` : ''}
 
                         ${product.design_image ? `
-                                                                                                                                                                                                                                                    <div style="width: 103px;">
-                                                                                                                                                                                                                                                        <div class="fw-semibold">Design photo</div>
-                                                                                                                                                                                                                                                        <div class="image-container">
-                                                                                                                                                                                                                                                            <img class="img-thumbnail"
-                                                                                                                                                                                                                                                                style="cursor: pointer;"
-                                                                                                                                                                                                                                                                src="${product.design_image}">
-                                                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                                    ` : ''}
+                                                        <div style="width: 103px;">
+                                                            <div class="fw-semibold">Design photo</div>
+                                                            <div class="image-container">
+                                                                <img class="img-thumbnail"
+                                                                    style="cursor: pointer;"
+                                                                    src="${product.design_image}">
+                                                            </div>
+                                                        </div>
+                                                        ` : ''}
                     </div>
                 </div>
 
@@ -753,8 +761,6 @@
 
             const products = [];
             let allImagesSelected = true;
-
-            // Tạo danh sách các Promise để đọc ảnh
             const promises = [];
 
             $('#confirmed-products-wrapper .custom-form').each(function() {
@@ -768,54 +774,37 @@
                 const totalPrice = productEl.find('.total-price span').text().trim();
                 const quantity = productEl.find('.step_product_input').val();
 
-                const designImageInput = productEl.find(`#design_${productId}`);
-                const modelImageInput = productEl.find(`#model_${productId}`);
-
-                // Biến chứa đường dẫn ảnh (Base64)
+                const imageWrapper = $(`#image_container_${productId}`);
+                const imgEl = imageWrapper.find(`#show_design_${productId}`);
+                const imageSrc = imgEl.attr('src') || '';
+                const hasImage = imageWrapper.hasClass('has-image');
                 let designImageBase64 = null;
                 let modelImageBase64 = null;
 
-                // 🔎 Kiểm tra ảnh "Design photo" đã chọn chưa
-                if (designImageInput.get(0).files.length === 0) {
-                    datgin.error(`Please select a design image for the product: ${name}`);
-                    productEl.css('border', '1px solid red');
+                // Kiểm tra xem đã có ảnh design chưa
+                if (!hasImage || imageSrc === '' || imageSrc.includes('default')) {
+                    datgin.error(`Vui lòng chọn ảnh thiết kế cho sản phẩm: ${name}`);
                     allImagesSelected = false;
                 } else {
-                    productEl.css('border', '');
-
-                    // Tạo Promise cho ảnh design
-                    const designPromise = new Promise((resolve) => {
-                        const designFile = designImageInput.get(0).files[0];
-                        const designReader = new FileReader();
-                        designReader.onload = function(event) {
-                            designImageBase64 = event.target.result;
-                            resolve(); // ✅ Đánh dấu hoàn thành
-                        };
-                        designReader.readAsDataURL(designFile);
-                    });
-
-                    // Thêm vào danh sách Promise
-                    promises.push(designPromise);
+                    designImageBase64 = imageSrc; // Lưu URL vào
                 }
 
-                // 🔎 Kiểm tra ảnh "Model" (không bắt buộc)
-                if (modelImageInput.get(0).files.length > 0) {
-                    // Tạo Promise cho ảnh model
+                // Xử lý ảnh model (vẫn là file input)
+                const modelImageInput = productEl.find(`#model_${productId}`);
+                if (modelImageInput.get(0)?.files.length > 0) {
                     const modelPromise = new Promise((resolve) => {
                         const modelFile = modelImageInput.get(0).files[0];
-                        const modelReader = new FileReader();
-                        modelReader.onload = function(event) {
-                            modelImageBase64 = event.target.result;
-                            resolve(); // ✅ Đánh dấu hoàn thành
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            modelImageBase64 = e.target.result;
+                            resolve();
                         };
-                        modelReader.readAsDataURL(modelFile);
+                        reader.readAsDataURL(modelFile);
                     });
-
-                    // Thêm vào danh sách Promise
                     promises.push(modelPromise);
                 }
 
-                // Lấy các giá trị attribute đã chọn (nếu là variant)
+                // Thu thập attributes
                 const attributes = [];
                 productEl.find('select.product-attr-select').each(function() {
                     const attrName = $(this).find('option:selected').text();
@@ -830,8 +819,8 @@
 
                 const attributesText = attributes.map(attr => attr.name).join(' - ');
 
-                // Sau khi tất cả ảnh của product này được load xong, push vào products
-                Promise.all(promises).then(() => {
+                // Push product vào danh sách sau khi model ảnh load (hoặc ngay nếu không có)
+                const finalPush = () => {
                     products.push({
                         id: productId,
                         time: time,
@@ -846,14 +835,30 @@
                         design_image: designImageBase64,
                         model_image: modelImageBase64
                     });
-                });
+                };
+
+                if (modelImageInput.get(0)?.files.length > 0) {
+                    promises.push(
+                        new Promise((resolve) => {
+                            const checkDone = setInterval(() => {
+                                if (modelImageBase64 !== null) {
+                                    finalPush();
+                                    clearInterval(checkDone);
+                                    resolve();
+                                }
+                            }, 100);
+                        })
+                    );
+                } else {
+                    finalPush();
+                }
             });
 
-            // Chờ tất cả các ảnh đều load xong
             Promise.all(promises).then(() => {
                 if (!allImagesSelected) {
                     return;
                 }
+
                 renderReviewProducts(products);
                 updateStepStatus(1, {
                     step: 2,
@@ -910,7 +915,6 @@
 
             const formDataArray = $(form).serializeArray();
 
-            // Chuyển mảng thành object: {first_name: "A", last_name: "B", ...}
             const formData = {};
             formDataArray.forEach(field => {
                 formData[field.name] = field.value;
@@ -1301,13 +1305,9 @@
                                             <input type="file" name="model" id="model_${product.id}" class="form-control d-none"
                                                 accept="image/*" onchange="previewImage(event, 'show_model_${product.id}')">
                                         </div>
-                                        <form class="design-upload position-relative" style="width: 11%;" enctype="multipart/form-data" id="design_form_${product.id}">
+                                        <div class="design-upload position-relative" style="width: 11%;" id="design_form_${product.id}">
                                             <div class="design-tooltip position-absolute"
                                                 id="design-tooltip-${product.id}"
-                                                data-width="${product.expected_width}"
-                                                data-height="${product.expected_height}"
-                                                data-dpi="${product.expected_dpi}"
-                                                data-format="${product.expected_format}"
                                                 style="top: 31px; right: 5px; z-index: 10; cursor: pointer;">
                                                 <i class="fa-solid fa-circle-info"></i>
                                                 <div class="design-tooltip-content"></div>
@@ -1315,27 +1315,20 @@
 
                                             <label class="form-label fw-bold d-block required">Design photo</label>
 
-                                            <div class="image-container">
-                                                <img class="img-thumbnail"
-                                                    id="show_design_${product.id}"
-                                                    style="cursor: pointer;"
-                                                    src="${product.image_preview || '/images/image-default.png'}"
-                                                    alt=""
-                                                    onclick="document.getElementById('design_${product.id}').click();">
+                                            <div class="position-relative image-preview-wrapper" id="image_container_${product.id}">
+                                                <button class="custom-btn btn open-mockup-modal w-100" data-bs-toggle="modal" data-bs-target="#mockupModal" data-product-id="${product.id}">
+                                                    <img src="{{ showImage('') }}" class="img-fluid rounded" alt="" id="show_design_${product.id}">
+                                                </button>
 
-                                                <div class="image-hover-actions" id="delete_icon_${product.id}">
-                                                    <i class="fa-solid fa-eye" onclick="viewImage('show_design_${product.id}')"></i>
-                                                    <i class="fa-solid fa-trash" onclick="removeImage('show_design_${product.id}', 'design_${product.id}', '${product.image_default || '/images/image-default.png'}')"></i>
+                                                <div class="image-hover-icons justify-content-center align-items-center position-absolute top-0 start-0 w-100 h-100" style="pointer-events: auto;">
+                                                    <i class="bi bi-trash me-2 cursor-pointer remove-image" title="Xoá"></i>
+                                                    <a href="{{ showImage('') }}" class="image-zoom-link ms-2 text-white" title="Phóng to">
+                                                        <i class="bi bi-arrows-fullscreen cursor-pointer"></i>
+                                                    </a>
                                                 </div>
                                             </div>
 
-                                            <input type="file"
-                                                name="design"
-                                                id="design_${product.id}"
-                                                class="form-control d-none"
-                                                accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.tiff"
-                                                onchange="validateAndPreviewImage(event, 'show_design_${product.id}', 'design-tooltip-${product.id}', '${product.image_default || '/images/image-default.png'}')">
-                                        </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>`;

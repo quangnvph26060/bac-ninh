@@ -5,6 +5,7 @@ use App\Http\Controllers\Frontend\App\BillController;
 use App\Http\Controllers\Frontend\App\CouponController;
 use App\Http\Controllers\Frontend\App\DashboardController;
 use App\Http\Controllers\Frontend\App\OrderController;
+use App\Http\Controllers\Frontend\App\PhotoController;
 use App\Http\Controllers\Frontend\Auth\AuthController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
@@ -64,6 +65,12 @@ Route::middleware('auth')->group(function () {
         Route::get('profile', 'profile')->name('profile');
         Route::post('update', 'update')->name('profile.update');
         Route::post('change-password', 'changePassword')->name('change.password');
+    });
+
+    Route::group(['controller' => PhotoController::class], function () {
+        Route::get('photos', 'index')->name('photos.index');
+        Route::post('photos', 'upload');
+        Route::delete('photos', 'bulkDelete');
     });
 
     Route::group(['controller' => TicketController::class], function () {
