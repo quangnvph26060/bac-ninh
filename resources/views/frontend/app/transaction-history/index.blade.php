@@ -101,18 +101,18 @@
                 },
                 beforeSend: () => {
                     $('#result').hide();
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: function(response) {
                     $('#result').html(response.html).fadeIn(200);
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 },
                 error: function(xhr) {
                     console.error("Lỗi khi lọc:", xhr);
                     datgin.error('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                     $('#result').show();
                 }
             });

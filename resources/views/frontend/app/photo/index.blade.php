@@ -211,7 +211,7 @@
                 processData: false,
                 contentType: false,
                 beforeSend: () => {
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: function(res) {
                     if (res.success) {
@@ -228,7 +228,7 @@
                     datgin.error('Đã có lỗi xảy ra.');
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 }
             });
         });
@@ -308,7 +308,7 @@
                     ids: selectedIds,
                 },
                 beforeSend: () => {
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: function(res) {
                     if (res.success) {
@@ -327,7 +327,7 @@
                     datgin.error('Đã xảy ra lỗi khi xóa ảnh.');
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 }
             });
         });
@@ -349,7 +349,7 @@
                     per_page
                 },
                 beforeSend: () => {
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: (response) => {
                     $('#imageGrid').html(response.data);
@@ -363,7 +363,7 @@
                     datgin.error(xhr.responseJSON.messages)
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 }
             })
         }

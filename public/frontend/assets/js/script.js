@@ -4,53 +4,93 @@ AOS.init({
     delay: 200, // Độ trễ trước khi chạy
 });
 
-// Thumbnail slider (ảnh nhỏ) có autoplay
-function initThumbSlider() {
-    let isVertical = window.matchMedia("(min-width: 768px)").matches; // Kiểm tra màn hình
+// // Thumbnail slider (ảnh nhỏ) có autoplay
+// function initThumbSlider() {
+//     let isVertical = window.matchMedia("(min-width: 768px)").matches; // Kiểm tra màn hình
 
-    return new Swiper(".thumb-slider", {
-        spaceBetween: 20,
-        slidesPerView: 5,
-        direction: isVertical ? "vertical" : "horizontal", // Dọc khi lớn hơn 768px, ngang khi nhỏ hơn
-        loop: true,
-        autoplay: {
-            delay: 3000, // Tự chạy mỗi 3 giây
-            disableOnInteraction: false,
+//     return new Swiper(".thumb-slider", {
+//         spaceBetween: 20,
+//         slidesPerView: 5,
+//         direction: isVertical ? "vertical" : "horizontal", // Dọc khi lớn hơn 768px, ngang khi nhỏ hơn
+//         loop: true,
+//         autoplay: {
+//             delay: 3000, // Tự chạy mỗi 3 giây
+//             disableOnInteraction: false,
+//         },
+//         watchSlidesProgress: true,
+//         watchSlidesVisibility: true,
+//     });
+// }
+
+// var thumbSlider = initThumbSlider();
+
+// window.addEventListener("resize", function () {
+//     let newIsVertical = window.matchMedia("(min-width: 768px)").matches;
+//     let newSlidesPerView = 5;
+
+//     if (
+//         newIsVertical !== (thumbSlider.params.direction === "vertical") ||
+//         newSlidesPerView !== thumbSlider.params.slidesPerView
+//     ) {
+//         thumbSlider.destroy(true, true); // Hủy slider cũ
+//         thumbSlider = initThumbSlider(); // Tạo lại slider mới
+//         mainSlider.thumbs.swiper = thumbSlider; // Cập nhật liên kết thumbnail
+//     }
+// });
+
+// // Main slider (ảnh lớn)
+// var mainSlider = new Swiper(".main-slider", {
+//     spaceBetween: 10,
+//     loop: true,
+//     effect: "fade",
+//     autoplay: {
+//         delay: 3000, // Đồng bộ chạy với thumbnail
+//         disableOnInteraction: false,
+//     },
+//     thumbs: {
+//         swiper: thumbSlider, // Liên kết với thumbnail slider
+//     },
+// });
+
+let thumbSlider = new Swiper(".thumb-slider", {
+    spaceBetween: 20,
+    slidesPerView: 5,
+    freeMode: true,
+    watchSlidesProgress: true,
+    direction: window.innerWidth > 768 ? "vertical" : "horizontal",
+    breakpoints: {
+        0: {
+            slidesPerView: 5,
+            direction: "horizontal",
         },
-        watchSlidesProgress: true,
-        watchSlidesVisibility: true,
-    });
-}
-
-var thumbSlider = initThumbSlider();
-
-window.addEventListener("resize", function () {
-    let newIsVertical = window.matchMedia("(min-width: 768px)").matches;
-    let newSlidesPerView = 5;
-
-    if (
-        newIsVertical !== (thumbSlider.params.direction === "vertical") ||
-        newSlidesPerView !== thumbSlider.params.slidesPerView
-    ) {
-        thumbSlider.destroy(true, true); // Hủy slider cũ
-        thumbSlider = initThumbSlider(); // Tạo lại slider mới
-        mainSlider.thumbs.swiper = thumbSlider; // Cập nhật liên kết thumbnail
-    }
+        769: {
+            slidesPerView: 5,
+            direction: "vertical",
+        },
+    },
 });
 
-// Main slider (ảnh lớn)
-var mainSlider = new Swiper(".main-slider", {
+let mainSlider = new Swiper(".main-slider", {
     spaceBetween: 10,
-    loop: true,
-    effect: "fade",
     autoplay: {
-        delay: 3000, // Đồng bộ chạy với thumbnail
+        delay: 3000,
         disableOnInteraction: false,
     },
     thumbs: {
-        swiper: thumbSlider, // Liên kết với thumbnail slider
+        swiper: thumbSlider,
     },
 });
+
+// Cập nhật hướng thumbnail khi resize
+window.addEventListener("resize", () => {
+    const dir = window.innerWidth > 768 ? "vertical" : "horizontal";
+    thumbSlider.changeDirection(dir);
+});
+
+const mainSliderEl = document.querySelector(".main-slider");
+
+mainSliderEl.addEventListener("mouseenter", () => mainSlider.autoplay.stop());
+mainSliderEl.addEventListener("mouseleave", () => mainSlider.autoplay.start());
 
 var swiper = new Swiper(".my-catalog", {
     slidesPerView: 2,

@@ -220,6 +220,7 @@ class BaseService
         array $whereHasConditions = [],
         array $withCount = [],
         array $order = [],
+        array $withSum = []
     ) {
         $conditions = $this->payload();
 
@@ -231,6 +232,10 @@ class BaseService
 
         if ($withCount) {
             $query->withCount($withCount);
+        }
+
+        foreach ($withSum as $relation => $column) {
+            $query->withSum($relation, $column);
         }
 
         foreach ($wheres as $condition) {
@@ -259,7 +264,6 @@ class BaseService
 
             $query->whereBetween('created_at', [$startDate, $endDate]);
         }
-
 
         if ($order) {
             $query->orderBy($order[0], $order[1]);

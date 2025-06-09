@@ -100,17 +100,17 @@
                 },
                 beforeSend: () => {
                     $('#coupon-content').hide();
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: function(response) {
                     $('#coupon-content').html(response.html).fadeIn(200);
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 },
                 error: function(xhr) {
                     datgin.error('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                     $('#coupon-content').show();
                 }
             });

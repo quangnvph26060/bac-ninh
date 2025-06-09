@@ -186,25 +186,15 @@
         ]
     },
     {
-        "title": "Quản lý vật liệu",
-        "icon": "fa-solid fa-box",
-        "id": "materials",
-        "children": [
-            {
-                "title": "Vật liệu",
-                "url": "admin.materials.index"
-            },
-            {
-                "title": "Quản lý nhập kho",
-                "url": "admin.warehouse.index"
-            }
-        ],
-        "inRoutes": ["admin.materials.index", "admin.warehouse.index"]
-    },
-    {
         "title": "Tin nhắn",
         "icon": "far fa-comment-dots",
         "route": "admin.chats.index",
         "id": "message"
+    },
+    {
+        "title": "Ticket",
+        "icon": "fas fa-ticket-alt",
+        "route": "admin.tickets.index",
+        "id": "ticket"
     }
 ]

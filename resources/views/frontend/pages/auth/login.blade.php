@@ -23,7 +23,7 @@
             class="px-6 xs-px-10 sm-px-16 md-px-97px w-full h-full flex items-center justify-center relative lg-w-1-2 lg-p-0">
             <div class="relative flex flex-col items-center w-full tablet-w-500px lg-w-300px"><a href="/"><img
                         class="w-210px h-10 object-scale-down" src="{{ asset('frontend/assets/img/art-logo.png') }}"
-                        alt="Printway.io"></a>
+                        alt="{{ getDomainFromUrl() }}"></a>
                 <form class="flex flex-col w-full pt-48px" id="form-login">
                     @csrf
                     <p class="font-bold sm-text-xl text-lg">Chào mừng trở lại!</p>

@@ -6,6 +6,7 @@ namespace App\Providers;
 use App\Models\Collection;
 use App\Models\Config;
 use App\Models\Order;
+use App\Models\Subject;
 use App\Models\Wallet;
 use App\Observers\ActivityLogObserver;
 use App\Services\CategoryService;
@@ -109,6 +110,17 @@ class AppServiceProvider extends ServiceProvider
 
         view()->composer('admin.layout.sidebar', function ($view) use ($result) {
             $view->with(['result' => $result]);
+        });
+
+        View::composer(['frontend.components.create-ticket-modal', 'frontend.app.ticket.index', 'frontend.app.order.show'], function () {
+            $subjects = Subject::where('status', 1)->latest()->pluck('title', 'id');
+            $availableOrders = Order::where('user_id', auth('web')->id())
+                ->select(['id', 'order_code', 'order_name'])->latest()->get();
+
+            View::share([
+                'subjects' => $subjects,
+                'availableOrders' => $availableOrders
+            ]);
         });
     }
 }

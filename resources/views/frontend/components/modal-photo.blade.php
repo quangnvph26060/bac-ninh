@@ -226,7 +226,7 @@
                     type: 'radio'
                 },
                 beforeSend: () => {
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: (response) => {
                     $('#imageGrid').html(response.data);
@@ -235,7 +235,7 @@
                     datgin.error(xhr.responseJSON.messages)
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 }
             })
         }

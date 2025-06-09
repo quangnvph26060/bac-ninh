@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Responsive Product Gallery</title>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+        />
+
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: sans-serif;
+                margin: 0;
+                padding: 20px;
+            }
+
+            .product-gallery {
+                display: flex;
+                gap: 10px;
+                max-width: 100%;
+                flex-direction: row;
+            }
+
+            .main-slider {
+                flex: 1;
+            }
+
+            .main-slider img {
+                width: 100%;
+                height: auto;
+                border-radius: 8px;
+                display: block;
+                object-fit: contain;
+            }
+
+            .thumb-slider {
+                width: 100px;
+                max-height: 400px;
+            }
+
+            .thumb-slider .swiper-slide {
+                opacity: 0.5;
+                cursor: pointer;
+                margin-bottom: 8px;
+                height: auto;
+            }
+
+            .thumb-slider .swiper-slide-thumb-active {
+                opacity: 1;
+                border: 2px solid #333;
+                border-radius: 4px;
+            }
+
+            .thumb-slider img {
+                width: 100%;
+                height: auto;
+                display: block;
+                border-radius: 4px;
+            }
+
+            @media (max-width: 768px) {
+                .product-gallery {
+                    flex-direction: column;
+                }
+
+                .thumb-slider {
+                    width: 100%;
+                    max-height: none;
+                }
+
+                .thumb-slider .swiper-wrapper {
+                    flex-direction: row !important;
+                }
+
+                .thumb-slider .swiper-slide {
+                    width: 80px !important;
+                    margin-right: 8px;
+                    margin-bottom: 0;
+                }
+
+                .main-slider {
+                    width: 100%;
+                    max-height: 300px;
+                    overflow: hidden;
+                }
+
+                .main-slider img {
+                    height: 100%;
+                    object-fit: contain;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="product-gallery">
+            <!-- Main Slider -->
+            <div class="swiper main-slider">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <img
+                            src="https://placehold.co/600x400?text=1"
+                            alt="Image 1"
+                        />
+                    </div>
+                    <div class="swiper-slide">
+                        <img
+                            src="https://placehold.co/600x400?text=2"
+                            alt="Image 2"
+                        />
+                    </div>
+                    <div class="swiper-slide">
+                        <img
+                            src="https://placehold.co/600x400?text=3"
+                            alt="Image 3"
+                        />
+                    </div>
+                    <div class="swiper-slide">
+                        <img
+                            src="https://placehold.co/600x400?text=4"
+                            alt="Image 4"
+                        />
+                    </div>
+                    <div class="swiper-slide">
+                        <img
+                            src="https://placehold.co/600x400?text=5"
+                            alt="Image 5"
+                        />
+                    </div>
+                    <div class="swiper-slide">
+                        <img
+                            src="https://placehold.co/600x400?text=6"
+                            alt="Image 6"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thumbnail Slider -->
+            <div class="swiper thumb-slider">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <img
+                            src="https://placehold.co/100x66?text=1"
+                            alt="Thumb 1"
+                        />
+                    </div>
+                    <div class="swiper-slide">
+                        <img
+                            src="https://placehold.co/100x66?text=2"
+                            alt="Thumb 2"
+                        />
+                    </div>
+                    <div class="swiper-slide">
+                        <img
+                            src="https://placehold.co/100x66?text=3"
+                            alt="Thumb 3"
+                        />
+                    </div>
+                    <div class="swiper-slide">
+                        <img
+                            src="https://placehold.co/100x66?text=4"
+                            alt="Thumb 4"
+                        />
+                    </div>
+                    <div class="swiper-slide">
+                        <img
+                            src="https://placehold.co/100x66?text=5"
+                            alt="Thumb 5"
+                        />
+                    </div>
+                    <div class="swiper-slide">
+                        <img
+                            src="https://placehold.co/100x66?text=6"
+                            alt="Thumb 6"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+        <script>
+            let thumbSlider = new Swiper(".thumb-slider", {
+                spaceBetween: 10,
+                slidesPerView: 4,
+                freeMode: true,
+                watchSlidesProgress: true,
+                direction: window.innerWidth > 768 ? "vertical" : "horizontal",
+                breakpoints: {
+                    0: {
+                        slidesPerView: 4,
+                        direction: "horizontal",
+                    },
+                    769: {
+                        slidesPerView: 4,
+                        direction: "vertical",
+                    },
+                },
+            });
+
+            let mainSlider = new Swiper(".main-slider", {
+                spaceBetween: 10,
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                },
+                thumbs: {
+                    swiper: thumbSlider,
+                },
+            });
+
+            // Cập nhật hướng thumbnail khi resize
+            window.addEventListener("resize", () => {
+                const dir = window.innerWidth > 768 ? "vertical" : "horizontal";
+                thumbSlider.changeDirection(dir);
+            });
+
+            const mainSliderEl = document.querySelector(".main-slider");
+
+            mainSliderEl.addEventListener("mouseenter", () =>
+                mainSlider.autoplay.stop()
+            );
+            mainSliderEl.addEventListener("mouseleave", () =>
+                mainSlider.autoplay.start()
+            );
+        </script>
+    </body>
+</html>

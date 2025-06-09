@@ -189,7 +189,25 @@ function getImageInfo($filePathOrFile, bool $fullInfo = true): array
     }
 }
 
+if (! function_exists('getDomainFromUrl')) {
+    function getDomainFromUrl()
+    {
+        $host = parse_url(request()->url(), PHP_URL_HOST);
 
+        // Trả về null nếu không đúng URL
+        if (!$host) {
+            return null;
+        }
+
+        // Bỏ 'www.' nếu có
+        return preg_replace('/^www\./', '', $host);
+    }
+}
+
+function generateTicketCode()
+{
+    return 'TICK-' . strtoupper(Str::random(8));
+}
 
 if (!function_exists('showImage')) {
     function showImage($image)
