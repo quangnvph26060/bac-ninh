@@ -139,6 +139,35 @@
                             </div>
                         </div>
                     </div>
+
+                    @php
+                        $presetHours = [1, 6, 12, 24];
+                        $selectedValue = $config['order_send_delay_hours'] ?? '';
+                    @endphp
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Phê duyệt đơn hàng</h4>
+                        </div>
+                        <div class="card-body">
+                            @foreach ($presetHours as $hour)
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="order_send_delay_hours"
+                                        id="delay{{ $hour }}" value="{{ $hour }}"
+                                        {{ $selectedValue == $hour ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="delay{{ $hour }}">{{ $hour }}
+                                        tiếng</label>
+                                </div>
+                            @endforeach
+
+                            <div class="input-group mb-3 mt-2">
+                                <input type="text" class="form-control" id="custom-order-send-delay-hours"
+                                    name="custom_order_send_delay_hours"
+                                    value="{{ !in_array($selectedValue, $presetHours) ? $selectedValue : '' }}">
+                                <label class="input-group-text" for="custom-order-send-delay-hours">Tiếng</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </form>
@@ -147,6 +176,14 @@
 
 @push('scripts')
     <script>
+        $('#custom-order-send-delay-hours').on('focus', function() {
+            $('input[name="order_send_delay_hours"]').prop('checked', false);
+        });
+
+        $('input[name="order_send_delay_hours"]').on('change', function() {
+            $('#custom-order-send-delay-hours').val('');
+        });
+
         $('#toggle-seo-fields').click(function() {
             $('.seo-edit-section').toggle(); // Ẩn/hiện các trường SEO
         });

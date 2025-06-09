@@ -37,7 +37,9 @@ class ConfigurationController extends Controller
                 'copyright' => 'nullable|string|max:255',
                 'seo_title' => 'nullable|string|max:255',
                 'seo_description' => 'nullable|string|max:500',
-                'tax_rate' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/'
+                'tax_rate' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
+                'order_send_delay_hours' => 'nullable|numeric|min:0',
+                'custom_order_send_delay_hours' => 'nullable|numeric|min:0'
             ],
             __('request.messages'),
             [
@@ -58,7 +60,6 @@ class ConfigurationController extends Controller
             ]
         );
 
-
         try {
             $config = Config::query()->first();
             $oldLogo = $config->logo;
@@ -70,6 +71,10 @@ class ConfigurationController extends Controller
 
             if ($request->hasFile('favicon')) {
                 $credentials['favicon'] = uploadImages('favicon', 'favicon');
+            }
+
+            if (!empty($credentials['custom_order_send_delay_hours'])) {
+                $credentials['order_send_delay_hours'] = $credentials['custom_order_send_delay_hours'];
             }
 
             $config->update($credentials);

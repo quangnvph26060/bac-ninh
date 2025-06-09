@@ -27,6 +27,7 @@ class Config extends Model
         'seo_title',
         'seo_description',
         'tax_rate',
-        'order_completion_time'
+        'order_completion_time',
+        'order_send_delay_hours'
     ];
 }

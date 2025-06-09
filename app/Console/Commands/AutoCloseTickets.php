@@ -29,6 +29,7 @@ class AutoCloseTickets extends Command
             $ticket->update(['status' => 'closed']);
         }
 
+        logger('Đã chạy autoclose lúc ' . now());
         $this->info('AutoCloseTicketsJob dispatched!');
     }
 }
