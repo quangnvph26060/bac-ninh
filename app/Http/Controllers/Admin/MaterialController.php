@@ -58,6 +58,7 @@ class MaterialController extends Controller
 
     public function show(string $id)
     {
+
         $material = $this->materialService->show($id);
 
         $groupedByDate = $material->importDetails
@@ -98,5 +99,6 @@ class MaterialController extends Controller
         //     'selectedAttributes' => $selectedAttributes,
         //     'materialAttributes' => $materialAttributes
         // ]);
+
     }
 }

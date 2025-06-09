@@ -183,54 +183,8 @@ class WarehouseController extends Controller
 
     public function show($id)
     {
-        $warehouse = Warehouse::find($id);
-
-        if (request()->ajax()) {
-            $productListQuery = WarehouseDetail::query()->where('warehouse_id', $id);
-
-            return $this->processDataTable(
-                $productListQuery,
-                function ($dataTable) {
-                    $dataTable->editColumn('name', function ($row) {
-                        $name_parent = $row->type == 'normal' ? '' : '( ' . $row->name_parent . ' )';
-                        return "$row->name $name_parent";
-                    });
-
-                    $dataTable->filterColumn('name', function ($query, $keyword) {
-                        $query->where('name', 'like', "%{$keyword}%")
-                            ->orWhere('name_parent', 'like', "%{$keyword}%");
-                    });
-
-
-                    $dataTable->editColumn('price', function ($row) {
-                        if ($row->price_type === 'usd') {
-                            return '$ ' . number_format($row->price, 2, '.', ',');
-                        } elseif ($row->price_type === 'vnd') {
-                            return number_format($row->price, 0, ',', '.') . ' đ';
-                        } else {
-                            return number_format($row->price, 2, '.', ',');
-                        }
-                    });
-
-
-
-                    $dataTable->addColumn('operations', function ($row) {
-                        $showUrl = route('admin.warehouse.show', $row->id);
-                        return "
-                        <a href=\"{$showUrl}\" class=\"btn btn-primary btn-sm\">
-                            <i class=\"ti ti-eye\"></i>
-                        </a>
-                        <a href=\"javascript:void(0)\" data-id=\"{$row->id}\" class=\"btn btn-danger btn-sm btn-operation-destroy\">
-                            <i class=\"ti ti-trash\"></i>
-                        </a>
-                    ";
-                    });
-
-                    return $dataTable;
-                },
-                ['operations']
-            );
-        }
+        $warehouse = Warehouse::with('details')->find($id);
+        // $productListQuery = WarehouseDetail::query()->where('warehouse_id', $id);
 
         return view('admin.warehouse.show', compact('warehouse', 'id'));
     }

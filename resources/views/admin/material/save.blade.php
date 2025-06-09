@@ -19,6 +19,7 @@
                     <div class="card">
                         <div class="card-body">
 
+
                             {{-- Chọn nguyên vật liệu --}}
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Tên nguyên vật liệu</label>
@@ -28,6 +29,7 @@
                                         <option value="{{ $name }}">{{ $name }}</option>
                                     @endforeach
                                 </select>
+
                             </div>
 
                             {{-- Chọn loại --}}
@@ -37,7 +39,9 @@
                                     @foreach ($types as $typeName)
                                         <option value="{{ $typeName }}">{{ $typeName }}</option>
                                     @endforeach
+
                                 </select>
+
                             </div>
                         </div>
                     </div>
@@ -70,7 +74,9 @@
                             <h4 class="card-title">Mã nhập</h4>
                         </div>
                         <div class="card-body">
+
                             <input class="form-control" type="text" name="import_code" value="">
+
                         </div>
                     </div>
 
@@ -214,12 +220,47 @@
                 if ($('#import-table-body tr').length === 0) {
                     $('#import-table').hide();
                 }
+
             });
 
 
             submitForm('#myForm', function(response) {
                 window.location.href = "{{ route('admin.materials.index') }}"
             })
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const priceInputs = document.querySelectorAll('.format-price, .format-price-vnd');
+
+            priceInputs.forEach(function(input) {
+
+                input.addEventListener('input', function(e) {
+
+                    let value = e.target.value;
+                    value = value.replace(/[^0-9]/g, '');
+                    value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    e.target.value = value;
+                });
+            });
+
+
+            const priceInput = document.getElementById('price_usd');
+
+            if (priceInput) {
+                priceInput.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    value = value.replace(/[^0-9.]/g, '');
+
+                    const parts = value.split('.');
+                    const integerPart = parts[0];
+                    const decimalPart = parts[1] ? '.' + parts[1].replace(/\./g, '') : '';
+
+                    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+                    e.target.value = formattedInteger + decimalPart;
+                });
+            }
         });
     </script>
 @endpush
