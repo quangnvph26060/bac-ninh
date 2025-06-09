@@ -234,6 +234,12 @@
                                     <span>Bill</span>
                                 </a>
                             </li>
+                            <li class="nav-item {{ request()->routeIs('spending.stats') ? 'active' : '' }}">
+                                <a href="{{ route('spending.stats') }}" class="nav-link">
+                                    <i class="bi bi-graph-up-arrow"></i>
+                                    <span>Statistical</span>
+                                </a>
+                            </li>
                             <li class="nav-item {{ request()->routeIs('coupons.index') ? 'active' : '' }}">
                                 <a href="{{ route('coupons.index') }}" class="nav-link ">
                                     <i class="bi-tags"></i>
@@ -287,10 +293,14 @@
     </section>
 
     <div class="overlay" id="overlay"></div>
-    <div id="loading" style="display: none; text-align: center; padding: 50px;">
+    {{-- <div id="loading" style="display: none; text-align: center; padding: 50px;">
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
+    </div> --}}
+
+    <div id="loadingOverlay">
+        <div id="loading"></div>
     </div>
 
     @include('frontend.includes.chat')
@@ -333,6 +343,7 @@
     @vite('resources/js/app.js')
 
     @stack('scripts')
+
 </body>
 
 </html>

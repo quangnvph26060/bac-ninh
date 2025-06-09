@@ -74,7 +74,17 @@ class OrderController extends Controller
 
     public function show(string $code)
     {
-        $order = Order::query()->where('order_code', $code)->with(['orderItems.productVariant.attributeValues'])->firstOrFail();
+        $order = Order::query()
+            ->where('order_code', $code)
+            ->with([
+                'orderItems.productVariant.attributeValues',
+                'tickets.subject',
+                'tickets' => function ($q) {
+                    $q->orderBy('created_at', 'desc');
+                }
+            ])
+            ->firstOrFail();
+
         return view('frontend.app.order.show', compact('order'));
     }
 

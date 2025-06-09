@@ -1,7 +1,7 @@
 <table class="table table-striped custom-table">
     <thead>
         <tr class="align-middle">
-            <th scope="col" style="width: 10%;">Ticket ID</th>
+            <th scope="col" style="width: 12%;">Ticket ID</th>
             <th scope="col">Order ID/ Name</th>
             <th scope="col">Subject</th>
             <th scope="col">Status</th>
@@ -15,7 +15,10 @@
             <tr>
                 <td class="align-middle">{{ $ticket->code }}</td>
                 <td class="align-middle">
-                    <p class="fw-bold">{{ $ticket->order->order_code }}</p><span>{{ $ticket->order->order_name }}</span>
+                    <a href="{{ route('orders.show', $ticket->order->order_code) }}" class="fw-bold d-block">
+                        {{ $ticket->order->order_code }}
+                    </a>
+                    <span>{{ $ticket->order->order_name }}</span>
                 </td>
                 <td class="align-middle">{{ $ticket->subject->title }}</td>
                 <td class="align-middle">
@@ -46,7 +49,12 @@
                 <td class="align-middle">
                     {{ $ticket->created_at->format('F j, Y \a\t g:i a') }}
                 </td>
-                <td class="align-middle"></td>
+                <td class="align-middle">
+                    <button class="btn btn-sm btn-primary btn-view-ticket" title="Xem chi tiết"
+                        data-id="{{ $ticket->id }}">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </td>
             </tr>
             @empty
                 <tr>

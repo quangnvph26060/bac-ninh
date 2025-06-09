@@ -117,7 +117,7 @@
                     date_range: dateRange
                 },
                 beforeSend: () => {
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: function(res) {
                     // Gán lại dữ liệu vào các ô thống kê
@@ -132,7 +132,7 @@
                     alert('Có lỗi xảy ra khi tải dữ liệu.');
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 }
             });
         }
@@ -157,7 +157,7 @@
 
         /* Nhấn mạnh tiêu đề khi hover */
         .row a:hover .card .title {
-            color: #0d6efd;
+            color: #f06022;
             /* màu chính Bootstrap */
             transition: color .3s ease;
         }

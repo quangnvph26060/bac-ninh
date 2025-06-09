@@ -6,6 +6,7 @@ use App\Http\Controllers\Frontend\App\CouponController;
 use App\Http\Controllers\Frontend\App\DashboardController;
 use App\Http\Controllers\Frontend\App\OrderController;
 use App\Http\Controllers\Frontend\App\PhotoController;
+use App\Http\Controllers\Frontend\App\StatController;
 use App\Http\Controllers\Frontend\Auth\AuthController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
@@ -49,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::get('coupons', [CouponController::class, 'coupons'])->name('coupons.index');
 
     Route::get('transaction-history', [TransactionHistoryController::class, 'transactionHistory'])->name('transaction.history');
+    Route::get('spending-stats', [StatController::class, 'index'])->name('spending.stats');
 
     Route::prefix('bills')
         ->controller(BillController::class)
@@ -73,8 +75,17 @@ Route::middleware('auth')->group(function () {
         Route::delete('photos', 'bulkDelete');
     });
 
-    Route::group(['controller' => TicketController::class], function () {
-        Route::get('tickets', 'index')->name('tickets.index');
+    Route::group([
+        'prefix' => 'tickets',
+        'controller' => TicketController::class,
+        'as' => 'tickets.'
+    ], function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{id}', 'show')->name('show');
+        Route::post('/send', 'send')->name('send');
+        Route::post('/close', 'close')->name('close');
+        Route::post('/rate', 'rate')->name('rate');
     });
 
     Route::prefix('orders')->name('orders.')->controller(OrderController::class)->group(function () {

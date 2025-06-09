@@ -14,7 +14,14 @@ class Ticket extends Model
         'order_id',
         'subject_id',
         'code',
+        'is_confirmed',
+        'rating',
+        'feedback',
         'status'
+    ];
+
+    protected $casts = [
+        'is_confirmed' => 'boolean'
     ];
 
     public function user()
@@ -30,5 +37,18 @@ class Ticket extends Model
     public function subject()
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(TicketMessage::class);
+    }
+
+    public static function getStatusCountsByUser($userId)
+    {
+        return self::where('user_id', $userId)
+            ->selectRaw("status, COUNT(*) as total")
+            ->groupBy('status')
+            ->pluck('total', 'status');
     }
 }

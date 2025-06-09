@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Material;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class MaterialRequest extends FormRequest
 {
@@ -21,29 +23,18 @@ class MaterialRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
-            'name'         => 'required|string|max:255',
-            'type'         => 'required|in:normal,variant',
-            'price_usd'    => 'required_if:type,normal|min:0',
-            'price_vnd'    => 'required_if:type,normal|min:0',
-            'stock'        => 'required_if:type,normal|min:0',
-            'distributor'  => 'nullable|string|max:255',
-            'sku'          => 'nullable|string|max:100|unique:materials,sku',
-            'status'       => 'nullable'
+
+        return [
+            'name' => 'required|string|max:255',
+            'import_code' => 'nullable|string|max:255',
+
+            'data' => 'required|array|min:1',
+            'data.*.type_name' => 'required|string|max:255',
+            'data.*.supplier_name' => 'required|string|max:255',
+            'data.*.price' => 'required|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
+            'data.*.quantity' => 'required|numeric|min:0',
+            'data.*.unit' => 'required|string|max:100',
         ];
-
-        if ($this->input('type') != 'normal') {
-            $rules['attributes'] = 'required|array|min:1';
-            $rules['variants']   = 'required|array|min:1';
-
-            $rules['variants.*.attribute_value_ids'] = 'required';
-            $rules['variants.*.sku']                 = 'required';
-            $rules['variants.*.price']               = 'required';
-            $rules['variants.*.product_unit']        = 'required';
-            $rules['variants.*.stock']               = 'required';
-        }
-
-        return $rules;
     }
 
     public function messages()
@@ -51,27 +42,40 @@ class MaterialRequest extends FormRequest
         return __('request.messages');
     }
 
+
     public function attributes()
     {
         return [
-            'name'                          => 'Tên vật liệu',
-            'type'                          => 'Loại vật liệu',
-            'price_usd'                     => 'Giá vật liệu (USD)',
-            'price_vnd'                     => 'Giá vật liệu (VND)',
-            'distributor'                  => 'Nhà phân phối',
-            'stock'                         => 'Số lượng tồn',
-            'sku'                           => 'Mã vật liệu',
-
-            'attributes'                    => 'Thuộc tính',
-            'attributes.*'                  => 'Thuộc tính',
-
-            'variants'                      => 'Biến thể',
-            'variants.*.attribute_value_ids'     => 'Giá trị thuộc tính',
-            'variants.*.attribute_value_ids.*'   => 'Giá trị thuộc tính chi tiết',
-            'variants.*.sku'                => 'Mã biến thể',
-            'variants.*.price'              => 'Giá biến thể',
-            'variants.*.product_unit'       => 'Đơn vị biến thể',
-            'variants.*.stock'              => 'Số lượng tồn kho biến thể',
+            'material_id' => 'nguyên vật liệu',
+            'data.*.type_name' => 'loại vật liệu',
+            'data.*.price' => 'giá',
+            'data.*.quantity' => 'số lượng',
+            'data.*.unit' => 'đơn vị',
+            'data.*.supplier_name' => 'nhà cung cấp',
         ];
     }
+
+    // protected function failedValidation(Validator $validator)
+    // {
+    //     $messages = $validator->errors()->getMessages();
+
+    //     $customMessages = [];
+
+    //     foreach ($messages as $key => $errors) {
+    //         if (preg_match('/data\.(\d+)\.(\w+)/', $key, $matches)) {
+    //             $index = (int) $matches[1] + 1; // dòng bắt đầu từ 1
+    //             $field = $matches[2];
+    //             foreach ($errors as $error) {
+    //                 // Thay :position = dòng
+    //                 $customMessages[] = str_replace(':position', $index, $error);
+    //             }
+    //         } else {
+    //             $customMessages = array_merge($customMessages, $errors);
+    //         }
+    //     }
+
+    //     throw new HttpResponseException(response()->json([
+    //         'message' => $customMessages[0],
+    //     ], 422));
+    // }
 }

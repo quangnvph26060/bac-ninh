@@ -6,8 +6,11 @@
             <h1 class="billing__title__content">Orders</h1>
 
             <div class="d-flex gap-2 align-items-center">
-                <button class="ant-btn ant-btn-default px-3 text-f06022 border-f06022">Create ticket <i
-                        class="bi bi-plus-circle-dotted ms-2"></i></button>
+                <button class="ant-btn ant-btn-default px-3 text-f06022 border-f06022" data-bs-toggle="modal"
+                    data-bs-target="#createTicketModal">
+                    Create ticket <i class="bi bi-plus-circle-dotted ms-2"></i>
+                </button>
+
                 <button type="submit" class="ant-btn ant-btn-default px-3 " data-bs-toggle="modal"
                     data-bs-target="#exportOrderModal">
                     Export Order
@@ -41,7 +44,8 @@
                 <option value="confirmed_pending_production">Confirmed Pending Production</option>
                 <option value="in_production" @selected(request('status') === 'in_production')>In Production</option>
                 <option value="produced_awaiting_completion">Produced Awaiting Completion</option>
-                <option value="completed_waiting_for_shipment" @selected(request('status') === 'completed_waiting_for_shipment')>Completed Waiting For Shipment</option>
+                <option value="completed_waiting_for_shipment" @selected(request('status') === 'completed_waiting_for_shipment')>Completed Waiting For Shipment
+                </option>
                 <option value="shipped" @selected(request('status') === 'shipped')>Shipped</option>
                 <option value="cancelled" @selected(request('status') === 'cancelled')>Cancelled</option>
             </select>
@@ -52,8 +56,8 @@
             <select class="form-select" name="payment_status">
                 <option value="">All</option>
                 <option value="pending" @selected(request('payment_status') === 'pending')>Unpaid</option>
-                <option value="completed" @selected(request('payment_status')  === 'completed')>Paid</option>
-                <option value="refunded" @selected(request('payment_status' ) === 'refunded')>Refunded</option>
+                <option value="completed" @selected(request('payment_status') === 'completed')>Paid</option>
+                <option value="refunded" @selected(request('payment_status') === 'refunded')>Refunded</option>
             </select>
         </div>
 
@@ -119,10 +123,11 @@
             </div>
         </div>
     </div>
+
+    @include('frontend/components/create-ticket-modal')
 @endsection
 
 @push('styles')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
     <link rel="stylesheet" href="{{ asset('backend/assets/css/sweetalert2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/fonts/icomoon/style.css') }}">
 @endpush
@@ -174,7 +179,7 @@
                     responseType: 'blob'
                 },
                 beforeSend: () => {
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: function(response, status, xhr) {
                     const disposition = xhr.getResponseHeader('Content-Disposition');
@@ -193,10 +198,10 @@
                 },
                 error: function() {
                     datgin.error('Export failed!');
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 }
             });
         });
@@ -325,7 +330,7 @@
                             ids: ids,
                         },
                         beforeSend: () => {
-                            $('#loading').show();
+                            $('#loadingOverlay').show();
                         },
                         success: function(response) {
                             datgin.success(response.message);
@@ -335,7 +340,7 @@
                             datgin.error(xhr.responseJSON.message || "Something went wrong")
                         },
                         complete: () => {
-                            $('#loading').hide();
+                            $('#loadingOverlay').hide();
                         }
                     })
 
@@ -367,7 +372,7 @@
                             ids: ids,
                         },
                         beforeSend: () => {
-                            $('#loading').show();
+                            $('#loadingOverlay').show();
                         },
                         success: function(response) {
                             datgin.success(response.message);
@@ -377,7 +382,7 @@
                             datgin.error(xhr.responseJSON.message || "Something went wrong")
                         },
                         complete: () => {
-                            $('#loading').hide();
+                            $('#loadingOverlay').hide();
                         }
                     })
 
@@ -450,7 +455,7 @@
             const per_page = $('.per-page-selector').val() || 10;
 
             $('#order-content').hide();
-            $('#loading').show();
+            $('#loadingOverlay').show();
 
             const urlWithParams = new URL(url, window.location.href);
             const searchParams = new URLSearchParams(urlWithParams.search);
@@ -469,7 +474,7 @@
                 },
                 beforeSend: () => {
                     $('#coupon-content').hide();
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: function(response) {
                     lastOrdersUrl = urlWithParams.pathname;
@@ -478,16 +483,16 @@
                     $('#bulk-action').hide()
 
                     $('#order-content').html(response.html).fadeIn(200);
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                     bindEventHandlers();
                 },
                 error: function(xhr) {
                     console.error("Error loading orders:", xhr);
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                     $('#order-content').show();
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                     $('#coupon-content').show();
                 }
             });

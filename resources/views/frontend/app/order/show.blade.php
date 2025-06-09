@@ -354,6 +354,50 @@
                 <div class="card mt-3">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="header-title fw-bold">Ticket</h4>
+                            <button class="cursor" data-bs-toggle="modal" data-bs-target="#createTicketModal">
+                                <i class="bi bi-plus-lg icon-custom"></i>
+                            </button>
+
+                        </div>
+                        <div id="ticketList">
+                            @foreach ($order->tickets ?? [] as $ticket)
+                                <div class="border rounded p-2 {{ !$loop->last ? 'mb-2' : '' }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <a class="fw-bold btn-view-ticket" title="Xem chi tiết"
+                                            data-id="{{ $ticket->id }}">{{ $ticket->code }}</a>
+                                        @switch($ticket->status)
+                                            @case('open')
+                                                <span class="badge-soft badge-soft-primary">Open</span>
+                                            @break
+
+                                            @case('resolving')
+                                                <span class="badge-soft badge-soft-warning">Resolving</span>
+                                            @break
+
+                                            @case('resolved')
+                                                <span class="badge-soft badge-soft-success">Resolved</span>
+                                            @break
+
+                                            @case('closed')
+                                                <span class="badge-soft badge-soft-secondary">Closed</span>
+                                            @break
+
+                                            @default
+                                                <span class="badge-soft badge-soft-dark">Unknown</span>
+                                        @endswitch
+                                    </div>
+                                    <p class="mt-1 text-muted">{{ $ticket->created_at->format('d/m/Y H:i') }}</p>
+                                    <p class="mt-1">{{ $ticket->subject->title }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
                             <h4 class="header-title mb-3 fw-bold">Note</h4>
                             @if ($valid)
                                 <div id="toggle-note">
@@ -402,13 +446,360 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="createTicketModal" tabindex="-1" aria-labelledby="createTicketModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createTicketModalLabel">Create ticket</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="#" method="POST" id="myForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="subject_id" class="form-label">Subject <span class="text-danger">*</span></label>
+                            <select name="subject_id" id="subject_id" class="form-select">
+                                <option value="">Select subject</option>
+                                @foreach ($subjects as $id => $title)
+                                    <option value="{{ $id }}">{{ $title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Content <span class="text-danger">*</span></label>
+                            <textarea name="content" id="content" class="form-control" rows="6"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="ant-btn ant-btn-default px-3"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="ant-btn ant-btn-primary px-3">Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ticketDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content" id="ticket-detail-content">
+                <!-- Nội dung chi tiết sẽ được load bằng JS -->
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="closeTicketModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="form-close-ticket">
+                @csrf
+                <input type="hidden" name="ticket_id" id="close-ticket-id">
+
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Close ticket</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="close_reason" class="form-label fw-bold">Reason <span
+                                    class="text-danger">*</span></label>
+                            <textarea name="reason" id="close_reason" class="form-control" rows="4" placeholder="Reason" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="ant-btn ant-btn-default px-3"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="ant-btn ant-btn-primary px-3">Confirm</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 
 @push('scripts')
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     <script src="{{ asset('backend/assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
 
     <script>
+        $(function() {
+            ClassicEditor
+                .create(document.querySelector('#content'), {
+                    // Không cần uploadUrl khi dùng base64
+                })
+                .then(editor => {
+                    // Kích hoạt base64 upload
+                    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                        return new Base64UploadAdapter(loader);
+                    };
+
+                    // Nếu cần lấy nội dung khi submit: lưu editor trong window
+                    window.editorInstance = editor;
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        })
+
+        $('#myForm').on('submit', function(e) {
+            e.preventDefault();
+
+            const content = window.editorInstance.getData();
+
+            let formData = new FormData(this);
+
+            formData.set('content', content);
+            formData.set('order_id', "{{ $order->id }}");
+
+            $.ajax({
+                url: "/tickets",
+                method: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                beforeSend: () => {
+                    $('#loadingOverlay').show();
+                },
+                success: (response) => {
+                    $('#createTicketModal').modal('hide');
+                    datgin.success(response.message)
+                    $('#myForm')[0].reset();
+                    window.editorInstance.setData('');
+
+                    const tickets = response.data.tickets;
+                    loopTickets(tickets)
+                },
+                error: (xhr) => {
+                    datgin.error(xhr.responseJSON.message || 'something went wrong!')
+                    $('#loadingOverlay').hide();
+                },
+                complete: () => {
+                    $('#loadingOverlay').hide();
+                }
+            })
+        })
+
+        function loopTickets(tickets) {
+            let html = '';
+
+            tickets.forEach((ticket, index) => {
+                const isLast = index === tickets.length - 1;
+
+                // Badge theo status
+                let badgeClass = 'badge-soft-dark';
+                let statusLabel = 'Unknown';
+
+                switch (ticket.status) {
+                    case 'open':
+                        badgeClass = 'badge-soft-primary';
+                        statusLabel = 'Open';
+                        break;
+                    case 'resolving':
+                        badgeClass = 'badge-soft-warning';
+                        statusLabel = 'Resolving';
+                        break;
+                    case 'resolved':
+                        badgeClass = 'badge-soft-success';
+                        statusLabel = 'Resolved';
+                        break;
+                    case 'closed':
+                        badgeClass = 'badge-soft-secondary';
+                        statusLabel = 'Closed';
+                        break;
+                }
+
+                html += `
+                    <div class="border rounded p-2 ${!isLast ? 'mb-2' : ''}">
+                        <div class="d-flex align-items-center gap-2">
+                            <a class="fw-bold btn-view-ticket" title="Xem chi tiết" data-id="${ticket.id}">
+                                ${ticket.code}
+                            </a>
+                            <span class="badge-soft ${badgeClass}">${statusLabel}</span>
+                        </div>
+                        <p class="mt-1 text-muted">${new Date(ticket.created_at).toLocaleString('vi-VN')}</p>
+                        <p class="mt-1">${ticket.subject?.title || ''}</p>
+                    </div>
+                `;
+            });
+
+            $('#ticketList').html(html);
+        }
+
+        let lastOpenedTicketId = null;
+
+        $(document).on('click', '.btn-view-ticket', function() {
+            const ticketId = $(this).data('id');
+
+            // Nếu ticket hiện tại trùng với lần trước → chỉ show modal
+            if (ticketId === lastOpenedTicketId) {
+                $('#ticketDetailModal').modal('show');
+                return;
+            }
+
+            // Nếu khác ID → gọi AJAX để load nội dung mới
+            $.ajax({
+                url: `/tickets/${ticketId}`,
+                method: 'GET',
+                beforeSend: () => {
+                    $('#loadingOverlay').show();
+                },
+                success: function(response) {
+                    $('#ticket-detail-content').html(response.html);
+                    $('#ticketDetailModal').modal('show');
+
+                    // Cập nhật ID ticket đã mở
+                    lastOpenedTicketId = ticketId;
+                },
+                error: function() {
+                    datgin.error('Không lấy được dữ liệu ticket');
+                },
+                complete: () => {
+                    $('#loadingOverlay').hide();
+                }
+            });
+        });
+
+        $(document).on('click', '.reply', function() {
+            const $container = $('#replyFormContainer');
+
+            // Ẩn nút trả lời (hoặc có thể toggle tùy ý)
+            $('.reply').hide();
+
+            // Tránh thêm nhiều form
+            if ($container.find('.reply-form-block').length > 0) return;
+
+            // Append template
+            const $template = $($('#replyFormTemplate').html());
+            $container.append($template);
+
+            // Khởi tạo CKEditor sau khi form đã append vào DOM
+            ClassicEditor
+                .create(document.querySelector('#replyEditor'), {})
+                .then(editor => {
+                    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                        return new Base64UploadAdapter(loader);
+                    };
+
+                    // Gắn global để submit hoặc debug nếu cần
+                    window.editorInstance = editor;
+
+                    editor.editing.view.focus();
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        });
+
+        $(document).on('submit', '#form-send', function(e) {
+            e.preventDefault();
+
+            const message = window.editorInstance.getData();
+
+            let formData = new FormData(this);
+
+            formData.set('message', message);
+
+            $.ajax({
+                url: "/tickets/send",
+                method: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                beforeSend: () => {
+                    $('#loadingOverlay').show();
+                },
+                success: (response) => {
+                    const html = `
+                        <div class="d-flex mb-4 justify-content-end">
+                            <div class="d-flex flex-row-reverse align-items-start" style="max-width: 100%;">
+                                <div class="ms-2" style="flex: 0 0 48px;">
+                                    <img src="{{ showImage(auth('web')->user()->img_url) }}" class="rounded-circle border"
+                                        style="width: 48px; height: 48px; object-fit: cover; object-position: center;" />
+                                </div>
+                                <div class="flex-grow-1">
+                                    <strong class="d-block text-end">{{ auth('web')->user()->name }}</strong>
+                                    <small class="text-muted d-block text-end">
+                                        ${new Date().toLocaleString('vi-VN')}
+                                    </small>
+                                    <div class="border rounded p-2 message-content bg-light mt-1">
+                                        ${message}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    $('#messagesContainer').append(html);
+
+                    $('#form-send')[0].reset();
+
+                    window.editorInstance.setData('');
+
+                    $('#form-send').closest('.reply-form-block').remove();
+
+                    $('.reply').show();
+
+                    datgin.success(response.message)
+
+                    $('#messagesContainer').scrollTop($('#messagesContainer')[0].scrollHeight);
+                },
+                error: (xhr) => {
+                    datgin.error(xhr.responseJSON.message || 'something went wrong!')
+                },
+                complete: () => {
+                    $('#loadingOverlay').hide();
+                }
+            })
+        })
+
+        $(document).on('click', '#close-form-reply', function() {
+            $('#replyFormContainer').empty();
+
+            $('.reply').show()
+        })
+
+        $(document).on('click', '#closed', function() {
+            let ticketId = $(this).closest('[data-ticket-id]').data('ticket-id'); // bạn cần thêm attr này
+            $('#close-ticket-id').val(ticketId);
+            $('#close_reason').val('');
+        });
+
+        $(document).on('submit', '#form-close-ticket', function(e) {
+            e.preventDefault();
+
+            let formData = $(this).serialize();
+
+            $.ajax({
+                url: '/tickets/close',
+                method: 'POST',
+                data: formData,
+                beforeSend: function() {
+                    $('#loadingOverlay').show();
+                },
+                success: function(response) {
+                    datgin.success(response.message);
+                    lastOpenedTicketId = null
+                    $('#closeTicketModal').modal('hide');
+                    $('#ticketDetailModal').modal('hide');
+
+                    const tickets = response.data.tickets;
+                    loopTickets(tickets)
+                },
+                error: function(xhr) {
+                    datgin.error(xhr.responseJSON.message || 'Lỗi khi đóng ticket!');
+                },
+                complete: function() {
+                    $('#loadingOverlay').hide();
+                }
+            });
+        });
+
         function zoomImage(imageId) {
             const src = document.querySelector(`.${imageId}`).getAttribute("src");
             document.getElementById("modalImage").setAttribute("src", src);
@@ -442,7 +833,7 @@
                 processData: false,
                 contentType: false,
                 beforeSend: () => {
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: (response) => {
                     datgin.success(response.message);
@@ -457,7 +848,7 @@
                     $image.style.opacity = '1';
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 }
             });
         }
@@ -491,7 +882,7 @@
                     orderId: "{{ $order->id }}"
                 },
                 beforeSend: () => {
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: (response) => {
                     datgin.success(response.message);
@@ -507,7 +898,7 @@
                     datgin.error(xhr.responseJSON.message || "update note failed")
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 }
             })
         })
@@ -545,7 +936,7 @@
                 method: "POST",
                 data: data,
                 beforeSend: () => {
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: (response) => {
                     datgin.success(response.message);
@@ -568,7 +959,7 @@
                     datgin.error(xhr.responseJSON.message || "Update failed")
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 }
             })
         })
@@ -602,7 +993,7 @@
                         },
                         beforeSend: () => {
                             $('#coupon-content').hide();
-                            $('#loading').show();
+                            $('#loadingOverlay').show();
                         },
                         success: (response) => {
 
@@ -628,7 +1019,7 @@
                             datgin.error(xhr.responseJSON.message);
                         },
                         complete: () => {
-                            $('#loading').hide();
+                            $('#loadingOverlay').hide();
                             $('#coupon-content').show();
                         }
                     })
@@ -657,7 +1048,7 @@
                 },
                 beforeSend: () => {
                     $('#coupon-content').hide();
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: (response) => {
                     datgin.success(response.message);
@@ -681,7 +1072,7 @@
                     datgin.error(xhr.responseJSON.message);
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                     $('#coupon-content').show();
                 }
             })
@@ -774,6 +1165,13 @@
         .header-title {
             font-size: 1rem;
             margin: 0 0 7px 0;
+        }
+
+        .icon-custom {
+            font-size: 1.5rem;
+            /* làm icon to hơn */
+            color: #f06022;
+            /* màu cam theo mã bạn đưa */
         }
     </style>
 @endpush

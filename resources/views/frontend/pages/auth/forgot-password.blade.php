@@ -25,7 +25,7 @@
             <div class="relative flex flex-col items-center w-full tablet-w-500px lg-w-300px">
                 <a href="/">
                     <img class="w-210px h-10 object-scale-down" src="{{ asset('frontend/assets/img/art-logo.png') }}"
-                        alt="Printway.io">
+                        alt="{{ getDomainFromUrl() }}">
                 </a>
 
                 <form class="flex flex-col w-full pt-48px" id="form-forgot-password">

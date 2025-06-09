@@ -2,18 +2,15 @@
 
 namespace App\Models;
 
-use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\User;
-use App\Models\Client;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
 class Order extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'user_id',
@@ -38,14 +35,6 @@ class Order extends Model
         'canceled_by'
     ];
 
-    public function getOrderdetailAttribute()
-    {
-        return OrderDetail::where('order_id', $this->attributes['id'])->get();
-    }
-    public function orderDetails()
-    {
-        return $this->hasMany(OrderDetail::class);
-    }
 
     public function orderItems()
     {
@@ -62,9 +51,9 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function client()
+    public function tickets()
     {
-        return $this->belongsTo(Client::class);
+        return $this->hasMany(Ticket::class);
     }
 
     protected static function booted()

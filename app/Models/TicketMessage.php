@@ -8,4 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class TicketMessage extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'ticket_id',
+        'sender_type',
+        'sender_id',
+        'message'
+    ];
+
+    public function sender()
+    {
+        return $this->morphTo();
+    }
 }

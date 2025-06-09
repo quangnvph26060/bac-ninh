@@ -262,17 +262,17 @@
                 },
                 beforeSend: () => {
                     $('#result').hide();
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: function(response) {
                     $('#result').html(response.html).fadeIn(200);
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 },
                 error: function(xhr) {
                     datgin.error('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
                 },
                 complete: () => {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                     $('#result').show();
                 }
             });
@@ -359,7 +359,7 @@
                     processData: false,
                     contentType: false,
                     beforeSend: () => {
-                        $('#loading').show();
+                        $('#loadingOverlay').show();
                         $('#confirmTopupBtn').prop('disabled', true);
                     },
                     success: function(response) {
@@ -372,7 +372,7 @@
                         datgin.error(xhr.responseJSON.message);
                     },
                     complete: () => {
-                        $('#loading').hide();
+                        $('#loadingOverlay').hide();
                         $('#confirmTopupBtn').prop('disabled', false);
                     }
                 });

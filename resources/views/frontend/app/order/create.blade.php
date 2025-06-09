@@ -561,7 +561,7 @@
 
             // 🚀 Gửi AJAX
             try {
-                $('#loading').show();
+                $('#loadingOverlay').show();
 
                 const response = await $.ajax({
                     url: "{{ route('orders.store.order') }}",
@@ -577,7 +577,7 @@
             } catch (error) {
                 datgin.error(error.responseJSON?.message || "Đã xảy ra lỗi.");
             } finally {
-                $('#loading').hide();
+                $('#loadingOverlay').hide();
             }
         });
 
@@ -1053,7 +1053,7 @@
             function fetchProducts(url) {
                 const searchText = $('input[name="search_text"]').val();
                 const perPage = $('select[name="per_page"]').val();
-                $('#loading').show();
+                $('#loadingOverlay').show();
 
                 $.ajax({
                     url: url,
@@ -1065,10 +1065,10 @@
                     success: function(data) {
                         $('.result-product').html(data);
                         highlightSelectedProducts();
-                        $('#loading').hide();
+                        $('#loadingOverlay').hide();
                     },
                     error: function() {
-                        $('#loading').hide();
+                        $('#loadingOverlay').hide();
                         alert('Đã xảy ra lỗi khi tải dữ liệu.');
                     }
                 });

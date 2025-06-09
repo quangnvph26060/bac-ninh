@@ -84,7 +84,7 @@ ul ul {
 a {
     -webkit-text-decoration-skip: objects;
     background-color: initial;
-    color: #1890ff;
+    color: #f26722;
     cursor: pointer;
     outline: none;
     text-decoration: none;
@@ -1300,18 +1300,87 @@ main::-webkit-scrollbar-thumb:hover {
     z-index: 9999;
 } */
 
-#loading {
+/* #loading {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.7); /* mờ trắng */
-    z-index: 9999; /* cao nhất */
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 9999;
     display: flex;
     justify-content: center;
     align-items: center;
-    pointer-events: all; /* chặn click */
+    pointer-events: all;
+} */
+
+#loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4); /* nền tối */
+    z-index: 9999;
+    display: none;
+}
+
+#loading {
+    width: 48px;
+    height: 48px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 3px solid;
+    border-color: #fff #fff transparent transparent;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+#loading::after,
+#loading::before {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    border: 3px solid;
+    border-color: transparent transparent #ff3d00 #ff3d00;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    animation: rotationBack 0.5s linear infinite;
+    transform-origin: center center;
+}
+
+#loading::before {
+    width: 32px;
+    height: 32px;
+    border-color: #fff #fff transparent transparent;
+    animation: rotation 1.5s linear infinite;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rotationBack {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(-360deg);
+    }
 }
 
 .custom-pagination .page-item.active:hover {
@@ -2179,6 +2248,13 @@ h2 {
     border-color: inherit;
 }
 
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+    background-color: #f06022; /* xanh lá */
+    border-color: #f06022;
+    box-shadow: 0 0 0 4px rgba(240, 96, 34, 0.2);
+}
+
 .custom-btn {
     /* Dark blue background */
     color: white;
@@ -2193,6 +2269,10 @@ h2 {
     height: 100px;
     border: 2px dashed #3498db;
     /* Dashed border */
+}
+
+.custom-btn:hover {
+    border-color: inherit;
 }
 
 .plus-sign {

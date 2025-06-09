@@ -25,10 +25,15 @@ class SupplierService extends BaseService
         return $this->findById($id, ['*'], ['brands']);
     }
 
+    public function getAllSupplier(): array
+    {
+        return $this->pluck(['id', 'company_name']);
+    }
+
     public function create(array $data)
     {
         return transaction(function () use ($data) {
-            if (! $supplier = parent::create($data)) {
+            if (!$supplier = parent::create($data)) {
                 return errorResponse('Đã có lỗi xảy ra. Vui lòng thử lại sau!!!');
             }
 
@@ -43,7 +48,7 @@ class SupplierService extends BaseService
     public function update(string $id, array $payload)
     {
         return transaction(function () use ($id, $payload) {
-            if (! $supplier = $this->updateData($id, $payload)) {
+            if (!$supplier = $this->updateData($id, $payload)) {
                 return errorResponse('Đã có lỗi xảy ra. Vui lòng thử lại sau!!!');
             }
 

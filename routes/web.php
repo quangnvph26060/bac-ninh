@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\ReportdebtController;
 use App\Http\Controllers\Admin\StorageController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\SubjectController;
+use App\Http\Controllers\Admin\TicketController;
 use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\Admin\TransferHistoryController;
 use Illuminate\Support\Facades\Route;
@@ -89,6 +90,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::view('view-barcode-pdf', 'admin.pdf.barcode');
         });
 
+        Route::group(['prefix' => 'tickets', 'controller' => TicketController::class, 'as' => 'tickets.'], function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('reply/{id}', 'reply')->name('reply');
+            Route::post('send-message', 'sendMessage');
+            Route::patch('update-status', 'updateStatus');
+        });
+
         // Product Router
         Route::prefix('products')->controller(ProductController::class)->name('products.')->group(function () {
             Route::get('/', 'index')->name('index');
@@ -103,16 +111,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('selected-attributes/{id}', 'getValueByAttributeId')->name('selected.attributes');
         });
 
-        Route::prefix('materials')->controller(MaterialController::class)->name('materials.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('create', 'create')->name('create');
-            Route::post('create', 'store')->name('store');
-            Route::get('edit/{id}', 'edit')->name('edit');
-            Route::put('edit/{id}', 'update')->name('update');
-            Route::get('search-products', 'search')->name('search.products');
-            Route::get('selected-attributes/{id}', 'getValueByAttributeId')->name('selected.attributes');
-            Route::get('list', 'list')->name('list');
-        });
+        // Route::prefix('materials')->controller(MaterialController::class)->name('materials.')->group(function () {
+        //     Route::get('/', 'index')->name('index');
+        //     Route::get('create', 'create')->name('create');
+        //     Route::post('create', 'store')->name('store');
+        //     Route::get('/{id}', 'show')->name('show');
+        //     Route::get('edit/{id}', 'edit')->name('edit');
+        //     Route::put('edit/{id}', 'update')->name('update');
+
+        //     Route::get('list', 'list')->name('list');
+        // });
 
         // Attribute Router
         Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {

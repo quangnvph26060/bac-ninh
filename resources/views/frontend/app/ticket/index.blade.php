@@ -31,7 +31,8 @@
 
             <div class="form-group col-2">
                 <label class="form-label fw-bold">Subject</label>
-                <select name="subject_id" id="subject_id" class="form-select">
+                <select name="subject" id="subject" class="form-select">
+                    <option value="">--- Subject ---</option>
                     @foreach ($subjects as $id => $title)
                         <option value="{{ $id }}">{{ $title }}</option>
                     @endforeach
@@ -65,48 +66,68 @@
         </div>
     </div>
 
-    <div class="modal fade" id="createTicketModal" tabindex="-1" aria-labelledby="createTicketModalLabel"
+    @include('frontend/components/create-ticket-modal')
+
+    <div class="modal fade" id="closeTicketModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
         aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="createTicketModalLabel">Create ticket</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="#" method="POST">
-                    @csrf
+        <div class="modal-dialog">
+            <form id="form-close-ticket">
+                @csrf
+                <input type="hidden" name="ticket_id" id="close-ticket-id">
+
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Close ticket</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="subject_id" class="form-label">Subject <span class="text-danger">*</span></label>
-                            <select name="subject_id" id="subject_id" class="form-select" required>
-                                <option value="">Select subject</option>
-                                @foreach ($subjects as $id => $title)
-                                    <option value="{{ $id }}">{{ $title }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="order_id" class="form-label">Order</label>
-                            <select name="order_id" id="order_id" class="form-select">
-                                <option value="">Select order</option>
-                                @foreach ($orders as $order)
-                                    <option value="{{ $order->id }}">{{ $order->order_code }} -
-                                        {{ $order->order_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="content" class="form-label">Content <span class="text-danger">*</span></label>
-                            <textarea name="content" id="content" class="form-control" rows="6" required></textarea>
+                            <label for="close_reason" class="form-label fw-bold">Reason <span
+                                    class="text-danger">*</span></label>
+                            <textarea name="reason" id="close_reason" class="form-control" rows="4" placeholder="Reason" required></textarea>
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="ant-btn ant-btn-default px-3" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="ant-btn ant-btn-primary px-3">Send</button>
+                        <button type="submit" class="ant-btn ant-btn-primary px-3">Confirm</button>
                     </div>
-                </form>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="ratingModal" tabindex="-1" aria-labelledby="ratingModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="ratingModalLabel">Service review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="text-center mb-3">
+                        <div id="ratingText" class="mb-2 fw-bold text-secondary">Chọn đánh giá</div>
+                        <div id="stars" class="d-flex justify-content-center">
+                            @for ($i = 1; $i <= 5; $i++)
+                                <i class="star fa fa-star fs-3 mx-1" data-value="{{ $i }}"></i>
+                            @endfor
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ratingDescription" class="form-lable fw-bold">Mô tả</label>
+                        <textarea class="form-control" id="ratingDescription" rows="3" placeholder="Viết mô tả..."></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="ant-btn ant-btn-default px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="ant-btn ant-btn-primary px-3" id="submitRating">Submit a
+                        review</button>
+                </div>
             </div>
         </div>
     </div>
@@ -114,106 +135,117 @@
 
 @push('scripts')
     <script src="{{ asset('frontend/assets/js/select2.min.js') }}"></script>
-    <script src="{{ asset('backend/assets/js/plugin/summernote/summernote-lite.min.js') }}"></script>
+
     <script>
-        $(function() {
+        let selectedRating = 0;
+        const ratingText = {
+            1: 'Poor',
+            2: 'Unsatisfactory',
+            3: 'Normal',
+            4: 'Good',
+            5: 'Very good'
+        };
 
-            $('#subject_id').select2({
-                placeholder: "Chọn chủ thể",
-                allowClear: true,
-                width: '100%' // đảm bảo không bị vỡ layout
+        $(document).ready(function() {
+            $('#ratingModal').on('show.bs.modal', function() {
+                selectedRating = 0;
+                highlightStars(0);
+                $('#ratingText').text('Chọn đánh giá');
+                $('#ratingDescription').val('');
             });
 
-            $('#date-range').daterangepicker({
-                autoUpdateInput: false,
-                locale: {
-                    cancelLabel: 'Clear',
-                    applyLabel: 'Apply',
-                    format: 'DD/MM/YYYY'
-                }
+            $('.star').on('mouseenter', function() {
+                const value = $(this).data('value');
+                highlightStars(value);
+                $('#ratingText').text(ratingText[value]);
             });
 
-            $('#date-range').on('apply.daterangepicker', function(ev, picker) {
-                $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format(
-                    'DD/MM/YYYY'));
-                fetchTicket();
+            $('.star').on('mouseleave', function() {
+                highlightStars(selectedRating);
+                $('#ratingText').text(selectedRating ? ratingText[selectedRating] : 'Select review');
             });
 
-            $('#date-range').on('cancel.daterangepicker', function(ev, picker) {
-                $(this).val('');
-                fetchTicket();
+            $('.star').on('click', function() {
+                selectedRating = $(this).data('value');
+                highlightStars(selectedRating);
+                $('#ratingText').text(ratingText[selectedRating]);
             });
 
-            // Gõ tìm kiếm (debounce)
-            let debounceTimer;
-            $(document).on('input', 'input[name="search"]', function() {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    fetchTicket();
-                }, 500); // 500ms chờ sau khi ngừng gõ
+            $('#submitRating').on('click', function() {
+                const description = $('#ratingDescription').val();
+                const ticketId = $('[data-ticket-id]').data('ticket-id');
+
+                $.ajax({
+                    url: '/tickets/rate',
+                    method: 'POST',
+                    data: {
+                        rating: selectedRating,
+                        description: description,
+                        ticket_id: ticketId
+                    },
+                    beforeSend: function() {
+                        $('#loadingOverlay').show();
+                    },
+                    success: function(response) {
+                        $('#ratingModal').modal('hide');
+                        datgin.success(response.message)
+
+                        if (response.data && response.data.statusCounts) {
+                            updateTotalStatus(response)
+                        }
+
+                        fetchTicket();
+
+                        lastOpenedTicketId = null
+                    },
+                    error: function(xhr) {
+                        datgin.error('Lỗi:', xhr.responseJSON?.message || 'Đã xảy ra lỗi')
+                    },
+                    complete: function() {
+                        $('#loadingOverlay').hide();
+                    }
+                });
             });
 
-            $(document).on('click', '.filter-btn', function(e) {
-                $('.filter-btn').removeClass('active')
-                $(this).addClass('active')
-                fetchTicket()
-            });
 
-            // Phân trang
-            $(document).on('click', '.page-url-link', function(e) {
-                e.preventDefault();
-                const url = $(this).attr('href');
-                if (url) {
-                    fetchTicket(url);
-                }
-            });
-
-            $(document).on('change', '.per-page-selector', function() {
-                fetchTicket();
-            });
+            function highlightStars(rating) {
+                $('.star').each(function() {
+                    const value = $(this).data('value');
+                    $(this).toggleClass('hover', value <= rating);
+                    $(this).toggleClass('selected', value <= rating);
+                });
+            }
         });
-
-        // Gửi AJAX để lọc đơn hàng
-        function fetchTicket(url = "{{ route('tickets.index') }}", page = 1) {
-            const search = $('input[name="search"]').val();
-            const status = $('.filter-btn.active').data('status') || 'all'; // <-- thêm dòng này
-
-            const urlWithParams = new URL(url, window.location.href);
-            const searchParams = new URLSearchParams(urlWithParams.search);
-            const pageParam = searchParams.get('page') || page;
-
-            $.ajax({
-                url: urlWithParams.pathname,
-                method: 'GET',
-                data: {
-                    search: search,
-                    status: status, // <-- thêm vào đây
-                    page: pageParam
-                },
-                beforeSend: () => {
-                    $('#ticket-content').hide();
-                    $('#loading').show();
-                },
-                success: function(response) {
-                    $('#ticket-content').html(response.html).fadeIn(200);
-                    $('#loading').hide();
-                },
-                error: function(xhr) {
-                    datgin.error('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
-                },
-                complete: () => {
-                    $('#loading').hide();
-                    $('#ticket-content').show();
-                }
-            });
-        }
-
-
-        fetchTicket()
     </script>
 @endpush
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('frontend/assets/fonts/icomoon/style.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/select2.min.css') }}">
+
+    <style>
+        figure.image {
+            justify-content: center;
+            display: flex
+        }
+
+        .message-content img {
+            max-width: 300px;
+            height: auto;
+            border-radius: 8px;
+            /* nếu muốn bo tròn ảnh */
+            display: block;
+        }
+
+        .star {
+            color: #ccc;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .star.hover,
+        .star.selected {
+            color: #f4c150;
+        }
+    </style>
 @endpush

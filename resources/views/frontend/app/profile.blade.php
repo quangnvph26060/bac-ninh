@@ -135,7 +135,7 @@
                 processData: false,
                 contentType: false,
                 beforeSend: function() {
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: function(response) {
                     datgin.success(response.message);
@@ -146,7 +146,7 @@
                     datgin.error(xhr.responseJSON.message);
                 },
                 complete: function() {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 }
             });
         })
@@ -163,7 +163,7 @@
                     new_password: $new_password.val()
                 },
                 beforeSend: function() {
-                    $('#loading').show();
+                    $('#loadingOverlay').show();
                 },
                 success: function(response) {
                     datgin.success(response.message);
@@ -175,7 +175,7 @@
                     datgin.error(xhr.responseJSON.message);
                 },
                 complete: function() {
-                    $('#loading').hide();
+                    $('#loadingOverlay').hide();
                 }
             });
         });

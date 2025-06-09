@@ -11,33 +11,15 @@ class Material extends Model
 
     protected $fillable = [
         'name',
-        'price_usd',
-        'price_vnd',
-        'distributor',
-        'stock',
-        'sku',
-        'type',
-        'status'
     ];
 
-    public function variants()
+    public function types()
     {
-        return $this->hasMany(MaterialVariant::class);
+        return $this->belongsToMany(Type::class, 'material_type');
     }
 
-    public function attributes()
+    public function importDetails()
     {
-        return $this->hasMany(MaterialAttribute::class);
-    }
-
-    public static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $latastproduct = self::orderBy('id', 'desc')->first();
-            $nextNumber = $latastproduct ? ((int)substr($latastproduct->sku, 2)) + 1 : 1;
-            $model->sku = 'VT' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
-        });
+        return $this->hasMany(MaterialImportDetail::class);
     }
 }

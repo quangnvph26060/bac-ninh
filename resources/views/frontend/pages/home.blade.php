@@ -67,17 +67,19 @@
                                     <a href="{{ route('products.detail', [$product->category->slug, $product->slug]) }}">
                                         <img src="{{ showImage($product->image) }}" alt="{{ $product->name }}" />
                                         <div class="px-4 d-flex flex-column gap-2 text-center bg-white">
-                                            <span class="text-dark fw-bold text-truncate fs-6 mt-1">{{ $product->name }}</span>
+                                            <span
+                                                class="text-dark fw-bold text-truncate fs-6 mt-1">{{ $product->name }}</span>
                                             <p class="price-product">
 
                                                 @if (isOnSale($product))
                                                     <span
-                                                        class="text-danger fs-6">{{ formatPrice($product->discount_price) }} USD</span>
-                                                    <del
-                                                        class="ms-2 text-muted">{{ formatPrice($product->sale_price) }} USD</del>
+                                                        class="text-danger fs-6">{{ formatPrice($product->discount_price) }}
+                                                        USD</span>
+                                                    <del class="ms-2 text-muted">{{ formatPrice($product->sale_price) }}
+                                                        USD</del>
                                                 @else
-                                                    <span
-                                                        class="text-danger fs-6">{{ formatPrice($product->sale_price) }} USD</span>
+                                                    <span class="text-danger fs-6">{{ formatPrice($product->sale_price) }}
+                                                        USD</span>
                                                 @endif
 
                                             </p>
@@ -259,8 +261,8 @@
                 </p>
             </div>
         </div>
-        {{-- <div data-aos="fade-down" data-aos-once="true" data-aos-delay="600" class="category_home">
-            <div class="categories">
+        <div data-aos="fade-down" data-aos-once="true" data-aos-delay="600" class="category_home">
+            {{--  <div class="categories">
                 <div class="list_categories">
                     <div class="row text-center">
                         @foreach ($categories as $category)
@@ -286,20 +288,22 @@
                     </div>
                 </div>
             </div> --}}
-        <div class="d-flex align-items-center justify-content-center w-100 mt-2">
-            <a href="#">
-                <button type="button" class="ant-btn-primary">
-                    <span>Xem tất cả</span>
-                </button></a>
+            <div class="d-flex align-items-center justify-content-center w-100 mt-2">
+                <a href="#">
+                    <button type="button" class="ant-btn-primary">
+                        <span>Xem tất cả</span>
+                    </button></a>
+            </div>
         </div>
-    </div>
     </div>
 
     <div class="pw_different_part_wrapper position-relative">
         <div class="pw_help_you_wrapper">
             <div data-aos="zoom-in-up" data-aos-once="true" data-aos-delay="350"
                 class="w-100 d-flex align-items-center justify-content-center position-absolute z-3" style="top: -55px">
-                <img loading="lazy" src="https://printway.io/images/logo_line.png" alt="printway.io" />
+                <div class="image-frame">
+                    <img loading="lazy" src="{{ showImage($config['favicon']) }}" alt="{{ getDomainFromUrl() }}" />
+                </div>
             </div>
 
             <div data-aos="fade-up" data-aos-once="true" data-aos-delay="400" class="pw_help_you_wrapper_inner">
@@ -412,9 +416,9 @@
                     </div>
                     <div data-aos="fade-up" data-aos-once="true" data-aos-delay="600"
                         class="d-flex justify-content-center align-items-center mt-5">
-                        <a href="#"><button type="button"
+                        <a href="{{ route('dashboard') }}"><button type="button"
                                 class="ant-btn css-2i2tap ant-btn-primary btn_primary_ant">
-                                <span>Start Your Bussiness</span>
+                                <span>Start Your Order</span>
                             </button></a>
                     </div>
                 </div>
