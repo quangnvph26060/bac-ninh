@@ -1,10 +1,12 @@
 <?php
 
+use App\Models\Supplier;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -12,8 +14,11 @@ return new class extends Migration {
     {
         Schema::create('material_imports', function (Blueprint $table) {
             $table->id();
-            $table->date('import_date');
-            $table->string('import_code')->unique();
+            $table->string('code')->unique();
+            $table->foreignIdFor(Supplier::class)->constrained()->noActionOnDelete();
+            $table->date('date');
+            $table->text('note')->nullable();
+            $table->foreignId('created_by')->constrained('users')->noActionOnDelete();
             $table->timestamps();
         });
     }

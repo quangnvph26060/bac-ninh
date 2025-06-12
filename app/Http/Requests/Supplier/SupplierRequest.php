@@ -24,7 +24,7 @@ class SupplierRequest extends FormRequest
         $id = $this->route('id', null);
         return [
             'company_name' => 'required|max:250|unique:suppliers,company_name,' . $id,
-            'representative_name' => 'nullable|max:250',
+            'representative_name' => 'required|max:250',
             'position' => 'nullable|max:100',
             'phone' => ['required', 'regex:/^(0|\+84)[3-9][0-9]{8}$/', 'max:12'],
             'email' => 'nullable|max:250|email|unique:suppliers,email,' . $id,
@@ -33,9 +33,14 @@ class SupplierRequest extends FormRequest
             'bank_account_number' => 'nullable',
             'bank_id' => 'nullable|exists:banks,id',
             'notes' => 'nullable|max:400',
-            'status' => 'required|numeric|in:1,2',
+            'status' => 'nullable|numeric',
             'brand_id' => 'nullable|array',
             'brand_id.*' => 'exists:brands,id'
         ];
+    }
+
+    public function messages()
+    {
+        return __('request.messages');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Database\QueryException;
 
 class BulkActionController extends Controller
 {
@@ -60,8 +61,14 @@ class BulkActionController extends Controller
                 default:
                     return response()->json(['success' => false, 'message' => 'Loại hành động không hợp lệ.'], 400);
             }
+        } catch (QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return response()->json(['message' => 'Không thể xóa vì dữ liệu đang được liên kết.'], 400);
+            }
+
+            return response()->json(['message' => 'Lỗi truy vấn: ' . $e->getMessage()], 500);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Lỗi không xác định: ' . $e->getMessage()], 500);
         }
     }
 

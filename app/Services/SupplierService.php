@@ -41,7 +41,7 @@ class SupplierService extends BaseService
                 $supplier->brands()->sync($data['brand_id']);
             }
 
-            return successResponse('Thêm mới nhà cung cấp thành công.');
+            return successResponse('Thêm mới nhà cung cấp thành công.', $supplier);
         });
     }
 
@@ -51,7 +51,6 @@ class SupplierService extends BaseService
             if (!$supplier = $this->updateData($id, $payload)) {
                 return errorResponse('Đã có lỗi xảy ra. Vui lòng thử lại sau!!!');
             }
-
 
             if (!empty($payload['brand_id'])) {
 

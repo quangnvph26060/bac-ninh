@@ -5,14 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MaterialImportDetail extends Model
+class Bom extends Model
 {
     use HasFactory;
-    protected $fillable = ['material_import_id', 'material_id', 'quantity', 'unit_price', 'total_price', 'note'];
 
-    public function materialImport()
+    public $timestamps = false;
+    protected $fillable = ['productable_type', 'productable_id', 'material_id', 'quantity_required'];
+
+    public function productable()
     {
-        return $this->belongsTo(MaterialImport::class);
+        return $this->morphTo();
     }
 
     public function material()

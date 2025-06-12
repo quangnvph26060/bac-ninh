@@ -33,6 +33,10 @@
     .cke_notification_warning {
         display: none !important;
     }
+
+    .alert-danger {
+        z-index: 9999 !important;
+    }
 </style>
 
 @stack('styles')

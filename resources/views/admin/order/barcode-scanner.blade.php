@@ -8,7 +8,7 @@
 
         <div class="card mt-4">
             <div class="card-header bg-primary text-white">
-                <h4>Quét mã vạch để tìm đơn hàng</h4>
+                <h4 class="text-light">Quét mã vạch để tìm đơn hàng</h4>
             </div>
             <div class="card-body text-center">
                 <div id="reader" class="mx-auto" style="max-width: 500px;"></div>

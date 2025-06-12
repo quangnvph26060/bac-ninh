@@ -92,11 +92,14 @@ class Product extends Model
         return $this->hasMany(ProductImages::class);
     }
 
-    public function storages()
+    public function boms()
     {
-        return $this->belongsToMany(Storage::class, 'product_storage')
-            ->withPivot('quantity')
-            ->withTimestamps();
+        return $this->hasMany(Bom::class);
+    }
+
+    public function usages()
+    {
+        return $this->hasMany(MaterialUsage::class);
     }
 
     public static function boot()
