@@ -16,10 +16,11 @@ return new class extends Migration
         Schema::create('material_import_details', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(MaterialImport::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Material::class)->constrained()->cascadeOnUpdate();
-            $table->unsignedBigInteger('quantity');
-            $table->decimal('price', 12, 2)->default(0);
-            $table->string('unit');
+            $table->foreignIdFor(Material::class)->constrained()->restrictOnDelete();
+            $table->decimal('quantity', 12, 2);
+            $table->decimal('unit_price', 15, 2);
+            $table->decimal('total_price', 20, 2);
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }

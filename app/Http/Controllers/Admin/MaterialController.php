@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Material\MaterialRequest;
-use App\Models\Material;
-use App\Models\MaterialAttribute;
 use App\Services\MaterialService;
 use App\Services\SupplierService;
 use App\Services\TypeService;
@@ -15,14 +13,12 @@ use Illuminate\Http\Request;
 class MaterialController extends Controller
 {
     use PaginateTrait;
-    public function __construct(public MaterialService $materialService, public TypeService $typeService, public SupplierService $supplierService)
+    public function __construct(public MaterialService $materialService)
     {
     }
 
     public function index()
     {
-        // dd($this->materialService->pagination()->get());
-
         if (request()->ajax()) {
 
             $buider = $this->materialService->pagination();
@@ -31,29 +27,26 @@ class MaterialController extends Controller
                 $buider,
                 fn($dataTable) =>
                 $dataTable
+                    ->editColumn('min_stock', fn($row) => $row->min_stock ? number_format($row->min_stock, 0, ',', '') : 0)
+                    ->addColumn('stock', fn($row) => $row->inventory ? number_format($row->inventory->quantity, 0, ',', '') : 0)
+                    ->addColumn('final_update', fn($row) => $row->inventory ? $row->inventory->updated_at->format('d/m/Y H:i') : 'N/A')
                     ->editColumn('created_at', fn($row) => $row->created_at->format('d/m/Y'))
-                    ->addColumn('items', fn($row) => $row->types ? $row->types->pluck('name')->implode(', ') : 'N/A')
-                    ->addColumn('total_stock', fn($row) => $row->import_details_sum_quantity ?? 0)
-                    ->addColumn('total_stock', fn($row) => $row->import_details_sum_quantity ?? 0)
-                    ->addColumn('operations', fn($row) => "
-                        <a href='" . route('admin.materials.show', $row->id) . "'
-                            class='btn btn-primary btn-sm table-actions btn-operation-show'>
-                            <i class='ti ti-eye'></i>
-                        </a>
-                    "),
+                    ->addColumn('operations', fn($row) => view('admin.components.operation', compact('row'))),
                 ['operations']
             );
         }
 
-        return view('admin.material.index');
+        $units = $this->materialService->getUnits();
+
+        return view('admin.material.index', compact('units'));
     }
 
     public function create()
     {
-        $suppliers = $this->supplierService->getAllSupplier();
-        $types = $this->typeService->getTypeNames();
-        $names = $this->materialService->getMaterialNames();
-        return view('admin.material.save', compact('names', 'types', 'suppliers'));
+        $material = null;
+        $units = $this->materialService->getUnits();
+
+        return view('admin.material.save', compact('units', 'material'));
     }
 
     public function show(string $id)
@@ -75,30 +68,34 @@ class MaterialController extends Controller
 
         $response = $this->materialService->store($credentials);
 
-        return handleResponse($response['message'], $response['success'], $response['code'], null, false);
+        return handleResponse($response['message'], $response['success'], $response['code'], $response['data'], false);
     }
-
-
 
     public function edit(string $id)
     {
-        // $title = 'Cập nhật vật tư';
-        // $material = Material::find($id);
+        $units = $this->materialService->getUnits();
 
-        // $variants = $material->variants ?? [];
-        // // dd($variants);
-        // $attributes = $this->attributeService->getPluck();
-        // $materialAttributes =  MaterialAttribute::where('material_id', $id)->get();
-        // $selectedAttributes = $materialAttributes->pluck('attribute_id')->toArray();
+        $material = $this->materialService->show($id);
 
-        // return view('admin.material.save', [
-        //     'title' => 'Cập nhật vật tư',
-        //     'material' => $material,
-        //     'variants' => $variants,  // Truyền dữ liệu variants,
-        //     'attributes' => $attributes,
-        //     'selectedAttributes' => $selectedAttributes,
-        //     'materialAttributes' => $materialAttributes
-        // ]);
+        return view('admin.material.save', compact('units', 'material'));
+    }
 
+    public function update(MaterialRequest $request, string $id)
+    {
+        $credentials = $request->validated();
+
+        $response = $this->materialService->update($id, $credentials);
+
+        return handleResponse($response['message'], $response['success'], $response['code'], null, false);
+    }
+
+    public function search(Request $request)
+    {
+        $term = $request->get('term', '');
+        $page = $request->get('page', 1);
+
+        $response = $this->materialService->search($term, $page);
+
+        return successResponse("Lấy dữ liệu thành công", $response, 200, true);
     }
 }

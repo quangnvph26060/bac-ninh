@@ -11,7 +11,7 @@
                 <h5 class="text-uppercase card-title fw-bold">danh sách nguyên vật liệu</h5>
                 <div class="card-tool">
                     <a href="{{ route('admin.materials.create') }}" class="btn btn-primary btn-sm fs-6"><i
-                            class="ti ti-circle-plus"></i> Nhập vật liệu </a>
+                            class="ti ti-circle-plus"></i> Thêm mới vật liệu </a>
                 </div>
             </div>
 
@@ -27,7 +27,12 @@
     <script>
         $(document).ready(function() {
             const api = "{{ route('admin.materials.index') }}"
-            dataTables(api, columns, 'Material')
+            dataTables(api, columns, 'Material', {
+                unit: {
+                    title: 'Lọc đơn vị',
+                    data: @json($units)
+                }
+            })
         })
     </script>
 @endpush

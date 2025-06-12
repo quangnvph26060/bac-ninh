@@ -15,13 +15,8 @@ use App\Http\Controllers\Frontend\App\ProfileController;
 use App\Http\Controllers\Frontend\App\TicketController;
 use App\Http\Controllers\Frontend\App\TransactionHistoryController;
 use App\Http\Controllers\Frontend\ChatController;
-use App\Imports\OrderImport;
-use App\Jobs\ImportOrdersFromExcel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
-use Maatwebsite\Excel\Facades\Excel;
 
 // route::get('get-ppi-image', function () {
 //     return view('get-ppi');
@@ -49,7 +44,6 @@ Route::middleware('auth')->group(function () {
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('coupons', [CouponController::class, 'coupons'])->name('coupons.index');
 
-    Route::get('transaction-history', [TransactionHistoryController::class, 'transactionHistory'])->name('transaction.history');
     Route::get('spending-stats', [StatController::class, 'index'])->name('spending.stats');
 
     Route::prefix('bills')
