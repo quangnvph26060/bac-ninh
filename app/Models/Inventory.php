@@ -9,7 +9,7 @@ class Inventory extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
+   
 
     protected $fillable = ['material_id', 'quantity'];
 
@@ -18,7 +18,5 @@ class Inventory extends Model
         return $this->belongsTo(Material::class);
     }
 
-    protected $casts = [
-        'updated_at' => 'datetime',
-    ];
+
 }
