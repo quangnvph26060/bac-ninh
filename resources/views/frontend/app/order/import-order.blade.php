@@ -72,14 +72,16 @@
                 if (file) {
                     $('#file-drop-text').text(file.name);
                     $('#file-action-wrapper').html(`
-                <button type="button" class="btn btn-primary btn-sm" id="confirm-upload-btn">
-                    Confirm Import
-                </button>
-            `);
+                        <button type="button" class="btn btn-primary btn-sm" id="confirm-upload-btn">
+                            Confirm Import
+                        </button>
+                    `);
 
                     $('#confirm-upload-btn').on('click', function() {
                         let formData = new FormData();
                         formData.append('file', file);
+
+                        $(this).prop('disabled', true).text('Đang import...');
 
                         $('#import-progress').removeClass('d-none');
                         $('#progress-text').text('Đang khởi tạo...');
@@ -226,6 +228,7 @@
             // $('#error-list').empty();
 
             // Rebind lại sự kiện change cho input file (vì nó bị thay mới)
+            $('#confirm-upload-btn').prop('disabled', false).text('Confirm Import');
             bindFileInput();
         }
     </script>
