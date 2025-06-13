@@ -17,21 +17,21 @@ class AttributePolicy
      */
     public function view(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Attribute View');
+        return $this->hasAccess($employee, 'View Attribute List');
     }
 
     public function create(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Attribute Create');
+        return $this->hasAccess($employee, 'Add New Attribute');
     }
 
     public function edit(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Attribute Edit');
+        return $this->hasAccess($employee, 'Update Attribute');
     }
 
     public function destroy(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Attribute Destroy');
+        return $this->hasAccess($employee, 'Delete Attribute');
     }
 }

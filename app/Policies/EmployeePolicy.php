@@ -16,21 +16,21 @@ class EmployeePolicy
      */
     public function view(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Employee View');
+        return $this->hasAccess($employee, 'View Employee List');
     }
 
     public function create(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Employee Create');
+        return $this->hasAccess($employee, 'Add New Employee');
     }
 
     public function edit(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Employee Edit');
+        return $this->hasAccess($employee, 'Staff Update');
     }
 
     public function destroy(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Employee Destroy');
+        return $this->hasAccess($employee, 'Delete Employee');
     }
 }

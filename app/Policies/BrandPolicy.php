@@ -17,21 +17,21 @@ class BrandPolicy
      */
     public function view(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Brand View');
+        return $this->hasAccess($employee, 'View Brand List');
     }
 
     public function create(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Brand Create');
+        return $this->hasAccess($employee, 'Add New Brand');
     }
 
     public function edit(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Brand Edit');
+        return $this->hasAccess($employee, 'Brand Update');
     }
 
     public function destroy(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Brand Destroy');
+        return $this->hasAccess($employee, 'Remove Brand');
     }
 }
