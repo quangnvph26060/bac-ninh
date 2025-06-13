@@ -17,22 +17,22 @@ class ProductPolicy
      */
     public function view(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Product View');
+        return $this->hasAccess($employee, 'View Product List');
     }
 
     public function create(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Product Create');
+        return $this->hasAccess($employee, 'Add New Product');
     }
 
     public function edit(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Product Edit');
+        return $this->hasAccess($employee, 'Product Updates');
     }
 
     public function destroy(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Product Destroy');
+        return $this->hasAccess($employee, 'Delete Product');
     }
 
     public function import(Employee $employee): bool

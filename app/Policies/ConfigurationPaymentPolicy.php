@@ -14,19 +14,19 @@ class ConfigurationPaymentPolicy
 
     public function view(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Configuration Payment View');
+        return $this->hasAccess($employee, 'Payment Config List');
     }
 
     public function save(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Configuration Payment Save');
+        return $this->hasAccess($employee, 'Payment Config Create');
     }
     public function editStatus(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Configuration Payment Edit Status');
+        return $this->hasAccess($employee, 'Payment Config Status');
     }
     public function destroy(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Configuration Payment Destroy');
+        return $this->hasAccess($employee, 'Payment Config Delete');
     }
 }
