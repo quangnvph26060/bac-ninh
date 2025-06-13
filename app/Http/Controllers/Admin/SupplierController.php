@@ -44,20 +44,20 @@ class SupplierController extends Controller
     public function create()
     {
         $this->authorize('create', Supplier::class);
-
+        $banks = DB::table('banks')->pluck('name', 'id')->toArray();
         $title = 'Thêm mới nhà cung cấp.';
         $supplier = null;
-        return view('admin.supplier.save', compact('title', 'supplier'));
+        $brands = $this->brandService->getBrandAll(false);
+        return view('admin.supplier.save', compact('title', 'supplier', 'banks', 'brands'));
     }
 
-    public function store(Request $request)
+    public function store(SupplierRequest $request)
     {
         $this->authorize('create', Supplier::class);
 
         $response = $this->supplierService->create($request->all());
-        return handleResponse($response['message'], $response['success'], $response['code']);
+        return handleResponse($response['message'], $response['success'], $response['code'], $response['data'], false);
     }
-
 
     public function edit(string $id)
     {

@@ -23,19 +23,20 @@ class MaterialRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id = $this->route('id', null);
 
         return [
-            'name' => 'required|string|max:255',
-            'import_code' => 'nullable|string|max:255',
-
-            'data' => 'required|array|min:1',
-            'data.*.type_name' => 'required|string|max:255',
-            'data.*.supplier_name' => 'required|string|max:255',
-            'data.*.price' => 'required|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
-            'data.*.quantity' => 'required|numeric|min:0',
-            'data.*.unit' => 'required|string|max:100',
+            'name' => "required|string|max:250|unique:materials,name,{$id}",
+            'code' => [
+                'nullable',
+                "unique:materials,code,{$id}",
+            ],
+            'unit' => 'required|max:50',
+            'min_stock' => 'nullable|numeric|min:0',
+            'note' => 'nullable|string|max:255'
         ];
     }
+
 
     public function messages()
     {
@@ -46,12 +47,11 @@ class MaterialRequest extends FormRequest
     public function attributes()
     {
         return [
-            'material_id' => 'nguyên vật liệu',
-            'data.*.type_name' => 'loại vật liệu',
-            'data.*.price' => 'giá',
-            'data.*.quantity' => 'số lượng',
-            'data.*.unit' => 'đơn vị',
-            'data.*.supplier_name' => 'nhà cung cấp',
+            'name' => 'Tên vật tư',
+            'code' => 'Mã vật tư',
+            'unit' => 'Đơn vị',
+            'min_stock' => 'Số lượng báo động',
+            'note' => 'Ghi chú'
         ];
     }
 

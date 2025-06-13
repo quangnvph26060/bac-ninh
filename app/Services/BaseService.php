@@ -220,7 +220,8 @@ class BaseService
         array $whereHasConditions = [],
         array $withCount = [],
         array $order = [],
-        array $withSum = []
+        array $withSum = [],
+        string $dateColumn = 'created_at'
     ) {
         $conditions = $this->payload();
 
@@ -262,7 +263,7 @@ class BaseService
             $startDate = $conditions['start_date'];
             $endDate = $conditions['end_date'] . ' 23:59:59';
 
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            $query->whereBetween($dateColumn, [$startDate, $endDate]);
         }
 
         if ($order) {

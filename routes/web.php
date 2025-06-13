@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\MaterialImportController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\Admin\ReportdebtController;
 use App\Http\Controllers\Admin\StorageController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\SubjectController;
+use App\Http\Controllers\Admin\SupplierDebtController;
 use App\Http\Controllers\Admin\TicketController;
 use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\Admin\TransferHistoryController;
@@ -75,8 +77,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('orders')->controller(OrderController::class)->name('orders.')->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('create', 'create')->name('create');
-            Route::post('create', 'store')->name('store');
             Route::get('edit/{id}', 'edit')->name('edit');
             Route::put('edit/{id}', 'update')->name('update');
             Route::post('items', 'getItemByCode')->name('get.item.by.code');
@@ -111,16 +111,35 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('selected-attributes/{id}', 'getValueByAttributeId')->name('selected.attributes');
         });
 
-        // Route::prefix('materials')->controller(MaterialController::class)->name('materials.')->group(function () {
-        //     Route::get('/', 'index')->name('index');
-        //     Route::get('create', 'create')->name('create');
-        //     Route::post('create', 'store')->name('store');
-        //     Route::get('/{id}', 'show')->name('show');
-        //     Route::get('edit/{id}', 'edit')->name('edit');
-        //     Route::put('edit/{id}', 'update')->name('update');
+        Route::prefix('materials')->controller(MaterialController::class)->name('materials.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('search', 'search')->name('search');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+            Route::get('/{id}', 'show')->name('show');
+        });
 
-        //     Route::get('list', 'list')->name('list');
-        // });
+        Route::prefix('material-imports')->controller(MaterialImportController::class)->name('material-imports.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('show/{id}', 'show')->name('show');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+        });
+
+        Route::prefix('suppliers-debts')->controller(SupplierDebtController::class)->name('suppliers-debts.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('show/{id}', 'show')->name('show');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+            Route::get('pdf/{id}', 'downloadPdf');
+            Route::post('pay', 'pay');
+        });
 
         // Attribute Router
         Route::prefix('attributes')->controller(AttributeController::class)->name('attributes.')->group(function () {
@@ -162,6 +181,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(function () {
             Route::get("/", 'index')->name('index');
             Route::get("create", 'create')->name('create');
+            Route::post("/", 'store')->name('store');
             Route::get("edit/{id}", 'edit')->name('edit');
             Route::put("edit/{id}", 'update')->name('update');
         });

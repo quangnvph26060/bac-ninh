@@ -32,4 +32,19 @@ class Supplier extends Model
     {
         return $this->belongsToMany(Brand::class, 'brand_suppliers');
     }
+
+    public function imports()
+    {
+        return $this->hasMany(MaterialImport::class);
+    }
+
+    public function debts()
+    {
+        return $this->hasMany(SupplierDebt::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(SupplierPayment::class);
+    }
 }

@@ -22,6 +22,41 @@ function formatCurrency(amount) {
     return formatted;
 }
 
+function formatNumber(amount) {
+    if (!amount) return "0";
+
+    const formatted = new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(amount);
+
+    // Remove .00 if present
+    if (formatted.endsWith(".00")) {
+        return formatted.slice(0, -3);
+    }
+
+    // Remove trailing 0 if present
+    if (formatted.endsWith("0")) {
+        return formatted.slice(0, -1);
+    }
+
+    return formatted;
+}
+
+function formatQuantity(value) {
+    if (!value) return "0";
+
+    const formatted = parseFloat(value).toFixed(2);
+
+    // Bỏ .00 nếu là số nguyên
+    if (formatted.endsWith(".00")) {
+        return formatted.slice(0, -3);
+    }
+
+    // Bỏ số 0 cuối nếu như là .10, .50 v.v.
+    return formatted.replace(/(\.\d)0$/, "$1");
+}
+
 function convertToAsciiUpper(inputId) {
     $(inputId).on("input", function () {
         let value = $(this).val();
@@ -327,34 +362,35 @@ function submitForm(formId, successCallback, url = null, errorCallback = null) {
     $(formId).on("submit", function (e) {
         e.preventDefault();
 
-        let isValid = true;
+        // let isValid = true;
 
-        $(this)
-            .find("input[data-rules], textarea[data-rules], select[data-rules]")
-            .each(function () {
-                // Gọi validate lại từng input/textarea/select
-                if (!validateInput(this)) {
-                    isValid = false;
-                }
-            });
+        // $(this)
+        //     .find("input[data-rules], textarea[data-rules], select[data-rules]")
+        //     .each(function () {
+        //         // Gọi validate lại từng input/textarea/select
+        //         if (!validateInput(this)) {
+        //             isValid = false;
+        //         }
+        //     });
 
         // Nếu có lỗi, chặn submit
-        if (!isValid) {
-            return;
-        }
+        // if (!isValid) {
+        //     return;
+        // }
 
         // Cập nhật tất cả giá trị CKEditor vào các textarea tương ứng
         for (const instance in CKEDITOR.instances) {
             CKEDITOR.instances[instance].updateElement();
         }
 
+        var formData = new FormData(this);
+
         // 👉 Xóa dấu phẩy trong các input có class `usd-price-format`
         $(".usd-price-format").each(function () {
-            const value = $(this).val().replace(/,/g, "");
-            $(this).val(value);
+            const name = $(this).attr("name");
+            const rawValue = $(this).val().replace(/,/g, "");
+            formData.set(name, rawValue); // Ghi đè lại giá trị trong formData
         });
-
-        var formData = new FormData(this);
 
         $.ajax({
             url: url || window.location.href,

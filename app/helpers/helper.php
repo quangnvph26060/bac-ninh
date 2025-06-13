@@ -87,6 +87,19 @@ if (!function_exists('uploadImages')) {
     }
 }
 
+if (!class_exists('formatNumber')) {
+
+    function formatNumber($number)
+    {
+        if (fmod($number, 1) == 0) {
+            return (int)$number; // Trả về số nguyên, không thêm ,
+        }
+
+        return number_format($number, 2, '.', ''); // giữ lại phần thập phân nếu có
+    }
+}
+
+
 function removeVietnameseTones($str)
 {
     $str = preg_replace("/(à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ)/u", "a", $str);
@@ -325,17 +338,6 @@ if (!class_exists('sessionFlash')) {
     }
 }
 
-if (!class_exists('formatNumber')) {
-    function formatNumber($number)
-    {
-        if (!empty($number)) {
-            return number_format((float) $number, 2, '.', ',');
-        }
-        return 0.00;
-    }
-}
-
-
 function isOnSale($record)
 {
     // Kiểm tra xem có discount_price không
@@ -435,6 +437,40 @@ if (!function_exists('isActiveMenu')) {
         }
 
         return '';
+    }
+}
+
+if (!function_exists('generateCode')) {
+
+    function generateCode(int $length = 12): string
+    {
+        $base = microtime(true) . bin2hex(random_bytes(5));
+        $hash = strtoupper(substr(hash('sha256', $base), 0, $length));
+        return $hash;
+    }
+}
+
+if (!function_exists('generateUniqueCode')) {
+    function generateUniqueCode(string $table, string $column = 'code', int $length = 12): string
+    {
+        do {
+            $code = generateCode($length);
+        } while (DB::table($table)->where($column, $code)->exists());
+
+        return $code;
+    }
+}
+
+if (!function_exists('removePrefix')) {
+    function removePrefix(mixed $value, string $prefix): string
+    {
+        if ($value === null) return "";
+
+        if (str_starts_with($value, $prefix)) {
+            return substr($value, strlen($prefix));
+        }
+
+        return $value;
     }
 }
 

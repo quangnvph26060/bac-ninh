@@ -52,7 +52,6 @@ class ProductController extends Controller
 
         $categories     = $this->categoryService->getCategoryAll();
         $brands         = $this->brandService->getBrandAll();
-        // $companies      = $this->companyService->getCompanyAll();
 
         return view('admin.product.index', compact('categories', 'brands'));
     }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Frontend\App;
 use App\Http\Controllers\Controller;
 use App\Models\ConfigPayment;
 use App\Models\TopupRequest;
-use App\Models\TransactionHistory;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use App\Services\PaypalService;
@@ -205,130 +204,6 @@ class BillController extends Controller
             return errorResponse('Đã có lỗi xảy ra, vui lòng thử lại sau!', true);
         }
     }
-
-    // public function processTransaction(Request $request)
-    // {
-    //     $request->validate(
-    //         [
-    //             'amount' => 'required|numeric',
-    //             'note' => 'nullable|string|max:255'
-    //         ],
-    //         __('request.messages'),
-    //         [
-    //             'amount' => 'Số tiền',
-    //             'note' => 'Ghi chú'
-    //         ]
-    //     );
-
-    //     try {
-    //         $response = $this->paypalService->createOrder(
-    //             $request->amount,
-    //             'USD',
-    //             route('bills.paypal.success'),
-    //             route('bills.paypal.cancel')
-    //         );
-
-    //         if (isset($response['id']) && $response['status'] == 'CREATED') {
-    //             session([
-    //                 'paypal_wallet' => [
-    //                     'token' => $response['id'],
-    //                     'amount' => $request->amount,
-    //                     'note' => $request->note,
-    //                 ]
-    //             ]);
-    //             foreach ($response['links'] as $link) {
-    //                 if ($link['rel'] === 'approve') {
-    //                     return response()->json([
-    //                         'approval_url' => $link['href'],
-    //                     ]);
-    //                 }
-    //             }
-    //         }
-    //     } catch (\Exception $e) {
-    //         logger("error:" . $e->getMessage());
-    //         return errorResponse('Đã có lỗi xảy ra trong quá trình thành toán!', true);
-    //     }
-    // }
-
-    // public function successTransaction(Request $request)
-    // {
-    //     try {
-    //         $response = $this->paypalService->captureOrder($request->token);
-
-    //         $paypalWallet = session('paypal_wallet');
-
-    //         // Nếu không có session hoặc token không trùng khớp
-    //         if (!$paypalWallet || $paypalWallet['token'] !== $request->token) {
-    //             return redirect()->route('bills.index')->with('error', 'Lệnh nạp không hợp lệ!');
-    //         }
-
-    //         $amount = $paypalWallet['amount'];
-    //         $note = $paypalWallet['note'];
-    //         $status = $response['status'] ?? 'FAILED';
-
-    //         // Lấy ví (nếu chưa có thì tạo)
-    //         $wallet = Wallet::firstOrCreate(
-    //             ['user_id' => auth()->id()],
-    //             ['balance' => 0]
-    //         );
-
-    //         $balanceBefore = $wallet->balance;
-
-    //         if ($status === 'COMPLETED') {
-    //             $wallet->increment('balance', $amount);
-    //         }
-
-    //         $balanceAfter = $wallet->fresh()->balance;
-
-    //         // Ghi lại lịch sử giao dịch, dù thành công hay thất bại
-    //         WalletTransaction::create([
-    //             'wallet_id' => $wallet->id,
-    //             'code' => generateTransactionCode(),
-    //             'amount' => $amount,
-    //             'note' => $note,
-    //             'balance_before' => $balanceBefore,
-    //             'balance_after' => $balanceAfter,
-    //             'extra' => json_encode($response), // Có thể lưu toàn bộ response
-    //         ]);
-
-    //         session()->forget('paypal_wallet');
-
-    //         if ($status === 'COMPLETED') {
-    //             return redirect()->route('bills.index')->with('success', 'Nạp tiền thành công!');
-    //         } else {
-    //             return redirect()->route('bills.index')->with('error', 'Giao dịch không hoàn tất.');
-    //         }
-    //     } catch (\Exception $e) {
-    //         logger("PayPal error: " . $e->getMessage());
-
-    //         // Ghi lại nếu có session
-    //         if (session()->has('paypal_wallet')) {
-    //             $paypalWallet = session('paypal_wallet');
-    //             $wallet = Wallet::firstOrCreate(
-    //                 ['user_id' => auth()->id()],
-    //                 ['balance' => 0]
-    //             );
-
-    //             WalletTransaction::create([
-    //                 'wallet_id' => $wallet->id,
-    //                 'code' => generateTransactionCode(),
-    //                 'amount' => $paypalWallet['amount'],
-    //                 'note' => $paypalWallet['note'] . ' (Lỗi khi thanh toán)',
-    //                 'balance_before' => $wallet->balance,
-    //                 'balance_after' => $wallet->balance,
-    //                 'status' => 'failure',
-    //                 'extra' => json_encode(['exception' => $e->getMessage()]),
-    //             ]);
-
-    //             session()->forget('paypal_wallet');
-    //         }
-
-    //         return redirect()
-    //             ->route('bills.index')
-    //             ->with('error', 'Đã xảy ra lỗi khi xử lý thanh toán.');
-    //     }
-    // }
-
 
     public function cancelTransaction()
     {

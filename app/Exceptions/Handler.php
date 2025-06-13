@@ -9,6 +9,7 @@ use Throwable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Database\QueryException;
 
 class Handler extends ExceptionHandler
 {
@@ -67,6 +68,8 @@ class Handler extends ExceptionHandler
 
             return response()->view('errors.403', [], 403);
         }
+
+
 
         if ($request->expectsJson()) {
             return response()->json([
