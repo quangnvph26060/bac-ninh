@@ -20,10 +20,6 @@
                 "url": "admin.orders.barcode.scanner"
             },
             {
-                "title": "Quản lý yêu cầu vật tư",
-                "url": "admin.material-requests.index"
-            },
-            {
                 "title": "Chờ xác nhận",
                 "status": "pending",
                 "class": "bg-warning text-dark",
