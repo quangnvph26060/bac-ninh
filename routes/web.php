@@ -1,7 +1,11 @@
 <?php
 // phpinfo();
 
+use App\Exports\MaterialsDataSheet;
+use App\Exports\MaterialsExport;
+use App\Exports\MaterialsTemplateExport;
 use App\Http\Controllers\Admin\ActivityController;
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\BulkActionController;
@@ -33,13 +37,16 @@ use App\Http\Controllers\Admin\TicketController;
 use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\Admin\TransferHistoryController;
 use Illuminate\Support\Facades\Route;
-
+use Maatwebsite\Excel\Facades\Excel;
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::middleware('admin.auth')->group(function () {
         // Dashboard Router
         Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
+
+        // Change avatar
+        Route::post('avatar', [AdminController::class, 'updateAvatar'])->name('updateAvatar');
 
         // Logout Router
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
@@ -113,6 +120,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('materials')->controller(MaterialController::class)->name('materials.')->group(function () {
+            // Temp mẫu
+            Route::get('download-template', function () {
+                return Excel::download(new MaterialsTemplateExport, 'materials_template_'.time().'.xlsx');
+            })->name('template');
+
+            
+            Route::post('import', [MaterialController::class, 'import'])->name('import');
+    
+            Route::get('export', function () {
+                return Excel::download(new MaterialsDataSheet, 'danh_sach_nguyen_vat_lieu_'.time().'.xlsx');
+            })->name('export');
+
             Route::get('/', 'index')->name('index');
             Route::get('search', 'search')->name('search');
             Route::get('create', 'create')->name('create');
@@ -120,6 +139,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('edit/{id}', 'edit')->name('edit');
             Route::put('edit/{id}', 'update')->name('update');
             Route::get('/{id}', 'show')->name('show');
+
         });
 
         Route::group(

@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Material\MaterialRequest;
+use App\Imports\MaterialsImport;
+use App\Models\MaterialImport;
 use App\Services\MaterialService;
 use App\Services\SupplierService;
 use App\Services\TypeService;
 use App\Traits\PaginateTrait;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MaterialController extends Controller
 {
@@ -98,4 +101,26 @@ class MaterialController extends Controller
 
         return successResponse("Lấy dữ liệu thành công", $response, 200, true);
     }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls',
+        ]);
+
+        try {
+            $import = new MaterialsImport(); // <-- KHỞI TẠO TRƯỚC
+            Excel::import($import, $request->file('file')); // <-- TRUYỀN VÀO
+
+            return back()->with([
+                'success' => $import->success,
+                'error' => $import->error,
+                'import_errors' => $import->errors,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Lỗi: ' . $e->getMessage()], 500);
+        }
+    }
+
 }

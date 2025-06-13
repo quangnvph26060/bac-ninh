@@ -98,7 +98,7 @@
                     <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#"
                         aria-expanded="false">
                         <div class="avatar-sm">
-                            <img src="{{ showImage(auth()->guard('admin')->user()->img_url) }}"
+                            <img src="{{ showImage(auth()->guard('admin')->user()->avatar) }}"
                                 alt="{{ auth()->guard('admin')->user()->full_name }}" class="avatar-img rounded-circle">
                         </div>
                         <span class="profile-username">
@@ -120,8 +120,10 @@
                                             <h4>{{ auth()->guard('admin')->user()->full_name }}</h4>
                                             <p class="text-muted">{{ auth()->guard('admin')->user()->email }}</p>
                                             <div style="display: flex">
-                                                <a href="#" class="btn btn-xs btn-secondary btn-sm p-1">Trang cá
-                                                    nhân</a>
+                                                <a href="#" class="btn btn-xs btn-secondary btn-sm p-1"
+                                                    data-bs-toggle="modal" data-bs-target="#changeAvatarModal">
+                                                    Đổi avatar
+                                                </a>
                                                 <a href="#" class="btn btn-xs btn-sm p-1"
                                                     style="background: red; color: #ffff; margin-left: 10px"
                                                     onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Đăng
@@ -157,4 +159,29 @@
     </nav>
     <!-- End Navbar -->
 </div>
-
+{{-- Mordal thay đổi avatar --}}
+<div class="modal fade" id="changeAvatarModal" tabindex="-1" aria-labelledby="changeAvatarModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="{{route('admin.updateAvatar')}}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeAvatarModalLabel">Cập nhật Avatar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="avatar" class="form-label">Chọn ảnh avatar</label>
+                        <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*"
+                            required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
