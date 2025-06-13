@@ -17,21 +17,21 @@ class SupplierPolicy
      */
     public function view(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Supplier View');
+        return $this->hasAccess($employee, 'View List Of Suppliers');
     }
 
     public function create(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Supplier Create');
+        return $this->hasAccess($employee, 'Add New Supplier');
     }
 
     public function edit(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Supplier Edit');
+        return $this->hasAccess($employee, 'Supplier Update');
     }
 
     public function destroy(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Supplier Destroy');
+        return $this->hasAccess($employee, 'Delete Supplier');
     }
 }

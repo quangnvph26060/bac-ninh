@@ -17,11 +17,11 @@ class CustomerPolicy
      */
     public function view(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Customer View');
+        return $this->hasAccess($employee, 'Customer List');
     }
     public function viewAny(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Customer View Any');
+        return $this->hasAccess($employee, 'View Customer Details');
     }
 
 

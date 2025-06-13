@@ -75,7 +75,9 @@
                 "url": "admin.transfer.histories.index"
             }
         ],
-        "inRoutes": ["admin.transfer.histories.index"]
+        "inRoutes": [
+            "admin.transfer.histories.index"
+        ]
     },
     {
         "title": "Sản phẩm",
@@ -125,7 +127,10 @@
                 "url": "admin.subjects.index"
             }
         ],
-        "inRoutes": ["admin.coupons.index", "admin.subjects.index"]
+        "inRoutes": [
+            "admin.coupons.index",
+            "admin.subjects.index"
+        ]
     },
     {
         "title": "Nhà cung cấp",
@@ -138,7 +143,10 @@
         "icon": "fas fa-user",
         "route": "admin.customers.index",
         "id": "customers",
-        "inRoutes": ["admin.customers.index", "admin.customers.show"]
+        "inRoutes": [
+            "admin.customers.index",
+            "admin.customers.show"
+        ]
     },
     {
         "title": "Nhân viên",
@@ -196,5 +204,27 @@
         "icon": "fas fa-ticket-alt",
         "route": "admin.tickets.index",
         "id": "ticket"
+    },
+
+    {
+        "title": "Phân quyền",
+        "icon": "fas fa-user-shield",
+        "id": "permissions",
+        "children": [
+            {
+                "title": "Quản lý vai trò",
+                "url": "admin.roles.index"
+            },
+            {
+                "title": "Quản lý quyền hạn",
+                "url": "admin.permissions.index"
+            }
+        ],
+        "inRoutes": [
+            "admin.employees.index",
+            "admin.roles.index",
+            "admin.permissions.index",
+            "admin.activity.log.history"
+        ]
     }
 ]

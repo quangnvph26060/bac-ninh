@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Helpers;
-
 class NumberToWords {
     public static function convert($number) {
         $hyphen      = ' ';

@@ -17,11 +17,11 @@ class ConfigurationPolicy
      */
     public function view(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Configuration View');
+        return $this->hasAccess($employee, 'Manage Conflig');
     }
 
     public function edit(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Configuration Edit');
+        return $this->hasAccess($employee, 'Update General Configuration');
     }
 }

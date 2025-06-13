@@ -17,20 +17,20 @@ class RolePolicy
      */
     public function view(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Role View');
+        return $this->hasAccess($employee, 'List Role');
     }
     public function create(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Role Create');
+        return $this->hasAccess($employee, 'Create Role');
     }
 
     public function edit(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Role Edit');
+        return $this->hasAccess($employee, 'Edit Role');
     }
 
     public function destroy(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Role Destroy');
+        return $this->hasAccess($employee, 'Delete Role');
     }
 }

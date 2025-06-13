@@ -16,7 +16,7 @@ class CataloguePolicy
      */
     public function view(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Catalogue View');
+        return $this->hasAccess($employee, 'View List Of Categories');
     }
 
     /**
@@ -24,7 +24,7 @@ class CataloguePolicy
      */
     public function create(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Catalogue Create');
+        return $this->hasAccess($employee, 'Add New Category');
     }
 
     /**
@@ -32,7 +32,7 @@ class CataloguePolicy
      */
     public function edit(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Catalogue Edit');
+        return $this->hasAccess($employee, 'Update Catalog');
     }
 
     /**
@@ -40,6 +40,6 @@ class CataloguePolicy
      */
     public function destroy(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Catalogue Destroy');
+        return $this->hasAccess($employee, 'Delete Category');
     }
 }
