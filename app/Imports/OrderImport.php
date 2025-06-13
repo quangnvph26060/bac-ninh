@@ -30,167 +30,148 @@ class OrderImport implements ToCollection
     {
         $rows->shift(); // Bỏ dòng tiêu đề
 
-        $filledRows = collect();
-        $lastFullData = null;
         $failures = [];
-        $orders = [];
+        $jobKey = "import_progress_{$this->jobId}";
+        $total = $rows->count();
+        $current = 0;
 
-        foreach ($rows as $row) {
-            // Bỏ qua dòng hoàn toàn trống
+        foreach ($rows as $index => $row) {
+            $current++;
+
+            // Bỏ qua dòng trống hoàn toàn
             if ($row->filter()->isEmpty()) {
                 continue;
             }
 
-            // Lưu dòng cuối đầy đủ
-            if (!empty($row[0]) && !empty($row[1]) && !empty($row[7])) {
-                $lastFullData = $row;
+            $line = $index + 1;
+
+            // Bắt buộc có các cột: mã đơn, tên đơn, họ
+            if (empty($row[0]) || empty($row[1]) || empty($row[7])) {
+                $failures[] = 'Dòng ' . $line . ': Thiếu thông tin đơn hàng bắt buộc (mã đơn, tên đơn, họ)';
+                continue;
             }
 
-            if ($lastFullData) {
-                foreach ([0, 1, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17] as $index) {
-                    if (empty($row[$index])) {
-                        $row[$index] = $lastFullData[$index];
-                    }
-                }
-
-                // Nếu thiếu thông tin sản phẩm → không đẩy vào xử lý
-                if (empty($row[2]) || empty($row[3]) || empty($row[4])) {
-                    continue;
-                }
+            // Kiểm tra thông tin sản phẩm
+            if (empty($row[2]) || empty($row[3]) || empty($row[4])) {
+                $failures[] = 'Dòng ' . $line . ': Thiếu thông tin sản phẩm (tên, SKU, số lượng)';
+                continue;
             }
 
-            $filledRows->push($row);
-        }
-
-        $total = $filledRows->count();
-
-        $current = 0;
-
-        foreach ($filledRows as $row) {
-
-            $current++;
-
-            // Lưu tiến trình
-            Cache::put("import_progress_{$this->jobId}", [
-                'current' => $current,
-                'total' => $total,
-                'percent' => round($current / $total * 100),
-                'status' => 'processing'
-            ], 3600);
-
-            $orderCode = $row[0];
-            $orderName = $row[1];
-            $productName = $row[2];
-            $sku = $row[3];
-            $qty = (int) $row[4];
-
+            // Validate ảnh thiết kế
             if (!$this->isValidImage($row[6])) {
-                $failures[] = "Ảnh thiết kế không hợp lệ tại biến thể: $sku";
+                $failures[] = 'Dòng ' . $line . ': Ảnh thiết kế không hợp lệ tại SKU: ' . $row[3];
                 continue;
             }
 
-            // Kiểm tra đơn hàng đã tồn tại
-            if (Order::where('order_code', $orderCode)->exists()) {
-                $failures[] = "Mã đơn hàng đã tồn tại: {$orderCode}";
+            // Check đơn hàng tồn tại
+            if (Order::where('order_code', $row[0])->exists()) {
+                $failures[] = 'Dòng ' . $line . ': Mã đơn hàng đã tồn tại: ' . $row[0];
                 continue;
             }
 
-            if (Order::where('order_name', $orderName)->exists()) {
-                $failures[] = "Tên đơn hàng đã tồn tại: {$orderName}";
+            if (Order::where('order_name', $row[1])->exists()) {
+                $failures[] = 'Dòng ' . $line . ': Tên đơn hàng đã tồn tại: ' . $row[1];
                 continue;
             }
 
             // Tìm sản phẩm
-            $product = Product::where('name', $productName)->first();
-
+            $product = Product::where('name', $row[2])->first();
             if (!$product) {
-                $failures[] = "Không tìm thấy sản phẩm: {$productName}";
+                $failures[] = 'Dòng ' . $line . ': Không tìm thấy sản phẩm: ' . $row[2];
                 continue;
             }
 
             // Tìm biến thể
             $variant = ProductVariant::where([
-                'sku' => $sku,
+                'sku' => $row[3],
                 'product_id' => $product->id
             ])->first();
 
             if (!$variant) {
-                $failures[] = "Không tìm thấy biến thể với SKU: {$sku} trong sản phẩm {$productName}";
+                $failures[] = 'Dòng ' . $line . ': Không tìm thấy biến thể SKU: ' . $row[3];
                 continue;
             }
 
-            if (!empty($row[5])) {
-                $mockup = $this->downloadImage($row[5], 'mockup');
+            // Kiểm tra tồn kho
+            $qty = (int) $row[4];
+            if ($variant->stock_status === "out_of_stock" || $variant->stock < $qty) {
+                $failures[] = 'Dòng ' . $line . ': Biến thể SKU: ' . $row[3] . ' hết hàng hoặc không đủ số lượng';
+                continue;
             }
 
-            // Tải tạm ảnh design để validate
+            // Validate ảnh thiết kế
             $tempDesign = $this->downloadImage($row[6], 'temp_design');
-
-            if ($tempDesign) {
-                $error = $this->validateDesignImage($tempDesign, $variant);
-                if ($error) {
-                    $failures[] = $error;
-                    // Xóa ảnh tạm
-                    Storage::delete($tempDesign);
-                    continue;
-                }
-                // Nếu validate thành công, di chuyển ảnh từ temp sang thư mục design
-                $design = str_replace('temp_design', 'design', $tempDesign);
-                Storage::move($tempDesign, $design);
-            }
-
-            if ($variant->stock_status === "out_of_stock" || $variant->stock <= 0) {
-                $failures[] = "Biến thể {$sku} trong sản phẩm {$productName} đã hết hàng";
+            if (!$tempDesign) {
+                $failures[] = 'Dòng ' . $line . ': Không thể tải ảnh thiết kế';
                 continue;
             }
 
-            if ($variant->stock < $qty) {
-                $failures[] = "Số lượng tồn kho không đủ với biến thể {$sku} trong sản phẩm {$productName}";
+            $error = $this->validateDesignImage($tempDesign, $variant);
+            if ($error) {
+                $failures[] = 'Dòng ' . $line . ': ' . $error;
+                Storage::delete($tempDesign);
                 continue;
             }
+
+
+            $design = str_replace('temp_design', 'design', $tempDesign);
+            Storage::move($tempDesign, $design);
+
+            $mockup = !empty($row[5]) ? $this->downloadImage($row[5], 'mockup') : null;
 
             // Tính giá
             $price = isOnSale($variant) ? $variant->discount_price : $variant->sale_price;
             $lineTotal = $price * $qty;
             $shipping = $this->switchDeliveryMethod($row[17], $variant);
 
-            // Nếu đơn hàng đã có, cộng dồn
-            if (!isset($orders[$orderCode])) {
-                $orders[$orderCode] = [
-                    'order_name' => $orderName,
-                    'full_name' => "{$row[7]} {$row[8]}",
+            // Tạo đơn hàng
+            DB::transaction(function () use ($row, $price, $lineTotal, $shipping, $product, $variant, $mockup, $design, $qty) {
+                $order = Order::create([
+                    'user_id' => $this->userId,
+                    'order_code' => $row[0],
+                    'order_name' => $row[1],
+                    'first_name' => $row[7],
+                    'last_name' => $row[8],
                     'email' => $row[9],
                     'phone_number' => !str_starts_with($row[10], '0') ? "0$row[10]" : $row[10],
                     'shipping_address' => "$row[14] $row[13] $row[12] $row[11]",
                     'zip_code' => $row[15],
                     'note' => $row[16],
+                    'shipping_fee' => $shipping,
+                    'total' => $lineTotal,
                     'delivery_method' => $row[17],
-                    'total' => 0,
-                    'shipping_fee' => 0,
-                    'items' => [],
-                ];
-            }
+                ]);
 
-            // Cộng dồn vào đơn hàng
-            $orders[$orderCode]['total'] += $lineTotal;
-            $orders[$orderCode]['shipping_fee'] += $shipping;
+                $order->orderItems()->create([
+                    'product_id' => $product->id,
+                    'product_variant_id' => $variant->id,
+                    'sku' => $variant->sku,
+                    'product_name' => $product->name,
+                    'price' => $price,
+                    'original_price' => $product->sale_price,
+                    'quantity' => $qty,
+                    'image' => $product->image,
+                    'model_image' => $mockup,
+                    'design_image' => $design,
+                ]);
 
-            $orders[$orderCode]['items'][] = [
-                'product_id' => $product->id,
-                'product_variant_id' => $variant->id,
-                'sku' => $sku,
-                'product_name' => $productName,
-                'price' => $price,
-                'original_price' => $product->sale_price,
-                'quantity' => $qty,
-                'image' => $product->image,
-                'model_image' => $mockup ?? null,
-                'design_image' => $design,
-            ];
+                if ($mockup) {
+                    DownloadOrderImage::dispatch($mockup, 'mockup', $order->id);
+                }
+                DownloadOrderImage::dispatch($design, 'design', $order->id);
+            });
+
+            // Cập nhật tiến trình
+            Cache::put($jobKey, [
+                'current' => $current,
+                'total' => $total,
+                'percent' => round($current / $total * 100),
+                'status' => 'processing'
+            ], 3600);
         }
 
-        // Lưu tiến trình hoàn thành
-        Cache::put("import_progress_{$this->jobId}", [
+        // Kết thúc
+        Cache::put($jobKey, [
             'current' => $total,
             'total' => $total,
             'percent' => 100,
@@ -198,44 +179,9 @@ class OrderImport implements ToCollection
             'failures' => $failures
         ], 3600);
 
-        foreach ($orders as $code => $item) {
-            $userId = $this->userId;
-            DB::transaction(function () use ($code, $item, $userId) {
-
-                // Tạo đơn hàng
-                $order = Order::create([
-                    'user_id' => $userId,
-                    'full_name' => $item['full_name'],
-                    'email' => $item['email'],
-                    'order_code' => $code,
-                    'order_name' => $item['order_name'],
-                    'total' => $item['total'],
-                    'phone_number' => $item['phone_number'],
-                    'shipping_address' => $item['shipping_address'],
-                    'note' => $item['note'],
-                    'zip_code' => $item['zip_code'],
-                    'shipping_fee' => $item['shipping_fee'],
-                ]);
-
-                // Tạo các item trong đơn hàng
-                $order->orderItems()->createMany($item['items']);
-
-                // Dispatch job to download images
-                if (!empty($item['items'])) {
-                    foreach ($item['items'] as $orderItem) {
-                        if (!empty($orderItem['model_image'])) {
-                            DownloadOrderImage::dispatch($orderItem['model_image'], 'mockup', $order->id);
-                        }
-                        if (!empty($orderItem['design_image'])) {
-                            DownloadOrderImage::dispatch($orderItem['design_image'], 'design', $order->id);
-                        }
-                    }
-                }
-            });
-        }
-
         return $failures;
     }
+
 
     private function switchDeliveryMethod($method, $variant)
     {
