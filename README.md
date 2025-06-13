@@ -39,3 +39,34 @@
     "admin.activity.log.history"
     ]
     },
+
+       // {
+    //     "title": "Kho hàng",
+    //     "icon": "fas fa-warehouse",
+    //     "id": "warehouses",
+    //     "children": [
+    //         {
+    //             "title": "Quản lý vật liệu",
+    //             "url": "admin.materials.index"
+    //         },
+    //         {
+    //             "title": "Quản lý phiếu nhập kho",
+    //             "url": "admin.material-imports.index"
+    //         },
+    //         {
+    //             "title": "Quản lý công nợ",
+    //             "url": "admin.suppliers-debts.index"
+    //         },
+    //         {
+    //             "title": "Quản lý nhà cung cấp",
+    //             "url": "admin.suppliers.index"
+    //         }
+    //     ],
+    //     "inRoutes": [
+    //         "admin.suppliers.index",
+    //         "admin.materials.index",
+    //         "admin.material-imports.index",
+    //         "admin.material-imports.create",
+    //         "admin.suppliers-debts.index"
+    //     ]
+    // },

@@ -37,6 +37,12 @@
     .alert-danger {
         z-index: 9999 !important;
     }
+
+    .dropdown-menu-up {
+        top: auto !important;
+        bottom: 100%;
+        transform: translateY(-0.25rem);
+    }
 </style>
 
 @stack('styles')

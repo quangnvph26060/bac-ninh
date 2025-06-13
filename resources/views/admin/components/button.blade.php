@@ -3,7 +3,7 @@
         <h4 class="card-title fs-6 fw-bold">Xuất bản</h4>
     </div>
     <div class="card-body">
-        <button type="submit" class="btn btn-primary btn-sm fs-6">
+        <button type="submit" class="btn btn-primary btn-sm fs-6" id="submitRequestBtn">
             <svg class="icon icon-left svg-icon-ti-ti-device-floppy" xmlns="http://www.w3.org/2000/svg" width="24"
                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -12,7 +12,8 @@
                 <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
                 <path d="M14 4l0 4l-6 0l0 -4"></path>
             </svg>
-            Lưu</button>
+            Lưu
+        </button>
 
         @isset($redirect)
             <a href="{{ $redirect }}" class="btn btn-sm btn-light fs-6 border">

@@ -1,584 +1,671 @@
-
+const $ = window.$;
+const bootstrap = window.bootstrap;
 
 $(document).ready(() => {
-    let productCounter = 0;
-    let totalAmount = 0;
+    // Global variables to store state
+    let selectedOrder = null;
+    let selectedProduct = null;
+    let materials = [];
+    let bomExists = null;
+    let existingMaterials = [];
+    let filteredMaterials = [];
+    let selectedExistingMaterial = null;
 
-    // Khởi tạo ngày hiện tại
-    $("#date").val(new Date().toISOString().split("T")[0]);
+    // Bootstrap modals
+    const addMaterialModal = new bootstrap.Modal(
+        document.getElementById("addMaterialModal")
+    );
+    const successModal = new bootstrap.Modal(
+        document.getElementById("successModal")
+    );
 
-    // Tự động tạo mã phiếu nhập
-    generateImportCode();
+    // Initialize by loading orders
+    loadOrders();
 
-    // Xử lý tìm kiếm sản phẩm
-    $("#searchProduct").on("input", function () {
-        const searchTerm = $(this).val().toLowerCase();
-        $("#existingProductsList tr").each(function () {
-            const productName = $(this)
-                .find("td:nth-child(3)")
-                .text()
-                .toLowerCase();
-            const productCode = $(this)
-                .find("td:nth-child(2)")
-                .text()
-                .toLowerCase();
-
-            if (
-                productName.includes(searchTerm) ||
-                productCode.includes(searchTerm)
-            ) {
-                $(this).show();
-            } else {
-                $(this).hide();
-            }
-        });
-    });
-
-    // Xử lý chọn sản phẩm có sẵn
-    $('input[name="selectedProduct"]').on("change", function () {
-        if ($(this).is(":checked")) {
-            const price = $(this).data("price");
-            $("#selectedPrice").val(price);
-            $("#selectedQuantity").val(1);
-            calculateSelectedTotal();
-        }
-    });
-
-    // Tính toán khi thay đổi số lượng hoặc đơn giá
-    $("#selectedQuantity, #selectedPrice").on("input", calculateSelectedTotal);
-    $("#newQuantity, #newPrice").on("input", calculateNewTotal);
-
-    // Thêm sản phẩm vào phiếu
-    $("#addProductBtn").on("click", () => {
-        const activeTab = $(".tab-pane.active").attr("id");
-
-        if (activeTab === "select-product") {
-            addSelectedProduct();
-        } else {
-            addNewProduct();
-        }
-    });
-
-    // Xử lý thay đổi số tiền đã trả
-    $("#paid_amount").on("input", () => {
-        calculateDebt();
-        updatePaymentStatus();
-    });
-
-    // Xử lý xem trước
-    $("#previewBtn").on("click", () => {
-        generatePreview();
-        $("#previewModal").modal("show");
-    });
-
-    // Xử lý submit form
-    $("#materialImportForm").on("submit", (e) => {
+    // Event listeners
+    $("#orderSelect").on("change", handleOrderChange);
+    $("#productSelect").on("change", handleProductChange);
+    $("#addMaterialBtn").on("click", openAddMaterialModal);
+    $("#saveMaterialBtn").on("click", handleAddMaterial);
+    $("#submitRequestBtn").on("click", handleSubmitRequest);
+    $("#successModalCloseBtn").on("click", resetForm);
+    $("#materialTabs button").on("click", function (e) {
         e.preventDefault();
+        $(this).tab("show");
 
-        if (validateForm()) {
-            saveImport();
+        // Reset selected material when switching tabs
+        selectedExistingMaterial = null;
+
+        // Load existing materials when switching to that tab
+        if ($(this).attr("id") === "existing-tab") {
+            loadExistingMaterials();
         }
+
+        // Update the save button text based on active tab
+        updateSaveButtonText();
     });
 
-    // Reset modal khi đóng
-    $("#addProductModal").on("hidden.bs.modal", () => {
-        resetProductModal();
-    });
+    $("#searchMaterial").on("keyup", filterExistingMaterials);
+    $("#searchMaterialBtn").on("click", filterExistingMaterials);
 
-    function generateImportCode() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, "0");
-        const day = String(now.getDate()).padStart(2, "0");
-        const time =
-            String(now.getHours()).padStart(2, "0") +
-            String(now.getMinutes()).padStart(2, "0");
+    // Load orders from API (simulated)
+    function loadOrders() {
+        $("#orderLoading").removeClass("d-none");
 
-        const code = `PN${year}${month}${day}${time}`;
-        $("#code").val(code);
-    }
+        // Simulate API call with timeout
+        setTimeout(() => {
+            const orders = [
+                {
+                    id: "1",
+                    orderNumber: "ORD-2023-001",
+                    customerName: "Công ty ABC",
+                    date: "2023-06-10",
+                },
+                {
+                    id: "2",
+                    orderNumber: "ORD-2023-002",
+                    customerName: "Công ty XYZ",
+                    date: "2023-06-12",
+                },
+                {
+                    id: "3",
+                    orderNumber: "ORD-2023-003",
+                    customerName: "Công ty 123",
+                    date: "2023-06-13",
+                },
+            ];
 
-    function calculateSelectedTotal() {
-        const quantity = Number.parseFloat($("#selectedQuantity").val()) || 0;
-        const price = Number.parseFloat($("#selectedPrice").val()) || 0;
-        const total = quantity * price;
+            // Clear and populate the order select
+            $("#orderSelect option:not(:first)").remove();
 
-        // Hiển thị tổng tiền (có thể thêm vào UI nếu cần)
-        console.log("Tổng tiền sản phẩm đã chọn:", formatCurrency(total));
-    }
-
-    function calculateNewTotal() {
-        const quantity = Number.parseFloat($("#newQuantity").val()) || 0;
-        const price = Number.parseFloat($("#newPrice").val()) || 0;
-        const total = quantity * price;
-
-        console.log("Tổng tiền sản phẩm mới:", formatCurrency(total));
-    }
-
-    function addSelectedProduct() {
-        const selectedRadio = $('input[name="selectedProduct"]:checked');
-
-        if (!selectedRadio.length) {
-            alert("Vui lòng chọn một sản phẩm!");
-            return;
-        }
-
-        const quantity = Number.parseFloat($("#selectedQuantity").val());
-        const price = Number.parseFloat($("#selectedPrice").val());
-        const note = $("#selectedNote").val();
-
-        if (!quantity || !price) {
-            alert("Vui lòng nhập đầy đủ số lượng và đơn giá!");
-            return;
-        }
-
-        const productData = {
-            id: selectedRadio.val(),
-            name: selectedRadio.data("name"),
-            unit: selectedRadio.data("unit"),
-            quantity: quantity,
-            price: price,
-            total: quantity * price,
-            note: note,
-        };
-
-        addProductToTable(productData);
-        $("#addProductModal").modal("hide");
-    }
-
-    function addNewProduct() {
-        const code = $("#newProductCode").val().trim();
-        const name = $("#newProductName").val().trim();
-        const unit = $("#newProductUnit").val().trim();
-        const quantity = Number.parseFloat($("#newQuantity").val());
-        const price = Number.parseFloat($("#newPrice").val());
-        const note = $("#newProductNote").val();
-
-        if (!code || !name || !unit || !quantity || !price) {
-            alert("Vui lòng nhập đầy đủ thông tin sản phẩm!");
-            return;
-        }
-
-        const productData = {
-            id: "new_" + Date.now(),
-            code: code,
-            name: name,
-            unit: unit,
-            quantity: quantity,
-            price: price,
-            total: quantity * price,
-            note: note,
-            isNew: true,
-        };
-
-        addProductToTable(productData);
-        $("#addProductModal").modal("hide");
-    }
-
-    function addProductToTable(product) {
-        // Xóa dòng "Chưa có sản phẩm" nếu có
-        $(".no-products").remove();
-
-        productCounter++;
-
-        const row = `
-            <tr class="product-row" data-product-id="${product.id}">
-                <td class="text-center">${productCounter}</td>
-                <td>
-                    ${product.name}
-                    ${
-                        product.isNew
-                            ? '<span class="badge bg-success ms-1">Mới</span>'
-                            : ""
-                    }
-                    ${
-                        product.code
-                            ? `<br><small class="text-muted">Mã: ${product.code}</small>`
-                            : ""
-                    }
-                </td>
-                <td>
-                    <input type="number" class="form-control form-control-sm quantity-input"
-                           value="${
-                               product.quantity
-                           }" min="1" step="0.01" data-original="${
-            product.quantity
-        }">
-                    <small class="text-muted">${product.unit || ""}</small>
-                </td>
-                <td>
-                    <input type="number" class="form-control form-control-sm price-input"
-                           value="${
-                               product.price
-                           }" min="0" step="0.01" data-original="${
-            product.price
-        }">
-                </td>
-                <td class="total-cell fw-bold text-end">${formatCurrency(
-                    product.total
-                )}</td>
-                <td>
-                    <input type="text" class="form-control form-control-sm"
-                           value="${
-                               product.note || ""
-                           }" placeholder="Ghi chú...">
-                </td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
-                            onclick="removeProduct(this)" title="Xóa sản phẩm">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
-
-        $("#productTableBody").append(row);
-        updateTotalAmount();
-
-        // Thêm event listener cho các input mới
-        attachProductEventListeners();
-    }
-
-    function attachProductEventListeners() {
-        $(".quantity-input, .price-input")
-            .off("input")
-            .on("input", function () {
-                const row = $(this).closest("tr");
-                const quantity =
-                    Number.parseFloat(row.find(".quantity-input").val()) || 0;
-                const price =
-                    Number.parseFloat(row.find(".price-input").val()) || 0;
-                const total = quantity * price;
-
-                row.find(".total-cell").text(formatCurrency(total));
-                updateTotalAmount();
+            orders.forEach((order) => {
+                $("#orderSelect").append(
+                    `<option value="${order.id}">${order.orderNumber} - ${order.customerName} (${order.date})</option>`
+                );
             });
+
+            $("#orderLoading").addClass("d-none");
+        }, 500);
     }
 
-    window.removeProduct = (button) => {
-        if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-            $(button).closest("tr").remove();
-            updateRowNumbers();
-            updateTotalAmount();
+    // Handle order selection change
+    function handleOrderChange() {
+        const orderId = $(this).val();
 
-            // Hiển thị lại dòng "Chưa có sản phẩm" nếu không còn sản phẩm nào
-            if ($("#productTableBody tr").length === 0) {
-                $("#productTableBody").html(`
-                    <tr class="no-products">
-                        <td colspan="7" class="text-center text-muted">
-                            Chưa có sản phẩm nào. Nhấn "Thêm sản phẩm" để bắt đầu.
-                        </td>
-                    </tr>
-                `);
-            }
+        if (!orderId) {
+            // Hide product selection and materials if no order is selected
+            $("#productSelectionContainer").addClass("d-none");
+            $("#materialsContainer").addClass("d-none");
+            selectedOrder = null;
+            return;
         }
-    };
 
-    function updateRowNumbers() {
-        $("#productTableBody tr:not(.no-products)").each(function (index) {
-            $(this)
-                .find("td:first")
-                .text(index + 1);
-        });
-        productCounter = $("#productTableBody tr:not(.no-products)").length;
-    }
-
-    function updateTotalAmount() {
-        totalAmount = 0;
-
-        $("#productTableBody tr:not(.no-products)").each(function () {
-            const quantity =
-                Number.parseFloat($(this).find(".quantity-input").val()) || 0;
-            const price =
-                Number.parseFloat($(this).find(".price-input").val()) || 0;
-            totalAmount += quantity * price;
-        });
-
-        $("#totalAmount").text(formatCurrency(totalAmount));
-        $("#total_amount").val(totalAmount);
-        calculateDebt();
-    }
-
-    function calculateDebt() {
-        const paidAmount = Number.parseFloat($("#paid_amount").val()) || 0;
-        const debtAmount = totalAmount - paidAmount;
-        $("#debt_amount").val(debtAmount);
-    }
-
-    function updatePaymentStatus() {
-        const paidAmount = Number.parseFloat($("#paid_amount").val()) || 0;
-
-        if (paidAmount === 0) {
-            $("#payment_status").val("unpaid");
-        } else if (paidAmount >= totalAmount) {
-            $("#payment_status").val("paid");
-        } else {
-            $("#payment_status").val("partial");
-        }
-    }
-
-    function resetProductModal() {
-        // Reset tab về tab đầu tiên
-        $("#select-tab").tab("show");
-
-        // Reset form chọn sản phẩm
-        $('input[name="selectedProduct"]').prop("checked", false);
-        $("#selectedQuantity, #selectedPrice, #selectedNote").val("");
-
-        // Reset form tạo sản phẩm mới
-        $(
-            "#newProductCode, #newProductName, #newProductUnit, #newProductNote, #newProductDescription"
-        ).val("");
-        $("#newQuantity, #newPrice").val("");
-
-        // Reset tìm kiếm
-        $("#searchProduct").val("");
-        $("#existingProductsList tr").show();
-    }
-
-    function generatePreview() {
-        const formData = {
-            code: $("#code").val(),
-            date: $("#date").val(),
-            supplier: $("#supplier_id option:selected").text(),
-            createdBy: $("#created_by").val(),
-            note: $("#note").val(),
-            totalAmount: totalAmount,
-            paidAmount: Number.parseFloat($("#paid_amount").val()) || 0,
-            debtAmount:
-                totalAmount - (Number.parseFloat($("#paid_amount").val()) || 0),
-            paymentStatus: $("#payment_status option:selected").text(),
-            paymentNote: $("#payment_note").val(),
+        // Store selected order
+        selectedOrder = {
+            id: orderId,
+            orderNumber: $("#orderSelect option:selected").text(),
         };
 
-        let productsHtml = "";
-        let stt = 1;
+        // Reset product and materials
+        selectedProduct = null;
+        materials = [];
+        bomExists = null;
 
-        $("#productTableBody tr:not(.no-products)").each(function () {
-            const name = $(this)
-                .find("td:nth-child(2)")
-                .clone()
-                .find(".badge")
-                .remove()
-                .end()
-                .text()
-                .trim();
-            const quantity = $(this).find(".quantity-input").val();
-            const price = Number.parseFloat($(this).find(".price-input").val());
-            const total = quantity * price;
-            const note = $(this).find("td:nth-child(6) input").val();
-
-            productsHtml += `
-                <tr>
-                    <td class="text-center">${stt++}</td>
-                    <td>${name}</td>
-                    <td class="text-center">${quantity}</td>
-                    <td class="text-end">${formatCurrency(price)}</td>
-                    <td class="text-end fw-bold">${formatCurrency(total)}</td>
-                    <td>${note || ""}</td>
-                </tr>
-            `;
-        });
-
-        const previewHtml = `
-            <div class="preview-section">
-                <div class="text-center mb-4">
-                    <h3 class="text-primary">PHIẾU NHẬP HÀNG</h3>
-                    <p class="mb-0">Mã phiếu: <strong>${
-                        formData.code
-                    }</strong></p>
-                    <p>Ngày: <strong>${formatDate(formData.date)}</strong></p>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <h6>Thông tin nhà cung cấp:</h6>
-                        <p class="mb-1"><strong>Tên:</strong> ${
-                            formData.supplier
-                        }</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Thông tin phiếu:</h6>
-                        <p class="mb-1"><strong>Người tạo:</strong> ${
-                            formData.createdBy
-                        }</p>
-                        <p class="mb-1"><strong>Ghi chú:</strong> ${
-                            formData.note || "Không có"
-                        }</p>
-                    </div>
-                </div>
-
-                <h6>Chi tiết sản phẩm:</h6>
-                <table class="table table-bordered">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-center">STT</th>
-                            <th>Tên sản phẩm</th>
-                            <th class="text-center">Số lượng</th>
-                            <th class="text-center">Đơn giá</th>
-                            <th class="text-center">Thành tiền</th>
-                            <th class="text-center">Ghi chú</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${productsHtml}
-                    </tbody>
-                    <tfoot>
-                        <tr class="table-info">
-                            <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
-                            <td class="text-end fw-bold">${formatCurrency(
-                                formData.totalAmount
-                            )}</td>
-                            <td></td>
-                        </tr>
-                    </tfoot>
-                </table>
-
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <h6>Thông tin thanh toán:</h6>
-                        <p class="mb-1"><strong>Tổng tiền:</strong> ${formatCurrency(
-                            formData.totalAmount
-                        )}</p>
-                        <p class="mb-1"><strong>Đã thanh toán:</strong> ${formatCurrency(
-                            formData.paidAmount
-                        )}</p>
-                        <p class="mb-1"><strong>Còn nợ:</strong> ${formatCurrency(
-                            formData.debtAmount
-                        )}</p>
-                        <p class="mb-1"><strong>Trạng thái:</strong> ${
-                            formData.paymentStatus
-                        }</p>
-                        ${
-                            formData.paymentNote
-                                ? `<p class="mb-1"><strong>Ghi chú TT:</strong> ${formData.paymentNote}</p>`
-                                : ""
-                        }
-                    </div>
-                    <div class="col-md-6">
-                        <div class="text-center">
-                            <p class="mb-4"><strong>Chữ ký người tạo</strong></p>
-                            <div style="height: 80px; border-bottom: 1px solid #000; margin-bottom: 10px;"></div>
-                            <p class="mb-0">${formData.createdBy}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        $("#previewContent").html(previewHtml);
+        // Show product selection and load products
+        $("#productSelectionContainer").removeClass("d-none");
+        $("#materialsContainer").addClass("d-none");
+        $("#productSelect").val("");
+        loadProducts(orderId);
     }
 
-    function validateForm() {
-        const requiredFields = ["code", "date", "supplier_id", "created_by"];
-        let isValid = true;
+    // Load products for selected order (simulated)
+    function loadProducts(orderId) {
+        $("#productLoading").removeClass("d-none");
 
-        requiredFields.forEach((field) => {
-            const value = $(`#${field}`).val().trim();
-            if (!value) {
-                $(`#${field}`).addClass("is-invalid");
-                isValid = false;
+        // Simulate API call with timeout
+        setTimeout(() => {
+            const products = [
+                { id: "1", name: "Sản phẩm A", sku: "SKU-A", quantity: 10 },
+                { id: "2", name: "Sản phẩm B", sku: "SKU-B", quantity: 5 },
+                { id: "3", name: "Sản phẩm C", sku: "SKU-C", quantity: 8 },
+            ];
+
+            // Clear and populate the product select
+            $("#productSelect option:not(:first)").remove();
+
+            products.forEach((product) => {
+                $("#productSelect").append(
+                    `<option value="${product.id}" data-quantity="${product.quantity}">${product.name} - SKU: ${product.sku} (SL: ${product.quantity})</option>`
+                );
+            });
+
+            $("#productLoading").addClass("d-none");
+        }, 500);
+    }
+
+    // Handle product selection change
+    function handleProductChange() {
+        const productId = $(this).val();
+
+        if (!productId) {
+            // Hide materials if no product is selected
+            $("#materialsContainer").addClass("d-none");
+            selectedProduct = null;
+            return;
+        }
+
+        // Store selected product
+        selectedProduct = {
+            id: productId,
+            name: $("#productSelect option:selected").text(),
+            quantity: Number.parseInt(
+                $("#productSelect option:selected").data("quantity")
+            ),
+        };
+
+        // Reset materials
+        materials = [];
+
+        // Show materials container and load BOM
+        $("#materialsContainer").removeClass("d-none");
+        loadBOM(productId);
+    }
+
+    // Load BOM for selected product (simulated)
+    function loadBOM(productId) {
+        // Show loading indicator (could add a spinner here)
+
+        // Simulate API call with timeout
+        setTimeout(() => {
+            // Simulate whether BOM exists for this product
+            const hasBom = productId === "1" || productId === "2";
+            bomExists = hasBom;
+
+            // Show appropriate alert
+            if (hasBom) {
+                $("#bomExistsAlert").removeClass("d-none");
+                $("#bomNotExistsAlert").addClass("d-none");
+
+                // If BOM exists, get materials from BOM and multiply by product quantity
+                const bomMaterials = [
+                    {
+                        id: "1",
+                        name: "Vải cotton",
+                        code: "M001",
+                        unit: "m",
+                        quantity: 2,
+                        inBom: true,
+                    },
+                    {
+                        id: "2",
+                        name: "Cúc áo",
+                        code: "M002",
+                        unit: "cái",
+                        quantity: 5,
+                        inBom: true,
+                    },
+                    {
+                        id: "3",
+                        name: "Chỉ may",
+                        code: "M003",
+                        unit: "cuộn",
+                        quantity: 1,
+                        inBom: true,
+                    },
+                ];
+
+                // Multiply quantities by the product quantity
+                const productQty = selectedProduct.quantity || 1;
+                materials = bomMaterials.map((material) => ({
+                    ...material,
+                    quantity: material.quantity * productQty,
+                }));
             } else {
-                $(`#${field}`).removeClass("is-invalid");
+                $("#bomExistsAlert").addClass("d-none");
+                $("#bomNotExistsAlert").removeClass("d-none");
+                materials = [];
             }
-        });
 
-        if ($("#productTableBody tr:not(.no-products)").length === 0) {
-            alert("Vui lòng thêm ít nhất một sản phẩm vào phiếu nhập!");
-            isValid = false;
-        }
+            // Update materials table
+            updateMaterialsTable();
 
-        return isValid;
+            // Update submit button state
+            updateSubmitButtonState();
+        }, 500);
     }
 
-    function saveImport() {
-        // Tạo dữ liệu phiếu nhập
-        const importData = {
-            code: $("#code").val(),
-            supplier_id: $("#supplier_id").val(),
-            date: $("#date").val(),
-            note: $("#note").val(),
-            created_by: $("#created_by").val(),
-            total_amount: totalAmount,
-            products: [],
-        };
+    // Update materials table with current materials
+    function updateMaterialsTable() {
+        const $tbody = $("#materialsTable tbody");
+        $tbody.empty();
 
-        // Lấy dữ liệu sản phẩm
-        $("#productTableBody tr:not(.no-products)").each(function () {
-            const productId = $(this).data("product-id");
-            const name = $(this)
-                .find("td:nth-child(2)")
-                .clone()
-                .find(".badge")
-                .remove()
-                .end()
-                .text()
-                .trim();
-            const quantity = Number.parseFloat(
-                $(this).find(".quantity-input").val()
-            );
-            const price = Number.parseFloat($(this).find(".price-input").val());
-            const note = $(this).find("td:nth-child(6) input").val();
+        if (materials.length === 0) {
+            $("#materialsTable").addClass("d-none");
+            $("#emptyMaterialsMessage").removeClass("d-none");
+            return;
+        }
 
-            importData.products.push({
-                material_id: productId,
-                name: name,
-                quantity: quantity,
-                unit_price: price,
-                total_price: quantity * price,
-                note: note,
-            });
+        $("#materialsTable").removeClass("d-none");
+        $("#emptyMaterialsMessage").addClass("d-none");
+
+        materials.forEach((material) => {
+            const $row = $(`
+        <tr ${material.inBom ? 'class="material-from-bom"' : ""}>
+          <td>${material.code}</td>
+          <td>${material.name}</td>
+          <td>${material.unit}</td>
+          <td>
+            <input type="number" class="form-control form-control-sm quantity-input"
+                  value="${material.quantity}" min="1"
+                  data-material-id="${material.id}">
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-danger remove-material"
+                    data-material-id="${material.id}"
+                    ${
+                        material.inBom
+                            ? 'disabled title="Không thể xóa vật tư từ BOM"'
+                            : 'title="Xóa vật tư"'
+                    }>
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `);
+
+            $tbody.append($row);
         });
 
-        // Thông tin thanh toán
-        const paymentData = {
-            total_amount: totalAmount,
-            paid_amount: Number.parseFloat($("#paid_amount").val()) || 0,
-            status: $("#payment_status").val(),
-            note: $("#payment_note").val(),
-        };
+        // Add event listeners for quantity changes and remove buttons
+        $(".quantity-input").on("change", handleQuantityChange);
+        $(".remove-material").on("click", handleRemoveMaterial);
+    }
 
-        // Hiển thị dữ liệu (trong thực tế sẽ gửi lên server)
-        console.log("Dữ liệu phiếu nhập:", importData);
-        console.log("Dữ liệu thanh toán:", paymentData);
+    // Handle quantity change for a material
+    function handleQuantityChange() {
+        const materialId = $(this).data("material-id");
+        const newQuantity = Number.parseInt($(this).val());
 
-        // Thông báo thành công
-        alert(
-            "Lưu phiếu nhập thành công!\n\nDữ liệu đã được in ra console để kiểm tra."
+        if (newQuantity < 1) {
+            $(this).val(1);
+            return;
+        }
+
+        // Update material quantity in the array
+        materials = materials.map((material) =>
+            material.id === materialId
+                ? { ...material, quantity: newQuantity }
+                : material
         );
 
-        // Reset form nếu muốn
-        if (confirm("Bạn có muốn tạo phiếu nhập mới?")) {
-            resetForm();
+        // Update submit button state
+        updateSubmitButtonState();
+    }
+
+    // Handle remove material button click
+    function handleRemoveMaterial() {
+        const materialId = $(this).data("material-id");
+
+        // Remove material from the array
+        materials = materials.filter((material) => material.id !== materialId);
+
+        // Update materials table
+        updateMaterialsTable();
+
+        // Update submit button state
+        updateSubmitButtonState();
+    }
+
+    // Open add material modal
+    function openAddMaterialModal() {
+        // Reset form
+        $("#addMaterialForm")[0].reset();
+        $("#materialUnit").val("cái");
+        $("#materialQuantity").val(1);
+
+        // Reset search and selection
+        $("#searchMaterial").val("");
+        selectedExistingMaterial = null;
+
+        // Default to existing materials tab
+        $("#existing-tab").tab("show");
+        loadExistingMaterials();
+
+        // Update save button text
+        updateSaveButtonText();
+
+        // Open modal
+        addMaterialModal.show();
+    }
+
+    // Handle add material form submission
+    function handleAddMaterial() {
+        // Check which tab is active
+        const isExistingTab = $("#existing-tab").hasClass("active");
+
+        if (isExistingTab) {
+            // Handle adding existing material
+            if (!selectedExistingMaterial) {
+                alert("Vui lòng chọn một vật tư từ danh sách!");
+                return;
+            }
+
+            // Get the quantity from the input in the selected row
+            const $selectedRow = $(
+                `.material-selectable[data-material-id="${selectedExistingMaterial.id}"]`
+            );
+            const quantity = Number.parseInt(
+                $selectedRow.find(".material-quantity-input").val()
+            );
+
+            if (isNaN(quantity) || quantity < 1) {
+                alert("Vui lòng nhập số lượng hợp lệ!");
+                return;
+            }
+
+            // Create new material from the selected existing material
+            const newMaterial = {
+                id: selectedExistingMaterial.id,
+                code: selectedExistingMaterial.code,
+                name: selectedExistingMaterial.name,
+                unit: selectedExistingMaterial.unit,
+                quantity: quantity,
+                inBom: false,
+            };
+
+            // Check if this material already exists in the list
+            const existingIndex = materials.findIndex(
+                (m) => m.id === newMaterial.id
+            );
+
+            if (existingIndex >= 0) {
+                // If material already exists, just update the quantity
+                materials[existingIndex].quantity += quantity;
+            } else {
+                // Otherwise add as new material
+                materials.push(newMaterial);
+            }
+        } else {
+            // Handle adding new material (existing code)
+            // Get form values
+            const code = $("#materialCode").val().trim();
+            const name = $("#materialName").val().trim();
+            const unit = $("#materialUnit").val().trim();
+            const quantity = Number.parseInt($("#materialQuantity").val());
+
+            // Validate form
+            if (!code || !name || !unit || isNaN(quantity) || quantity < 1) {
+                alert("Vui lòng điền đầy đủ thông tin vật tư!");
+                return;
+            }
+
+            // Create new material
+            const newMaterial = {
+                id: `new-${Date.now()}`,
+                code,
+                name,
+                unit,
+                quantity,
+                inBom: false,
+            };
+
+            // Add to materials array
+            materials.push(newMaterial);
+        }
+
+        // Update materials table
+        updateMaterialsTable();
+
+        // Highlight the new row
+        const $newRow = $("#materialsTable tbody tr:last-child");
+        $newRow.addClass("highlight-new");
+
+        // Close modal
+        addMaterialModal.hide();
+
+        // Update submit button state
+        updateSubmitButtonState();
+    }
+
+    // Update submit button state
+    function updateSubmitButtonState() {
+        if (selectedOrder && selectedProduct && materials.length > 0) {
+            $("#submitRequestBtn").prop("disabled", false);
+        } else {
+            $("#submitRequestBtn").prop("disabled", true);
         }
     }
 
+    // Handle submit request button click
+    function handleSubmitRequest() {
+        // Disable button and show loading state
+        const $btn = $("#submitRequestBtn");
+        const originalText = $btn.html();
+        $btn.prop("disabled", true).html(
+            '<i class="fas fa-spinner fa-pulse"></i> Đang gửi...'
+        );
+
+        // Prepare data to submit
+        const requestData = {
+            orderId: selectedOrder.id,
+            productId: selectedProduct.id,
+            materials: materials.map((m) => ({
+                materialId: m.id,
+                quantity: m.quantity,
+            })),
+        };
+
+        // Simulate API call with timeout
+        setTimeout(() => {
+            console.log("Submitting request:", requestData);
+
+            // Reset button state
+            $btn.html(originalText);
+
+            // Show success modal
+            successModal.show();
+        }, 1000);
+    }
+
+    // Reset form after successful submission
     function resetForm() {
-        $("#materialImportForm")[0].reset();
-        $("#productTableBody").html(`
-            <tr class="no-products">
-                <td colspan="7" class="text-center text-muted">
-                    Chưa có sản phẩm nào. Nhấn "Thêm sản phẩm" để bắt đầu.
-                </td>
-            </tr>
-        `);
-        productCounter = 0;
-        totalAmount = 0;
-        $("#totalAmount").text("0 VNĐ");
-        $("#total_amount, #debt_amount").val("0");
-        generateImportCode();
-        $("#date").val(new Date().toISOString().split("T")[0]);
+        // Reset selects
+        $("#orderSelect").val("");
+        $("#productSelectionContainer").addClass("d-none");
+        $("#materialsContainer").addClass("d-none");
+
+        // Reset state
+        selectedOrder = null;
+        selectedProduct = null;
+        materials = [];
+        bomExists = null;
+
+        // Reset submit button
+        $("#submitRequestBtn").prop("disabled", true);
     }
 
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-        }).format(amount);
+    // Add this function to update the save button text based on active tab
+    function updateSaveButtonText() {
+        if ($("#existing-tab").hasClass("active")) {
+            $("#saveMaterialBtn").text("Thêm vật tư đã chọn");
+        } else {
+            $("#saveMaterialBtn").text("Thêm vật tư mới");
+        }
     }
 
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString("vi-VN");
+    // Add this function to load existing materials
+    function loadExistingMaterials() {
+        // Show loading indicator
+        $("#existingMaterialsTable").addClass("d-none");
+        $("#noExistingMaterialsFound").addClass("d-none");
+        $("#existingMaterialsLoading").removeClass("d-none");
+
+        // Simulate API call with timeout
+        setTimeout(() => {
+            // Sample data - in a real app, this would come from an API
+            existingMaterials = [
+                {
+                    id: "m001",
+                    code: "VT001",
+                    name: "Vải cotton trắng",
+                    unit: "m",
+                    availableQuantity: 500,
+                },
+                {
+                    id: "m002",
+                    code: "VT002",
+                    name: "Vải cotton đen",
+                    unit: "m",
+                    availableQuantity: 350,
+                },
+                {
+                    id: "m003",
+                    code: "VT003",
+                    name: "Vải lụa",
+                    unit: "m",
+                    availableQuantity: 200,
+                },
+                {
+                    id: "m004",
+                    code: "VT004",
+                    name: "Cúc áo nhỏ",
+                    unit: "cái",
+                    availableQuantity: 1000,
+                },
+                {
+                    id: "m005",
+                    code: "VT005",
+                    name: "Cúc áo lớn",
+                    unit: "cái",
+                    availableQuantity: 800,
+                },
+                {
+                    id: "m006",
+                    code: "VT006",
+                    name: "Khóa kéo 15cm",
+                    unit: "cái",
+                    availableQuantity: 600,
+                },
+                {
+                    id: "m007",
+                    code: "VT007",
+                    name: "Khóa kéo 20cm",
+                    unit: "cái",
+                    availableQuantity: 450,
+                },
+                {
+                    id: "m008",
+                    code: "VT008",
+                    name: "Chỉ may trắng",
+                    unit: "cuộn",
+                    availableQuantity: 300,
+                },
+                {
+                    id: "m009",
+                    code: "VT009",
+                    name: "Chỉ may đen",
+                    unit: "cuộn",
+                    availableQuantity: 280,
+                },
+                {
+                    id: "m010",
+                    code: "VT010",
+                    name: "Nhãn mác",
+                    unit: "cái",
+                    availableQuantity: 2000,
+                },
+            ];
+
+            // Set filtered materials to all materials initially
+            filteredMaterials = [...existingMaterials];
+
+            // Update the table
+            updateExistingMaterialsTable();
+
+            // Hide loading indicator
+            $("#existingMaterialsLoading").addClass("d-none");
+            $("#existingMaterialsTable").removeClass("d-none");
+        }, 700);
+    }
+
+    // Add this function to filter existing materials based on search input
+    function filterExistingMaterials() {
+        const searchTerm = $("#searchMaterial").val().toLowerCase().trim();
+
+        if (!searchTerm) {
+            filteredMaterials = [...existingMaterials];
+        } else {
+            filteredMaterials = existingMaterials.filter(
+                (material) =>
+                    material.code.toLowerCase().includes(searchTerm) ||
+                    material.name.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        updateExistingMaterialsTable();
+    }
+
+    // Add this function to update the existing materials table
+    function updateExistingMaterialsTable() {
+        const $tbody = $("#existingMaterialsTable tbody");
+        $tbody.empty();
+
+        if (filteredMaterials.length === 0) {
+            $("#existingMaterialsTable").addClass("d-none");
+            $("#noExistingMaterialsFound").removeClass("d-none");
+            return;
+        }
+
+        $("#existingMaterialsTable").removeClass("d-none");
+        $("#noExistingMaterialsFound").addClass("d-none");
+
+        filteredMaterials.forEach((material) => {
+            const $row = $(`
+        <tr class="material-selectable" data-material-id="${material.id}">
+          <td>${material.code}</td>
+          <td>${material.name}</td>
+          <td>${material.unit}</td>
+          <td>
+            <input type="number" class="form-control form-control-sm material-quantity-input"
+                  value="1" min="1" max="${material.availableQuantity}">
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary select-material" data-material-id="${material.id}">
+              Chọn
+            </button>
+          </td>
+        </tr>
+      `);
+
+            $tbody.append($row);
+        });
+
+        // Add event listeners for selecting materials
+        $(".select-material").on("click", function (e) {
+            e.stopPropagation();
+            const materialId = $(this).data("material-id");
+            selectExistingMaterial(materialId);
+        });
+
+        $(".material-selectable").on("click", function () {
+            const materialId = $(this).data("material-id");
+            selectExistingMaterial(materialId);
+        });
+    }
+
+    // Add this function to handle selecting an existing material
+    function selectExistingMaterial(materialId) {
+        // Remove selection from all rows
+        $(".material-selectable").removeClass("material-selected");
+
+        // Add selection to the clicked row
+        $(`.material-selectable[data-material-id="${materialId}"]`).addClass(
+            "material-selected"
+        );
+
+        // Store the selected material
+        selectedExistingMaterial = filteredMaterials.find(
+            (m) => m.id === materialId
+        );
     }
 });

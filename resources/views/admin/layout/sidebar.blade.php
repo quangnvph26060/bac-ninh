@@ -57,32 +57,39 @@
                             <div class="collapse {{ isActiveMenu($item) }}" id="{{ $item['id'] }}">
                                 <ul class="nav nav-collapse">
                                     @foreach ($item['children'] as $child)
-                                        @isset($child['url'])
-                                            @php
-                                                $isChildActive = request()->routeIs($child['url']) ? 'active' : '';
-                                            @endphp
-                                            <li class="nav-item {{ $isChildActive }}">
-                                                <a href="{{ route($child['url']) }}"
-                                                    @isset($child['id'])
-                                                        class="d-flex justify-content-between"
-                                                @endisset>
-                                                    <span class="sub-item">{{ $child['title'] }}</span>
-                                                    @isset($child['id'])
-                                                        <span class="badge bg-secondary">{{ $result['total_orders'] }}</span>
-                                                    @endisset
+                                        @php
+                                            // Tách key và value từ param nếu có
+                                            $paramKey = $paramValue = null;
+                                            if (isset($child['param']) && str_contains($child['param'], '=')) {
+                                                [$paramKey, $paramValue] = explode('=', $child['param']);
+                                            }
 
-                                                </a>
-                                            </li>
-                                        @else
-                                            <li class="nav-item">
-                                                <a href="javascript:void(0)" class="d-flex justify-content-between">
-                                                    <span class="sub-item">{{ $child['title'] }}</span>
+                                            // Kiểm tra route và param có khớp không
+                                            $isChildActive =
+                                                request()->routeIs($child['url']) &&
+                                                (!isset($paramKey) || request()->query($paramKey) === $paramValue)
+                                                    ? 'active'
+                                                    : '';
+
+                                            // Tạo route tương ứng
+                                            $route = isset($child['param'])
+                                                ? route($child['url'], [], false) . '?' . $child['param']
+                                                : route($child['url']);
+                                        @endphp
+
+                                        <li class="nav-item {{ $isChildActive }}">
+                                            <a href="{{ $route }}" class="d-flex justify-content-between">
+                                                <span class="sub-item">{{ $child['title'] }}</span>
+                                                @isset($child['id'])
+                                                    <span class="badge bg-secondary">{{ $result['total_orders'] }}</span>
+                                                @endisset
+                                                @isset($child['class'])
                                                     <span
                                                         class="badge rounded-pill {{ $child['class'] }}">{{ $result[$child['status']] }}
                                                     </span>
-                                                </a>
-                                            </li>
-                                        @endisset
+                                                @endisset
+                                            </a>
+                                        </li>
                                     @endforeach
                                 </ul>
                             </div>

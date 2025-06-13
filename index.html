@@ -1,318 +1,450 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tạo Phiếu Nhập Hàng</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container-fluid py-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">
-                            <i class="fas fa-file-import me-2"></i>
-                            Tạo Phiếu Nhập Hàng
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        <form id="materialImportForm">
-                            <!-- Thông tin phiếu nhập -->
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <label for="code" class="form-label">Mã phiếu nhập <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="code" name="code" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="date" class="form-label">Ngày nhập <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="date" name="date" required>
-                                </div>
-                            </div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Quản lý yêu cầu vật tư</title>
+        <!-- Bootstrap 5 CSS -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <!-- Font Awesome for icons -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div class="container py-4">
+            <h1 class="mb-4 text-center">Quản lý yêu cầu vật tư</h1>
 
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <label for="supplier_id" class="form-label">Nhà cung cấp <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="supplier_id" name="supplier_id" required>
-                                        <option value="">Chọn nhà cung cấp</option>
-                                        <option value="1">Công ty TNHH ABC</option>
-                                        <option value="2">Công ty XYZ</option>
-                                        <option value="3">Nhà cung cấp DEF</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="created_by" class="form-label">Người tạo <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="created_by" name="created_by" required>
-                                </div>
-                            </div>
-
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <label for="note" class="form-label">Ghi chú</label>
-                                    <textarea class="form-control" id="note" name="note" rows="3" placeholder="Nhập ghi chú cho phiếu nhập..."></textarea>
-                                </div>
-                            </div>
-
-                            <!-- Chi tiết sản phẩm -->
-                            <div class="card mb-4">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">Chi tiết sản phẩm</h5>
-                                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                                        <i class="fas fa-plus me-1"></i>
-                                        Thêm sản phẩm
-                                    </button>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered" id="productTable">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th width="5%">STT</th>
-                                                    <th width="25%">Tên sản phẩm</th>
-                                                    <th width="15%">Số lượng</th>
-                                                    <th width="15%">Đơn giá</th>
-                                                    <th width="15%">Thành tiền</th>
-                                                    <th width="20%">Ghi chú</th>
-                                                    <th width="5%">Thao tác</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="productTableBody">
-                                                <tr class="no-products">
-                                                    <td colspan="7" class="text-center text-muted">
-                                                        Chưa có sản phẩm nào. Nhấn "Thêm sản phẩm" để bắt đầu.
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                            <tfoot>
-                                                <tr class="table-info">
-                                                    <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
-                                                    <td class="fw-bold" id="totalAmount">0 VNĐ</td>
-                                                    <td colspan="2"></td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Thông tin thanh toán -->
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Thông tin thanh toán</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <label for="total_amount" class="form-label">Tổng tiền</label>
-                                            <input type="text" class="form-control" id="total_amount" name="total_amount" readonly>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="paid_amount" class="form-label">Số tiền đã trả</label>
-                                            <input type="number" class="form-control" id="paid_amount" name="paid_amount" min="0" step="0.01">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="debt_amount" class="form-label">Số tiền còn nợ</label>
-                                            <input type="text" class="form-control" id="debt_amount" name="debt_amount" readonly>
-                                        </div>
-                                    </div>
-                                    <div class="row mt-3">
-                                        <div class="col-md-6">
-                                            <label for="payment_status" class="form-label">Trạng thái thanh toán</label>
-                                            <select class="form-select" id="payment_status" name="payment_status">
-                                                <option value="unpaid">Chưa thanh toán</option>
-                                                <option value="partial">Thanh toán một phần</option>
-                                                <option value="paid">Đã thanh toán</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="payment_note" class="form-label">Ghi chú thanh toán</label>
-                                            <input type="text" class="form-control" id="payment_note" name="payment_note" placeholder="Ghi chú về thanh toán...">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Nút thao tác -->
-                            <div class="d-flex justify-content-end gap-2">
-                                <button type="button" class="btn btn-secondary">
-                                    <i class="fas fa-times me-1"></i>
-                                    Hủy
-                                </button>
-                                <button type="button" class="btn btn-info" id="previewBtn">
-                                    <i class="fas fa-eye me-1"></i>
-                                    Xem trước
-                                </button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-1"></i>
-                                    Lưu phiếu nhập
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Tạo yêu cầu vật tư sản xuất</h5>
                 </div>
-            </div>
-        </div>
-    </div>
+                <div class="card-body">
+                    <!-- Order Selection -->
+                    <div class="mb-4">
+                        <label for="orderSelect" class="form-label"
+                            >Chọn đơn hàng</label
+                        >
+                        <select
+                            class="form-select"
+                            id="orderSelect"
+                            aria-label="Chọn đơn hàng"
+                        >
+                            <option selected value="">
+                                -- Chọn đơn hàng --
+                            </option>
+                        </select>
+                        <div id="orderLoading" class="mt-2 d-none">
+                            <div
+                                class="spinner-border spinner-border-sm text-primary"
+                                role="status"
+                            >
+                                <span class="visually-hidden">Đang tải...</span>
+                            </div>
+                            <span class="ms-2">Đang tải đơn hàng...</span>
+                        </div>
+                    </div>
 
-    <!-- Modal thêm/chọn sản phẩm -->
-    <div class="modal fade" id="addProductModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Thêm sản phẩm</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <ul class="nav nav-tabs" id="productTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="select-tab" data-bs-toggle="tab" data-bs-target="#select-product" type="button">
-                                Chọn sản phẩm có sẵn
+                    <!-- Product Selection (initially hidden) -->
+                    <div class="mb-4 d-none" id="productSelectionContainer">
+                        <label for="productSelect" class="form-label"
+                            >Chọn sản phẩm</label
+                        >
+                        <select
+                            class="form-select"
+                            id="productSelect"
+                            aria-label="Chọn sản phẩm"
+                        >
+                            <option selected value="">
+                                -- Chọn sản phẩm --
+                            </option>
+                        </select>
+                        <div id="productLoading" class="mt-2 d-none">
+                            <div
+                                class="spinner-border spinner-border-sm text-primary"
+                                role="status"
+                            >
+                                <span class="visually-hidden">Đang tải...</span>
+                            </div>
+                            <span class="ms-2">Đang tải sản phẩm...</span>
+                        </div>
+                    </div>
+
+                    <!-- Materials List (initially hidden) -->
+                    <div class="mb-4 d-none" id="materialsContainer">
+                        <div
+                            class="d-flex justify-content-between align-items-center mb-3"
+                        >
+                            <label class="form-label fs-5"
+                                >Danh sách vật tư</label
+                            >
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm"
+                                id="addMaterialBtn"
+                            >
+                                <i class="fas fa-plus me-1"></i> Thêm vật tư
                             </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create-product" type="button">
-                                Tạo sản phẩm mới
-                            </button>
-                        </li>
-                    </ul>
-                    <div class="tab-content mt-3" id="productTabsContent">
-                        <!-- Tab chọn sản phẩm có sẵn -->
-                        <div class="tab-pane fade show active" id="select-product">
-                            <div class="mb-3">
-                                <input type="text" class="form-control" id="searchProduct" placeholder="Tìm kiếm sản phẩm...">
-                            </div>
-                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                                <table class="table table-hover">
-                                    <thead class="table-light sticky-top">
-                                        <tr>
-                                            <th>Chọn</th>
-                                            <th>Mã SP</th>
-                                            <th>Tên sản phẩm</th>
-                                            <th>Đơn vị</th>
-                                            <th>Giá gốc</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="existingProductsList">
-                                        <tr>
-                                            <td><input type="radio" name="selectedProduct" value="1" data-name="Thép xây dựng" data-unit="Tấn" data-price="15000000"></td>
-                                            <td>SP001</td>
-                                            <td>Thép xây dựng</td>
-                                            <td>Tấn</td>
-                                            <td>15,000,000 VNĐ</td>
-                                        </tr>
-                                        <tr>
-                                            <td><input type="radio" name="selectedProduct" value="2" data-name="Xi măng Portland" data-unit="Bao" data-price="180000"></td>
-                                            <td>SP002</td>
-                                            <td>Xi măng Portland</td>
-                                            <td>Bao</td>
-                                            <td>180,000 VNĐ</td>
-                                        </tr>
-                                        <tr>
-                                            <td><input type="radio" name="selectedProduct" value="3" data-name="Gạch ống" data-unit="Viên" data-price="3500"></td>
-                                            <td>SP003</td>
-                                            <td>Gạch ống</td>
-                                            <td>Viên</td>
-                                            <td>3,500 VNĐ</td>
-                                        </tr>
-                                        <tr>
-                                            <td><input type="radio" name="selectedProduct" value="4" data-name="Cát xây dựng" data-unit="M³" data-price="350000"></td>
-                                            <td>SP004</td>
-                                            <td>Cát xây dựng</td>
-                                            <td>M³</td>
-                                            <td>350,000 VNĐ</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">Số lượng <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="selectedQuantity" min="1" step="0.01" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Đơn giá <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="selectedPrice" min="0" step="0.01" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Ghi chú</label>
-                                    <input type="text" class="form-control" id="selectedNote" placeholder="Ghi chú...">
-                                </div>
-                            </div>
                         </div>
 
-                        <!-- Tab tạo sản phẩm mới -->
-                        <div class="tab-pane fade" id="create-product">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label">Mã sản phẩm <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="newProductCode" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="newProductName" required>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">Đơn vị tính <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="newProductUnit" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Số lượng <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="newQuantity" min="1" step="0.01" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Đơn giá <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="newPrice" min="0" step="0.01" required>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <label class="form-label">Mô tả sản phẩm</label>
-                                    <textarea class="form-control" id="newProductDescription" rows="3" placeholder="Mô tả chi tiết về sản phẩm..."></textarea>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <label class="form-label">Ghi chú</label>
-                                    <input type="text" class="form-control" id="newProductNote" placeholder="Ghi chú...">
-                                </div>
-                            </div>
+                        <!-- BOM Status Alert -->
+                        <div
+                            class="alert alert-info d-none"
+                            id="bomExistsAlert"
+                        >
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>BOM đã tồn tại</strong>
+                            <p class="mb-0">
+                                Hệ thống đã tự động tạo danh sách vật tư dựa
+                                trên BOM của sản phẩm. Bạn có thể điều chỉnh số
+                                lượng hoặc thêm vật tư khác nếu cần.
+                            </p>
+                        </div>
+
+                        <div
+                            class="alert alert-warning d-none"
+                            id="bomNotExistsAlert"
+                        >
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>BOM chưa tồn tại</strong>
+                            <p class="mb-0">
+                                Sản phẩm này chưa có BOM. Vui lòng thêm thủ công
+                                các vật tư cần thiết.
+                            </p>
+                        </div>
+
+                        <!-- Materials Table -->
+                        <div class="table-responsive">
+                            <table
+                                class="table table-bordered table-hover"
+                                id="materialsTable"
+                            >
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 15%">Mã vật tư</th>
+                                        <th style="width: 35%">Tên vật tư</th>
+                                        <th style="width: 15%">Đơn vị</th>
+                                        <th style="width: 15%">Số lượng</th>
+                                        <th style="width: 10%">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Materials will be added here dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div
+                            id="emptyMaterialsMessage"
+                            class="text-center py-4 border rounded bg-light"
+                        >
+                            <p class="mb-0">
+                                Chưa có vật tư nào. Vui lòng thêm vật tư.
+                            </p>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" id="addProductBtn">Thêm vào phiếu</button>
+                <div class="card-footer text-end">
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        id="submitRequestBtn"
+                        disabled
+                    >
+                        <i class="fas fa-paper-plane me-1"></i> Gửi yêu cầu
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal xem trước -->
-    <div class="modal fade" id="previewModal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Xem trước phiếu nhập</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="previewContent">
-                    <!-- Nội dung xem trước sẽ được tạo bằng JavaScript -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="window.print()">In phiếu</button>
+        <!-- Add Material Modal -->
+        <div
+            class="modal fade"
+            id="addMaterialModal"
+            tabindex="-1"
+            aria-labelledby="addMaterialModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addMaterialModalLabel">
+                            Thêm vật tư
+                        </h5>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Tabs -->
+                        <ul
+                            class="nav nav-tabs"
+                            id="materialTabs"
+                            role="tablist"
+                        >
+                            <li class="nav-item" role="presentation">
+                                <button
+                                    class="nav-link active"
+                                    id="existing-tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#existing-materials"
+                                    type="button"
+                                    role="tab"
+                                    aria-controls="existing-materials"
+                                    aria-selected="true"
+                                >
+                                    <i class="fas fa-list me-2"></i>Chọn vật tư
+                                    có sẵn
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button
+                                    class="nav-link"
+                                    id="new-tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#new-material"
+                                    type="button"
+                                    role="tab"
+                                    aria-controls="new-material"
+                                    aria-selected="false"
+                                >
+                                    <i class="fas fa-plus me-2"></i>Thêm vật tư
+                                    mới
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content pt-3" id="materialTabsContent">
+                            <!-- Existing Materials Tab -->
+                            <div
+                                class="tab-pane fade show active"
+                                id="existing-materials"
+                                role="tabpanel"
+                                aria-labelledby="existing-tab"
+                            >
+                                <div class="mb-3">
+                                    <div class="input-group">
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="searchMaterial"
+                                            placeholder="Tìm kiếm vật tư..."
+                                        />
+                                        <button
+                                            class="btn btn-outline-secondary"
+                                            type="button"
+                                            id="searchMaterialBtn"
+                                        >
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="table-responsive"
+                                    style="max-height: 300px"
+                                >
+                                    <table
+                                        class="table table-hover table-bordered"
+                                        id="existingMaterialsTable"
+                                    >
+                                        <thead class="table-light sticky-top">
+                                            <tr>
+                                                <th style="width: 15%">
+                                                    Mã vật tư
+                                                </th>
+                                                <th style="width: 40%">
+                                                    Tên vật tư
+                                                </th>
+                                                <th style="width: 15%">
+                                                    Đơn vị
+                                                </th>
+                                                <th style="width: 15%">
+                                                    Số lượng
+                                                </th>
+                                                <th style="width: 15%">
+                                                    Thao tác
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Existing materials will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div
+                                    id="existingMaterialsLoading"
+                                    class="text-center py-4 d-none"
+                                >
+                                    <div
+                                        class="spinner-border text-primary"
+                                        role="status"
+                                    >
+                                        <span class="visually-hidden"
+                                            >Đang tải...</span
+                                        >
+                                    </div>
+                                    <p class="mt-2">
+                                        Đang tải danh sách vật tư...
+                                    </p>
+                                </div>
+
+                                <div
+                                    id="noExistingMaterialsFound"
+                                    class="text-center py-4 d-none"
+                                >
+                                    <i
+                                        class="fas fa-search fa-2x text-muted mb-2"
+                                    ></i>
+                                    <p>Không tìm thấy vật tư phù hợp.</p>
+                                </div>
+                            </div>
+
+                            <!-- New Material Tab -->
+                            <div
+                                class="tab-pane fade"
+                                id="new-material"
+                                role="tabpanel"
+                                aria-labelledby="new-tab"
+                            >
+                                <form id="addMaterialForm">
+                                    <div class="mb-3">
+                                        <label
+                                            for="materialCode"
+                                            class="form-label"
+                                            >Mã vật tư</label
+                                        >
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="materialCode"
+                                            required
+                                        />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label
+                                            for="materialName"
+                                            class="form-label"
+                                            >Tên vật tư</label
+                                        >
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="materialName"
+                                            required
+                                        />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label
+                                            for="materialUnit"
+                                            class="form-label"
+                                            >Đơn vị</label
+                                        >
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="materialUnit"
+                                            value="cái"
+                                        />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label
+                                            for="materialQuantity"
+                                            class="form-label"
+                                            >Số lượng</label
+                                        >
+                                        <input
+                                            type="number"
+                                            class="form-control"
+                                            id="materialQuantity"
+                                            min="1"
+                                            value="1"
+                                            required
+                                        />
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="saveMaterialBtn"
+                        >
+                            Thêm vật tư
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="script.js"></script>
-</body>
+        <!-- Success Modal -->
+        <div
+            class="modal fade"
+            id="successModal"
+            tabindex="-1"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Thành công</h5>
+                        <button
+                            type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center mb-3">
+                            <i
+                                class="fas fa-check-circle text-success"
+                                style="font-size: 3rem"
+                            ></i>
+                        </div>
+                        <p class="text-center">
+                            Yêu cầu vật tư đã được gửi thành công!
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-success"
+                            data-bs-dismiss="modal"
+                            id="successModalCloseBtn"
+                        >
+                            Đóng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Bootstrap 5 JS Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Custom JS -->
+        <script src="script.js"></script>
+    </body>
 </html>

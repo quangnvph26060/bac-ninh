@@ -20,45 +20,65 @@
                 "url": "admin.orders.barcode.scanner"
             },
             {
+                "title": "Quản lý yêu cầu vật tư",
+                "url": "admin.material-requests.index"
+            },
+            {
                 "title": "Chờ xác nhận",
                 "status": "pending",
-                "class": "bg-warning text-dark"
+                "class": "bg-warning text-dark",
+                "param": "status=pending",
+                "url": "admin.orders.index"
             },
             {
                 "title": "Đã xác nhận, chờ sản xuất",
                 "status": "confirmed_pending_production",
-                "class": "bg-info"
+                "class": "bg-info",
+                "param": "status=confirmed_pending_production",
+                "url": "admin.orders.index"
             },
             {
                 "title": "Đang sản xuất",
                 "status": "in_production",
-                "class": "bg-primary"
+                "class": "bg-primary",
+                "param": "status=in_production",
+                "url": "admin.orders.index"
             },
             {
                 "title": "Đã sản xuất xong, chờ hoàn thiện",
                 "status": "produced_awaiting_completion",
-                "class": "bg-secondary"
+                "class": "bg-secondary",
+                "param": "status=produced_awaiting_completion",
+                "url": "admin.orders.index"
             },
             {
                 "title": "Đã hoàn thiện, chờ giao hàng",
                 "status": "completed_waiting_for_shipment",
-                "class": "bg-light text-dark"
+                "class": "bg-light text-dark",
+                "param": "status=completed_waiting_for_shipment",
+                "url": "admin.orders.index"
             },
             {
                 "title": "Đã giao hàng",
                 "status": "shipped",
-                "class": "bg-success"
+                "class": "bg-success",
+                "param": "status=shipped",
+                "url": "admin.orders.index"
             },
             {
                 "title": "Đã hủy",
                 "status": "cancelled",
-                "class": "bg-danger"
+                "class": "bg-danger",
+                "param": "status=cancelled",
+                "url": "admin.orders.index"
             }
         ],
         "inRoutes": [
             "admin.orders.index",
             "admin.orders.edit",
-            "admin.orders.barcode.scanner"
+            "admin.orders.barcode.scanner",
+            "admin.material-requests.index",
+            "admin.material-requests.create"
         ]
     },
     {
@@ -172,36 +192,6 @@
         "route": "admin.tickets.index",
         "id": "ticket",
         "inRoutes": ["admin.tickets.index", "admin.tickets.reply"]
-    },
-    {
-        "title": "Kho hàng",
-        "icon": "fas fa-warehouse",
-        "id": "warehouses",
-        "children": [
-            {
-                "title": "Quản lý vật liệu",
-                "url": "admin.materials.index"
-            },
-            {
-                "title": "Quản lý phiếu nhập kho",
-                "url": "admin.material-imports.index"
-            },
-            {
-                "title": "Quản lý công nợ",
-                "url": "admin.suppliers-debts.index"
-            },
-            {
-                "title": "Quản lý nhà cung cấp",
-                "url": "admin.suppliers.index"
-            }
-        ],
-        "inRoutes": [
-            "admin.suppliers.index",
-            "admin.materials.index",
-            "admin.material-imports.index",
-            "admin.material-imports.create",
-            "admin.suppliers-debts.index"
-        ]
     },
     {
         "title": "Cấu hình",

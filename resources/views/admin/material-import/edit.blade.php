@@ -56,7 +56,7 @@
                                                     <th width="150">Đơn vị</th>
                                                     <th width="150">Đơn giá (USD)</th>
                                                     <th width="150">Số lượng</th>
-                                                    <th width="150">Thành tiền (USD)</th>
+                                                    <th width="150">Thành tiền</th>
                                                     <th width="100">Thao tác</th>
                                                 </tr>
                                             </thead>

@@ -198,13 +198,13 @@
     <script>
         $(document).ready(function() {
             const api = "{{ route('admin.suppliers-debts.index') }}"
-            
+
             dataTables(api, columns, 'SupplierDebt', {
                 supplier_id: {
                     title: 'Lọc nhà cung cấp',
                     data: @json($suppliers)
                 },
-            }, false, false, false, true)
+            }, false, true, false, true)
 
             $(document).on('click', '.show-modal', function(e) {
                 e.preventDefault();
@@ -317,11 +317,21 @@
                     xhrFields: {
                         responseType: 'blob'
                     },
-                    success: function(data) {
+                    success: function(data, status, xhr) {
+                        const disposition = xhr.getResponseHeader('Content-Disposition');
+                        let fileName = 'phieu_cong_no.pdf';
+
+                        if (disposition && disposition.indexOf('filename=') !== -1) {
+                            fileName = disposition
+                                .split('filename=')[1]
+                                .replace(/['"]/g, '')
+                                .trim();
+                        }
+
                         const url = window.URL.createObjectURL(data);
                         const a = document.createElement('a');
                         a.href = url;
-                        a.download = 'phieu_cong_no.pdf';
+                        a.download = fileName;
                         document.body.appendChild(a);
                         a.click();
                         a.remove();

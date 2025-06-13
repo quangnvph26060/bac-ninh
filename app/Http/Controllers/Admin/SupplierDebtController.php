@@ -68,11 +68,17 @@ class SupplierDebtController extends Controller
     {
         $supplierDebt = $this->supplierDebtService->show($id);
 
+        $code = $supplierDebt->code;
+        $timestamp = now()->format('Ymd_His');
+        $fileName = 'phieu_cong_no_' . $code . '_' . $timestamp . '.pdf';
+
         $pdf = Pdf::loadView('admin.template.print', compact('supplierDebt'))->setPaper('A4', 'portrait');
+
         return response($pdf->output(), 200)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="phieu_cong_no.pdf"');
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
     }
+
 
     public function pay(Request $request)
     {

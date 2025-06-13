@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\MaterialController;
+use App\Http\Controllers\Admin\MaterialRequestController;
 use App\Http\Controllers\Admin\PasswordChangeRequestController;
 use App\Http\Controllers\Admin\ReceiptController;
 use App\Http\Controllers\Admin\ReportdebtController;
@@ -121,6 +122,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/{id}', 'show')->name('show');
         });
 
+        Route::group(
+            [
+                'prefix' => 'material-requests',
+                'controller' => MaterialRequestController::class,
+                'as' => 'material-requests.'
+            ],
+            function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('create', 'create')->name('create');
+                Route::post('/', 'store');
+                Route::get('{id}', 'show');
+                Route::put('{id}', 'update');
+
+                Route::post('{id}/approve', 'approve');
+                Route::post('{id}/reject', 'reject');
+                Route::get('orders/select2', 'orderSelect');
+                Route::get('order/{orderId}/products', 'getProductsByOrder');
+                Route::get('product/{productId}/boms', 'getBomsByProduct');
+            }
+        );
+
         Route::prefix('material-imports')->controller(MaterialImportController::class)->name('material-imports.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('create', 'create')->name('create');
@@ -128,6 +150,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('show/{id}', 'show')->name('show');
             Route::get('edit/{id}', 'edit')->name('edit');
             Route::put('edit/{id}', 'update')->name('update');
+            Route::get('pdf/{id}', 'downloadPdf')->name('downloadPdf');
         });
 
         Route::prefix('suppliers-debts')->controller(SupplierDebtController::class)->name('suppliers-debts.')->group(function () {
