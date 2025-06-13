@@ -73,3 +73,7 @@
     //     ]
     // },
 
+            {
+                "title": "Quản lý yêu cầu vật tư",
+                "url": "admin.material-requests.index"
+            },
