@@ -11,6 +11,7 @@ use App\Services\MaterialImportService;
 use App\Services\MaterialService;
 use App\Services\SupplierService;
 use App\Traits\PaginateTrait;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -40,18 +41,7 @@ class MaterialImportController extends Controller
                     ->editColumn('created_at', fn($row) => $row->created_at->format('d/m/Y H:i'))
                     ->addColumn(
                         'operations',
-                        fn($row) =>
-                        "
-                            <button data-id='$row->id' type='button'
-                                class='btn btn-primary btn-sm table-actions btn-operation-show'>
-                                <i class='ti ti-eye text-white'></i>
-                            </button>
-
-                            <a href='" . route('admin.material-imports.edit', $row->id) . "'
-                                class='btn btn-warning btn-sm table-actions btn-operation-edit'>
-                                <i class='ti ti-edit text-dark'></i>
-                            </a>
-                    "
+                        fn($row) => view('components.material_import_actions', compact('row'))
                     ),
                 ['operations', 'payment_status']
             );
@@ -74,8 +64,6 @@ class MaterialImportController extends Controller
         $credentials = $request->validated();
 
         $response = $this->materialImportService->store($credentials);
-
-        logger($response);
 
         return handleResponse($response['message'], $response['success'], $response['code'], $response['data']);
     }
@@ -105,5 +93,21 @@ class MaterialImportController extends Controller
         $response = $this->materialImportService->update($id, $credentials);
 
         return handleResponse($response['message'], $response['success'], $response['code']);
+    }
+
+    public function downloadPdf($id)
+    {
+        $materialImport = $this->materialImportService->show($id);
+        logger($materialImport);
+        // Tạo tên file: phieu_nhap_kho_[ma_phieu]_[timestamp].pdf
+        $code = $materialImport->code;
+        $timestamp = now()->format('Ymd_His');
+        $fileName = 'phieu_nhap_kho_' . $code . '_' . $timestamp . '.pdf';
+
+        $pdf = Pdf::loadView('admin.template.imports.print', compact('materialImport'))->setPaper('A4', 'portrait');
+
+        return response($pdf->output(), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
     }
 }

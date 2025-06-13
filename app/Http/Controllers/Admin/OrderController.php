@@ -27,7 +27,9 @@ class OrderController extends Controller
         $this->authorize('view', Order::class);
 
         if (request()->ajax()) {
-            $query = $this->orderService->pagination();
+            $status = request()->query('status');
+
+            $query = $this->orderService->pagination($status);
 
             return $this->processDataTable(
                 $query,

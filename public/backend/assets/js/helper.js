@@ -362,6 +362,13 @@ function submitForm(formId, successCallback, url = null, errorCallback = null) {
     $(formId).on("submit", function (e) {
         e.preventDefault();
 
+        const $btn = $("#submitRequestBtn");
+        const originalText = $btn.html();
+
+        $btn.prop("disabled", true).html(
+            '<i class="fas fa-spinner fa-pulse"></i> Đang gửi...'
+        );
+
         // let isValid = true;
 
         // $(this)
@@ -422,10 +429,13 @@ function submitForm(formId, successCallback, url = null, errorCallback = null) {
 
                 $("#loadingSpinner").fadeOut();
 
+                $btn.prop("disabled", false).html(originalText);
+
                 Notifications(xhr.responseJSON.message, "danger");
             },
             complete: function () {
                 $("#loadingSpinner").fadeOut();
+                $btn.prop("disabled", false).html(originalText);
             },
         });
     });

@@ -11,8 +11,9 @@ class OrderService extends BaseService
         parent::__construct($order);
     }
 
-    public function pagination()
+    public function pagination($status)
     {
+
         $columns = [
             'id',
             'order_code',
@@ -35,9 +36,10 @@ class OrderService extends BaseService
             ['orderItems'],
             false,
             [],
-            [['payment_status', '<>', 'pending']],
+            !empty($status) ? [['status', $status]] : []
         );
     }
+
 
     public function getItemsByOrderCode($code)
     {
@@ -83,5 +85,33 @@ class OrderService extends BaseService
             logger('error: ' . $e->getMessage());
             return errorResponse("An error occurred, please try again later!", false, 500);
         }
+    }
+
+    public function orderSelect($request)
+    {
+        $query = $this->model->query();
+
+        if ($request->filled('search')) {
+            $keyword = $request->search;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('order_code', 'like', "%$keyword%")
+                    ->orWhere('customer_name', 'like', "%$keyword%");
+            });
+        }
+
+        $orders = $query->orderByDesc('created_at')
+            ->paginate(20);
+
+        $results = $orders->map(fn($order) => [
+            'id' => $order->id,
+            'code' => $order->order_code,
+            'order_name' => $order->order_name,
+            'date' => $order->created_at->format('d-m-Y'),
+        ]);
+
+        return [
+            'data' => $results,
+            'next_page_url' => $orders->nextPageUrl(),
+        ];
     }
 }

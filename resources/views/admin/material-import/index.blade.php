@@ -41,8 +41,45 @@
     <script>
         $(document).ready(function() {
             const api = "{{ route('admin.material-imports.index') }}"
-            dataTables(api, columns, 'MaterialImport', {}, false, false, false, true)
+            dataTables(api, columns, 'MaterialImport', {}, false, true, true, true)
 
+            $(document).on('click', '.download-debt', function(e) {
+                e.preventDefault();
+
+                let id = $(this).data('id');
+                let url = `/admin/material-imports/pdf/${id}`;
+
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function(data, status, xhr) {
+                        const disposition = xhr.getResponseHeader('Content-Disposition');
+                        let fileName = 'phieu_nhap_kho.pdf';
+
+                        // Nếu có Content-Disposition và chứa filename=
+                        if (disposition && disposition.indexOf('filename=') !== -1) {
+                            fileName = disposition
+                                .split('filename=')[1]
+                                .replace(/['"]/g, '')
+                                .trim();
+                        }
+
+                        const blobUrl = window.URL.createObjectURL(data);
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    },
+                    error: function() {
+                        alert('Không thể tải PDF');
+                    }
+                });
+            });
 
             let lastMaterialImportId = null; // Biến lưu id lần trước
 

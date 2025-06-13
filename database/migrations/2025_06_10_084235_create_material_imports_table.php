@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignIdFor(Supplier::class)->constrained()->noActionOnDelete();
             $table->date('date');
             $table->text('note')->nullable();
-            $table->foreignId('created_by')->constrained('users')->noActionOnDelete();
+            $table->foreignId('created_by')->constrained('employees')->noActionOnDelete();
             $table->timestamps();
         });
     }

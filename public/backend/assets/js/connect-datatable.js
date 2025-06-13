@@ -108,6 +108,8 @@ const dataTables = (
         ajax: {
             url: api,
             data: function (d) {
+                const urlParams = new URLSearchParams(window.location.search);
+                d.status = urlParams.get("status");
                 Object.keys(filters).forEach((key) => {
                     let value = $(`#filter-${key}`).val();
                     if (value) {
