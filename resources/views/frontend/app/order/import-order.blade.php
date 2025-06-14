@@ -3,19 +3,29 @@
 @section('content')
     <div class="container-wrapper">
         <div class="billing__title__wrapper">
-            <div class="d-flex gap-2 align-items-center">
+            <div class="d-flex gap-2 align-items-center justify-content-between">
                 <a href="{{ route('orders.index') }}">
-                    <div class="d-flex align-items-center cursor-pointer mb-2" style="color: rgb(66, 82, 110);"><svg
-                            width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19.1429 12L4.85718 12" stroke="#8F9BB3" stroke-width="2" stroke-miterlimit="10">
-                            </path>
+                    <div class="d-flex align-items-center cursor-pointer mb-2" style="color: rgb(66, 82, 110);">
+                        <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19.1429 12L4.85718 12" stroke="#8F9BB3" stroke-width="2" stroke-miterlimit="10" />
                             <path d="M9.85718 17L4.85718 12L9.85718 7" stroke="#8F9BB3" stroke-width="2"
-                                stroke-miterlimit="10" stroke-linecap="square"></path>
+                                stroke-miterlimit="10" stroke-linecap="square" />
                         </svg>
                         <div class="ms-2">Back to Orders</div>
                     </div>
                 </a>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('orders.downloadTemplate') }}" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-file-earmark-excel-fill me-2"></i> Download XLS Template
+                    </a>
+                    <a href="{{ route('orders.downloadProductInfo') }}" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-file-earmark-excel-fill me-2"></i> Product Info
+                    </a>
+
+                </div>
             </div>
+
             <h1 class="billing__title__content">Import Order</h1>
         </div>
 
@@ -54,7 +64,6 @@
                 </ul>
             </div>
         </div>
-
     </div>
 @endsection
 

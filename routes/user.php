@@ -103,6 +103,9 @@ Route::middleware('auth')->group(function () {
         Route::get('import-progress/{jobId}', 'importProgress')->name('import-progress');
         Route::post('export', 'export')->name('export');
         Route::post('validate-image', 'validateImage');
+        Route::get('template-download', 'downloadTemplate')->name('downloadTemplate');
+        Route::get('download-product-info', 'downloadProductInfo')->name('downloadProductInfo');
+
 
         Route::post('handle-change-note', 'handleChangeNote');
         Route::post('handle-change-info', 'handleChangeInfo');
