@@ -17,7 +17,7 @@ class OrderPolicy
      */
     public function view(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Order View');
+        return $this->hasAccess($employee, 'View Order List');
     }
 
     public function create(Employee $employee): bool
@@ -27,12 +27,12 @@ class OrderPolicy
 
     public function edit(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Order Edit');
+        return $this->hasAccess($employee, 'View Order Details');
     }
 
     public function showItem(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Order Show Item');
+        return $this->hasAccess($employee, 'Quick View Of Items');
     }
 
     public function cancel(Employee $employee): bool
@@ -42,10 +42,10 @@ class OrderPolicy
 
     public function print(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Order Print');
+        return $this->hasAccess($employee, 'Print Invoice');
     }
     public function changeStatus(Employee $employee): bool
     {
-        return $this->hasAccess($employee, 'Order Change Status');
+        return $this->hasAccess($employee, 'Update Order Status');
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Frontend\App;
 
 use App\Exports\OrderExport;
+use App\Exports\OrderImportTemplateExport;
+use App\Exports\ProductInfoExport;
 use App\Http\Controllers\Controller;
 use App\Jobs\ImportOrdersFromExcel;
 use App\Models\AttributeValue;
@@ -1134,6 +1136,8 @@ class OrderController extends Controller
     {
         $progress = Cache::get("import_progress_{$jobId}");
 
+        logger($progress);
+
         return response()->json($progress ?? [
             'current' => 0,
             'total' => 0,
@@ -1260,5 +1264,16 @@ class OrderController extends Controller
             logger($e->getMessage());
             return errorResponse('Update image failed', true);
         }
+    }
+
+    public function downloadTemplate()
+    {
+        $fileName = 'order_import_template_' . time() . '.xlsx';
+        return Excel::download(new OrderImportTemplateExport, $fileName);
+    }
+
+    public function downloadProductInfo()
+    {
+        return Excel::download(new ProductInfoExport, 'product_info_template' . time() . '.xlsx');
     }
 }
