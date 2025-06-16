@@ -40,7 +40,6 @@ class OrderService extends BaseService
         );
     }
 
-
     public function getItemsByOrderCode($code)
     {
 
@@ -68,7 +67,7 @@ class OrderService extends BaseService
 
     public function show($id)
     {
-        return $this->findById($id, ['*'], ['orderItems.productVariant.attributeValues', 'user'], [['payment_status', '<>', 'pending']]);
+        return $this->findById($id, ['*'], ['orderItems.productVariant.attributeValues', 'user']);
     }
 
     public function updateStatus(string $id, $status)

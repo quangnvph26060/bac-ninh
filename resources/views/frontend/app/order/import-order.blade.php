@@ -20,7 +20,7 @@
                         <i class="bi bi-file-earmark-excel-fill me-2"></i> Download XLS Template
                     </a>
                     <a href="{{ route('orders.downloadProductInfo') }}" class="btn btn-outline-danger btn-sm">
-                        <i class="bi bi-file-earmark-excel-fill me-2"></i> Product Info
+                        <i class="bi bi-file-earmark-excel-fill me-2"></i> Product Information
                     </a>
 
                 </div>
@@ -114,6 +114,8 @@
                                                 .replace('__jobId__', jobId),
                                             type: 'GET',
                                             success: function(response) {
+                                                console.log(response);
+
                                                 if (response) {
                                                     const {
                                                         percent,
@@ -128,31 +130,31 @@
                                                             percent + '%')
                                                         .text(percent +
                                                             '%');
-                                                    $('#progress-text')
-                                                        .text(
-                                                            `Đang xử lý: ${current}/${total} đơn hàng...`
-                                                        );
 
                                                     if (status ===
-                                                        'success' ||
-                                                        status ===
-                                                        'completed_with_errors'
-                                                    ) {
+                                                        'processing') {
+                                                        if (current === 0) {
+                                                            $('#progress-text')
+                                                                .text(
+                                                                    'Đang khởi tạo...'
+                                                                    );
+                                                        } else {
+                                                            $('#progress-text')
+                                                                .text(
+                                                                    `Đang xử lý...`
+                                                                    );
+                                                        }
+                                                    }
+// : ${current}/${total} đơn hàng
+                                                    if (status === 'done') {
                                                         clearInterval(
                                                             interval);
                                                         clearTimeout(
                                                             timeout);
 
-                                                        if (status ===
-                                                            'success') {
-                                                            $('#progress-text')
-                                                                .text(
-                                                                    'Hoàn tất import đơn hàng!'
-                                                                );
-                                                            showSuccess(
-                                                                'Import hoàn tất!'
-                                                            );
-                                                        } else {
+                                                        if (failures &&
+                                                            failures
+                                                            .length > 0) {
                                                             $('#progress-text')
                                                                 .text(
                                                                     'Import hoàn tất với một số lỗi.'
@@ -160,12 +162,17 @@
                                                             showErrors(
                                                                 failures
                                                             );
+                                                        } else {
+                                                            $('#progress-text')
+                                                                .text(
+                                                                    'Hoàn tất import đơn hàng!'
+                                                                );
+                                                            showSuccess(
+                                                                'Import hoàn tất!'
+                                                            );
                                                         }
 
-                                                        resetUI()
-                                                        // ✅ Reset UI sau một khoảng delay ngắn
-                                                        // setTimeout(resetUI,
-                                                        //     1000);
+                                                        resetUI();
                                                     }
                                                 }
                                             },
@@ -183,7 +190,7 @@
                                         clearInterval(interval);
                                         showErrors(['Quá thời gian chờ']);
                                         setTimeout(resetUI, 3000);
-                                    }, 5 * 60 * 1000);
+                                    }, 10 * 60 * 1000);
                                 } else {
                                     showErrors(['Không nhận được job_id từ server']);
                                     setTimeout(resetUI, 3000);

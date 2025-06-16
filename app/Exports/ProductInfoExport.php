@@ -23,6 +23,10 @@ class ProductInfoExport implements FromCollection, WithHeadings
                     'Product Name' => $product->name,
                     'Product Sku' => $product->sku,
                     'Product Variant Sku' => $variant->sku,
+                    'Design width' => $variant->design_width ?? 'N/A',
+                    'Design height' => $variant->design_height  ?? 'N/A',
+                    'Design ppi' => $variant->design_ppi  ?? 'N/A',
+                    'Design format' => $variant->design_format  ?? 'N/A',
                 ]);
             }
 
@@ -33,6 +37,10 @@ class ProductInfoExport implements FromCollection, WithHeadings
                     'Product Name' => $product->name,
                     'Product Sku' => $product->sku,
                     'Product Variant Sku' => 'N/A',
+                    'Design width' =>  'N/A',
+                    'Design height' =>  'N/A',
+                    'Design ppi' =>  'N/A',
+                    'Design format' =>  'N/A',
                 ]);
             }
         }
@@ -42,6 +50,15 @@ class ProductInfoExport implements FromCollection, WithHeadings
 
     public function headings(): array
     {
-        return ['#', 'Product Name', 'Product Sku', 'Product Variant Sku'];
+        return [
+            '#',
+            'Product Name',
+            'Product Sku',
+            'Product Variant Sku',
+            'Design width',
+            'Design height',
+            'Design ppi',
+            'Design format',
+        ];
     }
 }

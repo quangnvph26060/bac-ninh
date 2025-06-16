@@ -650,8 +650,6 @@ class OrderController extends Controller
                 return $config ? $config->tax_rate : 0;
             });
 
-            $shippingAddress = $this->getShippingDetails($request['orderInfo']);
-
             $shippingFee = 0;
             $shippingMethod = $request['orderInfo']['shipping_method'];
 
@@ -671,7 +669,7 @@ class OrderController extends Controller
             $subTotal = $this->calculateSubTotal($productDetails);
             $totals = $this->calculateOrderTotals($productDetails, $coupon, $subTotal, $shippingFee, $tax);
 
-            $order = $this->storeOrderDetails($request['orderInfo'], $totals['grandTotal'], $totals['discountAmount'], $shippingFee, $shippingAddress, $tax);
+            $order = $this->storeOrderDetails($request['orderInfo'], $totals['grandTotal'], $totals['discountAmount'], $shippingFee, $tax);
 
             $this->storeOrderItems($order, $productDetails);
 
@@ -770,7 +768,7 @@ class OrderController extends Controller
         ];
     }
 
-    private function storeOrderDetails($orderInfo, $grandTotal, $discountAmount, $shippingFee, $shippingAddress, $tax)
+    private function storeOrderDetails($orderInfo, $grandTotal, $discountAmount, $shippingFee, $tax)
     {
         return Order::create(
             [
@@ -784,8 +782,12 @@ class OrderController extends Controller
                 'status' => 'pending',
                 'payment_status' => $orderInfo['payment_method'] !== 'later' ? 'completed' : 'pending',
                 'payment_method' => $orderInfo['payment_method'] !== 'later' ? 'bank_transfer' : null,
+                'shipping_method' => $orderInfo['shipping_method'],
                 'phone_number' => $orderInfo['phone_number'],
-                'shipping_address' => $shippingAddress,
+                'nation' => $orderInfo['country'],
+                'state' => $orderInfo['state'],
+                'city' => $orderInfo['city'],
+                'shipping_address' => $orderInfo['shipping_address'],
                 'note' => $orderInfo['note'],
                 'total' => $grandTotal,
                 'discount' => $discountAmount,
@@ -1138,12 +1140,7 @@ class OrderController extends Controller
 
         logger($progress);
 
-        return response()->json($progress ?? [
-            'current' => 0,
-            'total' => 0,
-            'percent' => 0,
-            'status' => 'pending'
-        ]);
+        return response()->json($progress);
     }
 
     public function handleChangeNote(Request $request)
@@ -1268,12 +1265,12 @@ class OrderController extends Controller
 
     public function downloadTemplate()
     {
-        $fileName = 'order_import_template_' . time() . '.xlsx';
+        $fileName = 'order_import_template_' . date('d-m-Y') . '.xlsx';
         return Excel::download(new OrderImportTemplateExport, $fileName);
     }
 
     public function downloadProductInfo()
     {
-        return Excel::download(new ProductInfoExport, 'product_info_template' . time() . '.xlsx');
+        return Excel::download(new ProductInfoExport, 'product_info_template_' . date('d-m-Y') . '.xlsx');
     }
 }

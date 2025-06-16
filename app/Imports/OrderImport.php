@@ -6,18 +6,24 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Jobs\DownloadOrderImage;
+use App\Models\Config;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Concerns\ToCollection;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 
-class OrderImport implements ToCollection
+
+// WithChunkReading
+class OrderImport implements ToCollection, WithHeadingRow
 {
     protected $userId;
     protected $jobId;
     protected $failures = [];
-
     protected int $current = 0;
     protected int $total = 0;
 
@@ -27,58 +33,191 @@ class OrderImport implements ToCollection
         $this->jobId = $jobId;
     }
 
+    // public function chunkSize(): int
+    // {
+    //     return 5;
+    // }
+
     public function collection(Collection $rows)
     {
-        $this->total = $rows->count() - 1; // Trừ dòng tiêu đề
+        $this->total = $rows->count();
+
+        $tax = Config::query()->first()->tax_rate;
 
         foreach ($rows as $index => $row) {
-            if ($index === 0) continue;
+            $line = $index + 2;
 
-            $line = $index + 1;
+            $this->updateProgress('processing');
+
+            $info = [];
+
             $errors = $this->validateRow($row, $line);
+
+            $mockup = trim($row['mockup_image']);
+
+            $design = trim($row['design_image']);
 
             if (!empty($errors)) {
                 $this->failures = array_merge($this->failures, $errors);
+                $this->updateProgress('processing');
                 continue;
             }
 
-            if (Order::where('order_code', $row[0])->orWhere('order_name', $row[1])->exists()) {
-                $this->failures[] = "Dòng $line: Mã hoặc tên đơn hàng đã tồn tại: {$row[0]} / {$row[1]}";
+            if (Order::where('order_code', $row['order_code'])->orWhere('order_name', $row['order_name'])->exists()) {
+                $this->failures[] = "Dòng $line: Mã hoặc tên đơn hàng đã tồn tại: {$row['order_code']} / {$row['order_name']}";
+                $this->updateProgress('processing');
                 continue;
             }
 
-            $product = Product::where('name', $row[2])->first();
-            $variant = ProductVariant::where('sku', $row[3])->first();
+            $product = Product::where('name', $row['product_name'])->first();
+            $variant = ProductVariant::where('sku', $row['product_variant_sku'])->first();
 
             if (!$product || !$variant || $variant->product_id !== $product->id) {
-                $this->failures[] = "Dòng $line: Không tìm thấy sản phẩm hoặc biến thể khớp với SKU: {$row[3]}";
+                $this->failures[] = "Dòng $line: Không tìm thấy sản phẩm hoặc biến thể khớp với SKU: {$row['product_variant_sku']}";
+                $this->updateProgress('processing');
                 continue;
             }
 
-            // Nếu không có biến thể nhưng SKU trùng với SKU của sản phẩm, ta giả lập 1 "biến thể mặc định"
-            if (!$variant && $product->sku === $row[3]) {
-                $variant = (object)[
-                    'id' => null,
-                    'sku' => $product->sku,
-                    'price' => $product->price ?? 0,
-                ];
-            }
+            $mockupImage = $this->downloadAndSaveImage($mockup, 'mockup');
+            $designImage = $this->downloadAndSaveImage($design, 'design');
 
-            if (!$variant || ($variant->id && $variant->product_id !== $product->id)) {
-                $this->failures[] = "Dòng $line: Không tìm thấy biến thể phù hợp với SKU: {$row[3]}";
+            $absolutePath = Storage::disk('public')->path($designImage);
+
+            $invalid = $this->checkInfoDesignImage($absolutePath, $variant, $info);
+
+            if (!$invalid) {
+                $this->failures[] = "Dòng $line: Invalid image specifications. Expected: width: {$variant->design_width}px, height: {$variant->design_height}px, PPI: {$variant->design_ppi}, format: {$variant->design_format}. Your image: width: {$info['width']}px, height: {$info['height']}px, PPI: {$info['x_dpi']}, format: {$info['format']}. ";
+                deleteImage($mockupImage);
+                deleteImage($designImage);
+                $this->updateProgress('processing');
                 continue;
             }
 
-            $quantity = (int)$row[4];
-            $price = (float)$variant->price;
-            $lineTotal = $price * $quantity;
-            $shippingFee = (float)$row[5];
+            $quantity = (int)$row['quantity'];
+            $target = $variant ?? $product;
+            $price = isOnSale($target) ? $target->discount_price : $target->sale_price;
 
-            $mockup = $this->convertGoogleDriveUrl(trim($row[6]));
-            $design = $this->convertGoogleDriveUrl(trim($row[18]));
+            $deliveryMethod = $this->toSnakeCase($row['delivery_method'] ?? 'standard shipping');
 
-            $this->createOrder($row, $product, $variant, $quantity, $price, $lineTotal, $shippingFee, $mockup, $design);
+            $shippingFee = $this->calculateShippingFee($deliveryMethod, $product, $variant ?? null);
+
+            $lineTotal = $price * $quantity + $shippingFee + $tax;
+
+            $this->createOrder($row, $product, $variant, $quantity, $price, $lineTotal, $shippingFee, $deliveryMethod, $tax, $mockupImage, $designImage);
+
+            $this->current++;
+            $this->updateProgress('processing');
         }
+
+        $this->updateProgress('done');
+    }
+
+    private function checkInfoDesignImage($url, $variant, &$info)
+    {
+        if (
+            empty($variant->design_width) ||
+            empty($variant->design_height) ||
+            empty($variant->design_ppi) ||
+            empty($variant->design_format)
+        ) {
+            return true;
+        }
+
+        $info = getImageInfo($url, true);
+
+        return $info['width'] === (int) $variant->design_width &&
+            $info['height'] === (int) $variant->design_height &&
+            abs($info['x_dpi'] - (float) $variant->design_ppi) <= 5 &&
+            strtolower($info['format']) === strtolower($variant->design_format);
+    }
+
+    private function calculateShippingFee($deliveryMethod, $product, $variant = null)
+    {
+        // Ưu tiên biến thể nếu có
+        $source = $variant ?? $product;
+
+        $method = strtolower($deliveryMethod); // ví dụ: 'standard_shipping'
+
+        return (float)($source->{$method} ?? 0);
+    }
+
+    private function toSnakeCase($string)
+    {
+        return strtolower(preg_replace('/\s+/', '_', trim($string)));
+    }
+
+    protected function validateRow($row, $line): array
+    {
+        $messages = [];
+
+        $requiredFields = [
+            'order_code' => 'Mã đơn hàng',
+            'order_name' => 'Tên đơn hàng',
+            'product_name' => 'Tên sản phẩm',
+            'product_variant_sku' => 'SKU',
+            'quantity' => 'Số lượng',
+            'first_name' => 'Họ',
+            'last_name' => 'Tên',
+            'nation' => 'Quốc gia',
+            'state' => 'Tỉnh/Bang',
+            'city' => 'Thành phố',
+            'street_address' => 'Địa chỉ',
+            'delivery_method' => 'Phương thức giao hàng',
+            'design_image' => 'Ảnh thiết kế',
+        ];
+
+        foreach ($requiredFields as $field => $label) {
+            if (!isset($row[$field]) || trim($row[$field]) === '') {
+                $messages[] = "Thiếu $label";
+            }
+        }
+
+        if (!empty($row['design_image'])) {
+            $originalUrl = trim($row['design_image']);
+
+            if (!$this->isValidDriveUrl($originalUrl)) {
+                $messages[] = "Ảnh thiết kế không đúng định dạng Google Drive";
+            } else {
+                $converted = $this->convertGoogleDriveUrl($originalUrl);
+
+                $imageUrl = $converted ?: $originalUrl;
+
+                if (!$this->urlExists($imageUrl)) {
+                    $messages[] = "Ảnh thiết kế không truy cập được (có thể bị 404 hoặc cấm quyền truy cập)";
+                } else {
+                    $row->put('design_image', $imageUrl);
+                }
+            }
+        }
+
+        if (!empty($row['mockup_image'])) {
+            $originalUrl = trim($row['mockup_image']);
+
+            if (!$this->isValidDriveUrl($originalUrl)) {
+                $messages[] = "Ảnh mockup không đúng định dạng Google Drive";
+            } else {
+                $converted = $this->convertGoogleDriveUrl($originalUrl);
+
+                $imageUrl = $converted ?: $originalUrl;
+
+                if (!$this->urlExists($imageUrl)) {
+                    $messages[] = "Ảnh mockup không truy cập được (có thể bị 404 hoặc cấm quyền truy cập)";
+                } else {
+                    $row->put('mockup_image', $imageUrl);
+                }
+            }
+        }
+
+        if (!empty($messages)) {
+            return ["Dòng $line: " . implode(', ', $messages)];
+        }
+
+        return [];
+    }
+
+    protected function isValidDriveUrl($url): bool
+    {
+        return preg_match('/^https:\/\/drive\.google\.com\/(file\/d\/[^\/]+\/view|open\?id=[^&]+|uc\?id=[^&]+)/', $url);
     }
 
     protected function updateProgress($status)
@@ -92,39 +231,7 @@ class OrderImport implements ToCollection
         ], now()->addMinutes(10));
     }
 
-    public function getFailures(): array
-    {
-        return $this->failures;
-    }
-
-    protected function validateRow($row, $line): array
-    {
-        $errors = [];
-
-        if (empty($row[0]) || empty($row[1]) || empty($row[7])) {
-            $errors[] = "Dòng $line: Thiếu thông tin đơn hàng bắt buộc (mã đơn, tên đơn, họ)";
-        }
-
-        if (empty($row[2]) || empty($row[3]) || empty($row[4])) {
-            $errors[] = "Dòng $line: Thiếu thông tin sản phẩm (tên, SKU, số lượng)";
-        }
-
-        if (!$this->isValidImage($row[6])) {
-            $errors[] = "Dòng $line: Ảnh thiết kế không hợp lệ tại SKU: {$row[3]}";
-        }
-
-        return $errors;
-    }
-
-    protected function isValidImage($image): bool
-    {
-        if (!$image) return false;
-
-        return preg_match('/\.(jpg|jpeg|png|gif|bmp|webp)$/i', $image)
-            || preg_match('/drive\.google\.com\/.*(file\/d\/|open\?id=|uc\?id=)/', $image);
-    }
-
-    protected function convertGoogleDriveUrl($url): string
+    protected function convertGoogleDriveUrl($url): ?string
     {
         if (
             preg_match('/drive\.google\.com\/file\/d\/([^\/]+)\/view/', $url, $matches)
@@ -134,26 +241,70 @@ class OrderImport implements ToCollection
             return "https://drive.google.com/uc?export=download&id={$matches[1]}";
         }
 
-        return $url;
+        return null;
     }
 
-    protected function createOrder($row, $product, $variant, $qty, $price, $lineTotal, $shipping, $mockup, $design)
+    protected function urlExists(string $url): bool
     {
-        DB::transaction(function () use ($row, $product, $variant, $qty, $price, $lineTotal, $shipping, $mockup, $design) {
+        try {
+            $response = Http::timeout(5)->head($url);
+
+            return $response->successful();
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    private function downloadAndSaveImage(string $url, string $folder = 'design')
+    {
+        if (!$url || !filter_var($url, FILTER_VALIDATE_URL)) {
+            return null;
+        }
+
+        $ext = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
+
+        if (!$ext) {
+            $ext = 'jpg';
+        }
+
+        $filename = $folder . '/' . Str::random(20) . '.' . $ext;
+
+        try {
+            $response = Http::timeout(15)->get($url);
+
+            if ($response->successful()) {
+                Storage::put($filename, $response->body());
+
+                return $filename;
+            }
+        } catch (\Exception $e) {
+            logger($e->getMessage());
+            return null;
+        }
+    }
+
+    protected function createOrder($row, $product, $variant, $qty, $price, $lineTotal, $shipping, $deliveryMethod, $tax, $mockup, $design)
+    {
+        DB::transaction(function () use ($row, $product, $variant, $qty, $price, $lineTotal, $shipping, $deliveryMethod, $tax, $mockup, $design) {
             $order = Order::create([
                 'user_id' => $this->userId,
-                'order_code' => $row[0],
-                'order_name' => $row[1],
-                'first_name' => $row[7],
-                'last_name' => $row[8],
-                'email' => $row[9],
-                'phone_number' => !str_starts_with($row[10], '0') ? "0$row[10]" : $row[10],
-                'shipping_address' => "$row[14] $row[13] $row[12] $row[11]",
-                'zip_code' => $row[15],
-                'note' => $row[16],
+                'order_code' => $row['order_code'],
+                'order_name' => $row['order_name'],
+                'first_name' => $row['first_name'],
+                'last_name' => $row['last_name'],
+                'email' => $row['email'],
+                'phone_number' => $this->formatPhone($row['phone'] ?? null),
+                'shipping_address' => $row['street_address'],
+                'zip_code' => $row['zip_code'],
+                'note' => $row['note'],
                 'shipping_fee' => $shipping,
                 'total' => $lineTotal,
-                'delivery_method' => $row[17],
+                'shipping_method' => $deliveryMethod,
+                'nation' => $row['nation'],
+                'state' => $row['state'],
+                'city' => $row['city'],
+                'tax' => $tax,
+                'tracking' => $row['tracking_number'],
             ]);
 
             $order->orderItems()->create([
@@ -168,14 +319,19 @@ class OrderImport implements ToCollection
                 'model_image' => $mockup,
                 'design_image' => $design,
             ]);
-
-            if ($mockup) {
-                DownloadOrderImage::dispatch($mockup, 'mockup', $order->id);
-            }
-
-            if ($design) {
-                DownloadOrderImage::dispatch($design, 'design', $order->id);
-            }
         });
+    }
+
+    private function formatPhone($phone)
+    {
+        if (!$phone) return '';
+
+        $phone = trim($phone);
+        return str_starts_with($phone, '0') ? $phone : "0{$phone}";
+    }
+
+    public function getFailures(): array
+    {
+        return $this->failures;
     }
 }
