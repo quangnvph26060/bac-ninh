@@ -96,7 +96,6 @@ class AppServiceProvider extends ServiceProvider
 
         $ordersCountByStatus = Order::select('status', DB::raw('count(*) as total'))
             ->whereIn('status', $statuses)
-            ->where('payment_status', '!=', 'pending') // 👉 thêm điều kiện tại đây
             ->groupBy('status')
             ->pluck('total', 'status');
 

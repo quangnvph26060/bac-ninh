@@ -3,79 +3,110 @@
 namespace App\Jobs;
 
 use App\Models\Order;
-use App\Models\OrderItem;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Str;
+use Exception;
 
 class DownloadOrderImage implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $imageUrl;
-    protected $folder;
     protected $orderId;
+    protected $mockupUrl;
+    protected $designUrl;
 
-    public function __construct($imageUrl, $folder, $orderId)
+    public function __construct($orderId, $mockupUrl, $designUrl)
     {
-        $this->imageUrl = $imageUrl;
-        $this->folder = $folder;
         $this->orderId = $orderId;
+        $this->mockupUrl = $mockupUrl;
+        $this->designUrl = $designUrl;
     }
 
     public function handle()
     {
-        if (!$this->imageUrl || !filter_var($this->imageUrl, FILTER_VALIDATE_URL)) {
+        $order = Order::find($this->orderId);
+
+        if (!$order || !$order->orderItems()->exists()) {
             return;
         }
 
-        // Convert Google Drive links to direct download
-        if (preg_match('/drive\.google\.com\/file\/d\/([^\/]+)\/view/', $this->imageUrl, $matches)) {
-            $fileId = $matches[1];
-            $this->imageUrl = "https://drive.google.com/uc?export=download&id={$fileId}";
-        } else if (preg_match('/drive\.google\.com\/open\?id=([^&]+)/', $this->imageUrl, $matches)) {
-            $fileId = $matches[1];
-            $this->imageUrl = "https://drive.google.com/uc?export=download&id={$fileId}";
-        } else if (preg_match('/drive\.google\.com\/uc\?id=([^&]+)/', $this->imageUrl, $matches)) {
-            $fileId = $matches[1];
-            $this->imageUrl = "https://drive.google.com/uc?export=download&id={$fileId}";
+        $folder = now()->format('Y-m-d');
+        $paths = [];
+
+        if ($this->isValidDriveUrl($this->mockupUrl)) {
+            $mockupPath = $this->downloadDriveImage($this->mockupUrl, $folder);
+            if ($mockupPath) {
+                $paths['model_image'] = $mockupPath;
+            }
         }
 
-        // Get file extension
-        $ext = pathinfo(parse_url($this->imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION);
-        if (!$ext) {
-            $ext = 'jpg';
+        if ($this->isValidDriveUrl($this->designUrl)) {
+            $designPath = $this->downloadDriveImage($this->designUrl, $folder);
+            if ($designPath) {
+                $paths['design_image'] = $designPath;
+            }
         }
 
-        $filename = $this->folder . '/' . Str::random(20) . '.' . $ext;
+        if (!empty($paths)) {
+            $orderItem = $order->orderItems()->first();
+            $orderItem->update($paths);
+        }
+    }
+
+    protected function isValidDriveUrl($url): bool
+    {
+        return preg_match('/^https:\/\/drive\.google\.com\/(file\/d\/[^\/]+\/view|open\?id=[^&]+|uc\?id=[^&]+)/', $url);
+    }
+
+    protected function convertDriveUrl($url): ?string
+    {
+        if (
+            preg_match('/file\/d\/([^\/]+)\//', $url, $matches) ||
+            preg_match('/open\?id=([^&]+)/', $url, $matches) ||
+            preg_match('/uc\?id=([^&]+)/', $url, $matches)
+        ) {
+            $fileId = $matches[1];
+            return "https://drive.google.com/uc?export=download&id={$fileId}";
+        }
+        return null;
+    }
+
+    protected function downloadDriveImage($url, $folder): ?string
+    {
+        $downloadUrl = $this->convertDriveUrl($url);
+        if (!$downloadUrl) return null;
 
         try {
-            $response = Http::timeout(15)->get($this->imageUrl);
+            $response = Http::timeout(10)->get($downloadUrl);
 
-            if ($response->successful()) {
-                Storage::put($filename, $response->body());
+            if (!$response->ok()) return null;
 
-                // Update order item with downloaded image path
-                $order = Order::find($this->orderId);
-                if ($order) {
-                    $orderItem = $order->orderItems()
-                        ->where($this->folder . '_image_url', $this->imageUrl)
-                        ->first();
+            $ext = $this->getImageExtension($response);
+            $filename = Str::random(20) . ($ext ? ".{$ext}" : ".jpg");
+            $path = "orders/{$folder}/{$filename}";
 
-                    if ($orderItem) {
-                        $orderItem->update([
-                            $this->folder . '_image' => $filename
-                        ]);
-                    }
-                }
-            }
-        } catch (\Exception $e) {
-            // Log error if needed
+            Storage::disk('public')->put($path, $response->body());
+
+            return "storage/{$path}";
+        } catch (Exception $e) {
+            return null;
         }
+    }
+
+    protected function getImageExtension($response)
+    {
+        $contentType = $response->header('Content-Type');
+        return match ($contentType) {
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/gif' => 'gif',
+            default => null,
+        };
     }
 }

@@ -98,13 +98,30 @@
                                             </div>
                                         </td>
                                         <td class="text-center">
-                                            <img src="{{ showImage($item->model_image) }}" width="40" height="40"
-                                                alt="">
+                                            <div class="image-wrapper">
+                                                <img src="{{ showImage($item->model_image) }}" class="img-fluid"
+                                                    alt="">
+                                                <div class="image-actions">
+                                                    <a href="{{ showImage($item->model_image) }}" target="_blank"
+                                                        title="Xem"><i class="fa fa-eye"></i></a>
+                                                    <a href="{{ showImage($item->model_image) }}" download
+                                                        title="Tải xuống"><i class="fa fa-download"></i></a>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td class="text-center">
-                                            <img src="{{ showImage($item->design_image) }}" width="40" height="40"
-                                                alt="">
+                                            <div class="image-wrapper">
+                                                <img src="{{ showImage($item->design_image) }}" class="img-fluid"
+                                                    alt="">
+                                                <div class="image-actions">
+                                                    <a href="{{ showImage($item->design_image) }}" target="_blank"
+                                                        title="Xem"><i class="fa fa-eye"></i></a>
+                                                    <a href="{{ showImage($item->design_image) }}" download
+                                                        title="Tải xuống"><i class="fa fa-download"></i></a>
+                                                </div>
+                                            </div>
                                         </td>
+
                                         <td class="text-center">
                                             <div class="sa-price">
                                                 <span class="sa-price__symbol">$</span><span
@@ -135,8 +152,7 @@
                                     <td colspan="5" class="fw-semibold">Phí vận chuyển</td>
                                     <td class="text-end">
                                         <div class="sa-price">
-                                            <span
-                                                class="sa-price__integer">${{ formatPrice($order->shipping_fee) }}</span>
+                                            <span class="sa-price__integer">${{ formatPrice($order->shipping_fee) }}</span>
                                         </div>
                                     </td>
                                 </tr>
@@ -718,6 +734,47 @@
 
         .input-group-custom input:focus {
             box-shadow: none;
+        }
+
+        .image-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .image-actions {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            transition: 0.2s;
+            border-radius: 4px;
+        }
+
+        .image-actions a {
+            color: white;
+            font-size: 11px;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+
+        .image-wrapper:hover .image-actions {
+            opacity: 1;
         }
     </style>
 @endpush
