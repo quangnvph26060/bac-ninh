@@ -8,71 +8,95 @@ use App\Models\Bom;
 use App\Models\Material;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\BomService;
+use App\Services\ProductService;
+use App\Traits\PaginateTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BomsController extends Controller
 {
+    use PaginateTrait;
+
+    public function __construct(public ProductService $productService, public BomService $bomService) {}
+
     public function index()
     {
+
         if (request()->ajax()) {
-            $raw = Bom::with(['productable', 'material'])
-                ->get()
-                ->groupBy(function ($item) {
-                    return $item->productable_type . '_' . $item->productable_id;
-                })
-                ->values();
+            // $raw = Bom::with(['productable', 'material'])
+            //     ->get()
+            //     ->groupBy(function ($item) {
+            //         return $item->productable_type . '_' . $item->productable_id;
+            //     })
+            //     ->values();
 
-            $data = $raw->map(function ($group, $index) {
-                $first = $group->first();
+            // $data = $raw->map(function ($group, $index) {
+            //     $first = $group->first();
 
-                $productableName = '';
-                $productable_type = '';
-                if ($first->productable_type == '\App\Models\Product') {
-                    $productableName = Product::find($first->productable_id)->name;
-                    $productable_type = 'Sản phẩm';
-                } elseif ($first->productable_type == '\App\Models\ProductVariant') {
-                    $productableName = ProductVariant::find($first->productable_id)->sku;
-                    $productable_type = 'Biến thể';
-                }
+            //     $productableName = '';
+            //     $productable_type = '';
+            //     if ($first->productable_type == '\App\Models\Product') {
+            //         $productableName = Product::find($first->productable_id)->name;
+            //         $productable_type = 'Sản phẩm';
+            //     } elseif ($first->productable_type == '\App\Models\ProductVariant') {
+            //         $productableName = ProductVariant::find($first->productable_id)->sku;
+            //         $productable_type = 'Biến thể';
+            //     }
 
-                $materialList = $group->map(function ($item) {
-                    return ($item->material->name ?? '') . ' (' . number_format($item->quantity_required, 2) . ')';
-                })->implode(', ');
+            //     $materialList = $group->map(function ($item) {
+            //         return ($item->material->name ?? '') . ' (' . number_format($item->quantity_required, 2) . ')';
+            //     })->implode(', ');
 
-                return [
-                    'DT_RowIndex'        => $index + 1,
-                    'checkbox'           => '<input type="checkbox" class="row-checkbox" value="' . $first->productable_id . '">',
-                    'productable_type'   => $productable_type,
-                    'productable_name'   => $productableName,
-                    'material_name'      => $materialList,
-                    'quantity_required'  => '',
-                    'operations' => '
-                            <a href="' . route('admin.boms.edit', $first->productable_id) . '"
-                            class="btn btn-primary btn-sm table-actions btn-operation-edit">
-                                <i class="ti ti-edit"></i>
-                            </a>
-                            <a href="javascript:void(0);"
-                            data-id="' . $first->productable_id . '"
-                            class="btn btn-danger btn-sm table-actions btn-boms-destroy">
-                                <i class="ti ti-trash"></i>
-                            </a>
-                        ',
+            //     return [
+            //         'DT_RowIndex'        => $index + 1,
+            //         'checkbox'           => '<input type="checkbox" class="row-checkbox" value="' . $first->productable_id . '">',
+            //         'productable_type'   => $productable_type,
+            //         'productable_name'   => $productableName,
+            //         'material_name'      => $materialList,
+            //         'quantity_required'  => '',
+            //         'operations' => '
+            //                 <a href="' . route('admin.boms.edit', $first->productable_id) . '"
+            //                 class="btn btn-primary btn-sm table-actions btn-operation-edit">
+            //                     <i class="ti ti-edit"></i>
+            //                 </a>
+            //                 <a href="javascript:void(0);"
+            //                 data-id="' . $first->productable_id . '"
+            //                 class="btn btn-danger btn-sm table-actions btn-boms-destroy">
+            //                     <i class="ti ti-trash"></i>
+            //                 </a>
+            //             ',
 
-                ];
-            });
+            //     ];
+            // });
 
-            return datatables()->of($data)
-                ->rawColumns(['checkbox', 'operations'])
-                ->make(true);
+            // return datatables()->of($data)
+            //     ->rawColumns(['checkbox', 'operations'])
+            //     ->make(true);
+
+            if (request()->ajax()) {
+                $query = $this->bomService->pagination();
+
+                return $this->processDataTable(
+                    $query,
+                    fn($dataTable) =>
+                    $dataTable
+                        ->addColumn('material_items', function ($row) {
+                            return $row->bomItems
+                                ->map(fn($item) =>  $item->material->name . ' (SL: ' . number_format($item->quantity_required, 0) . ')')
+                                ->implode(', ');
+                        })->addColumn('productable_name', function ($row) {
+                            return $row->productable_name;
+                        })
+                        ->editColumn('created_at', fn($row) => $row->created_at->format('d-m-Y'))
+                        ->addColumn('operations', fn($row) => view('admin.components.operation', compact('row'))),
+                    ['operations']
+                );
+            }
         }
 
         return view('admin.booms.index');
     }
-
-
-
-
-
 
     /**
      * Show the form for creating a new resource.
@@ -80,12 +104,12 @@ class BomsController extends Controller
     public function create()
     {
 
-        $title = 'Thêm mới vật liệu cho sản phẩm';
+        $title = 'Thiết lập booms';
         $materials = Material::get();
         $products = Product::with('variants')->get();
-        $boms = collect();
+        $bom = null;
 
-        return view('admin.booms.save', compact('title', 'products', 'materials', 'boms'));
+        return view('admin.booms.save', compact('title', 'products', 'materials', 'bom'));
     }
 
     /**
@@ -93,20 +117,41 @@ class BomsController extends Controller
      */
     public function store(BomsRequest $request)
     {
+        $productableType = $request->productable_type;
+        $productableId = $request->productable_id;
 
-        $data = [];
+        // Kiểm tra nếu BOM đã tồn tại
+        $exists = Bom::where('productable_type', $productableType)
+            ->where('productable_id', $productableId)
+            ->exists();
 
-        foreach ($request->input('values') as $value) {
-            $data[] = [
-                'productable_type'  => $request->input('productable_type'),
-                'productable_id'    => $request->input('productable_id'),
-                'material_id'       => $value['material_id'],
-                'quantity_required' => $value['quantity_required'],
-            ];
+        if ($exists) {
+            return errorResponse('Sản phẩm hoặc biến thể này đã có BOM. Vui lòng chỉnh sửa BOM thay vì tạo mới.', true);
         }
 
-        Bom::insert($data);
-        return redirect()->route('admin.boms.index');
+        try {
+            DB::beginTransaction();
+
+            $bom = Bom::create($request->only(['productable_type', 'productable_id']));
+
+            $data = [];
+
+            foreach ($request->values as $value) {
+                $data[] = [
+                    'material_id' => $value['material_id'],
+                    'quantity_required' => $value['quantity_required'],
+                ];
+            }
+
+            $bom->bomItems()->createMany($data);
+
+            DB::commit();
+            return successResponse("Tạo BOM thành công", ['redirect' => '/admin/boms'], 201, true);
+        } catch (\Exception $e) {
+            logger($e->getMessage());
+            DB::rollBack();
+            return errorResponse("Đã có lỗi xảy ra, vui lòng thử lại sau", true);
+        }
     }
 
     /**
@@ -114,12 +159,13 @@ class BomsController extends Controller
      */
     public function edit(string $id)
     {
-        $title = 'Cập nhật vật liệu cho sản phẩm';
+        $title = 'Cập nhật boms';
         $materials = Material::get();
         $products = Product::with('variants')->get();
 
-        $boms = Bom::where('productable_id', $id)->get();
-        return view('admin.booms.save', compact('title', 'products', 'materials', 'boms'));
+        $bom = Bom::query()->with('bomItems')->findOrFail($id);
+
+        return view('admin.booms.save', compact('title', 'products', 'materials', 'bom'));
     }
 
     /**
@@ -127,69 +173,52 @@ class BomsController extends Controller
      */
     public function update(BomsRequest $request, string $id)
     {
-        $productableType = $request->input('productable_type');
-        $productableId = $request->input('productable_id');
-        $values = $request->input('values', []);
+        try {
+            DB::beginTransaction();
 
+            // Tìm bom cần cập nhật
+            $bom = Bom::findOrFail($id);
 
-        $existingBoms = Bom::where('productable_type', $productableType)
-            ->where('productable_id', $productableId)
-            ->get()
-            ->keyBy('material_id');
+            // Xoá các bom_item cũ
+            $bom->bomItems()->delete();
 
-
-        $newMaterialIds = [];
-
-        foreach ($values as $value) {
-            $materialId = $value['material_id'];
-            $quantity = $value['quantity_required'];
-            $newMaterialIds[] = $materialId;
-
-            if ($existingBoms->has($materialId)) {
-                // Nếu đã có thì update
-                $existingBoms[$materialId]->update([
-                    'quantity_required' => $quantity,
-                ]);
-            } else {
-                Bom::create([
-                    'productable_type' => $productableType,
-                    'productable_id' => $productableId,
-                    'material_id' => $materialId,
-                    'quantity_required' => $quantity,
-                ]);
+            // Tạo lại danh sách bom_item mới
+            $data = [];
+            foreach ($request->values as $value) {
+                $data[] = [
+                    'material_id' => $value['material_id'],
+                    'quantity_required' => $value['quantity_required'],
+                ];
             }
+
+            $bom->bomItems()->createMany($data);
+
+            DB::commit();
+            return handleResponse("Cập nhật BOM thành công", true, 200, ['redirect' => '/admin/boms']);
+        } catch (\Exception $e) {
+            logger($e->getMessage());
+            DB::rollBack();
+            return errorResponse("Đã có lỗi xảy ra, vui lòng thử lại sau", true);
         }
-
-
-        $bomsToDelete = $existingBoms->filter(function ($bom) use ($newMaterialIds) {
-            return !in_array($bom->material_id, $newMaterialIds);
-        });
-
-        foreach ($bomsToDelete as $bom) {
-            $bom->delete();
-        }
-
-        // return redirect()->route('admin.boms.index');
-
     }
 
-    public function delete($id)
+
+    public function productSelect(Request $request)
     {
+        $products = $this->productService->productSelect($request);
 
-        $deleted = Bom::where('productable_id', $id)->delete();
+        return response()->json($products);
+    }
 
-        if ($deleted) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Đã xoá thành công.'
-            ]);
-        }
+    public function checkVariants(Product $product)
+    {
+        $product->load('variants');
+
+        $variants = $product->variants()->select('id', 'sku')->get();
 
         return response()->json([
-            'success' => false,
-            'message' => 'Không tìm thấy dữ liệu để xoá.'
-        ], 404);
+            'has_variant' => $variants->count() > 1,
+            'variants' => $variants
+        ]);
     }
-
-
 }

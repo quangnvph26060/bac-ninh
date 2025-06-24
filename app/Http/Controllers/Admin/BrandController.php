@@ -40,6 +40,7 @@ class BrandController extends Controller
                 ['operations', 'logo', 'website']
             );
         }
+        
         return view('admin.brand.index');
     }
 

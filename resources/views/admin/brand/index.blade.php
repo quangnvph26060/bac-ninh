@@ -26,7 +26,5 @@
             const api = "{{ route('admin.brands.index') }}"
             dataTables(api, columns, 'Brand')
         })
-
-
     </script>
 @endpush

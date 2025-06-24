@@ -22,42 +22,26 @@ class BomsRequest extends FormRequest
      */
     public function rules(): array
     {
-        $id = $this->route('id'); // 'id' ở route (nullable nếu đang thêm mới)
-        $productableType = $this->input('productable_type');
-       
+        $productable_type = $this->input('variant_id') ? \App\Models\ProductVariant::class : \App\Models\Product::class;
+
+        $productable_id = $this->input('variant_id');
+        if (!$productable_id) {
+            $productable_id = $this->input('product_id');
+        }
+
+        $this->merge([
+            'productable_type' => $productable_type,
+            'productable_id' => $productable_id
+        ]);
 
         return [
-            'productable_id' => [
-                'required',
-                function ( $value, $fail) use ($id, $productableType) {
-                    $query = Bom::where('productable_type', $productableType)
-                        ->where('productable_id', $value);
-
-                    if ($id) {
-                        // Đang sửa, cho phép nếu ID giống ID cũ
-                        $bom = Bom::find($id);
-
-                        if ($bom && ($bom->productable_id != $value || $bom->productable_type != $productableType)) {
-                            // Nếu đổi sang product khác đã tồn tại -> không cho
-                            if ($query->exists()) {
-                                $fail('Sản phẩm này đã có vật liệu, không thể gán lại.');
-                            }
-                        }
-                    } else {
-                        // Đang thêm mới -> không được trùng
-                        if ($query->exists()) {
-                            $fail('Sản phẩm này đã có danh sách vật liệu.');
-                        }
-                    }
-                }
-            ],
-            'productable_type' => 'required|string',
-            'values' => 'required|array|min:1',
+            'product_id' => 'required|exists:products,id',
+            'variant_id' => 'nullable|exists:product_variants,id',
+            'values' => 'required|array',
             'values.*.material_id' => 'required|distinct',
             'values.*.quantity_required' => 'required|numeric|min:0.01',
         ];
     }
-
 
     public function messages()
     {
