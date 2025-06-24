@@ -255,18 +255,13 @@
     <div data-aos="fade-down" data-aos-once="true" data-aos-delay="500" class="pw_category_product_wrapper">
         <div class="title_content">
             <h2 class="title_highlight">Highlight Categories</h2>
-            <div class="mt-4">
-                <p class="title_large">
-                    Customize products &amp; start selling in minutes
-                </p>
-            </div>
         </div>
         <div data-aos="fade-down" data-aos-once="true" data-aos-delay="600" class="category_home">
-            {{--  <div class="categories">
+            <div class="categories">
                 <div class="list_categories">
-                    <div class="row text-center">
-                        @foreach ($categories as $category)
-                            <div class="col-md-3 col-6">
+                    <div class="swiper category-swiper py-2">
+                        <div class="swiper-wrapper">
+                            @foreach ($categories as $category)
                                 @php
                                     if ($category->parent) {
                                         $prefix = $category->parent->slug;
@@ -276,20 +271,22 @@
                                         $suffix = null;
                                     }
                                 @endphp
-                                <a href="{{ route('products.list', [$prefix, $suffix]) }}">
-                                    <div class="category-card shadow">
-                                        <img src="{{ showImage($category->image) }}" alt="{{ $category->name }}" />
-                                        <h5 class="mt-3 title_name">{{ $category->name }}</h5>
-                                        <p class="quantity_text">{{ $category->products_count }} sản phẩm </p>
-                                    </div>
-                                </a>
-                            </div>
-                        @endforeach
+                                <div class="swiper-slide">
+                                    <a href="{{ route('products.category', [$prefix, $suffix]) }}">
+                                        <div class="category-card shadow text-center">
+                                            <img src="{{ showImage($category->image) }}" alt="{{ $category->name }}" />
+                                            <h5 class="mt-3 title_name">{{ $category->name }}</h5>
+                                            <p class="quantity_text">{{ $category->products_count }} products</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
-            </div> --}}
+            </div>
             <div class="d-flex align-items-center justify-content-center w-100 mt-2">
-                <a href="#">
+                <a href="{{ route('products.all') }}">
                     <button type="button" class="ant-btn-primary">
                         <span>Xem tất cả</span>
                     </button></a>

@@ -113,4 +113,11 @@ class OrderService extends BaseService
             'next_page_url' => $orders->nextPageUrl(),
         ];
     }
+
+    public function getItemsByOrderId($orderId)
+    {
+        $order = $this->findById($orderId, ['*'], ['orderItems.productVariant']);
+
+        return $order->orderItems;
+    }
 }

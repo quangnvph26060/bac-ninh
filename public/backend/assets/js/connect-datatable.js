@@ -47,7 +47,6 @@ const dataTables = (
     thead += "</tr></thead>";
     $("#myTable").append(thead);
 
-    // Nếu có dt-control, đảm bảo nó ở vị trí đầu tiên
     let finalColumns;
 
     if (hasDtControl) {

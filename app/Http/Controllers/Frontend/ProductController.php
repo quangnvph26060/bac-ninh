@@ -322,6 +322,7 @@ class ProductController extends Controller
     {
         $attributes = [];
         $categories = Category::query()->whereNull('parent_id')->get();
+        // dd($categories);
         $pageName = 'All Products';
 
         $items = [
@@ -388,7 +389,7 @@ class ProductController extends Controller
         $valueIds = $request->input('value_ids'); // array
 
         // DB::enableQueryLog();
-        
+
         $variant = ProductVariant::select(['sale_price', 'discount_end', 'discount_price', 'discount_start'])
             ->where('product_id', $productId)
             ->join('attribute_value_variants', 'product_variants.id', '=', 'attribute_value_variants.product_variant_id')

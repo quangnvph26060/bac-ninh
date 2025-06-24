@@ -38,7 +38,7 @@
 
 
                     {{-- Nút Xuất Excel --}}
-                    <a href="/admin/materials/export" class="btn btn-outline-success btn-sm fs-6">
+                    <a href="/admin/materials/export" class="btn btn-success btn-sm fs-6">
                         <i class="ti ti-download"></i> Xuất Excel
                     </a>
 
@@ -46,7 +46,7 @@
                     <form action="{{ route('admin.materials.import') }}" method="POST" enctype="multipart/form-data"
                         id="importExcelForm">
                         @csrf
-                        <label class="btn btn-outline-danger btn-sm fs-6 mb-0" for="importExcelInput">
+                        <label class="btn btn-danger text-light btn-sm fs-6 mb-0" for="importExcelInput">
                             <i class="ti ti-upload"></i> Nhập Excel
                         </label>
                         <input type="file" name="file" id="importExcelInput" accept=".xlsx, .xls"

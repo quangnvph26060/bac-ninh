@@ -122,14 +122,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('materials')->controller(MaterialController::class)->name('materials.')->group(function () {
             // Temp mẫu
             Route::get('download-template', function () {
-                return Excel::download(new MaterialsTemplateExport, 'materials_template_'.time().'.xlsx');
+                return Excel::download(new MaterialsTemplateExport, 'materials_template_' . date('d-m-Y') . '.xlsx');
             })->name('template');
 
-            
+
             Route::post('import', [MaterialController::class, 'import'])->name('import');
-    
+
             Route::get('export', function () {
-                return Excel::download(new MaterialsDataSheet, 'danh_sach_nguyen_vat_lieu_'.time().'.xlsx');
+                return Excel::download(new MaterialsDataSheet, 'danh_sach_nguyen_vat_lieu_' . date('d-m-Y') . '.xlsx');
             })->name('export');
 
             Route::get('/', 'index')->name('index');
@@ -139,7 +139,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('edit/{id}', 'edit')->name('edit');
             Route::put('edit/{id}', 'update')->name('update');
             Route::get('/{id}', 'show')->name('show');
-
         });
 
         Route::group(
@@ -158,6 +157,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('{id}/approve', 'approve');
                 Route::post('{id}/reject', 'reject');
                 Route::get('orders/select2', 'orderSelect');
+                Route::get('orders/items/{orderId}', 'getItemsByOrderId');
+
                 Route::get('order/{orderId}/products', 'getProductsByOrder');
                 Route::get('product/{productId}/boms', 'getBomsByProduct');
             }
