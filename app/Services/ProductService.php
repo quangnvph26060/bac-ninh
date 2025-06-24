@@ -507,4 +507,29 @@ class ProductService  extends BaseService
         // Đồng bộ: sẽ tự động xóa các attribute_id không còn trong $syncData, cập nhật cái có và thêm cái mới
         $product->attributes()->sync($syncData);
     }
+
+    public function productSelect($request)
+    {
+        $query = $this->model->query();
+
+        if ($request->filled('search')) {
+            $keyword = $request->search;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%$keyword%");
+            });
+        }
+
+        $products = $query->orderByDesc('created_at')
+            ->paginate(20);
+
+        $results = $products->map(fn($product) => [
+            'id' => $product->id,
+            'name' => $product->name,
+        ]);
+
+        return [
+            'data' => $results,
+            'next_page_url' => $products->nextPageUrl(),
+        ];
+    }
 }

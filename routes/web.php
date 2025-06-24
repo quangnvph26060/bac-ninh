@@ -288,7 +288,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('create', 'store')->name('store');
             Route::get('edit/{id}', 'edit')->name('edit');
             Route::put('edit/{id}', 'update')->name('update');
-            Route::delete('{id}', 'delete')->name('delete');
+            Route::get('get-product-select', 'productSelect');
+            Route::get('check-variants/{product}', 'checkVariants');
         });
     });
 

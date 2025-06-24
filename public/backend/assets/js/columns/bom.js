@@ -7,19 +7,18 @@ const columns = [
         searchable: false,
     },
     {
-        data: "productable_type",
-        name: "productable_type",
-        title: "Loại sản phẩm",
-    },
-    {
         data: "productable_name",
         name: "productable_name",
-        title: "Tên/SKU sản phẩm",
+        title: "Tên sản phẩm/SKU biến thể",
     },
     {
-        data: "material_name",
-        name: "material.name",
+        data: "material_items",
+        name: "material_items",
         title: "Nguyên vật liệu",
     },
-
+    {
+        data: "created_at",
+        name: "created_at",
+        title: "Ngày tạo",
+    },
 ];
