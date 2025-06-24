@@ -45,4 +45,27 @@ class MaterialRequestController extends Controller
 
         return response()->json($orders);
     }
+
+    public function getItemsByOrderId(Request $request, $orderId)
+    {
+        $orderItems = $this->orderService->getItemsByOrderId($orderId);
+
+        // dd($orderItems);
+
+        // $items = \App\Models\OrderItem::with('productVariant.product') // lấy cả tên sản phẩm cha nếu cần
+        //     ->where('order_id', $orderId)
+        //     ->get();
+
+        // $results = $items->map(function ($item) {
+        //     $variant = $item->productVariant;
+        //     $productName = $variant->product->name ?? '---';
+        //     $sku = $variant->sku ?? '';
+        //     return [
+        //         'id' => $variant->id,
+        //         'text' => "$productName - SKU: $sku (SL: $item->quantity)"
+        //     ];
+        // });
+
+        return response()->json($orderItems);
+    }
 }

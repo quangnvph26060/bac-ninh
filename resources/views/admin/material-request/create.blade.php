@@ -23,7 +23,7 @@
                             <!-- Chọn sản phẩm -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Chọn sản phẩm</label>
-                                <select class="form-select" id="product_variant_id">
+                                <select class="form-select" id="items">
                                     {{-- <option selected>Sản phẩm A - SKU: SKU-A (SL: 10)</option> --}}
 
                                 </select>
@@ -97,6 +97,12 @@
 
     <script>
         $(document).ready(function() {
+            $('#items').select2({
+                placeholder: '-- Chọn sản phẩm --',
+                allowClear: true,
+                width: '100%'
+            });
+
             $('#order_id').select2({
                 placeholder: '-- Chọn đơn hàng --',
                 ajax: {
@@ -105,7 +111,7 @@
                     delay: 300,
                     data: function(params) {
                         return {
-                            search: params.term || '', // keyword search
+                            search: params.term || '',
                             page: params.page || 1
                         };
                     },
@@ -124,11 +130,43 @@
                 },
                 minimumInputLength: 0 // mở dropdown không cần gõ
             });
+
+            $('#order_id').on('change', function() {
+                const orderId = $(this).val();
+
+                // 👉 Clear sản phẩm đã chọn & dữ liệu cũ
+                const $productSelect = $('#items');
+                $productSelect.val(null).empty().trigger('change');
+
+                // 👉 (Nếu có bảng BOM đã render, clear luôn)
+                $('.table-materials tbody').empty(); // tùy theo bảng của bạn
+                $('.alert-bom').addClass('d-none'); // ẩn cảnh báo bom nếu có
+
+                if (!orderId) return;
+
+                // 👉 Gọi API lấy sản phẩm từ order_items
+                $.get(`/admin/material-requests/orders/items/${orderId}`, function(response) {
+                    if (response.length === 0) {
+                        $productSelect.append('<option value="">Không có sản phẩm</option>');
+                    } else {
+                        $productSelect.append('<option value="">-- Chọn sản phẩm --</option>');
+                        response.forEach(item => {
+                            const option = new Option(
+                                `${item.product_name} - SKU: ${item.product_variant.sku} (SL: ${item.quantity}) `,
+                                item.product_id,
+                                false, false);
+                            $productSelect.append(option);
+                        });
+                    }
+
+                    $productSelect.trigger('change'); // cập nhật Select2
+                });
+            });
         });
     </script>
 @endpush
 
-
+{{-- item.product_name + " - SKU: SKU-A (SL: 10)" --}}
 @push('styles')
     <link rel="stylesheet" href="{{ asset('backend/assets/css/select2.min.css') }}">
 @endpush

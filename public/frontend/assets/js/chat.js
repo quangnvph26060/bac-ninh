@@ -11,7 +11,7 @@ let messagePage = 1;
 let isLoadingMessages = false;
 let hasMoreMessages = true;
 
-chatBtn.addEventListener("click", () => {
+chatBtn?.addEventListener("click", () => {
     isOpen = !isOpen;
 
     if (isOpen) {
@@ -115,7 +115,7 @@ $("#chat-input").keypress(function (e) {
     }
 });
 
-chatForm.addEventListener("submit", function (e) {
+chatForm?.addEventListener("submit", function (e) {
     e.preventDefault();
     sendMessage();
 });

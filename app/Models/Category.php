@@ -48,7 +48,7 @@ class Category extends Model
 
     public function scopeHome($query)
     {
-        return $query->where('is_show_home', 1);
+        return $query->where('is_show_home', true);
     }
     public static function boot()
     {

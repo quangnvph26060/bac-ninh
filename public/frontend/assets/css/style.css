@@ -605,6 +605,12 @@ header {
 .category-card:hover {
     transform: scale(1.05);
 }
+.title_name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .category-card img {
     width: 100%;
     height: auto;

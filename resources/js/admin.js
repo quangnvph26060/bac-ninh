@@ -77,7 +77,7 @@ if (window.Laravel.adminId) {
                             </div>
                             <p class="text-truncate ${
                                 !isCurrentChatOpen ? "fw-bold" : ""
-                            }" style="max-width: 230px;">
+                            }" style="max-width: 200px;">
                                 ${e.message}
                             </p>
                         </div>

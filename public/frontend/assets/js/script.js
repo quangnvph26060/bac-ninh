@@ -52,6 +52,33 @@ AOS.init({
 //     },
 // });
 
+new Swiper(".category-swiper", {
+    slidesPerView: 4,
+    spaceBetween: 20,
+    loop: true,
+    autoplay: {
+        delay: 3000,
+        disableOnInteraction: false,
+    },
+    grabCursor: true,
+    breakpoints: {
+        1200: { slidesPerView: 4 },
+        992: { slidesPerView: 3 },
+        768: { slidesPerView: 2 },
+        480: { slidesPerView: 1 },
+    },
+});
+
+// // 👇 Dừng autoplay khi hover vào slider
+// $(".category-swiper").on("mouseenter", function () {
+//     swiper.autoplay.stop();
+// });
+
+// // 👇 Tiếp tục autoplay khi rời chuột
+// $(".category-swiper").on("mouseleave", function () {
+//     swiper.autoplay.start();
+// });
+
 let thumbSlider = new Swiper(".thumb-slider", {
     spaceBetween: 20,
     slidesPerView: 5,
@@ -89,8 +116,8 @@ window.addEventListener("resize", () => {
 
 const mainSliderEl = document.querySelector(".main-slider");
 
-mainSliderEl.addEventListener("mouseenter", () => mainSlider.autoplay.stop());
-mainSliderEl.addEventListener("mouseleave", () => mainSlider.autoplay.start());
+mainSliderEl?.addEventListener("mouseenter", () => mainSlider.autoplay.stop());
+mainSliderEl?.addEventListener("mouseleave", () => mainSlider.autoplay.start());
 
 var swiper = new Swiper(".my-catalog", {
     slidesPerView: 2,

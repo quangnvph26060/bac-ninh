@@ -10,8 +10,6 @@
     </button>
 @endif
 
-
-
 {{-- @can('delete-model', class_basename($row)) --}}
 @if (class_basename($row) !== 'Order')
     <a href="javascript:void(0)" data-id="{{ $row->id }}"

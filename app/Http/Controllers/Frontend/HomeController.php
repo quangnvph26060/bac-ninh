@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
@@ -17,7 +18,8 @@ class HomeController extends Controller
         // Category::fixTree();
 
         $products = Product::query()->select('id', 'name', 'slug', 'sale_price', 'type', 'image', 'slug', 'discount_price', 'discount_start', 'discount_end', 'stock_status', 'category_id')->with('category')->home()->active()->get();
+        $categories = Category::query()->home()->withCount('products')->get();
 
-        return view('frontend.pages.home', compact('products'));
+        return view('frontend.pages.home', compact('products', 'categories'));
     }
 }

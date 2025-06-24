@@ -58,7 +58,7 @@
                     <!-- Thông tin công nợ -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-header bg-light fw-bold">
-                            Thông tin công nợ
+                            Thông tin công nợ <span id="debt-code" class="text-muted fst-italic text-decoration-underline"></span>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -100,7 +100,7 @@
                     <!-- Thông tin phiếu nhập -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-header bg-light fw-bold">
-                            Thông tin phiếu nhập
+                            Thông tin phiếu nhập <span id="entry-code" class="text-muted fst-italic text-decoration-underline"></span>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -111,8 +111,8 @@
                                             <th>Mã vật tư</th>
                                             <th>Tên vật tư</th>
                                             <th>Số lượng</th>
-                                            <th>Đơn giá</th>
-                                            <th>Thành tiền</th>
+                                            <th>Đơn giá (USD)</th>
+                                            <th>Thành tiền (USD)</th>
                                         </tr>
                                     </thead>
                                     <tbody id="importTable" class="">
@@ -216,7 +216,12 @@
                     const details = response.data.import.details;
                     const payments = response.data.import.debt.payments;
 
+                    console.log(response);
+
+
                     // render thông tin ra các tab
+                    $('#debt-code').text('#' + response.data.code);
+                    $('#entry-code').text('#' + response.data.import.code);
                     $('#supplierName').text(response.data.supplier.company_name);
                     $('#debtDate').text(dayjs(response.data.created_at).format('DD/MM/YYYY'));
                     $('#debtTotal').text(formatNumber(response.data.total_amount) + ' USD');
