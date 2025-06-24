@@ -17,13 +17,9 @@ window.Echo = new Echo({
     broadcaster: "pusher",
     key: import.meta.env.VITE_PUSHER_APP_KEY,
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-    wsHost:
-        import.meta.env.VITE_PUSHER_HOST ||
-        `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.com`,
-    wsPort: import.meta.env.VITE_PUSHER_PORT || 6001,
-    forceTLS: false,
+    forceTLS: true,
+    encrypted: true,
     disableStats: true,
-    encrypted: false,
     authEndpoint: "/broadcasting/auth",
     auth: {
         headers: {
@@ -31,6 +27,7 @@ window.Echo = new Echo({
         },
     },
 });
+
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
