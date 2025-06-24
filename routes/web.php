@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\BomsController;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\PasswordChangeRequestController;
 use App\Http\Controllers\Admin\ReceiptController;
@@ -236,6 +237,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('payment/{id}', 'getConfigPayment')->name('get.config.payment');
             }
         );
+
+        Route::prefix('boms')->controller(BomsController::class)->name('boms.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{id}', 'update')->name('update');
+            Route::delete('{id}', 'delete')->name('delete');
+        });
     });
 
     // Auth Router
