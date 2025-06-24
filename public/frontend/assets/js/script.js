@@ -52,10 +52,14 @@ AOS.init({
 //     },
 // });
 
+const totalSlides = document.querySelectorAll(
+    ".category-swiper .swiper-slide"
+).length;
+
 new Swiper(".category-swiper", {
     slidesPerView: 4,
     spaceBetween: 20,
-    loop: true,
+    loop: totalSlides > 1, // ✅ chỉ loop nếu có nhiều hơn 1 sản phẩm
     autoplay: {
         delay: 3000,
         disableOnInteraction: false,

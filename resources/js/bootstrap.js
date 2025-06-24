@@ -28,6 +28,10 @@ window.Echo = new Echo({
     },
 });
 
+window.Echo.connector.pusher.connection.bind("connected", () => {
+    console.log("✅ Pusher connected");
+});
+
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
