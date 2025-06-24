@@ -15,6 +15,7 @@ class MessageSent implements ShouldBroadcast
         $receiverType = class_basename($this->message->receiver_type); // Chỉ lấy "User" hoặc "Employee"
         $channelName = 'chat.' . $receiverType . '.' . $this->message->receiver_id;
 
+        logger($channelName);
         return new PrivateChannel($channelName);
     }
 

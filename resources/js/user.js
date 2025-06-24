@@ -8,6 +8,7 @@ if (window.Laravel.userId) {
     window.Echo.private(`chat.${userType}.${userId}`).listen(
         "MessageSent",
         (e) => {
+            console.log("Tin nhắn đến (bạn):", e);
             const msg = document.createElement("div");
             msg.className = "message-in";
             msg.textContent = e.message;

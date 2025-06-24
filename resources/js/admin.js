@@ -4,6 +4,8 @@ if (window.Laravel.adminId) {
     const userType = "Employee";
     const userId = window.Laravel.adminId;
 
+    console.log(`chat.${userType}.${userId}`);
+
     window.Echo.private(`chat.${userType}.${userId}`).listen(
         "MessageSent",
         (e) => {
