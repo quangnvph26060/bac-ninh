@@ -119,6 +119,10 @@
                 "url": "admin.attributes.index"
             },
             {
+                "title": "Boms",
+                "url": "admin.boms.index"
+            },
+            {
                 "title": "Bộ sưu tập",
                 "url": "admin.collections.index"
             }
@@ -192,6 +196,17 @@
         "route": "admin.tickets.index",
         "id": "ticket",
         "inRoutes": ["admin.tickets.index", "admin.tickets.reply"]
+    },
+    {
+        "title": "Quản lý Thu Chi",
+        "icon": "fas fa-wallet",
+        "url": "javascript:void(0)",
+        "children": [
+            {
+                "title": "Phiếu thu/chi",
+                "url": "/cash-transactions"
+            }
+        ]
     },
     {
         "title": "Kho hàng",

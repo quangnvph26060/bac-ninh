@@ -25,7 +25,37 @@
     <script>
         $(function() {
             const api = "{{ route('admin.material-requests.index') }}"
-            dataTables(api, columns, 'MaterialRequest', {}, false, false, false, true)
+            dataTables(api, columns, 'MaterialRequest', {}, false, true, false, true)
+
+            $(document).on('click', '.handle-delete', function() {
+                const id = $(this).data('id')
+
+                Swal.fire({
+                    title: "Bạn có chắc chắn muốn xóa?",
+                    text: "Hành động này sẽ không thể hoàn tác!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Đồng ý, xóa!",
+                    cancelButtonText: "Hủy",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/admin/material-requests/destroy/${id}`,
+                            type: "DELETE",
+                            success: function(response) {
+                                $('#myTable').DataTable().ajax.reload();
+                                Notifications(response.message, "success");
+                            },
+                            error: function(xhr) {
+                                Notifications(xhr.responseJSON.message, "danger");
+                            },
+                        });
+                    }
+                });
+
+            })
         })
     </script>
 @endpush

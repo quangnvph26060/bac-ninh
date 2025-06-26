@@ -19,9 +19,9 @@
                             <div class="row">
                                 <div class="mb-3 position-relative col-md-12">
                                     <label for="product_id" class="form-label required">Tên sản phẩm</label>
-                                    <select name="product_id" id="product_id" class="form-control select2" disabled>
-                                        {{ isset($bom) ? 'disabled' : '' }}>
-                                        @if (isset($bom))
+                                    <select name="product_id" id="product_id" class="form-control select2">
+                                        {{ !empty($bom) ? 'disabled' : '' }}>
+                                        @if (!empty($bom))
                                             @php
                                                 $product =
                                                     $bom->productable_type === \App\Models\Product::class
@@ -36,20 +36,22 @@
                                             @endif
                                         @endif
                                     </select>
-                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    @if (!empty($bom))
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div id="variant_wrapper"
-                        class="card mt-3 {{ $bom && $bom->productable_type === 'App\Models\ProductVariant' ? '' : 'd-none' }}">
+                        class="card mt-3 {{ !empty($bom) && $bom->productable_type === 'App\Models\ProductVariant' ? '' : 'd-none' }}">
                         <div class="card-body">
                             <div class="mb-3">
                                 <label for="variant_id" class="form-label required">Chọn biến thể</label>
                                 <select name="variant_id" id="variant_id" class="form-control select2">
-                                    {{ $bom->productable_type === 'App\Models\ProductVariant' ? '' : 'disabled d-none' }}>
-                                    @if ($bom->productable_type === 'App\Models\ProductVariant')
+                                    {{ !empty($bom) && $bom->productable_type === 'App\Models\ProductVariant' ? '' : 'disabled d-none' }}>
+                                    @if (!empty($bom) && $bom->productable_type === 'App\Models\ProductVariant')
                                         @php
                                             $variant = \App\Models\ProductVariant::find($bom->productable_id);
                                         @endphp
@@ -85,7 +87,7 @@
                                 </thead>
                                 <tbody>
                                     @php $counter = 0; @endphp
-                                    @foreach ($bom->bomItems as $index => $item)
+                                    @foreach ($bom->bomItems ?? [] as $index => $item)
                                         <tr>
                                             <td width="5%">{{ $index + 1 }}</td>
                                             <td>
@@ -133,7 +135,7 @@
                 <div class="col-md-3 gap-3 d-flex flex-column-reverse flex-md-column mb-md-0 mb-5">
                     @include('admin.components.button', ['redirect' => route('admin.boms.index')])
                 </div>
-                
+
             </div>
         </form>
     </div>

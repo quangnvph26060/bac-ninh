@@ -13,8 +13,8 @@ class MaterialRequest extends Model
 
     protected $fillable = [
         'order_id',
-        'productable_type',
-        'productable_id',
+        'order_item_id',
+        'code',
         'quantity',
         'status',
         'note',

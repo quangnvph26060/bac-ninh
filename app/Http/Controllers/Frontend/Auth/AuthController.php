@@ -66,7 +66,7 @@ class AuthController extends Controller
                 'email' => 'required|email|unique:users,email',
                 'password' => ['required', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
                 'phone' => 'required|string|max:20|unique:users,phone',
-                'g-recaptcha-response' => 'required',
+                // 'g-recaptcha-response' => 'required',
             ],
             __('request.messages'),
             [
@@ -74,7 +74,7 @@ class AuthController extends Controller
                 'email' => 'Email',
                 'password' => 'Mật khẩu',
                 'phone' => 'Số điện thoại',
-                'g-recaptcha-response' => 'reCAPTCHA',
+                // 'g-recaptcha-response' => 'reCAPTCHA',
             ]
         );
 

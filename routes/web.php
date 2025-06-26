@@ -139,6 +139,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('create', 'store')->name('store');
             Route::get('edit/{id}', 'edit')->name('edit');
             Route::put('edit/{id}', 'update')->name('update');
+            Route::get('select2', 'select2');
             Route::get('/{id}', 'show')->name('show');
         });
 
@@ -151,9 +152,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('create', 'create')->name('create');
-                Route::post('/', 'store');
-                Route::get('{id}', 'show');
-                Route::put('{id}', 'update');
+                Route::post('create', 'store');
+                Route::get('{id}/edit', 'edit');
+                Route::put('{id}/edit', 'update');
 
                 Route::post('{id}/approve', 'approve');
                 Route::post('{id}/reject', 'reject');
@@ -161,7 +162,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('orders/items/{orderId}', 'getItemsByOrderId');
 
                 Route::get('order/{orderId}/products', 'getProductsByOrder');
-                Route::get('product/{productId}/boms', 'getBomsByProduct');
+                Route::get('get-boms', 'getBoms');
+                Route::delete('destroy/{id}', 'destroy');
             }
         );
 
