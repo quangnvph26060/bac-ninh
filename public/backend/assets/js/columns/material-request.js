@@ -10,7 +10,7 @@ const columns = [
     {
         data: "code",
         name: "code",
-        title: "Mã",
+        title: "Mã phiếu",
         width: "12%",
         render: (data, type, row) => {
             return `<a href="/admin/material-requests/edit/${row.id}" class="fw-bold">${data}</a>`;
@@ -22,10 +22,12 @@ const columns = [
         title: "đơn hàng",
         render: (data, type, row) => {
             return `
-                <a href="#">${row.order.order_code}</a>
+                <a href="#" class="fw-bold">${row.order.order_code}</a>
                 <span class="mb-0 text-muted d-block">${row.order.order_name}</span>
             `;
         },
+        orderable: false,
+        searchable: false,
     },
     {
         data: "productInfo",
@@ -39,11 +41,16 @@ const columns = [
                 </div>
             `;
         },
+        orderable: false,
+        searchable: false,
     },
     {
         data: "quantity",
         name: "quantity",
         title: "số lượng",
+        render(h) {
+            return h + " vật tư";
+        },
     },
     {
         data: "status",

@@ -9,8 +9,7 @@ class MaterialUsage extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-    protected $fillable = ['code', 'productable_type', 'productable_id', 'quantity', 'date', 'note', 'created_by'];
+    protected $fillable = ['order_id', 'code', 'productable_type', 'productable_id', 'quantity', 'date', 'note', 'created_by'];
 
     public function productable()
     {

@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Material\MaterialRequest;
 use App\Imports\MaterialsImport;
-use App\Models\MaterialImport;
+use App\Models\Material;
 use App\Services\MaterialService;
-use App\Services\SupplierService;
-use App\Services\TypeService;
 use App\Traits\PaginateTrait;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -16,9 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 class MaterialController extends Controller
 {
     use PaginateTrait;
-    public function __construct(public MaterialService $materialService)
-    {
-    }
+    public function __construct(public MaterialService $materialService) {}
 
     public function index()
     {
@@ -117,10 +113,26 @@ class MaterialController extends Controller
                 'error' => $import->error,
                 'import_errors' => $import->errors,
             ]);
-
         } catch (\Exception $e) {
             return response()->json(['error' => 'Lỗi: ' . $e->getMessage()], 500);
         }
     }
 
+    public function select2(Request $request)
+    {
+        $query = Material::query();
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                    ->orWhere('code', 'like', "%$search%");
+            });
+        }
+
+        $materials = $query->limit(50)->get(['id', 'code', 'name', 'unit']);
+
+        return response()->json([
+            'data' => $materials
+        ]);
+    }
 }

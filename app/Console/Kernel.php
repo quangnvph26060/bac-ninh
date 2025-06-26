@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         $schedule->command('tickets:autoclose')->everyMinute();
         $schedule->command('orders:auto-confirm')->hourly();
+        
     }
 
     /**
