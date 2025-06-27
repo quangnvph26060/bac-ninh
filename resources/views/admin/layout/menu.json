@@ -198,17 +198,6 @@
         "inRoutes": ["admin.tickets.index", "admin.tickets.reply"]
     },
     {
-        "title": "Quản lý Thu Chi",
-        "icon": "fas fa-wallet",
-        "url": "javascript:void(0)",
-        "children": [
-            {
-                "title": "Phiếu thu/chi",
-                "url": "/cash-transactions"
-            }
-        ]
-    },
-    {
         "title": "Kho hàng",
         "icon": "fas fa-warehouse",
         "id": "warehouses",

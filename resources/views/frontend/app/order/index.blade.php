@@ -335,6 +335,8 @@
                         success: function(response) {
                             datgin.success(response.message);
                             fetchOrders(lastOrdersUrl)
+
+                            $('#bulk-select').val('')
                         },
                         error: function(xhr) {
                             datgin.error(xhr.responseJSON.message || "Something went wrong")
