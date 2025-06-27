@@ -101,24 +101,30 @@
                                             <div class="image-wrapper">
                                                 <img src="{{ showImage($item->model_image) }}" class="img-fluid"
                                                     alt="">
-                                                <div class="image-actions">
-                                                    <a href="{{ showImage($item->model_image) }}" target="_blank"
-                                                        title="Xem"><i class="fa fa-eye"></i></a>
-                                                    <a href="{{ showImage($item->model_image) }}" download
-                                                        title="Tải xuống"><i class="fa fa-download"></i></a>
-                                                </div>
+                                                @if ($item->model_image && Storage::disk('public')->exists($item->model_image))
+                                                    <div class="image-actions">
+                                                        <a href="{{ showImage($item->model_image) }}" target="_blank"
+                                                            title="Xem"><i class="fa fa-eye"></i></a>
+                                                        <a href="{{ showImage($item->model_image) }}" download
+                                                            title="Tải xuống"><i class="fa fa-download"></i></a>
+                                                    </div>
+                                                @endif
+
                                             </div>
                                         </td>
                                         <td class="text-center">
                                             <div class="image-wrapper">
                                                 <img src="{{ showImage($item->design_image) }}" class="img-fluid"
                                                     alt="">
-                                                <div class="image-actions">
-                                                    <a href="{{ showImage($item->design_image) }}" target="_blank"
-                                                        title="Xem"><i class="fa fa-eye"></i></a>
-                                                    <a href="{{ showImage($item->design_image) }}" download
-                                                        title="Tải xuống"><i class="fa fa-download"></i></a>
-                                                </div>
+                                                @if ($item->model_image && Storage::disk('public')->exists($item->design_image))
+                                                    <div class="image-actions">
+                                                        <a href="{{ showImage($item->design_image) }}" target="_blank"
+                                                            title="Xem"><i class="fa fa-eye"></i></a>
+                                                        <a href="{{ showImage($item->design_image) }}" download
+                                                            title="Tải xuống"><i class="fa fa-download"></i></a>
+                                                    </div>
+                                                @endif
+
                                             </div>
                                         </td>
 

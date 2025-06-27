@@ -2,7 +2,6 @@
 // phpinfo();
 
 use App\Exports\MaterialsDataSheet;
-use App\Exports\MaterialsExport;
 use App\Exports\MaterialsTemplateExport;
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\AdminController;
@@ -25,6 +24,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BomsController;
+use App\Http\Controllers\Admin\CashBookController;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialRequestController;
 use App\Http\Controllers\Admin\PasswordChangeRequestController;
@@ -82,6 +82,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('load-more-users', 'loadMoreUsers')->name('loadMoreUsers');
             Route::post('send-message', 'sendMessage')->name('sendMessage');
             Route::get('messages/{userId}', 'getMessages')->name('messages');
+        });
+
+        Route::group(['prefix' => 'cashbook', 'controller' => CashBookController::class, 'as' => 'cashbook'], function () {
+            Route::get('/', 'index');
         });
 
         Route::prefix('orders')->controller(OrderController::class)->name('orders.')->group(function () {

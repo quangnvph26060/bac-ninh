@@ -48,3 +48,19 @@
                 "title": "Quản lý yêu cầu vật tư",
                 "url": "admin.material-requests.index"
             },
+
+
+,
+    {
+        "title": "Kế toán",
+        "icon": "fas fa-calculator",
+        "url": "javascript:void(0)",
+        "id": "cashbook",
+        "children": [
+            {
+                "title": "Thu chi tiền mặt",
+                "url": "admin.cashbook"
+            }
+        ],
+        "inRoutes": ["admin.cashbook"]
+    }

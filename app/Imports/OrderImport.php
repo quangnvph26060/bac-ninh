@@ -53,9 +53,9 @@ class OrderImport implements ToCollection, WithHeadingRow
 
             $errors = $this->validateRow($row, $line);
 
-            $mockup = trim($row['mockup_image']);
+            // $mockup = trim($row['mockup_image']);
 
-            $design = trim($row['design_image']);
+            // $design = trim($row['design_image']);
 
             if (!empty($errors)) {
                 $this->failures = array_merge($this->failures, $errors);
@@ -78,20 +78,20 @@ class OrderImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            $mockupImage = $this->downloadAndSaveImage($mockup, 'mockup');
-            $designImage = $this->downloadAndSaveImage($design, 'design');
+            // $mockupImage = $this->downloadAndSaveImage($mockup, 'mockup');
+            // $designImage = $this->downloadAndSaveImage($design, 'design');
 
-            $absolutePath = Storage::disk('public')->path($designImage);
+            // $absolutePath = Storage::disk('public')->path($designImage);
 
-            $invalid = $this->checkInfoDesignImage($absolutePath, $variant, $info);
+            // $invalid = $this->checkInfoDesignImage($absolutePath, $variant, $info);
 
-            if (!$invalid) {
-                $this->failures[] = "Dòng $line: Invalid image specifications. Expected: width: {$variant->design_width}px, height: {$variant->design_height}px, PPI: {$variant->design_ppi}, format: {$variant->design_format}. Your image: width: {$info['width']}px, height: {$info['height']}px, PPI: {$info['x_dpi']}, format: {$info['format']}. ";
-                deleteImage($mockupImage);
-                deleteImage($designImage);
-                $this->updateProgress('processing');
-                continue;
-            }
+            // if (!$invalid) {
+            //     $this->failures[] = "Dòng $line: Invalid image specifications. Expected: width: {$variant->design_width}px, height: {$variant->design_height}px, PPI: {$variant->design_ppi}, format: {$variant->design_format}. Your image: width: {$info['width']}px, height: {$info['height']}px, PPI: {$info['x_dpi']}, format: {$info['format']}. ";
+            //     deleteImage($mockupImage);
+            //     deleteImage($designImage);
+            //     $this->updateProgress('processing');
+            //     continue;
+            // }
 
             $quantity = (int)$row['quantity'];
             $target = $variant ?? $product;
@@ -103,7 +103,7 @@ class OrderImport implements ToCollection, WithHeadingRow
 
             $lineTotal = $price * $quantity + $shippingFee + $tax;
 
-            $this->createOrder($row, $product, $variant, $quantity, $price, $lineTotal, $shippingFee, $deliveryMethod, $tax, $mockupImage, $designImage);
+            $this->createOrder($row, $product, $variant, $quantity, $price, $lineTotal, $shippingFee, $deliveryMethod, $tax);
 
             $this->current++;
             $this->updateProgress('processing');
@@ -172,41 +172,41 @@ class OrderImport implements ToCollection, WithHeadingRow
             }
         }
 
-        if (!empty($row['design_image'])) {
-            $originalUrl = trim($row['design_image']);
+        // if (!empty($row['design_image'])) {
+        //     $originalUrl = trim($row['design_image']);
 
-            if (!$this->isValidDriveUrl($originalUrl)) {
-                $messages[] = "Ảnh thiết kế không đúng định dạng Google Drive";
-            } else {
-                $converted = $this->convertGoogleDriveUrl($originalUrl);
+        //     if (!$this->isValidDriveUrl($originalUrl)) {
+        //         $messages[] = "Ảnh thiết kế không đúng định dạng Google Drive";
+        //     } else {
+        //         $converted = $this->convertGoogleDriveUrl($originalUrl);
 
-                $imageUrl = $converted ?: $originalUrl;
+        //         $imageUrl = $converted ?: $originalUrl;
 
-                if (!$this->urlExists($imageUrl)) {
-                    $messages[] = "Ảnh thiết kế không truy cập được (có thể bị 404 hoặc cấm quyền truy cập)";
-                } else {
-                    $row->put('design_image', $imageUrl);
-                }
-            }
-        }
+        //         if (!$this->urlExists($imageUrl)) {
+        //             $messages[] = "Ảnh thiết kế không truy cập được (có thể bị 404 hoặc cấm quyền truy cập)";
+        //         } else {
+        //             $row->put('design_image', $imageUrl);
+        //         }
+        //     }
+        // }
 
-        if (!empty($row['mockup_image'])) {
-            $originalUrl = trim($row['mockup_image']);
+        // if (!empty($row['mockup_image'])) {
+        //     $originalUrl = trim($row['mockup_image']);
 
-            if (!$this->isValidDriveUrl($originalUrl)) {
-                $messages[] = "Ảnh mockup không đúng định dạng Google Drive";
-            } else {
-                $converted = $this->convertGoogleDriveUrl($originalUrl);
+        //     if (!$this->isValidDriveUrl($originalUrl)) {
+        //         $messages[] = "Ảnh mockup không đúng định dạng Google Drive";
+        //     } else {
+        //         $converted = $this->convertGoogleDriveUrl($originalUrl);
 
-                $imageUrl = $converted ?: $originalUrl;
+        //         $imageUrl = $converted ?: $originalUrl;
 
-                if (!$this->urlExists($imageUrl)) {
-                    $messages[] = "Ảnh mockup không truy cập được (có thể bị 404 hoặc cấm quyền truy cập)";
-                } else {
-                    $row->put('mockup_image', $imageUrl);
-                }
-            }
-        }
+        //         if (!$this->urlExists($imageUrl)) {
+        //             $messages[] = "Ảnh mockup không truy cập được (có thể bị 404 hoặc cấm quyền truy cập)";
+        //         } else {
+        //             $row->put('mockup_image', $imageUrl);
+        //         }
+        //     }
+        // }
 
         if (!empty($messages)) {
             return ["Dòng $line: " . implode(', ', $messages)];
@@ -283,9 +283,9 @@ class OrderImport implements ToCollection, WithHeadingRow
         }
     }
 
-    protected function createOrder($row, $product, $variant, $qty, $price, $lineTotal, $shipping, $deliveryMethod, $tax, $mockup, $design)
+    protected function createOrder($row, $product, $variant, $qty, $price, $lineTotal, $shipping, $deliveryMethod, $tax)
     {
-        DB::transaction(function () use ($row, $product, $variant, $qty, $price, $lineTotal, $shipping, $deliveryMethod, $tax, $mockup, $design) {
+        DB::transaction(function () use ($row, $product, $variant, $qty, $price, $lineTotal, $shipping, $deliveryMethod, $tax) {
             $order = Order::create([
                 'user_id' => $this->userId,
                 'order_code' => $row['order_code'],
@@ -316,8 +316,8 @@ class OrderImport implements ToCollection, WithHeadingRow
                 'original_price' => $product->sale_price,
                 'quantity' => $qty,
                 'image' => $product->image,
-                'model_image' => $mockup,
-                'design_image' => $design,
+                // 'model_image' => $mockup,
+                // 'design_image' => $design,
             ]);
         });
     }
