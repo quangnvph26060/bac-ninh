@@ -89,10 +89,6 @@
             {
                 "title": "Yêu cầu nạp tiền",
                 "url": "admin.transfer.histories.index"
-            },
-            {
-                "title": "Thống kê",
-                "url": "admin.transfer.histories.index"
             }
         ],
         "inRoutes": ["admin.transfer.histories.index"]
@@ -196,6 +192,23 @@
         "route": "admin.tickets.index",
         "id": "ticket",
         "inRoutes": ["admin.tickets.index", "admin.tickets.reply"]
+    },
+    {
+        "title": "Kế toán",
+        "icon": "fas fa-calculator",
+        "url": "javascript:void(0)",
+        "id": "cashbook",
+        "children": [
+            {
+                "title": "Thu chi tiền mặt",
+                "url": "admin.cashbook"
+            },
+            {
+                "title": "Tài khoản kế toán",
+                "url": "admin.accounting-accounts.index"
+            }
+        ],
+        "inRoutes": ["admin.cashbook"]
     },
     {
         "title": "Kho hàng",

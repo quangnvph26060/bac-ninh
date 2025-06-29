@@ -87,6 +87,26 @@ if (!function_exists('uploadImages')) {
     }
 }
 
+if (!function_exists('uploadExcel')) {
+    function uploadExcel(string $fieldName, string $directory = 'excels'): ?string
+    {
+        $file = request()->file($fieldName);
+
+        if ($file && $file->isValid()) {
+            $extension = strtolower($file->getClientOriginalExtension());
+
+            if (in_array($extension, ['xlsx', 'xls'])) {
+                $filename = time() . uniqid() . '.' . $extension;
+                $path = $file->storeAs($directory, $filename, 'public');
+                return $path;
+            }
+        }
+
+        return null; // Không có file hoặc file không hợp lệ
+    }
+}
+
+
 if (!class_exists('formatNumber')) {
 
     function formatNumber($number)

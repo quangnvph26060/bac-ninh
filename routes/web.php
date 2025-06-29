@@ -3,6 +3,7 @@
 
 use App\Exports\MaterialsDataSheet;
 use App\Exports\MaterialsTemplateExport;
+use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AttributeController;
@@ -101,6 +102,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get-by-barcode', 'getByBarcode')->name('get.by.barcode');
             Route::post('change-tracking', 'changeTracking')->name('change-tracking');
             Route::view('view-barcode-pdf', 'admin.pdf.barcode');
+        });
+
+        Route::group(['prefix' => 'accounting-accounts', 'controller' => AccountController::class, 'as' => 'accounting-accounts.'], function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('search', 'search')->name('search');
+            Route::post('/', 'store')->name('store');
         });
 
         Route::group(['prefix' => 'tickets', 'controller' => TicketController::class, 'as' => 'tickets.'], function () {

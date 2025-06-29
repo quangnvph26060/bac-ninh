@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->string('name');
+            $table->foreignId('created_by')->constrained('employees')->noActionOnDelete();
+
+            $table->unsignedBigInteger('status')->default(1);
+            $table->nestedSet();
             $table->timestamps();
         });
     }

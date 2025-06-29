@@ -15,7 +15,6 @@ return new class extends Migration
     {
         Schema::create('cash_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(CashCategory::class)->constrained()->noActionOnDelete();
             $table->foreignIdFor(CashAccount::class)->constrained()->noActionOnDelete();
             $table->foreignId('created_by')->constrained('employees')->noActionOnDelete();
             $table->string('code')->unique();

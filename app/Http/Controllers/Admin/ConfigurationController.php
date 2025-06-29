@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Bank;
 use App\Models\Config;
 use App\Models\ConfigPayment;
+use App\Models\OrderImportFile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ConfigurationController extends Controller
 {
@@ -14,7 +16,9 @@ class ConfigurationController extends Controller
     {
         $this->authorize('view', Config::class);
 
-        return view('admin.configuration.index');
+        $fileUpload = OrderImportFile::query()->firstOrCreate();
+
+        return view('admin.configuration.index', compact('fileUpload'));
     }
 
     public function updateConfiguration(Request $request)
@@ -39,7 +43,9 @@ class ConfigurationController extends Controller
                 'seo_description' => 'nullable|string|max:500',
                 'tax_rate' => 'nullable|numeric|min:0|regex:/^\d*(\.\d{1,2})?$/',
                 'order_send_delay_hours' => 'nullable|numeric|min:0',
-                'custom_order_send_delay_hours' => 'nullable|numeric|min:0'
+                'custom_order_send_delay_hours' => 'nullable|numeric|min:0',
+                'sample_file_path' => 'nullable|mimes:xlsx,xls|max:10240',
+                'data_file_path' => 'nullable|mimes:xlsx,xls|max:10240'
             ],
             __('request.messages'),
             [
@@ -60,17 +66,35 @@ class ConfigurationController extends Controller
             ]
         );
 
+        DB::beginTransaction();
         try {
-            $config = Config::query()->first();
+            $config = Config::query()->firstOrFail();
+            $fileUpload = OrderImportFile::query()->firstOrCreate();
+
+            // Lưu đường dẫn file cũ để xóa khi upload mới
             $oldLogo = $config->logo;
             $oldFavicon = $config->favicon;
+            $oldSampleFile = $fileUpload->sample_file_path;
+            $oldDataFile = $fileUpload->data_file_path;
+
+            $newLogo = $newFavicon = $newSampleFile = $newDataFile = null;
 
             if ($request->hasFile('logo')) {
-                $credentials['logo'] = uploadImages('logo', 'logo');
+                $newLogo = uploadImages('logo', 'logo');
+                $credentials['logo'] = $newLogo;
             }
 
             if ($request->hasFile('favicon')) {
-                $credentials['favicon'] = uploadImages('favicon', 'favicon');
+                $newFavicon = uploadImages('favicon', 'favicon');
+                $credentials['favicon'] = $newFavicon;
+            }
+
+            if ($request->hasFile('sample_file_path')) {
+                $newSampleFile = uploadExcel('sample_file_path', 'order_excels');
+            }
+
+            if ($request->hasFile('data_file_path')) {
+                $newDataFile = uploadExcel('data_file_path', 'order_excels');
             }
 
             if (!empty($credentials['custom_order_send_delay_hours'])) {
@@ -79,29 +103,52 @@ class ConfigurationController extends Controller
 
             $config->update($credentials);
 
-            if (!empty($credentials['logo'])) {
+            $fileUpload->update([
+                'sample_file_path' => $newSampleFile ?? $oldSampleFile,
+                'data_file_path' => $newDataFile ?? $oldDataFile,
+                'updated_at_sample' => $newSampleFile ? now() : $fileUpload->updated_at_sample,
+                'updated_at_data' => $newDataFile ? now() : $fileUpload->updated_at_data,
+            ]);
+
+            DB::commit();
+
+            // Sau khi commit DB thành công, xóa file cũ
+            if ($newLogo && $oldLogo) {
                 deleteImage($oldLogo);
             }
-
-            if (!empty($credentials['favicon'])) {
+            if ($newFavicon && $oldFavicon) {
                 deleteImage($oldFavicon);
+            }
+            if ($newSampleFile && $oldSampleFile) {
+                deleteImage($oldSampleFile);
+            }
+            if ($newDataFile && $oldDataFile) {
+                deleteImage($oldDataFile);
             }
 
             return successResponse('Lưu thay đổi thành công.', [], 200, true);
         } catch (\Exception $e) {
+            DB::rollBack();
             logger($e->getMessage());
 
-            if (!empty($credentials['logo'])) {
-                deleteImage($credentials['logo']);
+            // Xóa các file mới nếu có upload nhưng lỗi
+            if ($newLogo) {
+                deleteImage($newLogo);
             }
-
-            if (!empty($credentials['favicon'])) {
-                deleteImage($credentials['favicon']);
+            if ($newFavicon) {
+                deleteImage($newFavicon);
+            }
+            if ($newSampleFile) {
+                deleteImage($newSampleFile);
+            }
+            if ($newDataFile) {
+                deleteImage($newDataFile);
             }
 
             return errorResponse('Đã có lỗi xảy ra. Vui lòng thử lại sau!', true);
         }
     }
+
 
     public function payment()
     {
