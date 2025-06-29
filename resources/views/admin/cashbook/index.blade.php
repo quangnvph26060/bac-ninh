@@ -3,7 +3,7 @@
 @section('content')
     <div class="page-inner">
         <div class="page-header">
-            <x-breadcrumb :items="[['name' => 'thu chi tiền mặt']]" />
+            <x-breadcrumb :items="[['name' => 'thu chi']]" />
         </div>
 
         {{-- <div class="card">

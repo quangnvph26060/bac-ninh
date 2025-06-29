@@ -15,7 +15,7 @@
                         <div class="ms-2">Back to Orders</div>
                     </div>
                 </a>
-                <div class="d-flex gap-2">
+                {{-- <div class="d-flex gap-2">
                     <a href="{{ route('orders.downloadTemplate') }}" class="btn btn-outline-danger btn-sm">
                         <i class="bi bi-file-earmark-excel-fill me-2"></i> Download XLS Template
                     </a>
@@ -23,7 +23,7 @@
                         <i class="bi bi-file-earmark-excel-fill me-2"></i> Product Information
                     </a>
 
-                </div>
+                </div> --}}
             </div>
 
             <h1 class="billing__title__content">Import Order</h1>
@@ -49,6 +49,118 @@
             </div>
         </div>
 
+        <div class="row align-items-start">
+            <!-- Left Content -->
+            <div class="col-lg-6 col-md-12">
+                <div class="pe-lg-4">
+                    <!-- Main Title -->
+                    <h3 class="main-title mt-5">
+                        Your standardized file data and order settings
+                    </h3>
+
+                    <!-- Checklist Items -->
+                    <div class="mb-4">
+                        <div class="check-item">
+                            <div class="check-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="content-text">
+                                Upload your file
+                            </div>
+                        </div>
+
+                        <div class="check-item">
+                            <div class="check-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="content-text">
+                                Assign header names to data fields in your import file or use our template
+                            </div>
+                        </div>
+
+                        <div class="check-item">
+                            <div class="check-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="content-text">
+                                Match the header names in your import file with the ones in the tool
+                            </div>
+                        </div>
+
+                        <div class="check-item">
+                            <div class="check-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="content-text">
+                                Import your orders
+                            </div>
+                        </div>
+
+                        <div class="check-item">
+                            <div class="check-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="content-text">
+                                Confirm your orders and pay from your Printway Wallet
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtitle -->
+                    <div class="subtitle">
+                        Download our data import template with all the mandatory and optional fields
+                    </div>
+
+                    <!-- Download Links -->
+                    <div class="download-section grid gap-3">
+                        @if ($fileUpload?->sample_file_path)
+                            <div
+                                class="download-item flex items-center gap-3 p-3 border rounded hover:bg-gray-50 transition">
+                                <div class="excel-icon text-green-600 text-3xl">
+                                    <i class="fas fa-file-excel"></i>
+                                </div>
+                                <div>
+                                    <a href="{{ Storage::url($fileUpload->sample_file_path) }}"
+                                        class="download-link font-semibold text-blue-600 hover:underline" download>
+                                        📥 Download XLS Template
+                                    </a>
+                                    <div class="update-text text-sm text-gray-500">
+                                        Updated at: {{ $fileUpload->updated_at_sample?->format('d/m/Y') }}
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($fileUpload?->data_file_path)
+                            <div
+                                class="download-item flex items-center gap-3 p-3 border rounded hover:bg-gray-50 transition">
+                                <div class="excel-icon text-green-600 text-3xl">
+                                    <i class="fas fa-file-excel"></i>
+                                </div>
+                                <div>
+                                    <a href="{{ Storage::url($fileUpload->data_file_path) }}"
+                                        class="download-link font-semibold text-blue-600 hover:underline" download>
+                                        📥 Product Information
+                                    </a>
+                                    <div class="update-text text-sm text-gray-500">
+                                        Updated at: {{ $fileUpload->updated_at_data?->format('d/m/Y') }}
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right Illustration -->
+            <div class="col-lg-6 col-md-12">
+                <div class="illustration-container">
+                    <img src="{{ asset('images/excel-upload.png') }}" alt="Data Import Illustration" class="img-fluid">
+                </div>
+            </div>
+        </div>
+
         <div id="import-progress" class="mt-3 d-none">
             <div class="progress" style="height: 25px;">
                 <div id="progress-bar" class="progress-bar progress-bar-striped bg-success" style="width: 0%">0%</div>
@@ -68,6 +180,113 @@
 @endsection
 
 @push('styles')
+    <style>
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .check-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #e8f5e8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .check-icon i {
+            color: #28a745;
+            font-size: 12px;
+        }
+
+        .download-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding: 8px 0;
+        }
+
+        .excel-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #ff6b35;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+
+        .excel-icon i {
+            color: white;
+            font-size: 14px;
+        }
+
+        .download-link {
+            color: #17a2b8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .download-link:hover {
+            color: #138496;
+            text-decoration: underline;
+        }
+
+        .update-text {
+            color: #6c757d;
+            font-size: 0.875rem;
+            margin-left: 8px;
+        }
+
+        .main-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .subtitle {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .content-text {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .illustration-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .illustration-container img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: .9rem;
+            }
+
+            .illustration-container {
+                margin-top: 2rem;
+                min-height: 300px;
+            }
+        }
+    </style>
 @endpush
 
 @push('scripts')
@@ -137,15 +356,15 @@
                                                             $('#progress-text')
                                                                 .text(
                                                                     'Đang khởi tạo...'
-                                                                    );
+                                                                );
                                                         } else {
                                                             $('#progress-text')
                                                                 .text(
                                                                     `Đang xử lý...`
-                                                                    );
+                                                                );
                                                         }
                                                     }
-// : ${current}/${total} đơn hàng
+                                                    // : ${current}/${total} đơn hàng
                                                     if (status === 'done') {
                                                         clearInterval(
                                                             interval);

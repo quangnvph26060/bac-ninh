@@ -251,7 +251,6 @@ a.form-hint {
     right: 0;
     bottom: 0;
     background-color: #ccc;
-    -webkit-transition: 0.4s;
     transition: 0.4s;
 }
 
@@ -263,7 +262,6 @@ a.form-hint {
     left: 3px;
     bottom: 3px;
     background-color: white;
-    -webkit-transition: 0.4s;
     transition: 0.4s;
 }
 
@@ -276,18 +274,16 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
-    -webkit-transform: translateX(23px);
-    -ms-transform: translateX(23px);
     transform: translateX(23px);
 }
 
 /* Rounded sliders */
 .slider.round {
-    border-radius: 34px;
+    border-radius: 8px;
 }
 
 .slider.round:before {
-    border-radius: 50%;
+    border-radius: 4px;
 }
 
 .select2-container .select2-selection--single {

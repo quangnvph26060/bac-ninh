@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CashAccount;
 use Illuminate\Http\Request;
 
 class CashBookController extends Controller
@@ -11,4 +12,5 @@ class CashBookController extends Controller
     {
         return view('admin.cashbook.index');
     }
+
 }
