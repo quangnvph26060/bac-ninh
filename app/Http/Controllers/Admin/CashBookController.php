@@ -12,5 +12,4 @@ class CashBookController extends Controller
     {
         return view('admin.cashbook.index');
     }
-
 }

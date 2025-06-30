@@ -6,18 +6,37 @@
             <x-breadcrumb :items="[['name' => 'tài khoản kế toán']]" />
         </div>
 
-        {{-- <form action="{{ route('admin.accounting-accounts.import') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <input type="file" name="file" required>
-            <button type="submit" class="btn btn-primary">Import Excel</button>
-        </form> --}}
-
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal"
-                    data-bs-target="#addCashAccountModal">
-                    <i class="ti ti-circle-plus"></i> Thêm mới
-                </button>
+            <div class="card-header">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal"
+                            data-bs-target="#addCashAccountModal">
+                            <i class="ti ti-circle-plus"></i> Thêm mới
+                        </button>
+
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                                id="operationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Thao tác
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="operationDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="#" id="exportExcel"><i
+                                            class="far fa-file-excel me-2"></i>Xuất excel</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="#" id="delete-selected"> <i
+                                            class="far fa-trash-alt me-2"></i>Xóa các dòng đã
+                                        chọn</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="w-25">
+                        <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                    </div>
+                </div>
             </div>
 
             <div class="card-body">
@@ -30,11 +49,15 @@
                                 <th style="width:5%">ID</th>
                                 <th style="width:15%">Code</th>
                                 <th>Tên</th>
-                                <th style="width:15%">Trạng thái</th>
+                                <th style="width:15%">Tình trạng</th>
                                 <th style="width:15%">Người tạo</th>
                                 <th style="width:5%"><i class="fas fa-cog"></i></th>
                             </tr>
                         </thead>
+
+                        <tbody>
+                        </tbody>
+
                     </table>
                 </div>
             </div>
@@ -47,7 +70,7 @@
             <div class="modal-content">
                 <form id="myForm">
                     <div class="modal-header">
-                        <h5 class="modal-title">Thêm tài khoản kế toán</h5>
+                        <h5 class="modal-title fw-medium">Thêm tài khoản kế toán</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                     </div>
                     <div class="modal-body">
@@ -67,7 +90,8 @@
                             <label for="name" class="form-label">Tên tài khoản</label>
                             <input type="text" name="name" id="name" class="form-control">
                         </div>
-                        <div class="mb-3 form-check">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Tình trạng</label>
                             <label class="switch">
                                 <input name="status" type="checkbox" value="1" checked="">
                                 <span class="slider round"></span>
@@ -110,13 +134,18 @@
                                     data.forEach(function(item) {
                                         resultBox.append(
                                             `<a href="#" class="list-group-item list-group-item-action" data-id="${item.id}" data-text="${item.code} - ${item.name}">
-                                        ${item.code} - ${item.name}
-                                    </a>`
+                                                ${item.code} - ${item.name}
+                                            </a>`
                                         );
                                     });
                                     resultBox.show();
                                 } else {
-                                    resultBox.hide();
+                                    resultBox.append(
+                                        `<div class="list-group-item text-muted text-center">
+                                            Không tìm thấy kết quả
+                                        </div>`
+                                    );
+                                    resultBox.show();
                                 }
                             }
                         });
@@ -143,36 +172,176 @@
                 }
             });
 
-            // Submit form
-            // $('#addCashAccountForm').on('submit', function(e) {
-            //     e.preventDefault();
-            //     let form = $(this);
-            //     let submitBtn = form.find('button[type="submit"]');
-            //     submitBtn.prop('disabled', true).text('Đang lưu...');
-
-            //     $.ajax({
-            //         url: '',
-            //         method: 'POST',
-            //         data: form.serialize(),
-            //         success: function(response) {
-            //             toastr.success(response.message);
-            //             $('#addCashAccountModal').modal('hide');
-            //             form[0].reset();
-            //             $('#parent_id').val(null).trigger('change');
-            //             // Reload DataTable hoặc location.reload() nếu cần
-            //         },
-            //         error: function(xhr) {
-            //             toastr.error('Đã xảy ra lỗi, vui lòng kiểm tra lại.');
-            //         },
-            //         complete: function() {
-            //             submitBtn.prop('disabled', false).text('Lưu');
-            //         }
-            //     });
-            // });
-
             submitForm('#myForm', function(response) {
-                console.log(response);
-            })
+                reloadCashAccounts();
+                Notifications(response.message, "success");
+                $('#addCashAccountModal').modal('hide');
+            });
+
+            function reloadCashAccounts() {
+                $.ajax({
+                    url: "/admin/accounting-accounts/list",
+                    type: "GET",
+                    beforeSend: function() {
+                        $("#loadingSpinner").fadeIn();
+                    },
+                    success: function(res) {
+                        if (res.success) {
+                            $('#myTable tbody').html(res.html);
+                        }
+                    },
+                    error: function(xhr) {
+                        Notifications('Tải dữ liệu thất bại', "error");
+                    },
+                    complete: function() {
+                        $("#loadingSpinner").fadeOut();
+                    }
+                });
+            }
+
+            $('#addCashAccountModal').on('hidden.bs.modal', function() {
+                $('#myForm')[0].reset();
+                $('#parent_id').val('');
+                $('#parent_search').val('');
+                $('#myForm input[name="_method"]').remove();
+                $('#myForm input[name="id"]').remove();
+            });
+
+            $(document).on('click', '.btn-edit-account', function() {
+                let id = $(this).data('id');
+                let code = $(this).data('code');
+                let name = $(this).data('name');
+                let status = $(this).data('status');
+                let parentId = $(this).data('parent-id');
+                let parentName = $(this).data('parent-name') || '';
+
+                // Điền dữ liệu cũ vào modal
+                $('#code').val(code);
+                $('#name').val(name);
+                $('#parent_id').val(parentId);
+                $('#parent_search').val(parentName);
+
+                // Set trạng thái
+                if (status == 1) {
+                    $('input[name="status"]').prop('checked', true);
+                } else {
+                    $('input[name="status"]').prop('checked', false);
+                }
+
+                // Thêm input _method = PUT nếu chưa có
+                if ($('#myForm input[name="_method"]').length === 0) {
+                    $('#myForm').append('<input type="hidden" name="_method" value="PUT">');
+                    $('#myForm').append(`<input type="hidden" name="id" value="${id}">`);
+                }
+
+                // Mở modal
+                $('#addCashAccountModal').modal('show');
+            });
+
+
+            $(document).on('click', '.btn-add-child', function() {
+                let parentId = $(this).data('id');
+                let parentName = $(this).data('name');
+
+                // Gán giá trị vào input ẩn và hiển thị
+                $('#parent_id').val(parentId);
+                $('#parent_search').val(parentName);
+
+                // Mở modal
+                $('#addCashAccountModal').modal('show');
+            });
+
+            // Khi click vào checkbox "checked-all"
+            $('#checked-all').on('change', function() {
+                let isChecked = $(this).is(':checked');
+                $('.item-checkbox').prop('checked', isChecked);
+            });
+
+            // Khi click vào từng checkbox hàng
+            $(document).on('change', '.item-checkbox', function() {
+                let totalCheckboxes = $('.item-checkbox').length;
+                let checkedCheckboxes = $('.item-checkbox:checked').length;
+
+                if (totalCheckboxes === checkedCheckboxes) {
+                    $('#checked-all').prop('checked', true);
+                } else {
+                    $('#checked-all').prop('checked', false);
+                }
+            });
+
+            $('#delete-selected').on('click', function() {
+                let ids = $('.item-checkbox:checked').map(function() {
+                    return $(this).data('id');
+                }).get();
+
+                if (ids.length === 0) {
+                    Notifications('Vui lòng chọn ít nhất một tài khoản để xoá.', 'warning');
+                    return;
+                }
+
+                Swal.fire({
+                    title: "Bạn có chắc chắn muốn xóa?",
+                    text: "Hành động này sẽ không thể hoàn tác!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Đồng ý, xóa!",
+                    cancelButtonText: "Hủy",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/admin/accounting-accounts/delete-multiple',
+                            type: 'POST',
+                            data: {
+                                ids: ids,
+                            },
+                            beforeSend: function() {
+                                $('#delete-selected').prop('disabled', true).text(
+                                    'Đang xoá...');
+                            },
+                            success: function(res) {
+                                if (res.success) {
+                                    Notifications(res.message, 'success');
+                                    reloadCashAccounts();
+                                } else {
+                                    Notifications('Có lỗi xảy ra, vui lòng thử lại.',
+                                        'error');
+                                }
+                            },
+                            error: function() {
+                                Notifications('Có lỗi xảy ra, vui lòng thử lại.',
+                                    'error');
+                            },
+                            complete: function() {
+                                $('#delete-selected').prop('disabled', false).html(
+                                    '<i class="fas fa-trash"></i> Xoá đã chọn');
+                            }
+                        });
+                    } else {
+                        $('.item-checkbox, #checked-all').prop('checked', false)
+                    }
+                })
+
+            });
+
+            $('#exportExcel').on('click', function(e) {
+                e.preventDefault();
+
+                window.location.href = '/admin/accounting-accounts/export';
+            });
+
+            reloadCashAccounts()
         });
     </script>
+@endpush
+
+
+@push('styles')
+    <style>
+        #parent_results .list-group-item:hover {
+            background-color: rgba(108, 122, 145);
+            color: #ffffff !important
+        }
+    </style>
 @endpush

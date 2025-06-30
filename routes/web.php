@@ -106,8 +106,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::group(['prefix' => 'accounting-accounts', 'controller' => AccountController::class, 'as' => 'accounting-accounts.'], function () {
             Route::get('/', 'index')->name('index');
+            Route::get('list', 'list')->name('list');
             Route::get('search', 'search')->name('search');
             Route::post('/', 'store')->name('store');
+            Route::put('/', 'update')->name('update');
+            Route::delete('delete-multiple', 'destroy')->name('destroy');
+            Route::get('export', 'export')->name('export');
         });
 
         Route::group(['prefix' => 'tickets', 'controller' => TicketController::class, 'as' => 'tickets.'], function () {
