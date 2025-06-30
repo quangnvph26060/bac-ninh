@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Kalnoy\Nestedset\NodeTrait;
 
 class CashAccount extends Model
 {
-    use HasFactory, NodeTrait;
+    use HasFactory;
 
     protected $fillable = [
         'code',
@@ -16,9 +15,8 @@ class CashAccount extends Model
         'created_by',
         'level',
         'status',
-        '_lft',
-        '_rgt',
-        'parent_id'
+        'parent_id',
+        'is_default'
     ];
 
     /**
@@ -36,4 +34,13 @@ class CashAccount extends Model
     {
         return $this->hasMany(CashAccount::class, 'parent_id');
     }
+
+    public function creator()
+    {
+        return $this->belongsTo(Employee::class, 'created_by');
+    }
+
+    protected $casts = [
+        'is_default' => 'boolean'
+    ];
 }
