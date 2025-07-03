@@ -179,6 +179,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('order/{orderId}/products', 'getProductsByOrder');
                 Route::get('get-boms', 'getBoms');
                 Route::delete('destroy/{id}', 'destroy');
+
+                Route::get('/confirm', 'indexConfirm')->name('indexConfirm');
+                Route::post('/cancel/{id}', 'cancelConfirm')->name('cancelConfirm');
+                Route::post('/approved/{id}', 'approvedConfirm')->name('approvedConfirm');
             }
         );
 

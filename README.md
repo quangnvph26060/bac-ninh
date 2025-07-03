@@ -48,3 +48,17 @@
                 "title": "Quản lý yêu cầu vật tư",
                 "url": "admin.material-requests.index"
             },
+
+
+  {
+        "title": "Quản lý Thu Chi",
+        "icon": "fas fa-wallet",
+        "url": "javascript:void(0)",
+        "children": [
+            {
+                "title": "Phiếu thu/chi",
+                "url": "/cash-transactions"
+            }
+        ]
+    },
+f

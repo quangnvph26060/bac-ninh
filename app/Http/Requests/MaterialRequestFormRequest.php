@@ -23,7 +23,7 @@ class MaterialRequestFormRequest extends FormRequest
     {
         return [
             'order_id' => 'required|exists:orders,id',
-            'item_id' => ['required', 'regex:/^\d+-\d+$/'], // format: product_id-variant_id
+            'item_id' => ['required'], // format: product_id-variant_id
             'materials' => 'required|array|min:1',
             'materials.*.quantity' => 'required|numeric|min:0.01',
             'materials.*.note' => 'nullable|string|max:255',
