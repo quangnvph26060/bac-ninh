@@ -2,8 +2,8 @@
 // phpinfo();
 
 use App\Exports\MaterialsDataSheet;
-use App\Exports\MaterialsExport;
 use App\Exports\MaterialsTemplateExport;
+use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AttributeController;
@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BomsController;
+use App\Http\Controllers\Admin\CashBookController;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialRequestController;
 use App\Http\Controllers\Admin\PasswordChangeRequestController;
@@ -84,6 +85,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('messages/{userId}', 'getMessages')->name('messages');
         });
 
+        Route::group(['prefix' => 'cashbook', 'controller' => CashBookController::class, 'as' => 'cashbook'], function () {
+            Route::get('/', 'index');
+        });
+
         Route::prefix('orders')->controller(OrderController::class)->name('orders.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('edit/{id}', 'edit')->name('edit');
@@ -97,6 +102,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get-by-barcode', 'getByBarcode')->name('get.by.barcode');
             Route::post('change-tracking', 'changeTracking')->name('change-tracking');
             Route::view('view-barcode-pdf', 'admin.pdf.barcode');
+        });
+
+        Route::group(['prefix' => 'accounting-accounts', 'controller' => AccountController::class, 'as' => 'accounting-accounts.'], function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('list', 'list')->name('list');
+            Route::get('search', 'search')->name('search');
+            Route::post('/', 'store')->name('store');
+            Route::put('/', 'update')->name('update');
+            Route::delete('delete-multiple', 'destroy')->name('destroy');
+            Route::get('export', 'export')->name('export');
         });
 
         Route::group(['prefix' => 'tickets', 'controller' => TicketController::class, 'as' => 'tickets.'], function () {

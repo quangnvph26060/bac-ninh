@@ -13,6 +13,7 @@ use App\Models\Config;
 use App\Models\Country;
 use App\Models\Coupon;
 use App\Models\Order;
+use App\Models\OrderImportFile;
 use App\Models\OrderItem;
 use App\Models\Photo;
 use App\Models\Product;
@@ -1103,7 +1104,9 @@ class OrderController extends Controller
 
     public function importOrder()
     {
-        return view('frontend.app.order.import-order');
+        $fileUpload = OrderImportFile::query()->firstOrCreate();
+
+        return view('frontend.app.order.import-order', compact('fileUpload'));
     }
 
     public function import(Request $request)

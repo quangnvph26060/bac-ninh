@@ -168,6 +168,40 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">📦 Tải file Excel <strong>Order</strong></h4>
+                        </div>
+                        <div class="card-body">
+                            <input type="file" name="sample_file_path" class="form-control mb-2" accept=".xlsx,.xls">
+                            @if ($fileUpload->sample_file_path)
+                                <div class="mt-2">
+                                    <a href="{{ asset('storage/' . $fileUpload->sample_file_path) }}" target="_blank"
+                                        class="btn btn-link p-0">📂 Xem file đã upload</a><br>
+                                    <small class="text-muted">Cập nhật:
+                                        {{ $fileUpload->updated_at_sample?->format('d/m/Y') }}</small>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">📦 Tải file Excel <strong>Product</strong></h4>
+                        </div>
+                        <div class="card-body">
+                            <input type="file" name="data_file_path" class="form-control mb-2" accept=".xlsx,.xls">
+                            @if ($fileUpload->data_file_path)
+                                <div class="mt-2">
+                                    <a href="{{ asset('storage/' . $fileUpload->data_file_path) }}" target="_blank"
+                                        class="btn btn-link p-0">📂 Xem file đã upload</a><br>
+                                    <small class="text-muted">Cập nhật:
+                                        {{ $fileUpload->updated_at_data?->format('d/m/Y') }}</small>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </form>
