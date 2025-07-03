@@ -16,6 +16,7 @@ use App\Services\OrderService;
 use App\Traits\PaginateTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MaterialRequestController extends Controller
 {
@@ -24,7 +25,8 @@ class MaterialRequestController extends Controller
     public function __construct(
         public MaterialRequestService $materialRequestService,
         public OrderService $orderService
-    ) {}
+    ) {
+    }
 
     public function index()
     {
@@ -34,12 +36,12 @@ class MaterialRequestController extends Controller
 
             return $this->processDataTable(
                 $buider,
-                fn($dataTable) =>
+                fn ($dataTable) =>
                 $dataTable
-                    ->editColumn('created_at', fn($row) => $row->created_at->format('d/m/Y'))
+                    ->editColumn('created_at', fn ($row) => $row->created_at->format('d/m/Y'))
                     ->addColumn(
                         'operations',
-                        fn($row) =>
+                        fn ($row) =>
                         '
                             <a href="/admin/material-requests/' . $row->id . '/edit"
                                 class="btn btn-primary btn-sm table-actions btn-operation-edit">
@@ -262,4 +264,160 @@ class MaterialRequestController extends Controller
 
         return handleResponse("Xóa yêu cầu xuất vật tư thành công.", true, 200, null, false);
     }
+
+    public function indexConfirm()
+    {
+        if (request()->ajax()) {
+
+            $buider = $this->materialRequestService->pagination();
+
+            return $this->processDataTable(
+                $buider,
+                fn ($dataTable) =>
+                $dataTable
+                    ->editColumn('created_at', fn ($row) => $row->created_at->format('d/m/Y'))
+                    ->addColumn('operations', function ($row) {
+                        if ($row->status === 'rejected') {
+                            return '<span class="badge bg-danger">Từ chối</span>';
+                        }
+
+                        if ($row->status === 'approved') {
+                            return '<span class="badge bg-success"> Đã duyệt</span>';
+                        }
+
+                        return '
+                        <div class="dropdown text-center">
+                            <button class="btn btn-sm btn-outline-secondary rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li>
+                                    <a href="javascript:void(0);" class="dropdown-item text-success" onclick="confirmOrder(' . $row->id . ')">
+                                        ✅ Xác nhận đơn
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);" class="dropdown-item text-danger" onclick="openCancelModal(' . $row->id . ')">
+                                        ❌ Hủy đơn hàng
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    ';
+                    }),
+                ['operations'] // raw HTML
+            );
+        }
+
+        return view('admin.material-request-confirm.index');
+    }
+
+
+    public function cancelConfirm(Request $request, $id)
+    {
+        $request->validate([
+            'note' => 'required'
+        ]);
+
+        $material_requests = MaterialRequest::find($id);
+
+        if (!$material_requests) {
+            return response()->json([
+                'success' => false
+            ], 404);
+        }
+        $material_requests->status = 'rejected';
+        $material_requests->note = $request->note;
+
+        if ($material_requests->save()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã hủy yêu cầu thành công.'
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Không thể cập nhật trạng thái.'
+        ], 500);
+    }
+
+    public function approvedConfirm($id)
+    {
+
+        $material_requests = MaterialRequest::find($id);
+
+        if (!$material_requests) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy yêu cầu vật liệu.'
+            ], 404);
+        }
+
+
+        if (!$material_requests->orderItem) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy thông tin sản phẩm trong đơn hàng.'
+            ], 400);
+        }
+
+        foreach ($material_requests->items as $item) {
+            $material = Material::find($item->material_id);
+            if($material->min_stock <= $item->quantity){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vật liệu '.$material->name. ' không đủ.'
+                ]);
+            }
+        }
+
+        $material_requests->status = 'approved';
+
+        if ($material_requests->save()) {
+
+            $productableType = $material_requests->orderItem->product_variant_id
+                ? ProductVariant::class
+                : Product::class;
+
+            $productableId = $material_requests->orderItem->product_variant_id
+                ?? $material_requests->orderItem->product_id;
+
+
+            $materialUsage = MaterialUsage::create([
+                'order_id' => $material_requests->order_id,
+                'code' => $material_requests->code,
+                'productable_type' => $productableType,
+                'productable_id' => $productableId,
+                'quantity' => $material_requests->quantity,
+                'date' => now(),
+                'created_by' => auth()->id(),
+            ]);
+
+
+            foreach ($material_requests->items as $item) {
+                $materialUsage->details()->create([
+                    'material_id' => $item->material_id,
+                    'quantity_used' => $item->quantity
+                ]);
+
+                $material = Material::find($item->material_id);
+                $material->update([
+                    'min_stock' => $material->min_stock - $item->quantity
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Xác nhận yêu cầu thành công.'
+            ]);
+        }
+
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Không thể cập nhật trạng thái.'
+        ], 500);
+    }
+
 }
