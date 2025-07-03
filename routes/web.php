@@ -85,8 +85,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('messages/{userId}', 'getMessages')->name('messages');
         });
 
-        Route::group(['prefix' => 'cashbook', 'controller' => CashBookController::class, 'as' => 'cashbook'], function () {
-            Route::get('/', 'index');
+        Route::group(['prefix' => 'cashbook', 'controller' => CashBookController::class, 'as' => 'cashbook.'], function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('list', 'list')->name('list');
+            Route::post('voucher-types', 'voucherType');
+            Route::get('save/{id?}', 'save')->name('save');
+            Route::post('store', 'store');
+            Route::put('update/{id}', 'update');
+            Route::delete('destroy', 'destroy');
+            Route::post('print-multiple', 'printMultiple');
         });
 
         Route::prefix('orders')->controller(OrderController::class)->name('orders.')->group(function () {

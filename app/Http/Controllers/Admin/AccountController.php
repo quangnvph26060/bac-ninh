@@ -106,13 +106,22 @@ class AccountController extends Controller
         return $sorted;
     }
 
-    public function list()
+    public function list(Request $request)
     {
         $cashAccounts = CashAccount::query()
             ->with('creator')
             ->get();
 
         $orderedAccounts = $this->sortAccountsHierarchically($cashAccounts);
+
+        // Filter sau khi đã sort để giữ cấu trúc cây
+        if ($request->filled('keyword')) {
+            $keyword = mb_strtolower($request->input('keyword'));
+            $orderedAccounts = $orderedAccounts->filter(function ($account) use ($keyword) {
+                return str_contains(mb_strtolower($account->code), $keyword)
+                    || str_contains(mb_strtolower($account->name), $keyword);
+            });
+        }
 
         return response()->json([
             'success' => true,

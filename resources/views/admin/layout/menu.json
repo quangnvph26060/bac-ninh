@@ -200,15 +200,15 @@
         "id": "cashbook",
         "children": [
             {
-                "title": "Thu chi tiền mặt",
-                "url": "admin.cashbook"
+                "title": "Quản lý thu chi",
+                "url": "admin.cashbook.index"
             },
             {
                 "title": "Tài khoản kế toán",
                 "url": "admin.accounting-accounts.index"
             }
         ],
-        "inRoutes": ["admin.cashbook"]
+        "inRoutes": ["admin.cashbook.index", "admin.accounting-accounts.index", "admin.cashbook.save"]
     },
     {
         "title": "Kho hàng",

@@ -407,6 +407,297 @@ function finalPrice($discountPrice)
     return formatPrice($discountPrice);
 }
 
+function numberToVietnameseWords($number)
+{
+    $hyphen      = ' ';
+    $conjunction = ' ';
+    $separator   = ' ';
+    $negative    = 'âm ';
+    $dollar_unit = ' đô la'; // Đơn vị cho phần nguyên (đô la)
+    $cent_unit   = ' cent';   // Đơn vị cho phần thập phân (cent)
+
+    $dictionary  = [
+        0 => 'không',
+        1 => 'một',
+        2 => 'hai',
+        3 => 'ba',
+        4 => 'bốn',
+        5 => 'năm',
+        6 => 'sáu',
+        7 => 'bảy',
+        8 => 'tám',
+        9 => 'chín',
+        10 => 'mười',
+        11 => 'mười một',
+        12 => 'mười hai',
+        13 => 'mười ba',
+        14 => 'mười bốn',
+        15 => 'mười lăm',
+        16 => 'mười sáu',
+        17 => 'mười bảy',
+        18 => 'mười tám',
+        19 => 'mười chín',
+        20 => 'hai mươi',
+        30 => 'ba mươi',
+        40 => 'bốn mươi',
+        50 => 'năm mươi',
+        60 => 'sáu mươi',
+        70 => 'bảy mươi',
+        80 => 'tám mươi',
+        90 => 'chín mươi',
+        100 => 'trăm',
+        1000 => 'nghìn',
+        1000000 => 'triệu',
+        1000000000 => 'tỷ',
+        1000000000000 => 'nghìn tỷ',
+    ];
+
+    // Hàm trợ giúp để chuyển đổi một số (phần nguyên) thành chữ tiếng Việt mà không có đơn vị tiền tệ.
+    // Hàm này sẽ được gọi đệ quy và cho phần cent.
+    $convertNumberToWords = function ($num) use (&$convertNumberToWords, $dictionary, $hyphen) {
+        if (!is_numeric($num)) {
+            return '';
+        }
+        $num = (int)$num; // Đảm bảo đây là số nguyên cho hàm trợ giúp này
+
+        $str = '';
+        switch (true) {
+            case $num < 21:
+                $str = $dictionary[$num];
+                break;
+            case $num < 100:
+                $tens = ((int)($num / 10)) * 10;
+                $units = $num % 10;
+                $str = $dictionary[$tens];
+                if ($units) {
+                    if ($units == 1) {
+                        $str .= $hyphen . 'mốt';
+                    } elseif ($units == 5) {
+                        $str .= $hyphen . 'lăm';
+                    } else {
+                        $str .= $hyphen . $dictionary[$units];
+                    }
+                }
+                break;
+            case $num < 1000:
+                $hundreds = (int)($num / 100);
+                $remainder = $num % 100;
+                $str = $dictionary[$hundreds] . ' ' . $dictionary[100];
+                if ($remainder) {
+                    if ($remainder < 10) {
+                        $str .= ' lẻ ' . $convertNumberToWords($remainder);
+                    } else {
+                        $str .= ' ' . $convertNumberToWords($remainder);
+                    }
+                }
+                break;
+            default:
+                $baseUnit = pow(1000, floor(log($num, 1000)));
+                $numBaseUnits = (int)($num / $baseUnit);
+                $remainder = $num % $baseUnit;
+                $str = $convertNumberToWords($numBaseUnits) . ' ' . $dictionary[$baseUnit];
+                if ($remainder) {
+                    $str .= $remainder < 100 ? ' lẻ ' : ' ';
+                    $str .= $convertNumberToWords($remainder);
+                }
+                break;
+        }
+        return trim($str);
+    };
+
+    if (!is_numeric($number)) {
+        return false;
+    }
+
+    // Kiểm tra tràn số (đặc biệt đối với các số rất lớn có thể vượt quá PHP_INT_MAX)
+    if (($number >= 0 && (int)$number < 0) || (int)$number < 0 - PHP_INT_MAX) {
+        return false;
+    }
+
+    $is_negative = false;
+    if ($number < 0) {
+        $is_negative = true;
+        $number = abs($number); // Chuyển số âm thành dương để xử lý
+    }
+
+    $integer_part = null;
+    $fraction_str = null;
+
+    // Tách phần nguyên và phần thập phân
+    if (strpos((string)$number, '.') !== false) {
+        [$integer_part, $fraction_str] = explode('.', (string)$number);
+    } else {
+        $integer_part = (string)$number;
+    }
+
+    $result_words = '';
+
+    // Chuyển đổi phần nguyên
+    $integer_words = $convertNumberToWords($integer_part);
+    if ($integer_words === '' && (int)$integer_part === 0) {
+        $integer_words = $dictionary[0]; // Đảm bảo "không" cho phần nguyên bằng 0
+    }
+
+    $result_words .= $integer_words . $dollar_unit;
+
+    // Xử lý phần thập phân (cents)
+    if ($fraction_str !== null && is_numeric($fraction_str)) {
+        // Đảm bảo phần thập phân luôn có hai chữ số cho cents (ví dụ: '5' thành '50', '05' giữ nguyên)
+        $fraction_str = str_pad($fraction_str, 2, '0', STR_PAD_RIGHT);
+        $cents_value = (int)substr($fraction_str, 0, 2); // Chỉ lấy hai chữ số đầu cho cents
+
+        if ($cents_value > 0) {
+            $cent_words = $convertNumberToWords($cents_value);
+            $result_words .= ' ' . $cent_words . $cent_unit;
+        } else if ($cents_value === 0 && strlen($fraction_str) > 0) {
+            // Nếu phần thập phân là '00', không thêm "0 cent"
+            // Phần đô la đã được thêm vào.
+        }
+    }
+
+    // Thêm tiền tố "âm" nếu là số âm
+    if ($is_negative) {
+        $result_words = $negative . $result_words;
+    }
+
+    return trim($result_words);
+}
+
+
+// function numberToVietnameseWords($number)
+// {
+//     $hyphen      = ' ';
+//     $conjunction = ' ';
+//     $separator   = ' ';
+//     $negative    = 'âm ';
+//     $decimal     = ' phẩy ';
+//     $dictionary  = [
+//         0 => 'không',
+//         1 => 'một',
+//         2 => 'hai',
+//         3 => 'ba',
+//         4 => 'bốn',
+//         5 => 'năm',
+//         6 => 'sáu',
+//         7 => 'bảy',
+//         8 => 'tám',
+//         9 => 'chín',
+//         10 => 'mười',
+//         11 => 'mười một',
+//         12 => 'mười hai',
+//         13 => 'mười ba',
+//         14 => 'mười bốn',
+//         15 => 'mười lăm',
+//         16 => 'mười sáu',
+//         17 => 'mười bảy',
+//         18 => 'mười tám',
+//         19 => 'mười chín',
+//         20 => 'hai mươi',
+//         30 => 'ba mươi',
+//         40 => 'bốn mươi',
+//         50 => 'năm mươi',
+//         60 => 'sáu mươi',
+//         70 => 'bảy mươi',
+//         80 => 'tám mươi',
+//         90 => 'chín mươi',
+//         100 => 'trăm',
+//         1000 => 'nghìn',
+//         1000000 => 'triệu',
+//         1000000000 => 'tỷ',
+//         1000000000000 => 'nghìn tỷ',
+//     ];
+
+//     if (!is_numeric($number)) {
+//         return false;
+//     }
+
+//     // Check for overflow (especially for very large numbers that might exceed PHP_INT_MAX)
+//     // This check is a bit simplified; for very precise large number handling, libraries like GMP or BCMath are better.
+//     if (($number >= 0 && (int)$number < 0) || (int)$number < 0 - PHP_INT_MAX) {
+//         // overflow detection for positive numbers becoming negative due to int cast, or negative numbers exceeding min int
+//         return false;
+//     }
+
+//     if ($number < 0) {
+//         // Handle negative numbers recursively
+//         return $negative . numberToVietnameseWords(abs($number));
+//     }
+
+//     $string = $fraction = null;
+
+//     // Check if the number has a decimal part
+//     if (strpos((string)$number, '.') !== false) {
+//         [$number, $fraction] = explode('.', (string)$number);
+//     }
+
+//     // Convert the integer part to Vietnamese words
+//     switch (true) {
+//         case $number < 21:
+//             $string = $dictionary[$number];
+//             break;
+//         case $number < 100:
+//             $tens = ((int)($number / 10)) * 10;
+//             $units = $number % 10;
+//             $string = $dictionary[$tens];
+//             if ($units) {
+//                 if ($units == 1) {
+//                     $string .= $hyphen . 'mốt'; // Special case for 'mốt' (one)
+//                 } elseif ($units == 5) {
+//                     $string .= $hyphen . 'lăm'; // Special case for 'lăm' (five)
+//                 } else {
+//                     $string .= $hyphen . $dictionary[$units];
+//                 }
+//             }
+//             break;
+//         case $number < 1000:
+//             $hundreds = (int)($number / 100);
+//             $remainder = $number % 100;
+//             $string = $dictionary[$hundreds] . ' ' . $dictionary[100]; // e.g., "hai trăm"
+//             if ($remainder) {
+//                 if ($remainder < 10) {
+//                     $string .= ' lẻ ' . numberToVietnameseWords($remainder); // e.g., "hai trăm lẻ năm"
+//                 } else {
+//                     $string .= ' ' . numberToVietnameseWords($remainder); // e.g., "hai trăm hai mươi lăm"
+//                 }
+//             }
+//             break;
+//         default:
+//             // For numbers 1,000 and above, recursively break them down
+//             $baseUnit = pow(1000, floor(log($number, 1000)));
+//             $numBaseUnits = (int)($number / $baseUnit);
+//             $remainder = $number % $baseUnit;
+//             $string = numberToVietnameseWords($numBaseUnits) . ' ' . $dictionary[$baseUnit];
+//             if ($remainder) {
+//                 // Add 'lẻ' for remainders less than 100 when breaking down large numbers
+//                 $string .= $remainder < 100 ? ' lẻ ' : ' ';
+//                 $string .= numberToVietnameseWords($remainder);
+//             }
+//             break;
+//     }
+
+//     // Handle the fractional part
+//     if ($fraction !== null && is_numeric($fraction)) {
+//         $string .= $decimal;
+//         $digits = str_split((string)$fraction);
+//         foreach ($digits as $digit) {
+//             $string .= $dictionary[$digit] . ' ';
+//         }
+//         $string = trim($string); // Remove trailing space
+//     }
+
+//     return $string;
+// }
+
+function getRealSql($query)
+{
+    $sql = $query->toSql();
+    foreach ($query->getBindings() as $binding) {
+        $value = is_numeric($binding) ? $binding : "'{$binding}'";
+        $sql = preg_replace('/\?/', $value, $sql, 1);
+    }
+    return $sql;
+}
+
 function formatPrice($price)
 {
     if (!empty($price)) {

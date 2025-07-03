@@ -393,7 +393,7 @@ function submitForm(formId, successCallback, url = null, errorCallback = null) {
         var formData = new FormData(this);
 
         // 👉 Xóa dấu phẩy trong các input có class `usd-price-format`
-        $(".usd-price-format").each(function () {
+        $(`${formId} .usd-price-format`).each(function () {
             const name = $(this).attr("name");
             const rawValue = $(this).val().replace(/,/g, "");
             formData.set(name, rawValue); // Ghi đè lại giá trị trong formData

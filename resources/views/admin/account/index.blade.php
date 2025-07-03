@@ -34,7 +34,7 @@
                         </div>
                     </div>
                     <div class="w-25">
-                        <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm mã hoặc tên...">
                     </div>
                 </div>
             </div>
@@ -179,9 +179,14 @@
             });
 
             function reloadCashAccounts() {
+                const keyword = $('#searchInput').val();
+
                 $.ajax({
                     url: "/admin/accounting-accounts/list",
                     type: "GET",
+                    data: {
+                        keyword: keyword
+                    },
                     beforeSend: function() {
                         $("#loadingSpinner").fadeIn();
                     },
@@ -198,6 +203,15 @@
                     }
                 });
             }
+
+            let debounceTimer;
+            $('#searchInput').on('keyup', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    reloadCashAccounts();
+                }, 300); // 300ms delay
+            });
+
 
             $('#addCashAccountModal').on('hidden.bs.modal', function() {
                 $('#myForm')[0].reset();
@@ -269,7 +283,7 @@
                 }
             });
 
-            $('#delete-selected').on('click', function() {
+            $(document).on('click', '#delete-selected', function() {
                 let ids = $('.item-checkbox:checked').map(function() {
                     return $(this).data('id');
                 }).get();
@@ -297,8 +311,7 @@
                                 ids: ids,
                             },
                             beforeSend: function() {
-                                $('#delete-selected').prop('disabled', true).text(
-                                    'Đang xoá...');
+                                $("#loadingSpinner").fadeIn();
                             },
                             success: function(res) {
                                 if (res.success) {
@@ -314,8 +327,7 @@
                                     'error');
                             },
                             complete: function() {
-                                $('#delete-selected').prop('disabled', false).html(
-                                    '<i class="fas fa-trash"></i> Xoá đã chọn');
+                                $("#loadingSpinner").fadeOut();
                             }
                         });
                     } else {
