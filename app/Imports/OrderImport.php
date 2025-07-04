@@ -45,7 +45,7 @@ class OrderImport implements ToCollection, WithHeadingRow
         $tax = Config::query()->first()->tax_rate;
 
         foreach ($rows as $index => $row) {
-            $line = $index + 2;
+            $line = $index + 1;
 
             $this->updateProgress('processing');
 
@@ -151,18 +151,18 @@ class OrderImport implements ToCollection, WithHeadingRow
         $messages = [];
 
         $requiredFields = [
-            'order_code' => 'Mã đơn hàng',
-            'order_name' => 'Tên đơn hàng',
-            'product_name' => 'Tên sản phẩm',
+            'order_code' => 'mã đơn hàng',
+            'order_name' => 'tên đơn hàng',
+            'product_name' => 'tên sản phẩm',
             'product_variant_sku' => 'SKU',
-            'quantity' => 'Số lượng',
-            'first_name' => 'Họ',
-            'last_name' => 'Tên',
-            'nation' => 'Quốc gia',
-            'state' => 'Tỉnh/Bang',
-            'city' => 'Thành phố',
-            'street_address' => 'Địa chỉ',
-            'delivery_method' => 'Phương thức giao hàng',
+            'quantity' => 'số lượng',
+            'first_name' => 'họ người nhận',
+            'last_name' => 'tên người nhận',
+            'nation' => 'quốc gia',
+            'state' => 'tỉnh/Bang',
+            'city' => 'thành phố',
+            'street_address' => 'địa chỉ',
+            'delivery_method' => 'phương thức giao hàng',
             // 'design_image' => 'Ảnh thiết kế',
         ];
 
