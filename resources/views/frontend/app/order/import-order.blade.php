@@ -49,6 +49,22 @@
             </div>
         </div>
 
+        <div id="import-progress" class="mt-3 d-none">
+            <div class="progress" style="height: 25px;">
+                <div id="progress-bar" class="progress-bar progress-bar-striped bg-success" style="width: 0%">0%</div>
+            </div>
+            <p id="progress-text" class="mt-2">Đang khởi tạo...</p>
+        </div>
+
+
+        <div id="import-errors" class="mt-3 d-none">
+            <div class="alert alert-danger text-start" role="alert">
+                <h6 class="fw-bold mb-2">Import Failed</h6>
+                <ul class="mb-0" id="error-list">
+                </ul>
+            </div>
+        </div>
+
         <div class="row align-items-start">
             <!-- Left Content -->
             <div class="col-lg-6 col-md-12">
@@ -161,21 +177,7 @@
             </div>
         </div>
 
-        <div id="import-progress" class="mt-3 d-none">
-            <div class="progress" style="height: 25px;">
-                <div id="progress-bar" class="progress-bar progress-bar-striped bg-success" style="width: 0%">0%</div>
-            </div>
-            <p id="progress-text" class="mt-2">Đang khởi tạo...</p>
-        </div>
 
-
-        <div id="import-errors" class="mt-3 d-none">
-            <div class="alert alert-danger text-start" role="alert">
-                <h6 class="fw-bold mb-2">Import Failed</h6>
-                <ul class="mb-0" id="error-list">
-                </ul>
-            </div>
-        </div>
     </div>
 @endsection
 

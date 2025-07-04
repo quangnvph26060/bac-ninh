@@ -234,7 +234,7 @@ class CashBookController extends Controller
 
     public function downloadSample()
     {
-        return Excel::download(new SampleCashTransactionExport, 'mau_import_giao_dich_tien_mat.xlsx');
+        return Excel::download(new SampleCashTransactionExport, 'mau_import_phieu_thu_chi_' . date('d_m_Y') . '.xlsx');
     }
 
     public function import(Request $request)

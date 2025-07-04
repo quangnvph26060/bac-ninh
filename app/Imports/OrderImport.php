@@ -163,7 +163,7 @@ class OrderImport implements ToCollection, WithHeadingRow
             'city' => 'Thành phố',
             'street_address' => 'Địa chỉ',
             'delivery_method' => 'Phương thức giao hàng',
-            'design_image' => 'Ảnh thiết kế',
+            // 'design_image' => 'Ảnh thiết kế',
         ];
 
         foreach ($requiredFields as $field => $label) {
