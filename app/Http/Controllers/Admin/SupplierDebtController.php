@@ -22,13 +22,11 @@ class SupplierDebtController extends Controller
 
     public function index()
     {
-
         if (request()->ajax()) {
-
-            $buider = $this->supplierDebtService->pagination();
+            $builder = $this->supplierDebtService->pagination();
 
             return $this->processDataTable(
-                $buider,
+                $builder,
                 fn($dataTable) => $dataTable
                     ->addIndexColumn()
                     ->editColumn('created_at', fn($row) => $row->created_at->format('d/m/Y'))
@@ -41,13 +39,39 @@ class SupplierDebtController extends Controller
             );
         }
 
-        $totalDebt = $this->supplierDebtService->getTotalDebt();
-        $totalPaid = $this->supplierPaymentService->getTotalPaid();
-        $totalRemain = $totalDebt - $totalPaid;
-        $suppliers      = $this->supplierService->getAllSupplier();
+        $statistics = $this->getStatistics();
+        $suppliers = $this->supplierService->getAllSupplier();
 
-        return view('admin.suplier-debt.index', compact('totalDebt', 'totalPaid', 'totalRemain', 'suppliers'));
+        return view('admin.suplier-debt.index', array_merge(
+            $statistics,
+            compact('suppliers')
+        ));
     }
+
+
+    private function getStatistics($from = null, $to = null): array
+    {
+        $totalDebt = $this->supplierDebtService->getTotalDebt($from, $to);
+        $totalPaid = $this->supplierPaymentService->getTotalPaid($from, $to);
+        $totalRemain = $totalDebt - $totalPaid;
+
+        return compact('totalDebt', 'totalPaid', 'totalRemain');
+    }
+
+    public function statistics()
+    {
+        $from = request('start_date');
+        $to = request('end_date');
+
+        $statistics = $this->getStatistics($from, $to);
+
+        return response()->json([
+            'success' => true,
+            'data' => $statistics,
+        ]);
+    }
+
+
 
     public function show(string $id)
     {

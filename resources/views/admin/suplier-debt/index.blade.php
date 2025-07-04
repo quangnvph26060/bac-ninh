@@ -6,32 +6,41 @@
             <x-breadcrumb :items="[['name' => 'công nợ']]" />
         </div>
 
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card text-white bg-primary">
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="card stats-card card-primary text-white">
                     <div class="card-body">
+                        <i class="fas fa-credit-card card-icon"></i>
                         <h6 class="card-title">Tổng công nợ</h6>
-                        <h3 class="fw-bold text-white">{{ formatPrice($totalDebt) }} USD</h3>
+                        <h3 class="card-amount animate-number" id="totalDebt">{{ formatPrice($totalDebt) }} USD</h3>
+                        <p class="card-subtitle">Tổng số tiền cần thanh toán</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card text-white bg-success">
+
+            <div class="col-lg-4 col-md-6">
+                <div class="card stats-card card-success text-white">
                     <div class="card-body">
+                        <i class="fas fa-check-circle card-icon"></i>
                         <h6 class="card-title">Đã thanh toán</h6>
-                        <h3 class="fw-bold text-white">{{ formatPrice($totalPaid) }} USD</h3>
+                        <h3 class="card-amount animate-number" id="totalPaid">{{ formatPrice($totalPaid) }} USD</h3></h3>
+                        <p class="card-subtitle">Số tiền đã hoàn thành</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card text-white bg-danger">
+
+            <div class="col-lg-4 col-md-6">
+                <div class="card stats-card card-danger text-white">
                     <div class="card-body">
+                        <i class="fas fa-exclamation-triangle card-icon"></i>
                         <h6 class="card-title">Còn lại</h6>
-                        <h3 class="fw-bold text-white">{{ formatPrice($totalRemain) }} USD</h3>
+                        <h3 class="card-amount animate-number" id="totalRemain">{{ formatPrice($totalRemain) }} USD</h3>
+                        <p class="card-subtitle">Số tiền cần thanh toán</p>
                     </div>
                 </div>
             </div>
         </div>
+
 
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -58,7 +67,8 @@
                     <!-- Thông tin công nợ -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-header bg-light fw-bold">
-                            Thông tin công nợ <span id="debt-code" class="text-muted fst-italic text-decoration-underline"></span>
+                            Thông tin công nợ <span id="debt-code"
+                                class="text-muted fst-italic text-decoration-underline"></span>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -100,7 +110,8 @@
                     <!-- Thông tin phiếu nhập -->
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-header bg-light fw-bold">
-                            Thông tin phiếu nhập <span id="entry-code" class="text-muted fst-italic text-decoration-underline"></span>
+                            Thông tin phiếu nhập <span id="entry-code"
+                                class="text-muted fst-italic text-decoration-underline"></span>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -205,6 +216,37 @@
                     data: @json($suppliers)
                 },
             }, false, true, false, true)
+
+
+            $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
+                fetchStatistics(picker.startDate.format('YYYY-MM-DD'), picker.endDate.format('YYYY-MM-DD'));
+            });
+
+            $('#dateRangePicker').on('cancel.daterangepicker', function(ev, picker) {
+                fetchStatistics()
+            });
+
+            function fetchStatistics(startDate = null, endDate = null) {
+                $.ajax({
+                    url: "/admin/suppliers-debts/statistics",
+                    type: "GET",
+                    data: {
+                        start_date: startDate,
+                        end_date: endDate
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#totalDebt').text(formatNumber(response.data.totalDebt) + " USD");
+                            $('#totalPaid').text(formatNumber(response.data.totalPaid) + " USD");
+                            $('#totalRemain').text(formatNumber(response.data.totalRemain) + " USD");
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error(xhr);
+                        alert('Có lỗi xảy ra khi lấy dữ liệu thống kê.');
+                    }
+                });
+            }
 
             $(document).on('click', '.show-modal', function(e) {
                 e.preventDefault();
@@ -390,4 +432,104 @@
             }, '/admin/suppliers-debts/pay');
         })
     </script>
+@endpush
+
+@push('styles')
+    <style>
+        .stats-card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+        }
+
+        .card-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+        }
+
+        .card-danger {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        }
+
+        .card-body {
+            padding: 2rem;
+            position: relative;
+        }
+
+        .card-icon {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 2.5rem;
+            opacity: 0.3;
+        }
+
+       .stats-card .card-title {
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .card-amount {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .card-amount {
+                font-size: 1.8rem;
+            }
+
+            .card-icon {
+                font-size: 2rem;
+            }
+        }
+
+        .animate-number {
+            animation: countUp 2s ease-out;
+            color: #ffffff
+        }
+
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 @endpush

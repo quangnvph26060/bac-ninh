@@ -189,6 +189,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
                 Route::get('/confirm', 'indexConfirm')->name('indexConfirm');
                 Route::post('/cancel/{id}', 'cancelConfirm')->name('cancelConfirm');
+                Route::get('show-detail/{id}', 'showDetails')->name('showDetails');
                 Route::post('/approved/{id}', 'approvedConfirm')->name('approvedConfirm');
             }
         );
@@ -212,6 +213,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('edit/{id}', 'update')->name('update');
             Route::get('pdf/{id}', 'downloadPdf');
             Route::post('pay', 'pay');
+            Route::get('statistics', 'statistics')->name('statistics');
         });
 
         // Attribute Router
