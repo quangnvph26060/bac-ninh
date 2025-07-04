@@ -212,10 +212,10 @@
                                 <tr>
                                     <td>
                                         ${isExists ? `<i class="text-muted">✔</i>` : `<input type="checkbox" class="material-checkbox"
-                                                                                                                                                                                                                                                                    data-id="${material.id}"
-                                                                                                                                                                                                                                                                    data-code="${material.code}"
-                                                                                                                                                                                                                                                                    data-name="${material.name}"
-                                                                                                                                                                                                                                                                    data-unit="${material.unit}">`}
+                                                                                                                                                                                                                                                                        data-id="${material.id}"
+                                                                                                                                                                                                                                                                        data-code="${material.code}"
+                                                                                                                                                                                                                                                                        data-name="${material.name}"
+                                                                                                                                                                                                                                                                        data-unit="${material.unit}">`}
                                     </td>
                                     <td>${material.code}</td>
                                     <td>${material.name}</td>
@@ -251,6 +251,10 @@
             // Xác nhận chọn vật tư
             $('#confirm-add-materials').on('click', function() {
                 const $tbodyMain = $('.table-responsive tbody');
+
+                // Xóa dòng trống nếu có
+                $tbodyMain.find('tr:has(td[colspan])').remove();
+
                 const indexStart = $tbodyMain.find('tr').length;
 
                 $('.material-checkbox:checked').each(function(i) {
