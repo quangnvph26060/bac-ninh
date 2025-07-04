@@ -20,7 +20,7 @@
                 "url": "admin.orders.barcode.scanner"
             },
             {
-                "title": "Quản lý yêu cầu vật tư",
+                "title": "Yêu cầu vật tư",
                 "url": "admin.material-requests.index"
             },
             {
@@ -208,7 +208,11 @@
                 "url": "admin.accounting-accounts.index"
             }
         ],
-        "inRoutes": ["admin.cashbook.index", "admin.accounting-accounts.index", "admin.cashbook.save"]
+        "inRoutes": [
+            "admin.cashbook.index",
+            "admin.accounting-accounts.index",
+            "admin.cashbook.save"
+        ]
     },
     {
         "title": "Kho hàng",
@@ -228,6 +232,10 @@
                 "url": "admin.suppliers-debts.index"
             },
             {
+                "title": "Quản lý yêu cầu vật tư",
+                "url": "admin.material-requests.indexConfirm"
+            },
+            {
                 "title": "Quản lý nhà cung cấp",
                 "url": "admin.suppliers.index"
             }
@@ -237,7 +245,8 @@
             "admin.materials.index",
             "admin.material-imports.index",
             "admin.material-imports.create",
-            "admin.suppliers-debts.index"
+            "admin.suppliers-debts.index",
+            "admin.material-requests.indexConfirm"
         ]
     },
     {

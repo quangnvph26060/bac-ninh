@@ -25,8 +25,7 @@ class MaterialRequestController extends Controller
     public function __construct(
         public MaterialRequestService $materialRequestService,
         public OrderService $orderService
-    ) {
-    }
+    ) {}
 
     public function index()
     {
@@ -36,12 +35,12 @@ class MaterialRequestController extends Controller
 
             return $this->processDataTable(
                 $buider,
-                fn ($dataTable) =>
+                fn($dataTable) =>
                 $dataTable
-                    ->editColumn('created_at', fn ($row) => $row->created_at->format('d/m/Y'))
+                    ->editColumn('created_at', fn($row) => $row->created_at->format('d/m/Y'))
                     ->addColumn(
                         'operations',
-                        fn ($row) =>
+                        fn($row) =>
                         '
                             <a href="/admin/material-requests/' . $row->id . '/edit"
                                 class="btn btn-primary btn-sm table-actions btn-operation-edit">
@@ -273,45 +272,77 @@ class MaterialRequestController extends Controller
 
             return $this->processDataTable(
                 $buider,
-                fn ($dataTable) =>
+                fn($dataTable) =>
                 $dataTable
-                    ->editColumn('created_at', fn ($row) => $row->created_at->format('d/m/Y'))
+                    ->editColumn('created_at', fn($row) => $row->created_at->format('d/m/Y'))
                     ->addColumn('operations', function ($row) {
                         if ($row->status === 'rejected') {
                             return '<span class="badge bg-danger">Từ chối</span>';
                         }
 
                         if ($row->status === 'approved') {
-                            return '<span class="badge bg-success"> Đã duyệt</span>';
+                            return '<span class="badge bg-success">Đã duyệt</span>';
                         }
 
+                        $id = json_encode($row->id); // an toàn, escape ký tự
+
                         return '
-                        <div class="dropdown text-center">
-                            <button class="btn btn-sm btn-outline-secondary rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                <li>
-                                    <a href="javascript:void(0);" class="dropdown-item text-success" onclick="confirmOrder(' . $row->id . ')">
-                                        ✅ Xác nhận đơn
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="javascript:void(0);" class="dropdown-item text-danger" onclick="openCancelModal(' . $row->id . ')">
-                                        ❌ Hủy đơn hàng
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    ';
+                            <div class="dropdown text-center">
+                                <button
+                                    class="btn btn-sm btn-light border rounded-circle"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    <li>
+                                        <a
+                                            href="javascript:void(0);"
+                                            class="dropdown-item d-flex align-items-center gap-2"
+                                            onclick="viewRequestDetails(' . $id . ')"
+                                        >
+                                            <i class="fas fa-eye text-primary"></i> Xem chi tiết
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href="javascript:void(0);"
+                                            class="dropdown-item d-flex align-items-center gap-2"
+                                            onclick="confirmOrder(' . $id . ')"
+                                        >
+                                            <i class="fas fa-check-circle text-success"></i> Xác nhận đơn
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href="javascript:void(0);"
+                                            class="dropdown-item d-flex align-items-center gap-2"
+                                            onclick="openCancelModal(' . $id . ')"
+                                        >
+                                            <i class="fas fa-times-circle text-danger"></i> Hủy đơn hàng
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        ';
                     }),
-                ['operations'] // raw HTML
+                ['operations']
             );
         }
 
         return view('admin.material-request-confirm.index');
     }
 
+    public function showDetails($id)
+    {
+        $request = MaterialRequest::with('items.material.inventory')->findOrFail($id);
+
+        return response()->json([
+            'data' => $request->items
+        ]);
+    }
 
     public function cancelConfirm(Request $request, $id)
     {
@@ -364,10 +395,10 @@ class MaterialRequestController extends Controller
 
         foreach ($material_requests->items as $item) {
             $material = Material::find($item->material_id);
-            if($material->min_stock <= $item->quantity){
+            if ($material->min_stock <= $item->quantity) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Vật liệu '.$material->name. ' không đủ.'
+                    'message' => 'Vật liệu ' . $material->name . ' không đủ.'
                 ]);
             }
         }
@@ -419,5 +450,4 @@ class MaterialRequestController extends Controller
             'message' => 'Không thể cập nhật trạng thái.'
         ], 500);
     }
-
 }

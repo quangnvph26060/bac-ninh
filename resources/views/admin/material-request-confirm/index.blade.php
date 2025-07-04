@@ -29,8 +29,8 @@
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="submit" class="btn btn-danger btn-sm">✅ Xác nhận hủy</button>
-                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">❌
+                                <button type="submit" class="btn btn-primary btn-sm"> Xác nhận hủy</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm" data-bs-dismiss="modal">
                                     Thoát</button>
                             </div>
                         </div>
@@ -40,6 +40,25 @@
 
             <x-data-table file="material-request" />
 
+        </div>
+    </div>
+
+    <div class="modal fade" id="requestDetailModal" tabindex="-1" aria-labelledby="requestDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-medium">Chi tiết yêu cầu vật tư</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Nội dung chi tiết sẽ được load ở đây -->
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div>Đang tải dữ liệu...</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -105,44 +124,113 @@
             modal.show();
         }
 
+        function viewRequestDetails(id) {
+            // Sử dụng AJAX hoặc Alpine/Livewire/Vue để load chi tiết
+            // Hoặc đơn giản:
+            $('#requestDetailModal').modal('show');
+
+            // Load dữ liệu:
+            $.ajax({
+                url: `/admin/material-requests/show-detail/${id}`,
+                method: 'GET',
+                success: function(response) {
+                    const data = response.data;
+                    let html = `
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Mã vật tư</th>
+                                        <th>Tên vật tư</th>
+                                        <th>Đơn vị</th>
+                                        <th>Số lượng yêu cầu</th>
+                                        <th>Số lượng tồn</th>
+                                        <th>Thông báo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    data.forEach((item, index) => {
+                        const requiredQty = parseFloat(item.quantity);
+                        const availableQty = item.material.inventory ? parseFloat(item.material
+                            .inventory.quantity) : 0;
+
+                        let notice = '';
+                        if (availableQty < requiredQty) {
+                            notice = `<span class="text-danger">không hợp lệ</span>`;
+                        } else {
+                            notice = `<span class="text-success">hợp lệ</span>`;
+                        }
+
+                        html += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${item.material.code}</td>
+                                <td>${item.material.name}</td>
+                                <td>${item.material.unit}</td>
+                                <td>${requiredQty.toLocaleString()}</td>
+                                <td>${availableQty.toLocaleString()}</td>
+                                <td>${notice}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    $('#requestDetailModal .modal-body').html(html);
+                },
+
+                error: function() {
+                    alert('Không thể tải chi tiết yêu cầu.');
+                }
+            });
+        }
+
         function confirmOrder(orderId) {
-                Swal.fire({
-                    title: 'Bạn có chắc chắn?',
-                    text: "Xác nhận đơn hàng này?",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: '✅ Xác nhận',
-                    cancelButtonText: '❌ Hủy bỏ',
-                    customClass: {
-                        confirmButton: 'swal-confirm-sm',
-                        cancelButton: 'swal-cancel-sm'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '{{ route('admin.material-requests.approvedConfirm', ':id') }}'.replace(':id', orderId),
-                            type: 'POST',
+            Swal.fire({
+                title: 'Bạn có chắc chắn?',
+                text: "Xác nhận đơn hàng này?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: ' Xác nhận',
+                cancelButtonText: ' Hủy bỏ',
+                customClass: {
+                    confirmButton: 'swal-confirm-sm',
+                    cancelButton: 'swal-cancel-sm'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '{{ route('admin.material-requests.approvedConfirm', ':id') }}'.replace(':id',
+                            orderId),
+                        type: 'POST',
 
-                            success: function(data) {
-                                if (data.success) {
-                                    Swal.fire('Thành công!', data.message, 'success').then(
-                                () => {
+                        success: function(data) {
+                            if (data.success) {
+                                Swal.fire('Thành công!', data.message, 'success').then(
+                                    () => {
 
-                                    $('#myTable').DataTable().ajax.reload(null, false);
+                                        $('#myTable').DataTable().ajax.reload(null, false);
 
                                     });
-                                } else {
-                                    Swal.fire('Lỗi!', data.message || 'Không thể xác nhận.', 'error');
-                                }
-                            },
-                            error: function() {
-                                Swal.fire('Lỗi!', 'Không thể kết nối máy chủ.', 'error');
+                            } else {
+                                Swal.fire('Lỗi!', data.message || 'Không thể xác nhận.', 'error');
                             }
-                        });
-                    }
-                });
-            }
+                        },
+                        error: function() {
+                            Swal.fire('Lỗi!', 'Không thể kết nối máy chủ.', 'error');
+                        }
+                    });
+                }
+            });
+        }
     </script>
 @endpush
