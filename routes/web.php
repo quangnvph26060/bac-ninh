@@ -94,6 +94,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('update/{id}', 'update');
             Route::delete('destroy', 'destroy');
             Route::post('print-multiple', 'printMultiple');
+            Route::get('download-sample-cash-transaction', 'downloadSample');
+            Route::post('import', 'import');
         });
 
         Route::prefix('orders')->controller(OrderController::class)->name('orders.')->group(function () {

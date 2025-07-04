@@ -6,6 +6,21 @@
             <x-breadcrumb :items="[['name' => 'thu chi']]" />
         </div>
 
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show mt-2" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+                {{ $errors->first() }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+            </div>
+        @endif
+
+
         <div class="card">
             <div class="card-body">
                 <div class="filter-section">
@@ -32,7 +47,22 @@
                                             <i class="fas fa-trash-alt me-1"></i> Xóa đã chọn
                                         </a>
                                     </li>
+
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="import-excel">
+                                            <i class="fas fa-file-import me-1"></i> Import Excel
+                                        </a>
+                                    </li>
+
+
+                                    <li>
+                                        <a class="dropdown-item" href="/admin/cashbook/download-sample-cash-transaction"
+                                            id="download-sample">
+                                            <i class="fas fa-file-download me-1"></i> Tải file mẫu
+                                        </a>
+                                    </li>
                                 </ul>
+
                             </div>
                         </div>
                         <div class="row g-3 justify-content-end align-items-center">
@@ -91,6 +121,35 @@
         </div>
     </div>
 
+    <!-- Modal Import Excel -->
+    <div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="import-excel-form" action="/admin/cashbook/import" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importExcelModalLabel">Import Cash Transactions từ Excel</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="excel-file" class="form-label">Chọn file Excel</label>
+                            <input type="file" class="form-control" id="excel-file" name="file"
+                                accept=".xlsx,.xls,.csv" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-upload me-1"></i> Import
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
     <iframe id="print-iframe" style="display: none;"></iframe>
 @endsection
 
@@ -100,6 +159,12 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <script>
         $(document).ready(function() {
+
+            document.getElementById('import-excel').addEventListener('click', function(e) {
+                e.preventDefault();
+                var modal = new bootstrap.Modal(document.getElementById('importExcelModal'));
+                modal.show();
+            });
 
             let start = moment();
             let end = moment().add(1, 'month');

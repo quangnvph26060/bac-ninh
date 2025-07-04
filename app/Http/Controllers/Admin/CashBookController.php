@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\SampleCashTransactionExport;
 use App\Http\Controllers\Controller;
+use App\Imports\CashTransactionImport;
 use App\Models\CashAccount;
 use App\Models\CashTransaction;
 use App\Models\VoucherType;
@@ -11,6 +13,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CashBookController extends Controller
 {
@@ -179,7 +182,7 @@ class CashBookController extends Controller
         // Lọc theo account (cash / bank)
         if ($request->filled('account')) {
             $accountType = $request->input('account');
-             $query->where('cash_account_id', $accountType);
+            $query->where('cash_account_id', $accountType);
             // if ($accountType === 'cash') {
             //     $query->where('cash_account_id', 9);
             // } elseif ($accountType === 'bank') {
@@ -227,5 +230,21 @@ class CashBookController extends Controller
             'data' => $voucherType,
             'success' => true
         ]);
+    }
+
+    public function downloadSample()
+    {
+        return Excel::download(new SampleCashTransactionExport, 'mau_import_giao_dich_tien_mat.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ]);
+
+        Excel::import(new CashTransactionImport, $request->file('file'));
+
+        return back()->with('success', 'Import thành công!');
     }
 }
