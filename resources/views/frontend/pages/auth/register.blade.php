@@ -22,7 +22,7 @@
         <div
             class="px-6 xs-px-10 sm-px-16 md-px-97px w-full h-full flex items-center justify-center relative lg-w-1-2 lg-p-0">
             <div class="relative flex flex-col items-center w-full tablet-w-500px lg-w-300px"><a href="/"><img
-                        class="w-210px h-10 object-scale-down" src="{{ asset('frontend/assets/img/art-logo.png') }}"
+                        class="w-210px h-10 object-scale-down" src="{{ showImage($config['logo']) }}"
                         alt="{{ getDomainFromUrl() }}"></a>
                 <form class="flex flex-col w-full pt-48px" id="form-login">
                     @csrf
@@ -99,7 +99,7 @@
             <div class="px-6 lg-px-0">
                 <div class="flex items-center justify-center"><img alt="Banner"
                         class="xl-w-550px xl-h-420px lg-w-450px lg-h-320px md-w-full rounded-lg object-cover"
-                        src="{{ asset('frontend/assets/img/loginimg.jpg') }}"></div>
+                        src="{{ showImage($config['logo']) }}"></div>
                 <div class="flex justify-center my-6">
                     <h2 class="font-bold text-18px xl-text-24px text-f05f02 uppercase">Let's turn your ideas into
                         reality with us</h2>
