@@ -390,7 +390,12 @@ class ProductController extends Controller
 
         // DB::enableQueryLog();
 
-        $variant = ProductVariant::select(['sale_price', 'discount_end', 'discount_price', 'discount_start'])
+        $variant = ProductVariant::selectRaw('
+                MIN(sale_price) as sale_price,
+                MIN(discount_end) as discount_end,
+                MIN(discount_price) as discount_price,
+                MIN(discount_start) as discount_start
+            ')
             ->where('product_id', $productId)
             ->join('attribute_value_variants', 'product_variants.id', '=', 'attribute_value_variants.product_variant_id')
             ->whereIn('attribute_value_variants.attribute_value_id', $valueIds)
@@ -414,6 +419,5 @@ class ProductController extends Controller
         return response()->json([
             'price' => formatPrice($variant->sale_price),
         ]);
-
     }
 }
