@@ -641,13 +641,13 @@ video {
 }
 @media (min-width: 1280px) {
     .xl-h-420px {
-        height: 420px;
+        height: 262px;
     }
     .xl-min-h-865px {
-        min-height: 865px;
+        min-height: 695px;
     }
     .xl-w-550px {
-        width: 550px;
+        width: 356px;
     }
     .xl-text-15px {
         font-size: 15px;
