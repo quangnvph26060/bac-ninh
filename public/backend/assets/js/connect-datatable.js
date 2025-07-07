@@ -234,38 +234,6 @@ const dataTables = (
         row.child.hide();
     });
 
-    // $(document).on("submit", "#myForm", function (e) {
-    //     e.preventDefault();
-
-    //     let formData = new FormData(this),
-    //         row = table.row($(this).closest("tr"));
-
-    //     formData.append("id", row.data().id);
-    //     formData.append("_method", "PUT");
-    //     formData.append("model", model);
-
-    //     $.post({
-    //         url: "/admin/handle-fast-update",
-    //         data: formData,
-    //         processData: false,
-    //         contentType: false,
-    //         success: function (res) {
-    //             if (res.success) {
-    //                 Toast.fire({
-    //                     icon: "success",
-    //                     title: res.message,
-    //                 });
-    //                 table.draw();
-    //             }
-    //         },
-    //         error: (xhr) =>
-    //             Toast.fire({
-    //                 icon: "error",
-    //                 title: xhr.responseJSON.message,
-    //             }),
-    //     });
-    // });
-
     table.on("requestChild.dt", function (e, row) {
         row.child(format(row.data())).show();
     });
@@ -343,9 +311,43 @@ const dataTables = (
         $("#dateRangePicker").daterangepicker({
             autoUpdateInput: false,
             locale: {
-                cancelLabel: "Clear",
-                applyLabel: "Áp dụng",
                 format: "DD/MM/YYYY",
+                cancelLabel: "Hủy",
+                applyLabel: "Áp dụng",
+                customRangeLabel: "Tùy chọn",
+                daysOfWeek: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+                monthNames: [
+                    "Tháng 1",
+                    "Tháng 2",
+                    "Tháng 3",
+                    "Tháng 4",
+                    "Tháng 5",
+                    "Tháng 6",
+                    "Tháng 7",
+                    "Tháng 8",
+                    "Tháng 9",
+                    "Tháng 10",
+                    "Tháng 11",
+                    "Tháng 12",
+                ],
+                firstDay: 1,
+            },
+            ranges: {
+                "Hôm nay": [moment(), moment()],
+                "Ngày mai": [moment().add(1, "days"), moment().add(1, "days")],
+                "Tuần này": [moment().startOf("week"), moment().endOf("week")],
+                "Tuần sau": [
+                    moment().add(1, "week").startOf("week"),
+                    moment().add(1, "week").endOf("week"),
+                ],
+                "Tháng này": [
+                    moment().startOf("month"),
+                    moment().endOf("month"),
+                ],
+                "Tháng sau": [
+                    moment().add(1, "month").startOf("month"),
+                    moment().add(1, "month").endOf("month"),
+                ],
             },
         });
 
@@ -366,8 +368,6 @@ const dataTables = (
                         " - " +
                         picker.endDate.format("DD/MM/YYYY")
                 );
-                // filters.startDate = picker.startDate.format("YYYY-MM-DD");
-                // filters.endDate = picker.endDate.format("YYYY-MM-DD");
 
                 table.ajax.reload();
             }

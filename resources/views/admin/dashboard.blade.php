@@ -13,297 +13,272 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-xl-6  mb-3">
-                <div class="card custom-card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between flex-wrap">
-                            <div>
-                                <div class="flex-fill mb-2">
-                                    Tổng doanh số
-                                </div>
-                                <h3 class="fw-semibold mb-2">
-                                    ${{ formatPrice($statistics['total_revenue']) }}
-                                </h3>
-                            </div>
-                            <div class="avatar avatar-md avatar-rounded  svg-white">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"
-                                    style="background: rgb(25 135 84)">
-                                    <rect width="256" height="256" fill="none"></rect>
-                                    <polyline points="48 208 48 136 96 136" fill="none" stroke="currentColor"
-                                        stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
-                                    <line x1="224" y1="208" x2="32" y2="208" fill="none"
-                                        stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="16"></line>
-                                    <polyline points="96 208 96 88 152 88" fill="none" stroke="currentColor"
-                                        stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
-                                    <polyline points="152 208 152 40 208 40 208 208" fill="none" stroke="currentColor"
-                                        stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-6  mb-3">
-                <div class="card custom-card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between flex-wrap">
-                            <div>
-                                <div class="flex-fill mb-2">
-                                    Tổng số đơn hàng
-                                </div>
-                                <h3 class="fw-semibold mb-2">
-                                    {{ formatPrice($statistics['total_orders']) }}
-                                </h3>
-
-                            </div>
-                            <div class="avatar avatar-md avatar-rounded svg-white"> <svg xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 256 256" style="background: rgb(13 110 253)">
-                                    <rect width="256" height="256" fill="none"></rect>
-                                    <path
-                                        d="M209.67,208H46.33a8.06,8.06,0,0,1-8-7.07l-14.25-120a8,8,0,0,1,8-8.93H223.92a8,8,0,0,1,8,8.93l-14.25,120A8.06,8.06,0,0,1,209.67,208Z"
-                                        fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="16"></path>
-                                    <path d="M88,104V64a40,40,0,0,1,80,0v40" fill="none" stroke="currentColor"
-                                        stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
-                                </svg> </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {{-- <div class="col-xl-6  mb-3">
-                <div class="card custom-card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between flex-wrap">
-                            <div>
-                                <div class="flex-fill mb-2">
-                                    Tổng số lượt truy cập
-                                </div>
-                                <h3 class="fw-semibold mb-2">
-                                    2,21,635
-                                </h3>
-
-                            </div>
-                            <div class="avatar avatar-md avatar-rounded bg-secondary svg-white">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-                                    <rect width="256" height="256" fill="none"></rect>
-                                    <circle cx="128" cy="120" r="40" fill="none" stroke="currentColor"
-                                        stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></circle>
-                                    <path d="M63.8,199.37a72,72,0,0,1,128.4,0" fill="none" stroke="currentColor"
-                                        stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
-                                    <line x1="176" y1="56" x2="224" y2="56" fill="none"
-                                        stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="16"></line>
-                                    <line x1="200" y1="32" x2="200" y2="80" fill="none"
-                                        stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="16"></line>
-                                    <path d="M222.67,112A95.92,95.92,0,1,1,144,33.33" fill="none" stroke="currentColor"
-                                        stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> --}}
-
-            {{-- <div class="col-xl-6  mb-3">
-                <div class="card custom-card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between flex-wrap">
-                            <div>
-                                <div class="flex-fill mb-2">
-                                    Tổng sản phẩm
-                                </div>
-                                <h3 class="fw-semibold mb-2">
-                                    {{ number_format($product_list) }}
-                                </h3>
-
-                            </div>
-                            <div class="avatar avatar-md avatar-rounded svg-white">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"
-                                    style="background: rgb(13 202 240)">
-                                    <rect width="256" height="256" fill="none"></rect>
-                                    <polyline points="32.7 76.92 128 129.08 223.3 76.92" fill="none"
-                                        stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="16"></polyline>
-                                    <path
-                                        d="M131.84,25l88,48.18a8,8,0,0,1,4.16,7v95.64a8,8,0,0,1-4.16,7l-88,48.18a8,8,0,0,1-7.68,0l-88-48.18a8,8,0,0,1-4.16-7V80.18a8,8,0,0,1,4.16-7l88-48.18A8,8,0,0,1,131.84,25Z"
-                                        fill="none" stroke="currentColor" stroke-linecap="round"
-                                        stroke-linejoin="round" stroke-width="16"></path>
-                                    <line x1="128" y1="129.09" x2="128" y2="232" fill="none"
-                                        stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="16"></line>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> --}}
-        </div>
-
-        <div class="mb-3">
+        <div class="mt-5">
+            <!-- Financial Metrics -->
             <div class="row">
-                <div class="col-xl-6">
-                    <div class="card custom-card">
-                        <div class="card-header d-flex justify-content-between">
-                            <div class="card-title">
-                                Đơn hàng gần đây
-                            </div> <a href="javascript:void(0);" class="fs-13 text-muted">
-                                Xem tất cả<i class="ti ti-arrow-narrow-right ms-1"></i>
-                            </a>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled project-recent-transactions-list">
-                                @forelse ($statistics['recent_orders'] as $recent_order)
-                                    <li class="mb-2">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="lh-1">
-                                                <span
-                                                    class="avatar avatar-ms avatar-rounded bg-primary-transparent fw-semibold fs-14"
-                                                    style="color: #000000">
-                                                    {{ strtoupper(substr($recent_order['order_name'], 0, 1)) }}
-                                                </span>
-                                            </div>
-                                            <div class="flex-fill"> <span class="d-block fw-semibold">
-                                                    {{ $recent_order['order_name'] }}
-
-                                                </span> <span class="d-block fs-13 text-muted">
-                                                    {{ $recent_order['phone_number'] }}
-
-                                                </span> </div>
-                                            <div class="text-end"> <span class="h6 mb-0 fw-semibold text-danger">
-
-                                                    ${{ formatPrice($recent_order['total']) }}
-                                                </span> <span class="d-block text-muted fs-13">
-                                                    @php
-
-                                                        $dateString = $recent_order['created_at'];
-                                                        $date = new DateTime($dateString);
-
-                                                        // Định dạng lại ngày
-                                                        $formattedDate =
-                                                            'Ngày ' .
-                                                            $date->format('d') .
-                                                            ' tháng ' .
-                                                            $date->format('n') .
-                                                            ' năm ' .
-                                                            $date->format('Y');
-                                                    @endphp
-                                                    {{ $formattedDate }}
-
-                                                </span> </div>
-                                        </div>
-                                    </li>
-
-                                @empty
-                                @endforelse
-                            </ul>
-                        </div>
-                    </div>
+                <div class="col-12">
+                    <h5 class="fw-semibold text-dark">
+                        <i class="fas fa-chart-line text-success me-2"></i>Thống kê tài chính
+                    </h5>
                 </div>
-                <div class="col-xl-6">
-                    <div class="card custom-card">
-                        <div class="card-header d-flex justify-content-between">
-                            <div class="card-title">
-                                Sản phẩm bán chạy nhất
-                            </div> <a href="javascript:void(0);" class="fs-13 text-muted">
-                                Xem tất cả<i class="ti ti-arrow-narrow-right ms-1"></i>
-                            </a>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled ecommerce-top-selling-list">
-                                @forelse ($statistics['best_selling_products'] as $item)
-                                    <li class="mb-2">
-                                        <div class="d-flex align-items-center flex-wrap">
-                                            <div class="me-3 lh-1">
-                                                <span class="avatar avatar-md">
-                                                    <img src="{{ $item['product']->image }}" alt="">
-                                                </span>
-                                            </div>
-                                            <div class=" flex-fill"> <span class="d-block mb-0 fw-semibold">
-                                                    {{ $item['product']->name }}
-
-                                                </span> <span class="text-muted fs-13">
-
-                                                    {{ $item['product']->category->name }}
-                                                </span> </div>
-                                            <div class="text-end"> <span class="mb-0 d-block h6 fw-semibold">
-
-                                                    ${{ formatPrice($item['product']->price) }}
-
-                                                </span> <span class="mb-0 d-block text-muted fs-13">
-                                                    {{ $item['sold_quantity'] }} đã bán
-
-                                                </span>
-                                                <span class="mb-0 d-block text-muted fs-13">
-                                                    {{ $item['total_orders'] }} đơn hàng
-                                                </span>
-                                                <span class="mb-0 d-block text-muted fs-13">
-                                                    Trung bình {{ $item['average_quantity_per_order'] }} sản phẩm/đơn
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                @empty
-                                @endforelse
-
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-
             </div>
-        </div>
-
-        <div class="">
-            <div class="card custom-card">
-                <div class="card-header d-flex justify-content-between">
-                    <div class="card-title">
-                        Tóm tắt sản phẩm
-                    </div> <a href="{{ route('admin.products.index') }};" class="fs-13 text-muted">
-                        Xem tất cả<i class="ti ti-arrow-narrow-right ms-1"></i>
-                    </a>
+            <div class="row">
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Tổng doanh số</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="total-sales">0 USD</h4>
+                                </div>
+                                <div class="icon-wrapper bg-success">
+                                    <i class="fas fa-chart-line text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table text-nowrap">
-                            <thead>
-                                <tr>
-                                    <th>Sản phẩm</th>
-                                    <th>Tồn kho</th>
-                                    <th>Đơn vị</th>
-                                    <th>Thương hiệu</th>
-                                    <th>Danh mục</th>
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Tổng số đơn hàng</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="total-orders">0</h4>
+                                </div>
+                                <div class="icon-wrapper bg-primary">
+                                    <i class="fas fa-shopping-cart text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Yêu cầu nạp tiền</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="total-topup-requests">0</h4>
+                                </div>
+                                <div class="icon-wrapper bg-info">
+                                    <i class="fas fa-credit-card text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($newestProducts as $item)
-                                    <tr>
-                                        <td class="brder-bottom-0">
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar avatar-sm me-2">
-                                                    <img src="{{ $item->image }}" alt="avatar" class="">
-                                                </div>
-                                                <a href=""
-                                                    title="{{ $item->name }}">{{ Str::words($item->name, 30, '...') }}</a>
-                                            </div>
-                                        </td>
-                                        <td>{{ $item->stock }}</td>
-                                        <td>{{ $item->product_unit ?? '-----' }}</td>
-                                        <td>{{ $item->brand->name }}</td>
-                                        <td>{{ $item->category->name }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center">Không có sản phẩm nào</td>
-                                    </tr>
-                                @endforelse
+            <!-- Order Status Tracking -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h5 class="fw-semibold text-dark">
+                        <i class="fas fa-boxes text-primary me-2"></i>Trạng thái đơn hàng
+                    </h5>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Chờ xác nhận</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="pending-confirmation">0</h4>
+                                </div>
+                                <div class="icon-wrapper bg-warning">
+                                    <i class="fas fa-clock text-dark"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Chờ sản xuất</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="pending-production">23</h4>
+                                </div>
+                                <div class="icon-wrapper bg-info">
+                                    <i class="fas fa-check-circle text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Đang sản xuất</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="in-production">67</h4>
+                                </div>
+                                <div class="icon-wrapper bg-primary">
+                                    <i class="fas fa-cogs text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Chờ hoàn thiện</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="pending-completion">12</h4>
+                                </div>
+                                <div class="icon-wrapper bg-secondary">
+                                    <i class="fas fa-cube text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Chờ giao hàng</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="pending-delivery">8</h4>
+                                </div>
+                                <div class="icon-wrapper bg-success">
+                                    <i class="fas fa-shipping-fast text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Đã giao hàng</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="delivered">1,089</h4>
+                                </div>
+                                <div class="icon-wrapper bg-success">
+                                    <i class="fas fa-check-double text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Đã hủy</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="cancelled-orders">15</h4>
+                                </div>
+                                <div class="icon-wrapper bg-danger">
+                                    <i class="fas fa-times-circle text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                            </tbody>
-                        </table>
+            <!-- User Metrics -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h5 class="fw-semibold text-dark">
+                        <i class="fas fa-users text-info me-2"></i>Thống kê người dùng
+                    </h5>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Tổng khách hàng</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="total-customers">0</h4>
+                                </div>
+                                <div class="icon-wrapper bg-primary">
+                                    <i class="fas fa-users text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Tổng nhân viên</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="total-staff">48</h4>
+                                </div>
+                                <div class="icon-wrapper bg-success">
+                                    <i class="fas fa-user-check text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Communication & Support -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h5 class="fw-semibold text-dark">
+                        <i class="fas fa-headset text-warning me-2"></i>Hỗ trợ & Liên lạc
+                    </h5>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Tin nhắn chưa đọc</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="unread-messages">23</h4>
+                                </div>
+                                <div class="icon-wrapper bg-warning">
+                                    <i class="fas fa-envelope text-dark"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Tổng số ticket</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="total-tickets">89</h4>
+                                </div>
+                                <div class="icon-wrapper bg-info">
+                                    <i class="fas fa-ticket-alt text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 stat-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-2 small fw-medium">Yêu cầu xuất vật tư</p>
+                                    <h4 class="fw-bold mb-0 text-dark" id="material-request">34</h4>
+                                </div>
+                                <div class="icon-wrapper bg-secondary">
+                                    <i class="fas fa-file-export text-white"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -313,13 +288,52 @@
 
 @push('scripts')
     <script>
+        let start = moment();
+        let end = moment().add(1, 'month');
+
         $('#date-range').daterangepicker({
-            autoUpdateInput: false,
+            startDate: start,
+            endDate: end,
+            autoUpdateInput: true,
             locale: {
-                cancelLabel: 'Clear',
-                applyLabel: 'Áp dụng',
-                format: 'DD/MM/YYYY'
-            }
+                format: "DD/MM/YYYY",
+                cancelLabel: "Hủy",
+                applyLabel: "Áp dụng",
+                customRangeLabel: "Tùy chọn",
+                daysOfWeek: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+                monthNames: [
+                    "Tháng 1",
+                    "Tháng 2",
+                    "Tháng 3",
+                    "Tháng 4",
+                    "Tháng 5",
+                    "Tháng 6",
+                    "Tháng 7",
+                    "Tháng 8",
+                    "Tháng 9",
+                    "Tháng 10",
+                    "Tháng 11",
+                    "Tháng 12",
+                ],
+                firstDay: 1,
+            },
+            ranges: {
+                "Hôm nay": [moment(), moment()],
+                "Ngày mai": [moment().add(1, "days"), moment().add(1, "days")],
+                "Tuần này": [moment().startOf("week"), moment().endOf("week")],
+                "Tuần sau": [
+                    moment().add(1, "week").startOf("week"),
+                    moment().add(1, "week").endOf("week"),
+                ],
+                "Tháng này": [
+                    moment().startOf("month"),
+                    moment().endOf("month"),
+                ],
+                "Tháng sau": [
+                    moment().add(1, "month").startOf("month"),
+                    moment().add(1, "month").endOf("month"),
+                ],
+            },
         });
 
         $('#date-range').on('apply.daterangepicker', function(ev, picker) {
@@ -357,108 +371,23 @@
                 success: function(response) {
                     console.log(response);
 
-                    // Update total revenue
-                    $('.fw-semibold').first().text(formatCurrency(response.statistics.total_revenue));
+                    $('#total-sales').text(formatNumber(response.total_sales) + ' USD')
+                    $('#total-orders').text(response.total_orders)
+                    $('#total-topup-requests').text(response.total_topup_requests)
 
-                    // Update total orders
-                    $('.fw-semibold').eq(1).text(response.statistics.total_orders);
+                    $('#pending-confirmation').text(response.order_status_counts.pending ?? 0);
+                    $('#pending-production').text(response.order_status_counts.confirmed_pending_production ??
+                        0);
+                    $('#in-production').text(response.order_status_counts.in_production ?? 0);
+                    $('#pending-completion').text(response.order_status_counts.produced_awaiting_completion ??
+                        0);
+                    $('#pending-delivery').text(response.order_status_counts.completed_waiting_for_shipment ??
+                        0);
+                    $('#delivered').text(response.order_status_counts.shipped ?? 0);
+                    $('#cancelled-orders').text(response.order_status_counts.cancelled ?? 0);
 
-                    // Update recent orders
-                    let recentOrdersHtml = '';
-                    if (response.statistics.recent_orders && response.statistics.recent_orders.length > 0) {
-                        response.statistics.recent_orders.forEach(function(order) {
-                            let date = new Date(order.created_at);
-                            let formattedDate = 'Ngày ' + date.getDate() + ' tháng ' + (date
-                                .getMonth() + 1) + ' năm ' + date.getFullYear();
-
-                            recentOrdersHtml += `
-                                <li class="mb-2">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="lh-1">
-                                            <span class="avatar avatar-ms avatar-rounded bg-primary-transparent fw-semibold fs-14" style="color: #000000">
-                                                ${order.order_name.charAt(0).toUpperCase()}
-                                            </span>
-                                        </div>
-                                        <div class="flex-fill">
-                                            <span class="d-block fw-semibold">${order.order_name}</span>
-                                            <span class="d-block fs-13 text-muted">${order.phone_number}</span>
-                                        </div>
-                                        <div class="text-end">
-                                            <span class="h6 mb-0 fw-semibold text-danger">${formatCurrency(order.total)}</span>
-                                            <span class="d-block text-muted fs-13">${formattedDate}</span>
-                                        </div>
-                                    </div>
-                                </li>
-                            `;
-                        });
-                    } else {
-                        recentOrdersHtml = '<li class="text-center">Không có đơn hàng nào</li>';
-                    }
-                    $('.project-recent-transactions-list').html(recentOrdersHtml);
-
-                    // Update best selling products
-                    let bestSellingHtml = '';
-                    if (response.statistics.best_selling_products && response.statistics.best_selling_products
-                        .length > 0) {
-                        response.statistics.best_selling_products.forEach(function(item) {
-                            bestSellingHtml += `
-                                <li class="mb-2">
-                                    <div class="d-flex align-items-center flex-wrap">
-                                        <div class="me-3 lh-1">
-                                            <span class="avatar avatar-md">
-                                                <img src="${item.product.image}" alt="">
-                                            </span>
-                                        </div>
-                                        <div class="flex-fill">
-                                            <span class="d-block mb-0 fw-semibold">${item.product.name}</span>
-                                            <span class="text-muted fs-13">${item.product.category.name}</span>
-                                        </div>
-                                        <div class="text-end">
-                                            <span class="mb-0 d-block h6 fw-semibold">${formatCurrency(item.product.price)}</span>
-                                            <span class="mb-0 d-block text-muted fs-13">${item.sold_quantity} đã bán</span>
-                                            <span class="mb-0 d-block text-muted fs-13">${item.total_orders} đơn hàng</span>
-                                            <span class="mb-0 d-block text-muted fs-13">Trung bình ${item.average_quantity_per_order} sản phẩm/đơn</span>
-                                        </div>
-                                    </div>
-                                </li>
-                            `;
-                        });
-                    } else {
-                        bestSellingHtml = '<li class="text-center">Không có sản phẩm nào</li>';
-                    }
-                    $('.ecommerce-top-selling-list').html(bestSellingHtml);
-
-                    let newestProductsHtml = '';
-                    if (response.newestProducts && response.newestProducts.length > 0) {
-                        response.newestProducts.forEach(function(item) {
-                            // Truncate name to 30 words
-                            let truncatedName = item.name.split(' ').slice(0, 30).join(' ');
-                            if (item.name.split(' ').length > 30) {
-                                truncatedName += '...';
-                            }
-
-                            newestProductsHtml += `
-                                <tr>
-                                    <td class="brder-bottom-0">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar avatar-sm me-2">
-                                                <img src="${item.image}" alt="avatar" class="">
-                                            </div>
-                                            <a href="" title="${item.name}">${truncatedName}</a>
-                                        </div>
-                                    </td>
-                                    <td>${item.stock}</td>
-                                    <td>${item.product_unit || '-----'}</td>
-                                    <td>${item.brand.name}</td>
-                                    <td>${item.category.name}</td>
-                                </tr>
-                            `;
-                        });
-                    } else {
-                        newestProductsHtml =
-                            '<tr><td colspan="5" class="text-center">Không có sản phẩm nào</td></tr>';
-                    }
-                    $('.table-responsive table tbody').html(newestProductsHtml);
+                    $('#total-customers').text(response.total_users ?? 0);
+                    $('#total-staff').text(response.total_employees ?? 0);
                 },
                 error: function(xhr, status, error) {
                     console.log(xhr, status, error);
@@ -469,6 +398,8 @@
                 }
             });
         }
+
+        fetchData()
     </script>
 @endpush
 
@@ -490,6 +421,215 @@
             border-radius: 0.25rem;
             color: #fff;
             font-weight: 500;
+        }
+
+        .stat-card {
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            border-radius: 15px !important;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
+        }
+
+        .stat-card:hover .icon-wrapper {
+            transform: scale(1.1) rotate(3deg);
+            transition: transform 0.4s ease;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(0, 123, 255, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+            }
+        }
+
+        .stat-card:hover {
+            animation: pulse 1.5s ease-out;
+        }
+
+        .action-card {
+            transition: all 0.3s ease;
+            border-radius: 15px !important;
+            cursor: pointer;
+        }
+
+        .action-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .icon-wrapper {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+        }
+
+        .summary-card .text-success {
+            color: #28a745 !important;
+        }
+
+        .summary-card .text-primary {
+            color: #007bff !important;
+        }
+
+        .summary-card .text-info {
+            color: #17a2b8 !important;
+        }
+
+        .summary-card .text-warning {
+            color: #ffc107 !important;
+        }
+
+        .summary-card .text-danger {
+            color: #dc3545 !important;
+        }
+
+        .summary-card .text-white-50 {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+
+        .summary-card .border-end {
+            border-color: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        /* Gradient backgrounds */
+        .bg-gradient-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3) !important;
+        }
+
+        .bg-gradient-success {
+            background: linear-gradient(45deg, #28a745, #1e7e34) !important;
+        }
+
+        .bg-gradient-warning {
+            background: linear-gradient(45deg, #ffc107, #e0a800) !important;
+        }
+
+        .bg-gradient-info {
+            background: linear-gradient(45deg, #17a2b8, #138496) !important;
+        }
+
+        .bg-gradient-danger {
+            background: linear-gradient(45deg, #dc3545, #c82333) !important;
+        }
+
+        .bg-gradient-secondary {
+            background: linear-gradient(45deg, #6c757d, #545b62) !important;
+        }
+
+        /* Progress bars */
+        .progress {
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            border-radius: 10px;
+            transition: width 0.6s ease;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .summary-card .border-end {
+                border-right: none !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+                padding-bottom: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .summary-card .col-md-3:last-child .border-end {
+                border-bottom: none !important;
+                margin-bottom: 0;
+                padding-bottom: 0;
+            }
+
+            .icon-wrapper {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
+        }
+
+        .stat-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        /* Hover effects for icons */
+        .stat-card:hover .icon-wrapper {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .action-card:hover i {
+            transform: scale(1.2);
+        }
+
+        /* Icon improvements */
+        .fas,
+        .far {
+            font-weight: 900;
+        }
+
+        /* Responsive text sizing */
+        @media (max-width: 576px) {
+            h4.fw-bold {
+                font-size: 1.2rem;
+            }
+
+            h2.fw-bold {
+                font-size: 1.5rem;
+            }
+
+            .icon-wrapper {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
         }
     </style>
 @endpush

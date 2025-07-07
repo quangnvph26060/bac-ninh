@@ -1459,7 +1459,6 @@ body {
 }
 
 .logo-header {
-    float: left;
     width: 265px;
     height: 70px;
     line-height: 60px;
@@ -1470,8 +1469,6 @@ body {
     padding-left: 25px;
     padding-right: 25px;
     z-index: 1001;
-    display: flex;
-    align-items: center;
     position: relative;
     transition: all 0.3s;
 }
@@ -1490,8 +1487,6 @@ body {
     opacity: 1;
     position: relative;
     height: 100%;
-    display: flex;
-    align-items: center;
 }
 .logo-header .logo:hover {
     text-decoration: none;
@@ -1500,6 +1495,8 @@ body {
     padding-top: 0px;
     padding-bottom: 0px;
     margin-right: 0px;
+    width: 80%;
+    height: 70px;
 }
 .logo-header .nav-toggle {
     display: flex;
@@ -9278,7 +9275,7 @@ label.error {
         background: #fff;
     }
 
-    .logo-header {
+    .logo-header {.logo-header {
         display: flex;
         width: 100% !important;
         text-align: left;

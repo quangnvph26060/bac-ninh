@@ -6,6 +6,44 @@
         "id": "dashboard"
     },
     {
+        "title": "Sản phẩm",
+        "icon": "fas fa-box",
+        "id": "products",
+        "children": [
+            {
+                "title": "Quản lý sản phẩm",
+                "url": "admin.products.index"
+            },
+            {
+                "title": "Quản lý danh mục",
+                "url": "admin.categories.index"
+            },
+            {
+                "title": "Quản lý thương hiệu",
+                "url": "admin.brands.index"
+            },
+            {
+                "title": "Quản lý thuộc tính",
+                "url": "admin.attributes.index"
+            },
+            {
+                "title": "Boms",
+                "url": "admin.boms.index"
+            },
+            {
+                "title": "Bộ sưu tập",
+                "url": "admin.collections.index"
+            }
+        ],
+        "inRoutes": [
+            "admin.products.index",
+            "admin.categories.index",
+            "admin.brands.index",
+            "admin.attributes.index",
+            "admin.collections.index"
+        ]
+    },
+    {
         "title": "Đơn hàng",
         "icon": "fas fa-receipt",
         "id": "orders",
@@ -82,56 +120,6 @@
         ]
     },
     {
-        "title": "Tài chính",
-        "icon": "fas fa-money-bill",
-        "id": "finance",
-        "children": [
-            {
-                "title": "Yêu cầu nạp tiền",
-                "url": "admin.transfer.histories.index"
-            }
-        ],
-        "inRoutes": ["admin.transfer.histories.index"]
-    },
-    {
-        "title": "Sản phẩm",
-        "icon": "fas fa-box",
-        "id": "products",
-        "children": [
-            {
-                "title": "Quản lý sản phẩm",
-                "url": "admin.products.index"
-            },
-            {
-                "title": "Quản lý danh mục",
-                "url": "admin.categories.index"
-            },
-            {
-                "title": "Quản lý thương hiệu",
-                "url": "admin.brands.index"
-            },
-            {
-                "title": "Quản lý thuộc tính",
-                "url": "admin.attributes.index"
-            },
-            {
-                "title": "Boms",
-                "url": "admin.boms.index"
-            },
-            {
-                "title": "Bộ sưu tập",
-                "url": "admin.collections.index"
-            }
-        ],
-        "inRoutes": [
-            "admin.products.index",
-            "admin.categories.index",
-            "admin.brands.index",
-            "admin.attributes.index",
-            "admin.collections.index"
-        ]
-    },
-    {
         "title": "Marketing",
         "icon": "fas fa-box-open",
         "id": "marketing",
@@ -148,11 +136,43 @@
         "inRoutes": ["admin.coupons.index", "admin.subjects.index"]
     },
     {
+        "title": "Tài chính",
+        "icon": "fas fa-money-bill",
+        "id": "finance",
+        "children": [
+            {
+                "title": "Yêu cầu nạp tiền",
+                "url": "admin.transfer.histories.index"
+            }
+        ],
+        "inRoutes": ["admin.transfer.histories.index"]
+    },
+    {
         "title": "Khách hàng",
         "icon": "fas fa-user",
         "route": "admin.customers.index",
         "id": "customers",
         "inRoutes": ["admin.customers.index", "admin.customers.show"]
+    },
+    {
+        "title": "Hỗ trợ",
+        "icon": "fas fa-headset",
+        "id": "support",
+        "children": [
+            {
+                "title": "Tin nhắn",
+                "url": "admin.chats.index"
+            },
+            {
+                "title": "Ticket",
+                "url": "admin.tickets.index"
+            }
+        ],
+        "inRoutes": [
+            "admin.tickets.index",
+            "admin.tickets.reply",
+            "admin.chats.index"
+        ]
     },
     {
         "title": "Nhân viên",
@@ -178,40 +198,6 @@
             "admin.permissions.index",
             "admin.activity.log.history",
             "admin.password-change-request.index"
-        ]
-    },
-    {
-        "title": "Tin nhắn",
-        "icon": "far fa-comment-dots",
-        "route": "admin.chats.index",
-        "id": "message"
-    },
-    {
-        "title": "Ticket",
-        "icon": "fas fa-ticket-alt",
-        "route": "admin.tickets.index",
-        "id": "ticket",
-        "inRoutes": ["admin.tickets.index", "admin.tickets.reply"]
-    },
-    {
-        "title": "Kế toán",
-        "icon": "fas fa-calculator",
-        "url": "javascript:void(0)",
-        "id": "cashbook",
-        "children": [
-            {
-                "title": "Quản lý thu chi",
-                "url": "admin.cashbook.index"
-            },
-            {
-                "title": "Tài khoản kế toán",
-                "url": "admin.accounting-accounts.index"
-            }
-        ],
-        "inRoutes": [
-            "admin.cashbook.index",
-            "admin.accounting-accounts.index",
-            "admin.cashbook.save"
         ]
     },
     {
@@ -249,6 +235,28 @@
             "admin.material-requests.indexConfirm"
         ]
     },
+    {
+        "title": "Kế toán",
+        "icon": "fas fa-calculator",
+        "url": "javascript:void(0)",
+        "id": "cashbook",
+        "children": [
+            {
+                "title": "Quản lý thu chi",
+                "url": "admin.cashbook.index"
+            },
+            {
+                "title": "Tài khoản kế toán",
+                "url": "admin.accounting-accounts.index"
+            }
+        ],
+        "inRoutes": [
+            "admin.cashbook.index",
+            "admin.accounting-accounts.index",
+            "admin.cashbook.save"
+        ]
+    },
+
     {
         "title": "Cấu hình",
         "icon": "fa-solid fa-gear",
