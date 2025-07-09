@@ -119,7 +119,7 @@
 
                     <div class="card" style="display: none" id="search-product">
                         <input name="product_id[]" type="hidden"
-                            value="{{ $coupon->products->pluck('id')->implode(',') }}">
+                            value="{{ !empty($coupon) && $coupon->products ? $coupon->products->pluck('id')->implode(',') : '' }}">
 
                         <div class="card-body">
                             <div class="mb-3 mt-3 position-relative">
@@ -149,7 +149,7 @@
                                 style="@if (isset($coupon) && $coupon->products->isNotEmpty()) display:block; @else display:none @endif">
                                 <label class="form-label">Sản phẩm đã chọn</label>
 
-                                @foreach ($coupon->products as $product)
+                                @foreach ($coupon->products ?? [] as $product)
                                     <div class="list-group-item" data-id="{{ $product->id }}">
                                         <div class="row align-items-center">
                                             <div class="col-auto">
