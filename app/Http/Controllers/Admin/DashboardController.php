@@ -16,29 +16,6 @@ use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
-    // protected $dashboardService, $orderService;
-    // public function __construct(DashboardService $dashboardService, OrderService $orderService)
-    // {
-    //     $this->dashboardService = $dashboardService;
-    //     $this->orderService = $orderService;
-    // }
-
-    // public function dashboard(Request $request)
-    // {
-    //     $startDate = $request->get('startDate');
-    //     $endDate = $request->get('endDate');
-
-    //     $statistics = $this->dashboardService->getStatistics($startDate, $endDate);
-    //     // $newestProducts = $this->dashboardService->getNewestProducts($startDate, $endDate);
-
-    //     if ($request->ajax()) {
-    //         return response()->json([
-    //             'statistics' => $statistics,
-    //             // 'newestProducts' => $newestProducts
-    //         ]);
-    //     }
-    //     return view('admin.dashboard', compact('statistics'));
-    // }
 
     public function dashboard(Request $request)
     {
@@ -66,6 +43,9 @@ class DashboardController extends Controller
             $totalTopupRequests = $this->getTotalTopupRequests($startDate, $endDate);
             $totalUsers = $this->getTotalUsers();
             $totalEmployees = $this->getTotalEmployees();
+            $totalUnreadMessages = $this->getUnreadMessagesCount($startDate, $endDate);
+            $totalTickets = $this->getTotalTickets($startDate, $endDate);
+            $totalMaterialRequests = $this->getTotalMaterialRequests($startDate, $endDate);
 
             return response()->json([
                 'total_sales' => $totalSales,
@@ -74,6 +54,9 @@ class DashboardController extends Controller
                 'order_status_counts' => $orderStatusCounts,
                 'total_users' => $totalUsers,
                 'total_employees' => $totalEmployees,
+                'total_unread_messages_from_users_to_admin' => $totalUnreadMessages,
+                'total_tickets' => $totalTickets,
+                'total_material_requests' => $totalMaterialRequests,
             ]);
         }
 
@@ -143,5 +126,47 @@ class DashboardController extends Controller
     private function getTotalEmployees()
     {
         return DB::table('employees')->count();
+    }
+
+    private function getUnreadMessagesCount($startDate = null, $endDate = null)
+    {
+        $query = DB::table('messages')
+            ->where('sender_type', 'App\\Models\\User')
+            ->where('receiver_type', 'App\\Models\\Employee')
+            ->where('is_read', 0);
+
+        if ($startDate && $endDate) {
+            $startDate = \Carbon\Carbon::parse($startDate)->startOfDay();
+            $endDate = \Carbon\Carbon::parse($endDate)->endOfDay();
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        return $query->count();
+    }
+
+    private function getTotalTickets($startDate = null, $endDate = null)
+    {
+        $query = DB::table('tickets');
+
+        if ($startDate && $endDate) {
+            $startDate = \Carbon\Carbon::parse($startDate)->startOfDay();
+            $endDate = \Carbon\Carbon::parse($endDate)->endOfDay();
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        return $query->count();
+    }
+
+    private function getTotalMaterialRequests($startDate = null, $endDate = null)
+    {
+        $query = DB::table('material_requests');
+
+        if ($startDate && $endDate) {
+            $startDate = \Carbon\Carbon::parse($startDate)->startOfDay();
+            $endDate = \Carbon\Carbon::parse($endDate)->endOfDay();
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        return $query->count();
     }
 }
