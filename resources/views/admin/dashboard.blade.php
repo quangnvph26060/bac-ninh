@@ -100,7 +100,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <p class="text-muted mb-2 small fw-medium">Chờ sản xuất</p>
-                                    <h4 class="fw-bold mb-0 text-dark" id="pending-production">23</h4>
+                                    <h4 class="fw-bold mb-0 text-dark" id="pending-production">0</h4>
                                 </div>
                                 <div class="icon-wrapper bg-info">
                                     <i class="fas fa-check-circle text-white"></i>
@@ -115,7 +115,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <p class="text-muted mb-2 small fw-medium">Đang sản xuất</p>
-                                    <h4 class="fw-bold mb-0 text-dark" id="in-production">67</h4>
+                                    <h4 class="fw-bold mb-0 text-dark" id="in-production">0</h4>
                                 </div>
                                 <div class="icon-wrapper bg-primary">
                                     <i class="fas fa-cogs text-white"></i>
@@ -130,7 +130,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <p class="text-muted mb-2 small fw-medium">Chờ hoàn thiện</p>
-                                    <h4 class="fw-bold mb-0 text-dark" id="pending-completion">12</h4>
+                                    <h4 class="fw-bold mb-0 text-dark" id="pending-completion">0</h4>
                                 </div>
                                 <div class="icon-wrapper bg-secondary">
                                     <i class="fas fa-cube text-white"></i>
@@ -145,7 +145,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <p class="text-muted mb-2 small fw-medium">Chờ giao hàng</p>
-                                    <h4 class="fw-bold mb-0 text-dark" id="pending-delivery">8</h4>
+                                    <h4 class="fw-bold mb-0 text-dark" id="pending-delivery">0</h4>
                                 </div>
                                 <div class="icon-wrapper bg-success">
                                     <i class="fas fa-shipping-fast text-white"></i>
@@ -160,7 +160,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <p class="text-muted mb-2 small fw-medium">Đã giao hàng</p>
-                                    <h4 class="fw-bold mb-0 text-dark" id="delivered">1,089</h4>
+                                    <h4 class="fw-bold mb-0 text-dark" id="delivered">0</h4>
                                 </div>
                                 <div class="icon-wrapper bg-success">
                                     <i class="fas fa-check-double text-white"></i>
@@ -175,7 +175,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <p class="text-muted mb-2 small fw-medium">Đã hủy</p>
-                                    <h4 class="fw-bold mb-0 text-dark" id="cancelled-orders">15</h4>
+                                    <h4 class="fw-bold mb-0 text-dark" id="cancelled-orders">0</h4>
                                 </div>
                                 <div class="icon-wrapper bg-danger">
                                     <i class="fas fa-times-circle text-white"></i>
@@ -242,7 +242,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <p class="text-muted mb-2 small fw-medium">Tin nhắn chưa đọc</p>
-                                    <h4 class="fw-bold mb-0 text-dark" id="unread-messages">23</h4>
+                                    <h4 class="fw-bold mb-0 text-dark" id="unread-messages">0</h4>
                                 </div>
                                 <div class="icon-wrapper bg-warning">
                                     <i class="fas fa-envelope text-dark"></i>
@@ -257,7 +257,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <p class="text-muted mb-2 small fw-medium">Tổng số ticket</p>
-                                    <h4 class="fw-bold mb-0 text-dark" id="total-tickets">89</h4>
+                                    <h4 class="fw-bold mb-0 text-dark" id="total-tickets">0</h4>
                                 </div>
                                 <div class="icon-wrapper bg-info">
                                     <i class="fas fa-ticket-alt text-white"></i>
@@ -272,7 +272,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <p class="text-muted mb-2 small fw-medium">Yêu cầu xuất vật tư</p>
-                                    <h4 class="fw-bold mb-0 text-dark" id="material-request">34</h4>
+                                    <h4 class="fw-bold mb-0 text-dark" id="material-request">0</h4>
                                 </div>
                                 <div class="icon-wrapper bg-secondary">
                                     <i class="fas fa-file-export text-white"></i>
@@ -388,6 +388,9 @@
 
                     $('#total-customers').text(response.total_users ?? 0);
                     $('#total-staff').text(response.total_employees ?? 0);
+                    $('#unread-messages').text(response.total_unread_messages_from_users_to_admin ?? 0);
+                    $('#total-tickets').text(response.total_tickets ?? 0);
+                    $('#material-request').text(response.total_material_requests ?? 0);
                 },
                 error: function(xhr, status, error) {
                     console.log(xhr, status, error);

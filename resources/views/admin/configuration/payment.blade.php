@@ -8,7 +8,7 @@
 
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="text-uppercase card-title fw-bold">danh sách thương hiệu</h5>
+                <h5 class="text-uppercase card-title fw-bold">danh sách tài khoản</h5>
                 <div class="card-tool">
                     <button class="btn btn-primary btn-sm fs-6"><i class="ti ti-circle-plus"></i> Thêm mới </button>
                 </div>
@@ -30,8 +30,8 @@
                         @forelse ($configPayments as $configPayment)
                             <tr>
                                 <td>{{ $configPayment->id }}</td>
-                                <td><img src="{{ showImage($configPayment->image) }}" alt=""
-                                        style="object-fit: cover;"></td>
+                                <td style="max-width: 100px;"><img src="{{ showImage($configPayment->image) }}"
+                                        alt="" class="img-fluid" style="object-fit: cover;"></td>
                                 <td>{{ $configPayment->title }}</td>
                                 <td>
                                     <button type="button" data-content="{{ $configPayment->content }}"
