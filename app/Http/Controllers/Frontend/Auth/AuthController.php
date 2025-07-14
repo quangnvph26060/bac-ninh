@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\SendOtpEmail;
+use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -83,6 +84,20 @@ class AuthController extends Controller
 
         $user = User::create($payloads);
 
+        $existingCustomer = Customer::where(function ($query) use ($user) {
+            $query->where('phone', $user->phone)
+                ->orWhere('email', $user->email);
+        })->first();
+
+        if (!$existingCustomer) {
+            Customer::create([
+                'code' => generateCode('customers', 'KH'),
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone
+            ]);
+        }
+
         Auth::login($user);
 
         return handleResponse('Đăng ký tài khoản thành công!', true, 200, [
@@ -125,7 +140,7 @@ class AuthController extends Controller
             'last_otp_sent_at' => now(),
         ]);
 
-        SendOtpEmail::dispatch($user, $otp);
+        // SendOtpEmail::dispatch($user, $otp);
 
         return successResponse('Đã gửi email khôi phục mật khẩu!', [], 200, true);
     }
@@ -152,7 +167,7 @@ class AuthController extends Controller
             'last_otp_sent_at' => now(),
         ]);
 
-        SendOtpEmail::dispatch($user, $otp);
+        // SendOtpEmail::dispatch($user, $otp);
 
         return successResponse('Đã gửi email xác thực OTP!', [], 200, true);
     }

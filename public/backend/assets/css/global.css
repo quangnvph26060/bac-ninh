@@ -117,7 +117,7 @@ div.dt-container select.dt-input {
 .form-label.required:after,
 .card-title.required:after {
     color: #d63939;
-    content: "*";
+    content: "(*)";
     margin-left: 0.25rem;
 }
 

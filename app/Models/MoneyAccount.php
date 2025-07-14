@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CashAccount extends Model
+class MoneyAccount extends Model
 {
     use HasFactory;
 
@@ -24,7 +24,7 @@ class CashAccount extends Model
      */
     public function parent()
     {
-        return $this->belongsTo(CashAccount::class, 'parent_id');
+        return $this->belongsTo(MoneyAccount::class, 'parent_id');
     }
 
     /**
@@ -32,7 +32,7 @@ class CashAccount extends Model
      */
     public function children()
     {
-        return $this->hasMany(CashAccount::class, 'parent_id');
+        return $this->hasMany(MoneyAccount::class, 'parent_id');
     }
 
     public function creator()

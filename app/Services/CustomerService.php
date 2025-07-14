@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\User;
+use App\Models\Customer;
 
 
-class UserService extends BaseService
+class CustomerService extends BaseService
 {
-    public function __construct(User $user)
+    public function __construct(Customer $customer)
     {
-        parent::__construct($user);
+        parent::__construct($customer);
     }
 
     public function pagination()

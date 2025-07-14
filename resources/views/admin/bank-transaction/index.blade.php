@@ -3,7 +3,7 @@
 @section('content')
     <div class="page-inner">
         <div class="page-header">
-            <x-breadcrumb :items="[['name' => 'thu chi']]" />
+            <x-breadcrumb :items="[['name' => 'thu chi ngân hàng']]" />
         </div>
 
         @if (session('success'))
@@ -26,7 +26,7 @@
                 <div class="filter-section">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="d-flex gap-2">
-                            <a href="/admin/cashbook/save" class="btn btn-success btn-sm">
+                            <a href="/admin/bank-transactions/save" class="btn btn-success btn-sm">
                                 <i class="bi bi-plus-circle me-1"></i>
                                 Thêm mới
                             </a>
@@ -56,7 +56,8 @@
 
 
                                     <li>
-                                        <a class="dropdown-item" href="/admin/cashbook/download-sample-cash-transaction"
+                                        <a class="dropdown-item"
+                                            href="/admin/cash-transactions/download-sample-cash-transaction"
                                             id="download-sample">
                                             <i class="fas fa-file-download me-1"></i> Tải file mẫu
                                         </a>
@@ -66,7 +67,7 @@
                             </div>
                         </div>
                         <div class="row g-3 justify-content-end align-items-center">
-                            <div class="col-md-3">
+                            {{-- <div class="col-md-3">
                                 <select id="accountFilter" class="form-select">
                                     <option value="">--- Tài khoản ---</option>
                                     @foreach ($orderedAccounts as $account)
@@ -75,18 +76,19 @@
                                         </option>
                                     @endforeach
                                 </select>
-                            </div>
+                            </div> --}}
                             <div class="col-md-4">
                                 <input type="text" id="dateFilter" class="form-control" placeholder="Chọn khoảng ngày">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <select id="voucherFilter" class="form-select">
-                                    <option value="">--- Chứng từ ---</option>
-                                    <option value="yes">Có</option>
-                                    <option value="no">Không</option>
+                                    <option value="">--- Loại chứng từ ---</option>
+                                    @foreach ($voucherTypes as $voucherTypeId => $voucherTypeName)
+                                        <option value="{{ $voucherTypeId }}">{{ $voucherTypeName }}</option>
+                                    @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <input type="text" id="amountFilter" class="form-control usd-price-format"
                                     placeholder="Số tiền">
                             </div>
@@ -95,28 +97,31 @@
                 </div>
 
                 <!-- Data Table -->
-                <table class="table table-hover table-bordered mb-0">
-                    <thead>
-                        <tr>
-                            <th style="width: 40px;">
-                                <input type="checkbox" id="checked-all" class="form-check-input">
-                            </th>
-                            <th>ID | Ngày</th>
-                            <th>Loại chứng từ</th>
-                            <th>Tài khoản</th>
-                            <th>Thu (USD)</th>
-                            <th>Chi (USD)</th>
-                            <th>Người tạo</th>
-                            <th>File chứng từ</th>
-                            <th class="text-center" style="width: 5%">
-                                <i class="fas fa-cog"></i>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">
+                                    <input type="checkbox" id="checked-all" class="form-check-input">
+                                </th>
+                                <th>ID | Ngày</th>
+                                <th>Tài khoản</th>
+                                <th>Tài khoản đối ứng</th>
+                                <th>Đối tượng</th>
+                                <th>Thu (USD)</th>
+                                <th>Chi (USD)</th>
+                                <th>Người tạo</th>
+                                <th>File chứng từ</th>
+                                <th class="text-center" style="width: 5%">
+                                    <i class="fas fa-cog"></i>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -125,7 +130,8 @@
     <div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form id="import-excel-form" action="/admin/cashbook/import" method="POST" enctype="multipart/form-data">
+                <form id="import-excel-form" action="/admin/cash-transactions/import" method="POST"
+                    enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="importExcelModalLabel">Import Cash Transactions từ Excel</h5>
@@ -261,7 +267,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: '/admin/cashbook/destroy',
+                        url: '/admin/bank-transactions/destroy',
                         type: 'DELETE',
                         data: {
                             ids: ids,
@@ -271,6 +277,8 @@
                         },
                         success: function(res) {
                             if (res.success) {
+                                $('input[type="checkbox"]:checked').prop('checked', false);
+
                                 Notifications(res.message, 'success');
                                 loadCashTransactions();
                             } else {
@@ -306,7 +314,7 @@
             }
 
             $.ajax({
-                url: '/admin/cashbook/print-multiple',
+                url: '/admin/cash-transactions/print-multiple',
                 method: 'POST',
                 data: {
                     ids: selectedIds,
@@ -343,7 +351,7 @@
             }
 
             $.ajax({
-                url: '/admin/cashbook/print-multiple',
+                url: '/admin/cash-transactions/print-multiple',
                 method: 'POST',
                 data: {
                     ids: [transactionId],
@@ -382,7 +390,7 @@
 
         function loadCashTransactions(filters = {}) {
             $.ajax({
-                url: "/admin/cashbook/list",
+                url: "/admin/bank-transactions/list",
                 type: "GET",
                 data: filters,
                 beforeSend: function() {

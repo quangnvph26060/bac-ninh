@@ -6,46 +6,52 @@ use App\Models\CashAccount;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithStartRow;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
-class CashAccountImport implements ToCollection, WithHeadingRow, WithStartRow
+class CashAccountImport implements ToCollection, WithHeadingRow
 {
-
-    public function startRow(): int
-    {
-        return 10; // Bắt đầu từ hàng 6
-    }
-
     public function collection(Collection $rows)
     {
-        foreach ($rows as $row) {
-            $code = trim($row['code']);
-            $name = trim($row['name']);
+        DB::transaction(function () use ($rows) {
+            $latestLevel1Id = null;
+            $latestLevel2Id = null;
 
-            if (!$code || !$name) {
-                continue; // bỏ qua dòng thiếu dữ liệu
+            foreach ($rows as $row) {
+                $level = $row['level'];
+                $code = $row['code'];
+                $name = $row['ten'] ?? $row['name'];
+
+                // Xác định parent_id theo cấp:
+                if ($level == 1) {
+                    $parentId = null;
+                } elseif ($level == 2) {
+                    $parentId = $latestLevel1Id;
+                } elseif ($level == 3) {
+                    $parentId = $latestLevel2Id;
+                } else {
+                    $parentId = null; // fallback nếu có sai dữ liệu
+                }
+
+                $cashAccount = CashAccount::create([
+                    'code' => $code,
+                    'name' => trim($name),
+                    'level' => $level,
+                    'parent_id' => $parentId,
+                    'status' => 1,
+                    'is_default' => 1,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]);
+
+                // Cập nhật biến lưu id cha gần nhất cho các cấp tiếp theo
+                if ($level == 1) {
+                    $latestLevel1Id = $cashAccount->id;
+                    $latestLevel2Id = null; // reset khi gặp cấp 1 mới
+                } elseif ($level == 2) {
+                    $latestLevel2Id = $cashAccount->id;
+                }
             }
-
-            // Xác định cha dựa theo code
-            $parentCode = strlen($code) > 3 ? substr($code, 0, 3) : null;
-            $parent = CashAccount::where('code', $parentCode)->first();
-
-            // Xác định level
-            $level = $parent ? $parent->level + 1 : 1;
-
-            $node = new CashAccount([
-                'code' => $code,
-                'name' => $name,
-                'status' => 1,
-                'created_by' => null,
-                'level' => $level,
-            ]);
-
-            if ($parent) {
-                $node->appendToNode($parent)->save();
-            } else {
-                $node->saveAsRoot();
-            }
-        }
+        });
     }
 }
