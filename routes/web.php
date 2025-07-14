@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\BankTransactionController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\BulkActionController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -25,7 +26,8 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BomsController;
-use App\Http\Controllers\Admin\CashBookController;
+use App\Http\Controllers\Admin\CashTransactionController;
+use App\Http\Controllers\Admin\DebtController;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialRequestController;
 use App\Http\Controllers\Admin\PasswordChangeRequestController;
@@ -36,8 +38,11 @@ use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\SupplierDebtController;
 use App\Http\Controllers\Admin\TicketController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\Admin\TransferHistoryController;
+use App\Imports\CashAccountImport;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -66,7 +71,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('customers')->controller(CustomerController::class)->name('customers.')->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('show/{id}', 'show')->name('show');
+            Route::get('create', 'create')->name('create');
+            Route::post('create', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('edit/{customer}', 'update')->name('update');
             // Route::post('create', 'store')->name('store');
             // Route::get('edit/{id}', 'edit')->name('edit');
             // Route::put('edit/{id}', 'update')->name('update');
@@ -85,7 +93,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('messages/{userId}', 'getMessages')->name('messages');
         });
 
-        Route::group(['prefix' => 'cashbook', 'controller' => CashBookController::class, 'as' => 'cashbook.'], function () {
+        Route::group(['prefix' => 'cash-transactions', 'controller' => CashTransactionController::class, 'as' => 'cash-transactions.'], function () {
             Route::get('/', 'index')->name('index');
             Route::get('list', 'list')->name('list');
             Route::post('voucher-types', 'voucherType');
@@ -96,6 +104,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print-multiple', 'printMultiple');
             Route::get('download-sample-cash-transaction', 'downloadSample');
             Route::post('import', 'import');
+            Route::get('search-object', 'search');
+        });
+
+        Route::group(['prefix' => 'bank-transactions', 'controller' => BankTransactionController::class, 'as' => 'bank-transactions.'], function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('list', 'list')->name('list');
+            Route::get('save/{id?}', 'save')->name('save');
+            Route::post('store', 'store')->name('store');
+            Route::put('update/{id}', 'update')->name('update');
+            Route::delete('destroy', 'destroy');
+        });
+
+        Route::group(['prefix' => 'debts', 'controller' => DebtController::class, 'as' => 'debts.'], function () {
+            Route::get('customer', 'customer')->name('customer');
         });
 
         Route::prefix('orders')->controller(OrderController::class)->name('orders.')->group(function () {
@@ -392,3 +414,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 Route::post('/submit-table', [WarehouseController::class, 'store']);
+
+// Route::post('cash-accounts/import', function (Request $request) {
+//     $request->validate([
+//         'file' => 'required|mimes:xlsx,xls,csv',
+//     ]);
+
+//     Excel::import(new CashAccountImport, $request->file('file'));
+
+//     return back()->with('success', 'Import tài khoản kế toán thành công.');
+// })->name('cash-accounts.import');
+
+// Route::view('form-import', 'import');

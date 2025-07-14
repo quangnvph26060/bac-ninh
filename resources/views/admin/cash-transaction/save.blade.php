@@ -13,8 +13,7 @@
                     @method('PUT')
                 @endif
 
-                <div class="row g-0 ">
-                    <!-- Thông tin Section -->
+                {{-- <div class="row g-0 ">
                     <div class="col-lg-8 pe-0">
                         <div class="section-header">
                             <i class="fas fa-info-circle"></i>
@@ -22,7 +21,6 @@
                         </div>
                         <div class="section-content">
                             <div class="row g-3">
-                                <!-- Ngày thu chi -->
                                 <div class="col-md-6 ">
                                     <label class="form-label">Ngày thu chi</label>
                                     <div class="input-group">
@@ -34,7 +32,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Loại chứng từ -->
                                 <div class="col-md-6">
                                     <div class="d-flex justify-content-between align-content-center">
                                         <label class="form-label d-flex align-items-center">
@@ -54,14 +51,10 @@
                                     </select>
                                 </div>
 
-
-                                <!-- Tài khoản tiền mặt -->
                                 <div class="col-md-6">
                                     <label class="form-label">Tài khoản<span class="required">*</span></label>
                                     <select class="form-select" name="cash_account_id">
                                         <option value="">Chọn tài khoản</option>
-                                        {{-- <option value="tk-111">TK 111 - Tiền mặt</option>
-                                    <option value="tk-112">TK 112 - Tiền gửi ngân hàng</option> --}}
                                         @foreach ($orderedAccounts as $account)
                                             <option @selected(optional($cashTransaction)->cash_account_id == $account->id) value="{{ $account->id }}">
                                                 {!! str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $account->level_display) !!} {{ $account->code }} - {{ $account->name }}
@@ -70,7 +63,6 @@
                                     </select>
                                 </div>
 
-                                <!-- Loại phiếu -->
                                 <div class="col-md-6">
                                     <label class="form-label">Loại phiếu <span class="required">*</span></label>
                                     <select class="form-select" name="type">
@@ -80,10 +72,8 @@
                                     </select>
                                 </div>
 
-                                <!-- File Upload -->
                                 <div class="col-12">
                                     <div class="file-upload-area">
-                                        {{-- Hiển thị file đã có nếu đang cập nhật --}}
                                         @if (!empty($cashTransaction) && $cashTransaction->attachment)
                                             <div class="mb-2 d-flex justify-content-center align-items-center gap-2">
                                                 <a href="{{ asset('storage/' . $cashTransaction->attachment) }}"
@@ -99,7 +89,6 @@
                                             </div>
                                         @endif
 
-                                        {{-- Preview file mới khi chọn --}}
                                         <div id="filePreviewArea" class="mb-2"></div>
 
                                         <div class="file-upload-text">
@@ -112,7 +101,6 @@
                                         <input type="file" class="d-none" name="attachment" id="fileInput"
                                             accept=".jpg,.jpeg,.gif,.png,.doc,.docx,.pdf">
 
-                                        {{-- Input ẩn để đánh dấu cần xoá file cũ nếu xoá --}}
                                         <input type="hidden" name="remove_attachment" id="removeAttachment" value="0">
                                     </div>
                                 </div>
@@ -120,14 +108,12 @@
                         </div>
                     </div>
 
-                    <!-- Thanh toán Section -->
                     <div class="col-lg-4 section-divider ps-0">
                         <div class="section-header">
                             <i class="fas fa-credit-card"></i>
                             Thanh toán
                         </div>
                         <div class="section-content">
-                            <!-- Số tiền -->
                             <div class="mb-3">
                                 <label class="form-label">Số tiền (USD) <span class="required">*</span></label>
                                 <div class="input-group">
@@ -139,7 +125,6 @@
                                 </div>
                             </div>
 
-                            <!-- Ghi chú -->
                             <div class="mb-3">
                                 <label class="form-label">Ghi chú</label>
                                 <div class="input-group">
@@ -151,12 +136,203 @@
                             </div>
                         </div>
                     </div>
+                </div> --}}
+
+                <div class="row">
+                    <div class="col-lg-8 pe-0">
+                        <div class="section-header">
+                            <i class="fas fa-info-circle"></i>
+                            Thông tin
+                        </div>
+                        <div class="section-content">
+                            <div class="row g-3">
+                                <div class="col-lg-6">
+                                    <label class="form-label">Ngày thu chi</label>
+                                    <div class="input-group">
+                                        <input type="date" class="form-control" name="transaction_date"
+                                            value="{{ !empty($cashTransaction) ? \Carbon\Carbon::parse($cashTransaction->transaction_date)->format('Y-m-d') : date('Y-m-d') }}">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <label class="form-label required">Loại đối tượng</label>
+                                    <select name="object_type" id="object-type" class="form-select">
+                                        <option value=""></option>
+                                        <option value="customer" @selected(optional($cashTransaction)->object_type == 'customer')>Khách hàng</option>
+                                        <option value="supplier" @selected(optional($cashTransaction)->object_type == 'supplier')>Nhà cung cấp</option>
+                                        <option value="employee" @selected(optional($cashTransaction)->object_type == 'employee')>Nhân viên</option>
+                                    </select>
+                                </div>
+
+
+                                <div class="col-md-6">
+                                    <label class="form-label required">Tài khoản tiền mặt</label>
+                                    <select class="form-select" name="money_account_id" id="account">
+                                        <option value=""></option>
+                                        @foreach ($cashAccounts as $cashAccount)
+                                            <option value="{{ $cashAccount->id }}" @selected(optional($cashTransaction)->money_account_id == $cashAccount->id)>
+                                                {{ "$cashAccount->code - $cashAccount->name" }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="position-relative">
+                                        <label class="form-label">Đối tượng</label>
+
+                                        @php
+                                            $objectName = '';
+                                            $objectPhone = '';
+
+                                            if (isset($cashTransaction) && $cashTransaction->objectable) {
+                                                $objectPhone = $cashTransaction->objectable->phone ?? '';
+
+                                                $objectName = match ($cashTransaction->object_type) {
+                                                    'customer' => $cashTransaction->objectable->name ?? '',
+                                                    'supplier' => $cashTransaction->objectable->company_name ?? '',
+                                                    'employee' => $cashTransaction->objectable->full_name ?? '',
+                                                    default => '',
+                                                };
+                                            }
+                                        @endphp
+
+
+                                        <input type="text" id="object_code" class="form-control"
+                                            placeholder="Nhập 3 ký tự để tìm đối tượng"
+                                            value="{{ trim($objectName . ' - ' . $objectPhone, ' -') }}">
+
+                                        <input type="hidden" name="objectable_id"
+                                            value="{{ $cashTransaction->objectable_id ?? '' }}">
+
+                                        <div id="object-search-result"
+                                            class="border bg-white position-absolute w-100 shadow-sm"
+                                            style="z-index: 9999; display: none;">
+                                            <!-- Kết quả sẽ render tại đây -->
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Loại phiếu <span class="required">*</span></label>
+                                    <select class="form-select" name="type" id="type">
+                                        <option value=""></option>
+                                        <option value="income" @selected(optional($cashTransaction)->type == 'income')>Phiếu thu</option>
+                                        <option value="expense" @selected(optional($cashTransaction)->type == 'expense')>Phiếu chi</option>
+                                    </select>
+                                </div>
+
+
+                                <div class="col-md-6">
+                                    <div class="d-flex justify-content-between align-content-center">
+                                        <label class="form-label d-flex align-items-center">
+                                            Loại chứng từ
+                                        </label>
+                                        <a href="#" id="addVoucherTypeBtn"
+                                            class="ms-2 text-primary text-decoration-underline" title="Thêm loại chứng từ">
+                                            <i class="fas fa-plus-circle"></i> Thêm loại chứng từ
+                                        </a>
+                                    </div>
+                                    <select class="form-select" id="voucher_type_id" name="voucher_type_id">
+                                        <option value="">Chọn loại chứng từ</option>
+                                        @foreach ($voucherTypes as $typeId => $typeName)
+                                            <option value="{{ $typeId }}" @selected(optional($cashTransaction)->voucher_type_id == $typeId)>
+                                                {{ $typeName }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                </div>
+
+                                <div class="col-md-6  {{ $cashTransaction && $cashTransaction->object_type == 'employee' ? '' : 'd-none' }}"
+                                    id="corresponding-account-wrapper">
+                                    <label class="form-label">Tài khoản đối ứng</label>
+                                    <select class="form-select" name="contra_money_account_id" id="corresponding-account">
+                                        <option value=""></option>
+                                        @foreach ($orderedAccounts as $account)
+                                            <option @selected(optional($cashTransaction)->contra_money_account_id == $account->id) value="{{ $account->id }}">
+                                                {!! str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $account->level_display) !!} {{ $account->code }} ({{ $account->name }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="file-upload-area">
+                                        @if (!empty($cashTransaction) && $cashTransaction->file_path)
+                                            <div class="mb-2 d-flex justify-content-center align-items-center gap-2">
+                                                <a href="{{ asset('storage/' . $cashTransaction->file_path) }}"
+                                                    target="_blank"
+                                                    class="btn btn-sm btn-primary text-white text-decoration-none">
+                                                    <i class="bi bi-file-earmark-text me-1"></i>
+                                                    Xem file đính kèm
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-danger"
+                                                    id="removeAttachmentBtn">
+                                                    <i class="bi bi-x-circle"></i> Xoá file
+                                                </button>
+                                            </div>
+                                        @endif
+
+                                        <div id="filePreviewArea" class="mb-2"></div>
+
+                                        <div class="file-upload-text">
+                                            Chọn file jpg, jpeg, gif, png, doc,... &lt;= 8MB
+                                        </div>
+                                        <button type="button" class="btn btn-file" id="triggerFileInput">
+                                            <i class="bi bi-upload me-1"></i>
+                                            Chọn File
+                                        </button>
+                                        <input type="file" class="d-none" name="file_path" id="fileInput"
+                                            accept=".jpg,.jpeg,.gif,.png,.doc,.docx,.pdf">
+
+                                        <input type="hidden" name="remove_attachment" id="removeAttachment"
+                                            value="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 section-divider ps-0">
+                        <div class="section-header">
+                            <i class="fas fa-credit-card"></i>
+                            Thanh toán
+                        </div>
+                        <div class="section-content">
+                            <div class="mb-3">
+                                <label class="form-label">Số tiền (USD) <span class="required">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    </span>
+                                    <input type="text"
+                                        value="{{ $cashTransaction ? formatPrice($cashTransaction->amount) : '' }}"
+                                        class="form-control usd-price-format" name="amount" placeholder="0">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Ghi chú</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fab fa-rocketchat"></i>
+                                    </span>
+                                    <textarea class="form-control" rows="5" name="note" placeholder="Nhập ghi chú...">{{ optional($cashTransaction)->note }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="border-top p-3">
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="/admin/cashbook" class="btn btn-outline-secondary btn-sm">
+                        <a href="/admin/cash-transactions" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-x-circle me-1"></i>
                             Quay lại
                         </a>
@@ -199,8 +375,109 @@
 @endsection
 
 @push('scripts')
+    <script src="{{ asset('backend/assets/js/plugin/select2/select2.min.js') }}"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
+            $('#object-type').select2({
+                placeholder: "Chọn loại đối tượng",
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('#type').select2({
+                placeholder: "Chọn loại đối tượng",
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('#corresponding-account').select2({
+                placeholder: "Chọn tài khoản đổi ứng",
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('#account').select2({
+                placeholder: "Chọn tài khoản",
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('#voucher_type_id').select2({
+                placeholder: "Loại chứng từ",
+                allowClear: true,
+                width: '100%'
+            });
+
+            let typingTimer;
+            let doneTypingInterval = 500;
+
+            $('#object-type').on('change', function() {
+                $('#object_code').val('');
+                $('input[name="objectable_id"]').val('');
+                $('#object-search-result').hide();
+
+                const type = $(this).val();
+                const $correspondingWrapper = $('#corresponding-account-wrapper');
+
+                if (type === 'employee') {
+                    $correspondingWrapper.removeClass('d-none');
+                } else {
+                    $correspondingWrapper.addClass('d-none');
+                    $('#corresponding-account').val(''); // clear giá trị nếu không phải nhân viên
+                }
+            });
+
+            $('#object_code').on('keyup', function() {
+                clearTimeout(typingTimer);
+                let keyword = $(this).val();
+                let type = $('#object-type').val();
+
+                if (keyword.length >= 3 && type) {
+                    typingTimer = setTimeout(function() {
+                        $.ajax({
+                            url: '/admin/cash-transactions/search-object',
+                            data: {
+                                type: type,
+                                keyword: keyword
+                            },
+                            success: function(res) {
+                                let html = '';
+                                if (res.length > 0) {
+                                    res.forEach(item => {
+                                        html += `<div class="p-2 border-bottom object-item" style="cursor: pointer;" data-id="${item.id}" data-phone="${item.phone}" data-code="${item.code}" data-name="${item.name}">
+                                            ${item.name} - ${item.phone}
+                                        </div>`;
+                                    });
+                                } else {
+                                    html =
+                                        `<div class="p-2 text-muted text-center">Không tìm thấy dữ liệu phù hợp</div>`;
+                                }
+                                $('#object-search-result').html(html).show();
+                            }
+                        });
+                    }, doneTypingInterval);
+                } else {
+                    $('#object-search-result').hide();
+                }
+            });
+
+            $(document).on('click', '.object-item', function() {
+                let name = $(this).data('name');
+                let phone = $(this).data('phone');
+                let id = $(this).data('id');
+                $('#object_code').val(name + ' - ' + phone);
+                $('input[name="objectable_id"]').val(id);
+                $('#object-search-result').hide();
+            });
+
+            $(document).click(function(e) {
+                if (!$(e.target).closest('#object-search-result, #object_code').length) {
+                    $('#object-search-result').hide();
+                }
+            });
+
             submitForm('#voucherTypeForm', function(response) {
                 if (response.success) {
                     const data = response.data;
@@ -222,10 +499,10 @@
                     Notifications('Có lỗi xảy ra, vui lòng thử lại', 'error');
                 }
 
-            }, '/admin/cashbook/voucher-types');
+            }, '/admin/cash-transactions/voucher-types');
 
             let url =
-                '{{ !empty($cashTransaction) ? "/admin/cashbook/update/$cashTransaction->id" : '/admin/cashbook/store' }}'
+                '{{ !empty($cashTransaction) ? "/admin/cash-transactions/update/$cashTransaction->id" : '/admin/cash-transactions/store' }}'
 
             submitForm('#myForm', function(response) {
                 window.location.href = response.redirect
@@ -318,6 +595,8 @@
 @endpush
 
 @push('styles')
+    <link rel="stylesheet" href="{{ asset('backend/assets/css/select2.min.css') }}">
+
     <style>
         .form-container {
             background-color: white;

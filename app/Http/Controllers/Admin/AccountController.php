@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Exports\CashAccountsExport;
 use App\Http\Controllers\Controller;
 use App\Imports\CashAccountImport;
-use App\Models\CashAccount;
+use App\Models\MoneyAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -14,12 +14,12 @@ class AccountController extends Controller
 {
     public function index()
     {
-        $cashAccounts = CashAccount::query()
+        $moneyAccounts = MoneyAccount::query()
             ->with('creator')
             ->orderBy('code') // hoặc sắp theo id nếu muốn
             ->get();
 
-        $orderedAccounts = $this->sortAccountsHierarchically($cashAccounts);
+        $orderedAccounts = $this->sortAccountsHierarchically($moneyAccounts);
 
         return view('admin.account.index', compact('orderedAccounts'));
     }
@@ -37,11 +37,11 @@ class AccountController extends Controller
         $credentials['created_by'] = Auth::id();
 
         if (!empty($credentials['parent_id'])) {
-            $parent  = CashAccount::query()->findOrFail($credentials['parent_id']);
+            $parent  = MoneyAccount::query()->findOrFail($credentials['parent_id']);
             $credentials['level'] = $parent->level + 1;
         }
 
-        CashAccount::create($credentials);
+        MoneyAccount::create($credentials);
 
         return handleResponse('Tạo tài khoản kế toán thành công', true, 201, $credentials, false);
     }
@@ -57,10 +57,10 @@ class AccountController extends Controller
 
         $credentials['status'] ??= 0;
 
-        $cashAccount = CashAccount::query()->findOrFail($request->id);
+        $cashAccount = MoneyAccount::query()->findOrFail($request->id);
 
         if (!empty($credentials['parent_id'])) {
-            $parent = CashAccount::query()->findOrFail($credentials['parent_id']);
+            $parent = MoneyAccount::query()->findOrFail($credentials['parent_id']);
             $credentials['level'] = $parent->level + 1;
         } else {
             $credentials['level'] = 0;
@@ -78,7 +78,7 @@ class AccountController extends Controller
             'ids.*' => 'exists:cash_accounts,id',
         ]);
 
-        CashAccount::whereIn('id', $request->ids)->delete();
+        MoneyAccount::whereIn('id', $request->ids)->delete();
 
         return response()->json([
             'success' => true,
@@ -108,11 +108,11 @@ class AccountController extends Controller
 
     public function list(Request $request)
     {
-        $cashAccounts = CashAccount::query()
+        $moneyAccounts = MoneyAccount::query()
             ->with('creator')
             ->get();
 
-        $orderedAccounts = $this->sortAccountsHierarchically($cashAccounts);
+        $orderedAccounts = $this->sortAccountsHierarchically($moneyAccounts);
 
         // Filter sau khi đã sort để giữ cấu trúc cây
         if ($request->filled('keyword')) {
@@ -144,7 +144,7 @@ class AccountController extends Controller
     public function search(Request $request)
     {
         $q = $request->input('q');
-        $accounts = CashAccount::where('code', 'like', "%$q%")
+        $accounts = MoneyAccount::where('code', 'like', "%$q%")
             ->orWhere('name', 'like', "%$q%")
             ->limit(10)
             ->get(['id', 'code', 'name']);

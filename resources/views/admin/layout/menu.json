@@ -242,8 +242,12 @@
         "id": "cashbook",
         "children": [
             {
-                "title": "Quản lý thu chi",
-                "url": "admin.cashbook.index"
+                "title": "Thu chi tiền mặt",
+                "url": "admin.cash-transactions.index"
+            },
+            {
+                "title": "Thu chi ngân hàng",
+                "url": "admin.bank-transactions.index"
             },
             {
                 "title": "Tài khoản kế toán",
@@ -251,12 +255,24 @@
             }
         ],
         "inRoutes": [
-            "admin.cashbook.index",
+            "admin.cash-transactions.index",
             "admin.accounting-accounts.index",
-            "admin.cashbook.save"
+            "admin.cash-transactions.save",
+            "admin.bank-transactions.index"
         ]
     },
-
+    {
+        "title": "Công nợ",
+        "icon": "fas fa-file-invoice-dollar",
+        "url": "javascript:void(0)",
+        "id": "debt",
+        "children": [
+            {
+                "title": "Khách hàng",
+                "url": "admin.debts.customer"
+            }
+        ]
+    },
     {
         "title": "Cấu hình",
         "icon": "fa-solid fa-gear",

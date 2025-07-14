@@ -751,15 +751,15 @@ if (!function_exists('isActiveMenu')) {
     }
 }
 
-if (!function_exists('generateCode')) {
+// if (!function_exists('generateCode')) {
 
-    function generateCode(int $length = 12): string
-    {
-        $base = microtime(true) . bin2hex(random_bytes(5));
-        $hash = strtoupper(substr(hash('sha256', $base), 0, $length));
-        return $hash;
-    }
-}
+//     function generateCode(int $length = 12): string
+//     {
+//         $base = microtime(true) . bin2hex(random_bytes(5));
+//         $hash = strtoupper(substr(hash('sha256', $base), 0, $length));
+//         return $hash;
+//     }
+// }
 
 if (!function_exists('generateUniqueCode')) {
     function generateUniqueCode(string $table, string $column = 'code', int $length = 12): string
@@ -767,6 +767,23 @@ if (!function_exists('generateUniqueCode')) {
         do {
             $code = generateCode($length);
         } while (DB::table($table)->where($column, $code)->exists());
+
+        return $code;
+    }
+}
+
+if (!function_exists('generateCode')) {
+
+    function generateCode($table, $prefix, $length = 10)
+    {
+        // Lấy số lượng ký tự còn lại sau prefix
+        $padLength = $length - strlen($prefix);
+
+        do {
+            // Tạo số random độ dài phù hợp
+            $number = mt_rand(1, pow(10, $padLength) - 1);
+            $code = $prefix . str_pad($number, $padLength, '0', STR_PAD_LEFT);
+        } while (DB::table($table)->where('code', $code)->exists());
 
         return $code;
     }
