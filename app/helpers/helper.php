@@ -719,6 +719,14 @@ function formatPrice($price)
     return '0';
 }
 
+if (!function_exists('formatPriceHideZero')) {
+    function formatPriceHideZero($value)
+    {
+        return $value != 0 ? formatPrice($value) : '';
+    }
+}
+
+
 function generateEmployeeCode($table = 'employees', $column = 'employee_code', $prefix = 'PH', $length = 5)
 {
     // Lấy bản ghi có ID lớn nhất
@@ -751,15 +759,15 @@ if (!function_exists('isActiveMenu')) {
     }
 }
 
-// if (!function_exists('generateCode')) {
+if (!function_exists('generateCode')) {
 
-//     function generateCode(int $length = 12): string
-//     {
-//         $base = microtime(true) . bin2hex(random_bytes(5));
-//         $hash = strtoupper(substr(hash('sha256', $base), 0, $length));
-//         return $hash;
-//     }
-// }
+    function generateCode(int $length = 12): string
+    {
+        $base = microtime(true) . bin2hex(random_bytes(5));
+        $hash = strtoupper(substr(hash('sha256', $base), 0, $length));
+        return $hash;
+    }
+}
 
 if (!function_exists('generateUniqueCode')) {
     function generateUniqueCode(string $table, string $column = 'code', int $length = 12): string
@@ -772,9 +780,9 @@ if (!function_exists('generateUniqueCode')) {
     }
 }
 
-if (!function_exists('generateCode')) {
+if (!function_exists('generateCodeV2')) {
 
-    function generateCode($table, $prefix, $length = 10)
+    function generateCodeV2($table, $prefix, $length = 10)
     {
         // Lấy số lượng ký tự còn lại sau prefix
         $padLength = $length - strlen($prefix);

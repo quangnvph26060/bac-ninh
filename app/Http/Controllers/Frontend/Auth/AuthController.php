@@ -91,7 +91,7 @@ class AuthController extends Controller
 
         if (!$existingCustomer) {
             Customer::create([
-                'code' => generateCode('customers', 'KH'),
+                'code' => generateCodeV2('customers', 'KH'),
                 'name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone

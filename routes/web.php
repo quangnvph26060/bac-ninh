@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\CashTransactionController;
 use App\Http\Controllers\Admin\DebtController;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialRequestController;
+use App\Http\Controllers\Admin\OpeningBalanceController;
 use App\Http\Controllers\Admin\PasswordChangeRequestController;
 use App\Http\Controllers\Admin\ReceiptController;
 use App\Http\Controllers\Admin\ReportdebtController;
@@ -79,6 +80,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Route::get('edit/{id}', 'edit')->name('edit');
             // Route::put('edit/{id}', 'update')->name('update');
         });
+
+        Route::prefix('opening-balances')
+            ->controller(OpeningBalanceController::class)
+            ->name('opening-balances.')
+            ->group(function () {
+                Route::get('create', 'create')->name('create');
+                Route::post('create', 'store')->name('store');
+            });
 
         Route::prefix('subjects')->controller(SubjectController::class)->name('subjects.')->group(function () {
             Route::get('/', 'index')->name('index');
