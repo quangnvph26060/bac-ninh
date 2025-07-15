@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\JournalEntryController;
 use App\Http\Controllers\Admin\MaterialImportController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -419,6 +420,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', [WarehouseController::class, 'index'])->name('index');
         Route::get('create', [WarehouseController::class, 'create'])->name('create');
         Route::get('show/{id}', [WarehouseController::class, 'show'])->name('show');
+    });
+
+    Route::prefix('journal-entry')->name('journal-entry.')->group(function () {
+        Route::get('', [JournalEntryController::class, 'index'])->name('index');
+       
     });
 });
 
