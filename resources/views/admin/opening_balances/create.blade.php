@@ -36,7 +36,7 @@
                                         <select class="form-select" name="type" id="type">
                                             <option value=""></option>
                                             <option value="income">Phiếu thu</option>
-                                            <option value="expense">Phiếu chi</option>
+                                            <option value="expense">Phiếu trả</option>
                                         </select>
                                     </div>
 
@@ -149,8 +149,11 @@
             });
 
             submitForm('#myForm', function(response) {
-                Notifications(response.message, "success");
+
+
                 $('#myForm')[0].reset();
+
+                window.location.href = response.data
 
                 // Reset select2 thủ công
                 $('#object-type').val(null).trigger('change');

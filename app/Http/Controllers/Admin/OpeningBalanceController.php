@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\JournalEntry;
 use App\Models\OpeningBalance;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -42,13 +43,25 @@ class OpeningBalanceController extends Controller
             'note' => 'nullable|max:255'
         ]);
 
-
         return transaction(function () use ($credentials) {
-            OpeningBalance::create($credentials);
+            $openingBalance  =  OpeningBalance::create($credentials);
+
+            JournalEntry::create([
+                'object_type' => $credentials['object_type'],
+                'amount' => $credentials['amount'],
+                'debit_account' => $credentials['object_type'] === 'customer' ? 131 : 331,
+                'note' => $credentials['note'],
+                'related_type' => 'opening_balance',
+                'related_id' => $openingBalance->id
+            ]);
 
             $message = "Tạo công nợ đầu kỳ thành công.";
 
-            return successResponse(message: $message, isResponse: true);
+            sessionFlash('success', $message);
+
+            $redirect = $credentials['object_type'] === 'customer' ? '/admin/debts/customer' : '/admin/debts/supplier';
+
+            return successResponse(message: $message, isResponse: true, data: $redirect);
         });
     }
 }

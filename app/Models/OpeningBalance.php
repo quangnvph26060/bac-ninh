@@ -16,7 +16,7 @@ class OpeningBalance extends Model
         'note',
         'object_type',
         'object_id',
-        'created_by'
+        'created_by',
     ];
 
     public function creator()
