@@ -46,7 +46,7 @@ class CustomerController extends Controller
         $credentials = $this->validateRequest($request);
 
         return transaction(function () use ($credentials) {
-            $credentials['code'] ??= generateCode('customers', 'KH');
+            $credentials['code'] ??= generateCodeV2('customers', 'KH');
             Customer::create($credentials);
 
             sessionFlash('success', 'Tạo mới khách hàng thành công');
@@ -60,7 +60,7 @@ class CustomerController extends Controller
         $credentials = $this->validateRequest($request, $customer);
 
         return transaction(function () use ($credentials, $customer) {
-            $credentials['code'] ??= $customer->code ?? generateCode('customers', 'KH');
+            $credentials['code'] ??= $customer->code ?? generateCodeV2('customers', 'KH');
             $customer->update($credentials);
 
             sessionFlash('success', 'Cập nhật khách hàng thành công');

@@ -6,95 +6,172 @@
             <x-breadcrumb :items="[['name' => 'công nợ khách hàng']]" />
         </div>
 
+        <div class="card p-3 mb-3 shadow-sm">
+            <div class="d-flex flex-wrap gap-2 justify-content-end align-items-end">
+                <div>
+                    <input type="text" class="form-control" name="id" placeholder="Nhập ID">
+                </div>
+                <div>
+                    <input type="text" class="form-control" name="date_range" id="dateFilter">
+                </div>
+                <div>
+                    <input type="text" class="form-control" name="customer" placeholder="Tên khách hàng">
+                </div>
+                <div>
+                    <button type="button" class="btn btn-success btn-sm" id="filter">
+                        <i class="bi bi-funnel-fill"></i> Lọc
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
         <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle text-center">
-                <thead>
+            <table class="table table-bordered table-hover align-middle text-center mb-0" id="customerDebtTable">
+                <thead class="table-light align-middle">
                     <tr>
-                        <th rowspan="2" class="row-number">#</th>
-                        <th rowspan="2">Khách hàng</th>
-                        <th rowspan="2">Số điện thoại</th>
-                        <th colspan="2" class="header-main">Số dư đầu kì</th>
-                        <th colspan="2" class="header-main">Phát sinh trong kì</th>
-                        <th colspan="2" class="header-main">Số dư cuối kì</th>
+                        <th rowspan="3" style="width: 50px;">#</th>
+                        <th rowspan="3">Khách hàng</th>
+                        <th rowspan="3">Số điện thoại</th>
+                        <th colspan="2">Số dư đầu kỳ</th>
+                        <th colspan="2">Phát sinh trong kỳ</th>
+                        <th colspan="2">Số dư cuối kỳ</th>
                     </tr>
                     <tr>
-                        <th class="header-sub">Nợ [Phải thu]</th>
-                        <th class="header-sub">Có [Phải trả]</th>
-                        <th class="header-sub">Ghi nợ</th>
-                        <th class="header-sub">Ghi có</th>
-                        <th class="header-sub">Nợ [Phải thu] = 4 + 6 - 5 - 7</th>
-                        <th class="header-sub">Có [Phải trả] = 5 + 7 - 4 - 6</th>
+                        <th>Nợ [Phải thu]</th>
+                        <th>Có [Phải trả]</th>
+                        <th>Ghi nợ</th>
+                        <th>Ghi có</th>
+                        <th>Nợ [Phải thu] = 4 + 6 - 5 - 7</th>
+                        <th>Có [Phải trả] = 5 + 7 - 4 - 6</th>
                     </tr>
                     <tr>
-                        <th class="header-sub">[1]</th>
-                        <th class="header-sub">[2]</th>
-                        <th class="header-sub">[3]</th>
-                        <th class="header-sub">[4]</th>
-                        <th class="header-sub">[5]</th>
-                        <th class="header-sub">[6]</th>
-                        <th class="header-sub">[7]</th>
-                        <th class="header-sub">[8]</th>
-                        <th class="header-sub">[9]</th>
+                        <th>[4]</th>
+                        <th>[5]</th>
+                        <th>[6]</th>
+                        <th>[7]</th>
+                        <th>[8]</th>
+                        <th>[9]</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>5</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
+                    @forelse($customerDebts as $index => $debt)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td class="text-start">{{ $debt->customer_code }} - {{ $debt->customer_name }}</td>
+                            <td>{{ $debt->customer_phone }}</td>
+                            <td class="text-end">{{ formatPriceHideZero($debt->opening_debit) }}</td>
+                            <td class="text-end">{{ formatPriceHideZero($debt->opening_credit) }}</td>
+                            <td class="text-end">{{ formatPriceHideZero($debt->period_debit) }}</td>
+                            <td class="text-end">{{ formatPriceHideZero($debt->period_credit) }}</td>
+                            <td class="text-end">{{ formatPriceHideZero($debt->ending_debit) }}</td>
+                            <td class="text-end">{{ formatPriceHideZero($debt->ending_credit) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="9" class="text-center">Không có dữ liệu</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
+
     </div>
 @endsection
+
+@push('scripts')
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+    <script>
+        let start = moment().subtract(1, 'month'); // 15/06/2025
+        let end = moment();
+
+        $('#dateFilter').daterangepicker({
+            startDate: start,
+            endDate: end,
+            autoUpdateInput: true,
+            locale: {
+                format: 'DD/MM/YYYY',
+                cancelLabel: 'Hủy',
+                applyLabel: 'Áp dụng',
+                customRangeLabel: 'Tùy chọn',
+                daysOfWeek: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                monthNames: [
+                    'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+                    'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+                ],
+                firstDay: 1
+            },
+            ranges: {
+                'Hôm nay': [moment(), moment()],
+                'Ngày mai': [moment().add(1, 'days'), moment().add(1, 'days')],
+                'Tuần này': [moment().startOf('week'), moment().endOf('week')],
+                'Tuần sau': [moment().add(1, 'week').startOf('week'), moment().add(1, 'week').endOf(
+                    'week')],
+                'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                'Tháng sau': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf(
+                    'month')]
+            }
+        });
+
+        // Hiển thị mặc định trên input khi load
+        $('#dateFilter').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+
+        $('#dateFilter').on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format(
+                'DD/MM/YYYY'));
+        });
+
+        $('#dateFilter').on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+        });
+
+        $('#filter').on('click', function() {
+            let id = $('input[name="id"]').val();
+            let date_range = $('input[name="date_range"]').val();
+
+            $.ajax({
+                url: '',
+                type: "GET",
+                data: {
+                    id,
+                    date_range
+                },
+                beforeSend: function() {
+                    $("#loadingSpinner").fadeIn();
+                },
+                success: function(response) {
+                    renderTable(response);
+                },
+                error: function() {
+                    alert("Có lỗi xảy ra, vui lòng thử lại.");
+                },
+                complete: function() {
+                    $("#loadingSpinner").fadeOut();
+                },
+            });
+        })
+
+        function renderTable(data) {
+            let tbody = '';
+
+            data.forEach((debt, index) => {
+                tbody += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${debt.customer_code} - ${debt.customer_name}</td>
+                <td>${debt.customer_phone}</td>
+                <td class="text-end">${debt.opening_debit != 0 ? formatNumber(debt.opening_debit) : ''}</td>
+                <td class="text-end">${debt.opening_credit != 0 ? formatNumber(debt.opening_credit) : ''}</td>
+                <td class="text-end">${debt.period_debit != 0 ? formatNumber(debt.period_debit) : ''}</td>
+                <td class="text-end">${debt.period_credit != 0 ? formatNumber(debt.period_credit) : ''}</td>
+                <td class="text-end">${debt.ending_debit != 0 ? formatNumber(debt.ending_debit) : ''}</td>
+                <td class="text-end">${debt.ending_credit != 0 ? formatNumber(debt.ending_credit) : ''}</td>
+            </tr>`;
+            });
+
+            $('#customerDebtTable tbody').html(tbody);
+        }
+    </script>
+@endpush

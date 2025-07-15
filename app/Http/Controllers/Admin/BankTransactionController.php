@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\MoneyAccount;
 use App\Models\Receipt;
@@ -13,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-
+use Tymon\JWTAuth\Claims\Custom;
 
 class BankTransactionController extends Controller
 {
@@ -129,7 +130,7 @@ class BankTransactionController extends Controller
                 'integer',
                 Rule::when(
                     $request->object_type === 'customer',
-                    ['exists:users,id'],
+                    ['exists:customers,id'],
                 ),
                 Rule::when(
                     $request->object_type === 'supplier',
@@ -161,7 +162,7 @@ class BankTransactionController extends Controller
 
         // Map object_type => Model
         $modelMap = [
-            'customer' => User::class,
+            'customer' => Customer::class,
             'supplier' => Supplier::class,
             'employee' => Employee::class,
         ];
@@ -214,7 +215,7 @@ class BankTransactionController extends Controller
                 'integer',
                 Rule::when(
                     $request->object_type === 'customer',
-                    ['exists:users,id'],
+                    ['exists:customers,id'],
                 ),
                 Rule::when(
                     $request->object_type === 'supplier',
@@ -246,7 +247,7 @@ class BankTransactionController extends Controller
 
         // Map object_type => Model
         $modelMap = [
-            'customer' => User::class,
+            'customer' => Customer::class,
             'supplier' => Supplier::class,
             'employee' => Employee::class,
         ];
