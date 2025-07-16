@@ -133,10 +133,7 @@
                 "url": "admin.subjects.index"
             }
         ],
-        "inRoutes": [
-            "admin.coupons.index",
-            "admin.subjects.index"
-        ]
+        "inRoutes": ["admin.coupons.index", "admin.subjects.index"]
     },
     {
         "title": "Tài chính",
@@ -148,19 +145,14 @@
                 "url": "admin.transfer.histories.index"
             }
         ],
-        "inRoutes": [
-            "admin.transfer.histories.index"
-        ]
+        "inRoutes": ["admin.transfer.histories.index"]
     },
     {
         "title": "Khách hàng",
         "icon": "fas fa-user",
         "route": "admin.customers.index",
         "id": "customers",
-        "inRoutes": [
-            "admin.customers.index",
-            "admin.customers.show"
-        ]
+        "inRoutes": ["admin.customers.index", "admin.customers.show"]
     },
     {
         "title": "Hỗ trợ",
@@ -280,13 +272,18 @@
                 "url": "admin.debts.customer"
             },
             {
+                "title": "Nhà cung cấp",
+                "url": "admin.debts.supplier"
+            },
+            {
                 "title": "Nhập công nợ đầu kỳ",
                 "url": "admin.opening-balances.create"
             }
         ],
         "inRoutes": [
             "admin.debts.customer",
-            "admin.opening-balances.create"
+            "admin.opening-balances.create",
+            "admin.debts.supplier"
         ]
     },
     {
@@ -300,10 +297,7 @@
                 "url": "admin.journal-entry.index"
             }
         ],
-        "inRoutes": [
-            "admin.debts.customer",
-            "admin.opening-balances.create"
-        ]
+        "inRoutes": ["admin.debts.customer", "admin.opening-balances.create"]
     },
     {
         "title": "Cấu hình",

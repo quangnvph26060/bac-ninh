@@ -128,6 +128,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::group(['prefix' => 'debts', 'controller' => DebtController::class, 'as' => 'debts.'], function () {
             Route::get('customer', 'customer')->name('customer');
+            Route::get('supplier', 'supplier')->name('supplier');
         });
 
         Route::prefix('orders')->controller(OrderController::class)->name('orders.')->group(function () {
@@ -424,7 +425,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('journal-entry')->name('journal-entry.')->group(function () {
         Route::get('', [JournalEntryController::class, 'index'])->name('index');
-       
+
     });
 });
 
