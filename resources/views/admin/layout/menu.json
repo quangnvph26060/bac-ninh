@@ -294,7 +294,7 @@
         "children": [
             {
                 "title": "Bút toán",
-                "url": "admin.journal-entry.index"
+                "url": "admin.journal-entries.index"
             }
         ],
         "inRoutes": ["admin.debts.customer", "admin.opening-balances.create"]

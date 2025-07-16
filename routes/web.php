@@ -423,8 +423,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('show/{id}', [WarehouseController::class, 'show'])->name('show');
     });
 
-    Route::prefix('journal-entry')->name('journal-entry.')->group(function () {
+    Route::prefix('journal-entries')->name('journal-entries.')->group(function () {
         Route::get('', [JournalEntryController::class, 'index'])->name('index');
+        Route::delete('/destroy/{id}', [JournalEntryController::class, 'destroy'])->name('destroy');
+        Route::delete('/bulk-delete', [JournalEntryController::class, 'bulkDelete'])->name('bulkDelete');
 
     });
 });

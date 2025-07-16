@@ -208,10 +208,10 @@
                 triggerFilter();
             });
 
-            $('#dateFilter').on('cancel.daterangepicker', function() {
-                $(this).val('');
-                triggerFilter();
-            });
+            // $('#dateFilter').on('cancel.daterangepicker', function() {
+            //     $(this).val('');
+            //     triggerFilter();
+            // });
 
             $('#accountFilter, #voucherFilter').on('change', function() {
                 triggerFilter();
@@ -247,7 +247,7 @@
         // AJAX load danh sách
         function loadJournalEntry(filters = {}) {
             $.ajax({
-                url: "/admin/journal-entry",
+                url: "/admin/journal-entries",
                 type: "GET",
                 data: filters,
                 beforeSend: function() {
@@ -266,6 +266,91 @@
                 }
             });
         }
+
+        $(document).on('click', '.action-delete', function() {
+            const id = $(this).data('id');
+            console.log('Deleting ID:', id);
+            Swal.fire({
+                title: "Bạn có chắc chắn muốn xóa?",
+                text: "Hành động này sẽ không thể hoàn tác!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Đồng ý, xóa!",
+                cancelButtonText: "Hủy"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/admin/journal-entries/destroy/${id}`,
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(res) {
+                            if (res.success) {
+                                Notifications(res.message, 'success');
+                                triggerFilter();
+                            } else {
+                                Notifications('Xoá thất bại!', 'error');
+                            }
+                        },
+                        error: function() {
+                            Notifications('Có lỗi khi xoá!', 'error');
+                        }
+                    });
+                }
+            });
+        });
+
+        $(document).on('click', '#delete-selected', function(e) {
+            e.preventDefault();
+
+            let ids = $('.item-checkbox:checked').map(function() {
+                return $(this).data('id');
+            }).get();
+
+            if (ids.length === 0) {
+                Notifications('Vui lòng chọn ít nhất một dòng để xoá.', 'warning');
+                return;
+            }
+
+            Swal.fire({
+                title: "Bạn có chắc chắn muốn xóa?",
+                text: "Hành động này sẽ không thể hoàn tác!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Đồng ý, xóa!",
+                cancelButtonText: "Hủy"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/admin/journal-entries/bulk-delete', // route xử lý xoá hàng loạt
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            ids: ids
+                        },
+                        success: function(res) {
+                            if (res.success) {
+                                Notifications(res.message, 'success');
+                                triggerFilter();
+                                $('input[type="checkbox"]:checked').prop('checked', false);
+                            } else {
+                                Notifications(res.message || 'Xoá thất bại!', 'error');
+                            }
+                        },
+                        error: function() {
+                            Notifications('Có lỗi khi xoá!', 'error');
+                        }
+                    });
+                }
+            });
+        });
+
+
 
         function debounce(func, delay) {
             let timeoutId;
@@ -308,10 +393,10 @@
             window.location.href = url;
         });
 
-        $(document).on('click', '.action-delete', function() {
-            const id = $(this).closest('tr').data('id');
-            deleteReceipt(id);
-        });
+        // $(document).on('click', '.action-delete', function() {
+        //     const id = $(this).closest('tr').data('id');
+        //     deleteReceipt(id);
+        // });
     </script>
 @endpush
 

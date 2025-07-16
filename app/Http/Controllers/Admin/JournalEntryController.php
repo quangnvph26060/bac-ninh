@@ -44,15 +44,47 @@ class JournalEntryController extends Controller
 
             return response()->json([
                 'success' => true,
-                'html' => view('admin.journal-entry._table', compact('journalEntries'))->render()
+                'html' => view('admin.journal-entries._table', compact('journalEntries'))->render()
             ]);
         }
 
         return view(
-            'admin.journal-entry.index',
+            'admin.journal-entries.index',
             compact(
                 'voucherTypes'
             )
         );
     }
+
+    public function destroy($id)
+    {
+
+        $query = JournalEntry::find($id);
+        $query->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Xoá thành công!'
+        ]);
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không có bản ghi nào được chọn.'
+            ]);
+        }
+
+        JournalEntry::whereIn('id', $ids)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã xoá thành công ' . count($ids) . ' bản ghi.'
+        ]);
+    }
+
 }
