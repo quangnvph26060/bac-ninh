@@ -12,6 +12,7 @@ class JournalEntry extends Model
     protected $fillable = [
         'type',
         'object_type',
+        'object_id',
         'document',
         'amount',
         'debit_account',
@@ -19,7 +20,8 @@ class JournalEntry extends Model
         'note',
         'file',
         'related_type',
-        'related_id'
+        'related_id',
+        'transaction_date'
     ];
 
     protected static function booted()
@@ -35,4 +37,34 @@ class JournalEntry extends Model
             }
         });
     }
+
+    public function getObjectAttribute()
+    {
+        return match ($this->object_type) {
+            'customer' => Customer::query()->select('id', 'code', 'name')->where('id', $this->object_id)->first(),
+            'supplier' => Supplier::query()->select('id', 'code', 'company_name')->where('id', $this->object_id)->first(),
+            default => null,
+        };
+
+    }
+
+    public function getTypeLabelAttribute()
+    {
+        return match ($this->type) {
+            'income' => 'Phiếu thu',
+            'expense' => 'Phiếu trả',
+            'other' => 'Khác',
+            'debit_notice' => 'Báo nợ (Rút tiền)',
+            'credit_notice' => 'Báo có (Nộp tiền)',
+            default => 'Không rõ',
+        };
+    }
+
+
+
+    protected $casts = [
+        'transaction_date' => 'date'
+    ];
+
+
 }

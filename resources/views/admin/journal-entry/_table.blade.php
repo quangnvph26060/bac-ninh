@@ -1,9 +1,9 @@
 @foreach ($journalEntries as $item)
     <tr>
         <td> <input type="checkbox" id="checked-all" class="form-check-input"></td>
-        <td>{{ $item->id }} | {{ $item->created_at->format('d/m/Y') }}</td>
-        <td>{{ $item->type }}</td>
-        <td>{{ $item->object_type }}</td>
+        <td>{{ $item->id }} | {{ $item->transaction_date->format('d/m/Y') }}</td>
+        <td>{{ $item->typeLabel }}</td>
+        <td>{{ $item->object->code }} <br> {{ $item->object->name ??  $item->object->company_name}}</td>
         <td>{{ $item->document }}</td>
         <td>{{ number_format($item->amount, 0, ',', '.') }}</td>
         <td>{{ $item->debit_account }}</td>

@@ -77,18 +77,11 @@
                                     @endforeach
                                 </select>
                             </div> --}}
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <input type="text" id="dateFilter" class="form-control" placeholder="Chọn khoảng ngày">
                             </div>
+
                             <div class="col-md-4">
-                                <select id="voucherFilter" class="form-select">
-                                    <option value="">--- Loại chứng từ ---</option>
-                                    @foreach ($voucherTypes as $voucherTypeId => $voucherTypeName)
-                                        <option value="{{ $voucherTypeId }}">{{ $voucherTypeName }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-3">
                                 <input type="text" id="amountFilter" class="form-control usd-price-format"
                                     placeholder="Số tiền">
                             </div>
@@ -167,15 +160,17 @@
     <script>
         $(document).ready(function() {
 
+            // Mở modal import
             document.getElementById('import-excel').addEventListener('click', function(e) {
                 e.preventDefault();
                 var modal = new bootstrap.Modal(document.getElementById('importExcelModal'));
                 modal.show();
             });
 
-            let start = moment();
-            let end = moment().add(1, 'month');
+            let start = moment().subtract(1, 'month');
+            let end = moment();
 
+            // Khởi tạo daterangepicker
             $('#dateFilter').daterangepicker({
                 startDate: start,
                 endDate: end,
@@ -204,191 +199,52 @@
                 }
             });
 
-            // Hiển thị mặc định trên input khi load
+            // Set giá trị ban đầu cho date input
             $('#dateFilter').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
 
             $('#dateFilter').on('apply.daterangepicker', function(ev, picker) {
                 $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format(
                     'DD/MM/YYYY'));
-
                 triggerFilter();
             });
 
-            $('#dateFilter').on('cancel.daterangepicker', function(ev, picker) {
+            $('#dateFilter').on('cancel.daterangepicker', function() {
                 $(this).val('');
                 triggerFilter();
-
             });
 
             $('#accountFilter, #voucherFilter').on('change', function() {
                 triggerFilter();
             });
 
-            // Khi click vào checkbox "checked-all"
             $('#checked-all').on('change', function() {
                 let isChecked = $(this).is(':checked');
                 $('.item-checkbox').prop('checked', isChecked);
             });
 
-            // Khi click vào từng checkbox hàng
             $(document).on('change', '.item-checkbox', function() {
-                let totalCheckboxes = $('.item-checkbox').length;
-                let checkedCheckboxes = $('.item-checkbox:checked').length;
-
-                if (totalCheckboxes === checkedCheckboxes) {
-                    $('#checked-all').prop('checked', true);
-                } else {
-                    $('#checked-all').prop('checked', false);
-                }
+                let total = $('.item-checkbox').length;
+                let checked = $('.item-checkbox:checked').length;
+                $('#checked-all').prop('checked', total === checked);
             });
 
-            loadJournalEntry();
+            // Gọi lọc lần đầu tiên khi load trang
+            triggerFilter();
         });
-
-
-        $(document).on('click', '#delete-selected', function() {
-            let ids = $('.item-checkbox:checked').map(function() {
-                return $(this).data('id');
-            }).get();
-
-            if (ids.length === 0) {
-                Notifications('Vui lòng chọn ít nhất một tài khoản để xoá.', 'warning');
-                return;
-            }
-
-            Swal.fire({
-                title: "Bạn có chắc chắn muốn xóa?",
-                text: "Hành động này sẽ không thể hoàn tác!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Đồng ý, xóa!",
-                cancelButtonText: "Hủy",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: '/admin/bank-transactions/destroy',
-                        type: 'DELETE',
-                        data: {
-                            ids: ids,
-                        },
-                        beforeSend: function() {
-                            $("#loadingSpinner").fadeIn();
-                        },
-                        success: function(res) {
-                            if (res.success) {
-                                $('input[type="checkbox"]:checked').prop('checked', false);
-
-                                Notifications(res.message, 'success');
-                                loadJournalEntry();
-                            } else {
-                                Notifications('Có lỗi xảy ra, vui lòng thử lại.',
-                                    'error');
-                            }
-                        },
-                        error: function() {
-                            Notifications('Có lỗi xảy ra, vui lòng thử lại.',
-                                'error');
-                        },
-                        complete: function() {
-                            $("#loadingSpinner").fadeIn();
-                        }
-                    });
-                } else {
-                    $('.item-checkbox, #checked-all').prop('checked', false)
-                }
-            })
-        });
-
-        $('#print-selected').on('click', function(e) {
-            e.preventDefault();
-
-            let selectedIds = [];
-            $('.item-checkbox:checked').each(function() {
-                selectedIds.push($(this).data('id'));
-            });
-
-            if (selectedIds.length === 0) {
-                alert('Vui lòng chọn ít nhất 1 phiếu để in.');
-                return;
-            }
-
-            $.ajax({
-                url: '/admin/cash-transactions/print-multiple',
-                method: 'POST',
-                data: {
-                    ids: selectedIds,
-                },
-                success: function(response) {
-                    let printIframe = document.getElementById('print-iframe');
-                    let printDocument = printIframe.contentDocument || printIframe.contentWindow
-                        .document;
-
-                    printDocument.open();
-                    printDocument.write(response);
-                    printDocument.close();
-
-                    // Đợi iframe render xong mới in
-                    printIframe.onload = function() {
-                        printIframe.contentWindow.focus();
-                        printIframe.contentWindow.print();
-                    };
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                    alert('Đã xảy ra lỗi khi in phiếu.');
-                }
-            });
-
-        });
-
-        $(document).on('click', '.action-print', function() {
-            let transactionId = $(this).closest('tr').find('.item-checkbox').data('id');
-
-            if (!transactionId) {
-                alert('Không tìm thấy ID phiếu.');
-                return;
-            }
-
-            $.ajax({
-                url: '/admin/cash-transactions/print-multiple',
-                method: 'POST',
-                data: {
-                    ids: [transactionId],
-                },
-                success: function(response) {
-                    let printIframe = document.getElementById('print-iframe');
-                    let printDocument = printIframe.contentDocument || printIframe.contentWindow
-                        .document;
-
-                    printDocument.open();
-                    printDocument.write(response);
-                    printDocument.close();
-
-                    printIframe.onload = function() {
-                        printIframe.contentWindow.focus();
-                        printIframe.contentWindow.print();
-                    };
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                    alert('Đã xảy ra lỗi khi in phiếu.');
-                }
-            });
-        });
-
 
         // Toggle action menu
         $(document).on('click', '.action-toggle-btn', function(e) {
-
             e.stopPropagation();
             const $menu = $(this).siblings('.action-menu');
-
             $('.action-menu').not($menu).hide();
             $menu.toggle();
         });
 
+        $(document).on('click', function() {
+            $('.action-menu').hide();
+        });
+
+        // AJAX load danh sách
         function loadJournalEntry(filters = {}) {
             $.ajax({
                 url: "/admin/journal-entry",
@@ -427,34 +283,29 @@
             debouncedFilter();
         });
 
+        // Hàm lọc chính
         function triggerFilter() {
             let rawAmount = $('#amountFilter').val();
             let cleanedAmount = rawAmount.replace(/,/g, '').trim();
 
             let filters = {
                 date_range: $('#dateFilter').val(),
-                account: $('#accountFilter').val(),
-                voucher: $('#voucherFilter').val(),
-                amount: cleanedAmount
+                amount: cleanedAmount,
             };
 
+            console.log("Đang lọc với:", filters); // DEBUG
             loadJournalEntry(filters);
         }
 
-        // Close when clicking outside
-        $(document).on('click', function() {
-            $('.action-menu').hide();
-        });
-
-        // Action handlers
+        // Action handler
         $(document).on('click', '.action-print', function() {
             const id = $(this).closest('tr').data('id');
+            // Xử lý in nếu cần
         });
 
         $(document).on('click', '.action-edit', function() {
             const url = $(this).data('url');
-
-            window.location.href = url
+            window.location.href = url;
         });
 
         $(document).on('click', '.action-delete', function() {
