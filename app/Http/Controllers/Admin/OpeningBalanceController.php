@@ -48,11 +48,13 @@ class OpeningBalanceController extends Controller
 
             JournalEntry::create([
                 'object_type' => $credentials['object_type'],
+                'object_id' => $credentials['object_id'],
                 'amount' => $credentials['amount'],
                 'debit_account' => $credentials['object_type'] === 'customer' ? 131 : 331,
                 'note' => $credentials['note'],
                 'related_type' => 'opening_balance',
-                'related_id' => $openingBalance->id
+                'related_id' => $openingBalance->id,
+                'transaction_date' => $credentials['transaction_date'],
             ]);
 
             $message = "Tạo công nợ đầu kỳ thành công.";
