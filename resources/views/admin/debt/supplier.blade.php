@@ -12,7 +12,7 @@
                     <input type="text" class="form-control" name="date_range" id="dateFilter">
                 </div>
                 <div>
-                    <input type="text" class="form-control" name="name" placeholder="Tên khách hàng">
+                    <input type="text" class="form-control" name="company_name" placeholder="Tên nhà cung cấp">
                 </div>
                 <div>
                     <button type="button" class="btn btn-success btn-sm" id="filter">
@@ -28,8 +28,7 @@
                 <thead class="table-light align-middle">
                     <tr>
                         <th rowspan="3" style="width: 50px;">#</th>
-                        <th rowspan="3">Khách hàng</th>
-                        <th rowspan="3">Số điện thoại</th>
+                        <th rowspan="3">Đối tượng</th>
                         <th colspan="2">Số dư đầu kỳ</th>
                         <th colspan="2">Phát sinh trong kỳ</th>
                         <th colspan="2">Số dư cuối kỳ</th>
@@ -39,24 +38,26 @@
                         <th>Có [Phải trả]</th>
                         <th>Ghi nợ</th>
                         <th>Ghi có</th>
-                        <th>Nợ [Phải thu] = 4 + 6 - 5 - 7</th>
-                        <th>Có [Phải trả] = 5 + 7 - 4 - 6</th>
+                        <th>Nợ [Phải thu] = 3 + 5 - 4 - 6</th>
+                        <th>Có [Phải trả] = 4 + 6 - 3 -5</th>
                     </tr>
                     <tr>
+                        <th>[3]</th>
                         <th>[4]</th>
                         <th>[5]</th>
                         <th>[6]</th>
                         <th>[7]</th>
                         <th>[8]</th>
-                        <th>[9]</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($customerDebts as $index => $debt)
+                    @forelse($supplierDebts as $index => $debt)
                         <tr>
                             <td>{{ $index + 1 }}</td>
-                            <td class="text-start">{{ $debt->customer_code }} - {{ $debt->customer_name }}</td>
-                            <td>{{ $debt->customer_phone }}</td>
+                            <td class="text-start">
+                                {{ $debt->supplier_code }}  -  {{ $debt->supplier_name }} <br>
+                               SDT: {{ $debt->supplier_phone }}
+                            </td>
                             <td class="text-end">{{ formatPriceHideZero($debt->opening_debit) }}</td>
                             <td class="text-end">{{ formatPriceHideZero($debt->opening_credit) }}</td>
                             <td class="text-end">{{ formatPriceHideZero($debt->period_debit) }}</td>
@@ -126,14 +127,14 @@
 
         $('#filter').on('click', function() {
             let date_range = $('input[name="date_range"]').val();
-            let name = $('input[name="name"]').val();
+            let company_name = $('input[name="company_name"]').val();
 
             $.ajax({
                 url: '',
                 type: "GET",
                 data: {
                     date_range,
-                    name
+                    company_name
                 },
                 beforeSend: function() {
                     $("#loadingSpinner").fadeIn();
@@ -157,8 +158,10 @@
                 tbody += `
             <tr>
                 <td>${index + 1}</td>
-                <td class="text-start">${debt.customer_code} - ${debt.customer_name}</td>
-                <td>${debt.customer_phone}</td>
+                <td class="text-start">
+                    ${debt.supplier_code} - ${debt.supplier_name} <br/>
+                    SDT: ${debt.supplier_phone}
+                </td>
                 <td class="text-end">${debt.opening_debit != 0 ? formatNumber(debt.opening_debit) : ''}</td>
                 <td class="text-end">${debt.opening_credit != 0 ? formatNumber(debt.opening_credit) : ''}</td>
                 <td class="text-end">${debt.period_debit != 0 ? formatNumber(debt.period_debit) : ''}</td>
