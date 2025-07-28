@@ -1,24 +1,40 @@
-@foreach ($journalEntries as $item)
+@php
+    $typeLabels = [
+        'other' => 'Khác',
+        'income' => 'Phiếu thu',
+        'expense' => 'Phiếu chi',
+        'debit_notice' => 'Báo nợ (Rút tiền)',
+        'credit_notice' => 'Báo có (Nộp tiền)',
+    ];
+@endphp
+
+@forelse ($transactions as $t)
     <tr>
+        <td><input type="checkbox" class="form-check-input item-checkbox" value="{{ $t->transaction_id }}"></td>
+        <td>{{ $t->transaction_id }} | {{ \Carbon\Carbon::parse($t->transaction_date)->format('d/m/Y') }}</td>
+        <td>{{ $typeLabels[$t->transaction_type] ?? $t->transaction_type }}</td>
         <td>
-            <input type="checkbox" class="form-check-input item-checkbox" data-id="{{ $item->id }}">
-        </td>
-        <td>{{ $item->id }} | {{ $item->transaction_date->format('d/m/Y') }}</td>
-        <td>{{ $item->typeLabel }}</td>
-        <td>{{ $item->object->code }} <br> {{ $item->object->name ?? $item->object->company_name }}</td>
-        <td>{{ $item->document }}</td>
-        <td>{{ number_format($item->amount, 0, ',', '.') }}</td>
-        <td>{{ $item->debit_account }}</td>
-        <td>{{ $item->credit_account }}</td>
-        <td>{{ $item->note }}</td>
-        <td>
-            @if ($item->file)
-                <a href="{{ $item->file }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-file-alt me-1"></i> Xem file
-                </a>
+            {{ $t->object_name ?? '-' }}
+            @if ($t->object_phone)
+                <br><small class="text-muted">{{ $t->object_phone }}</small>
             @endif
         </td>
 
+        <td>{{ $t->document_type ?? '-' }}</td>
+        <td class="text-end">{{ formatPrice($t->amount) }}</td>
+        <td>{{ $t->debit_account ?? '-' }}</td>
+        <td>{{ $t->credit_account ?? '-' }}</td>
+        <td>{{ $t->note ?? '' }}</td>
+        <td>
+            @if ($t->attachment)
+                <a href="{{ asset("storage/$t->attachment") }}" target="_blank"
+                    class="text-primary fw-bold text-decoration-none">
+                    <i class="bi bi-file-earmark-text me-1"></i> Xem file đính kèm
+                </a>
+            @else
+                -
+            @endif
+        </td>
         <td class="text-end position-relative">
             <div class="dropdown">
                 <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -27,23 +43,23 @@
                 <ul class="dropdown-menu dropdown-menu-end shadow">
                     <li>
                         <a class="dropdown-item" href="" target="_blank">
-                            <i class="fas fa-print me-2"></i> In phiếu
+                            <i class="fas fa-print me-2"></i>
+                            In phiếu
                         </a>
                     </li>
-                    {{-- <li>
-                        <a class="dropdown-item" href="">
-                            <i class="fas fa-pen me-2"></i> Sửa
-                        </a>
-                    </li> --}}
                     <li>
-                        <button type="button" class="dropdown-item text-danger action-delete"
-                            data-id="{{ $item->id }}">
-                            <i class="fas fa-trash-alt me-2"></i> Xoá
+                        <button data-transaction-id="{{ $t->transaction_id }}" type="button"
+                            class="dropdown-item text-danger action-delete">
+                            <i class="fas fa-trash-alt me-2"></i>
+                            Xoá
                         </button>
                     </li>
                 </ul>
             </div>
         </td>
-
     </tr>
-@endforeach
+@empty
+    <tr>
+        <td colspan="11" class="text-center text-muted">Không có dữ liệu</td>
+    </tr>
+@endforelse

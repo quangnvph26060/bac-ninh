@@ -9,12 +9,13 @@ use App\Models\MoneyAccount;
 use App\Models\CashTransaction;
 use App\Models\Customer;
 use App\Models\Employee;
-use App\Models\Receipt;
 use App\Models\Supplier;
-use App\Models\User;
-use App\Models\VoucherType;
+use App\Models\Transaction;
+use App\Models\TransactionEntry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
@@ -23,54 +24,417 @@ class CashTransactionController extends Controller
 {
     public function index()
     {
-        $accounts = MoneyAccount::query()
-            ->with('creator')
-            ->orderBy('code') // hoặc sắp theo id nếu muốn
-            ->get();
-        $voucherTypes = VoucherType::query()->pluck('name', 'id')->toArray();
-        // $orderedAccounts = $this->sortAccountsHierarchically($accounts);
-
-        return view('admin.cash-transaction.index', compact('voucherTypes'));
+        return view('admin.cash-bank.cash');
     }
 
-    public function save($id = null)
+    public function save(Request $request)
     {
-        $voucherTypes = VoucherType::pluck('name', 'id')->toArray();
-        $accounts = MoneyAccount::query()
-            ->with('creator')
-            ->orderBy('code') // hoặc sắp theo id nếu muốn
-            ->get();
-        $orderedAccounts = $this->sortAccountsHierarchically($accounts);
+        $type = 'cash'; // Phiếu tiền mặt
+        $transaction = null;
+        $mainEntry = null;
+        $contraEntry = null;
 
-        $cashAccounts = MoneyAccount::query()
+        $transactionId = $request->input('transactionId');
+
+        // Lấy danh sách tài khoản tiền mặt (con của 111)
+        $moneyAccounts = MoneyAccount::query()
             ->whereHas('parent', function ($q) {
                 $q->where('code', 111);
             })
             ->where('is_default', false)
             ->where('status', true)
+            ->orderBy('code')
             ->get();
 
+        $moneyAccountIds = $moneyAccounts->pluck('id')->toArray();
 
-        $cashTransaction = null;
-        if ($id) {
-            $cashTransaction = Receipt::with(['objectable', 'cashAccount', 'contraMoneyAccount', 'voucherType', 'creator'])->findOrFail($id);
+        if (!empty($transactionId)) {
+            // Lấy transaction + entries
+            $transaction = Transaction::with('entries')->findOrFail($transactionId);
+
+            // Kiểm tra transaction này có entry nào thuộc tài khoản tiền mặt không
+            $hasCashAccount = $transaction->entries->contains(function ($entry) use ($moneyAccountIds) {
+                return in_array($entry->account_id, $moneyAccountIds);
+            });
+
+            if (!$hasCashAccount) {
+                // Không hợp lệ: transaction này không phải phiếu tiền mặt
+                return redirect()->back()->with('error', 'Phiếu này không phải phiếu tiền mặt.');
+            }
+
+            // Lấy mainEntry: entry thuộc tài khoản tiền mặt
+            $mainEntry = $transaction->entries->firstWhere(function ($entry) use ($moneyAccountIds) {
+                return in_array($entry->account_id, $moneyAccountIds);
+            });
+
+            // Lấy contraEntry: entry đối ứng (entry còn lại)
+            $contraEntry = $transaction->entries->firstWhere(function ($entry) use ($moneyAccountIds) {
+                return !in_array($entry->account_id, $moneyAccountIds);
+            });
+
+            // dd($mainEntry, $contraEntry);
         }
 
-        return view('admin.cash-transaction.save', compact('voucherTypes', 'orderedAccounts', 'cashTransaction', 'cashAccounts'));
+        return view('admin.cash-bank.form', compact(
+            'type',
+            'moneyAccounts',
+            'transaction',
+            'mainEntry',
+            'contraEntry'
+        ));
     }
 
-    private function sortAccountsHierarchically($accounts, $parentId = null, $level = 0)
+    public function store(Request $request)
     {
-        $sorted = collect();
+        $credentials = $request->validate([
+            'transaction_date'   => 'required|date_format:Y-m-d',
+            'obj_type'           => ['required', Rule::in(['customer', 'supplier'])],
+            'account_id'         => ['required', 'exists:money_accounts,id'], // tài khoản tiền
+            'obj_id'             => [
+                'required',
+                'integer',
+                Rule::when($request->obj_type === 'customer', ['exists:customers,id']),
+                Rule::when($request->obj_type === 'supplier', ['exists:suppliers,id']),
+            ],
+            'type'               => ['required', Rule::in(['income', 'expense'])],
+            'amount'             => 'required|numeric|min:0',
+            'description'        => 'nullable|string|max:255',
+            'document_type'      => 'nullable|string|max:255',
+            'attachment'         => ['nullable', 'file', 'max:2048', 'mimes:jpg,jpeg,png,pdf,webp'],
+            'reference_number'   => 'nullable|string|max:255',
+        ]);
 
-        foreach ($accounts->where('parent_id', $parentId) as $account) {
-            $account->level_display = $level; // nếu cần thụt lề
-            $sorted->push($account);
-            $children = $this->sortAccountsHierarchically($accounts, $account->id, $level + 1);
-            $sorted = $sorted->merge($children);
+        return DB::transaction(function () use ($credentials, $request) {
+            $credentials['created_by'] = Auth::guard('admin')->id();
+
+            // Nếu là phiếu chi, kiểm tra số dư tài khoản tiền
+            if ($credentials['type'] === 'expense') {
+                $balance = $this->getClosingBalanceByCode($credentials['account_id']);
+
+                if (!$balance['success']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $balance['message']
+                    ], 400);
+                }
+
+                $availableAmount = $balance['closing_balance_debit'] - $balance['closing_balance_credit'];
+
+                if ($availableAmount < $credentials['amount']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Tài khoản không đủ số dư để chi số tiền này.'
+                    ], 400);
+                }
+            }
+
+            // Xử lý file đính kèm nếu có
+            if ($request->hasFile('attachment')) {
+                $file = $request->file('attachment');
+                $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('attachments/cash_transactions', $filename, 'public');
+                $credentials['attachment'] = "attachments/cash_transactions/$filename";
+            }
+
+            // Tạo phiếu giao dịch
+            $transaction = Transaction::create([
+                'transaction_date'   => $credentials['transaction_date'],
+                'description'        => $credentials['description'] ?? null,
+                'reference_number'   => $credentials['reference_number'] ?? null,
+                'type'               => $credentials['type'], // income | expense
+                'document_type'      => $credentials['document_type'] ?? null,
+                'attachment'         => $credentials['attachment'] ?? null,
+                'created_by'         => $credentials['created_by'],
+            ]);
+
+            // Xác định đối tượng liên quan
+            $tableableType = $credentials['obj_type'] === 'customer'
+                ? 'App\\Models\\Customer'
+                : 'App\\Models\\Supplier';
+            $tableableId = $credentials['obj_id'];
+
+            // Tự xác định tài khoản đối ứng theo type + obj_type
+            $contraCode = match ([$credentials['type'], $credentials['obj_type']]) {
+                ['income', 'customer']  => '131',
+                ['income', 'supplier']  => '331',
+                ['expense', 'customer'] => '131',
+                ['expense', 'supplier'] => '331',
+            };
+
+            $contraAccountId = MoneyAccount::where('code', $contraCode)->value('id');
+
+            if (!$contraAccountId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy tài khoản đối ứng phù hợp.'
+                ], 400);
+            }
+
+            $amount = $credentials['amount'];
+
+            // Ghi nhận bút toán
+            if ($credentials['type'] === 'income') {
+                // Thu → tiền tăng (Nợ), đối ứng giảm (Có)
+                TransactionEntry::create([
+                    'transaction_id'   => $transaction->id,
+                    'account_id'       => $credentials['account_id'],
+                    'debit_amount'     => $amount,
+                    'credit_amount'    => 0,
+                ]);
+                TransactionEntry::create([
+                    'transaction_id'   => $transaction->id,
+                    'account_id'       => $contraAccountId,
+                    'debit_amount'     => 0,
+                    'credit_amount'    => $amount,
+                    'tableable_type'   => $tableableType,
+                    'tableable_id'     => $tableableId,
+                ]);
+            } else {
+                // Chi → tiền giảm (Có), đối ứng tăng (Nợ)
+                TransactionEntry::create([
+                    'transaction_id'   => $transaction->id,
+                    'account_id'       => $credentials['account_id'],
+                    'debit_amount'     => 0,
+                    'credit_amount'    => $amount,
+                ]);
+                TransactionEntry::create([
+                    'transaction_id'   => $transaction->id,
+                    'account_id'       => $contraAccountId,
+                    'debit_amount'     => $amount,
+                    'credit_amount'    => 0,
+                    'tableable_type'   => $tableableType,
+                    'tableable_id'     => $tableableId,
+                ]);
+            }
+
+            return response()->json([
+                'success'  => true,
+                'message'  => 'Tạo phiếu thu/chi thành công.',
+                'redirect' => '/admin/cash-transactions'
+            ]);
+        });
+    }
+
+    private function getClosingBalanceByCode($accountId)
+    {
+        if (!$accountId) {
+            return [
+                'success' => false,
+                'message' => 'Vui lòng cung cấp tài khoản.'
+            ];
         }
 
-        return $sorted;
+        $query = "
+        SELECT
+            ma.id,
+            ma.code,
+            ma.name,
+            GREATEST(SUM(COALESCE(te.debit_amount, 0)) - SUM(COALESCE(te.credit_amount, 0)), 0) AS closing_balance_debit,
+            GREATEST(SUM(COALESCE(te.credit_amount, 0)) - SUM(COALESCE(te.debit_amount, 0)), 0) AS closing_balance_credit
+
+        FROM money_accounts ma
+        LEFT JOIN transaction_entries te
+            ON te.account_id = ma.id
+            AND te.tableable_type IS NULL
+            AND te.tableable_id IS NULL
+        LEFT JOIN transactions t
+            ON t.id = te.transaction_id
+            AND t.type != 'other'
+
+        WHERE ma.id = ?
+        GROUP BY ma.id, ma.code, ma.name
+        LIMIT 1
+    ";
+
+        $result = DB::selectOne($query, [$accountId]);
+
+        if (!$result) {
+            return [
+                'success' => false,
+                'message' => 'Không tìm thấy tài khoản.'
+            ];
+        }
+
+        return [
+            'success' => true,
+            'account_code' => $result->code,
+            'account_name' => $result->name,
+            'closing_balance_debit' => $result->closing_balance_debit,
+            'closing_balance_credit' => $result->closing_balance_credit,
+        ];
+    }
+
+    public function update(Request $request)
+    {
+        $transactionId = $request->input('transaction_id');
+
+        $credentials = $request->validate([
+            'transaction_id'     => 'required|integer|exists:transactions,id',
+            'transaction_date'   => 'required|date_format:Y-m-d',
+            'obj_type'           => ['required', Rule::in(['customer', 'supplier'])],
+            'account_id'         => ['required', 'exists:money_accounts,id'], // tài khoản tiền
+            'obj_id'             => [
+                'required',
+                'integer',
+                Rule::when($request->obj_type === 'customer', ['exists:customers,id']),
+                Rule::when($request->obj_type === 'supplier', ['exists:suppliers,id']),
+            ],
+            'type'               => ['required', Rule::in(['income', 'expense'])],
+            'amount'             => 'required|numeric|min:0',
+            'description'        => 'nullable|string|max:255',
+            'document_type'      => 'nullable|string|max:255',
+            'attachment'         => ['nullable', 'file', 'max:2048', 'mimes:jpg,jpeg,png,pdf,webp'],
+            'reference_number'   => 'nullable|string|max:255',
+        ]);
+
+        return DB::transaction(function () use ($credentials, $request, $transactionId) {
+            $transaction = Transaction::findOrFail($transactionId);
+
+            // Nếu là phiếu chi, kiểm tra số dư tài khoản tiền
+            if ($credentials['type'] === 'expense') {
+                $balance = $this->getClosingBalanceByCode($credentials['account_id']);
+
+                if (!$balance['success']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $balance['message']
+                    ], 400);
+                }
+
+                $availableAmount = $balance['closing_balance_debit'] - $balance['closing_balance_credit'];
+
+                if ($availableAmount < $credentials['amount']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Tài khoản không đủ số dư để chi số tiền này.'
+                    ], 400);
+                }
+            }
+
+            // Xử lý file đính kèm
+            if ($request->hasFile('attachment')) {
+                if ($transaction->attachment) {
+                    deleteImage($transaction->attachment);
+                }
+                $file = $request->file('attachment');
+                $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('attachments/cash_transactions', $filename, 'public');
+                $credentials['attachment'] = "attachments/cash_transactions/$filename";
+            }
+
+            if ($request->input('remove_attachment') == '1' && $transaction->attachment) {
+                deleteImage($transaction->attachment);
+                $credentials['attachment'] = null;
+            }
+
+            // Cập nhật transaction
+            $transaction->update([
+                'transaction_date'   => $credentials['transaction_date'],
+                'description'        => $credentials['description'] ?? null,
+                'reference_number'   => $credentials['reference_number'] ?? null,
+                'type'               => $credentials['type'],
+                'document_type'      => $credentials['document_type'] ?? null,
+                'attachment'         => $credentials['attachment'] ?? null,
+            ]);
+
+            // Tự xác định tài khoản đối ứng dựa vào type + obj_type
+            $contraCode = match ([$credentials['type'], $credentials['obj_type']]) {
+                ['income', 'customer']  => '131',
+                ['income', 'supplier']  => '331',
+                ['expense', 'customer'] => '131',
+                ['expense', 'supplier'] => '331',
+            };
+
+            $contraAccountId = MoneyAccount::where('code', $contraCode)->value('id');
+
+            if (!$contraAccountId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy tài khoản đối ứng phù hợp.'
+                ], 400);
+            }
+
+            // Xác định đối tượng
+            $tableableType = $credentials['obj_type'] === 'customer'
+                ? 'App\\Models\\Customer'
+                : 'App\\Models\\Supplier';
+            $tableableId = $credentials['obj_id'];
+            $amount = $credentials['amount'];
+
+            // Xóa entries cũ
+            $transaction->entries()->delete();
+
+            // Tạo lại entries đúng chiều
+            if ($credentials['type'] === 'income') {
+                // Thu: tiền tăng (Nợ), công nợ giảm (Có)
+                TransactionEntry::create([
+                    'transaction_id'   => $transaction->id,
+                    'account_id'       => $credentials['account_id'],
+                    'debit_amount'     => $amount,
+                    'credit_amount'    => 0,
+                ]);
+                TransactionEntry::create([
+                    'transaction_id'   => $transaction->id,
+                    'account_id'       => $contraAccountId,
+                    'debit_amount'     => 0,
+                    'credit_amount'    => $amount,
+                    'tableable_type'   => $tableableType,
+                    'tableable_id'     => $tableableId,
+                ]);
+            } else {
+                // Chi: tiền giảm (Có), công nợ tăng (Nợ)
+                TransactionEntry::create([
+                    'transaction_id'   => $transaction->id,
+                    'account_id'       => $credentials['account_id'],
+                    'debit_amount'     => 0,
+                    'credit_amount'    => $amount,
+                ]);
+                TransactionEntry::create([
+                    'transaction_id'   => $transaction->id,
+                    'account_id'       => $contraAccountId,
+                    'debit_amount'     => $amount,
+                    'credit_amount'    => 0,
+                    'tableable_type'   => $tableableType,
+                    'tableable_id'     => $tableableId,
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật phiếu thu/chi thành công.',
+                'redirect' => '/admin/cash-transactions'
+            ]);
+        });
+    }
+
+
+    public function destroy(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:transactions,id',
+        ]);
+
+        return DB::transaction(function () use ($request) {
+            $transactionIds = $request->input('ids');
+
+            foreach ($transactionIds as $transactionId) {
+                $transaction = Transaction::find($transactionId);
+                if ($transaction) {
+                    // Xóa file nếu có
+                    if ($transaction->attachment) {
+                        deleteImage($transaction->attachment);
+                    }
+                    // Xóa transaction
+                    $transaction->delete();
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa phiếu thành công.'
+            ]);
+        });
     }
 
     public function search(Request $request)
@@ -93,7 +457,7 @@ class CashTransactionController extends Controller
 
             case 'supplier':
                 $query = Supplier::query()->where(function ($q) use ($keyword) {
-                    $q->where('company_name', 'like', "%$keyword%");
+                    $q->where('name', 'like', "%$keyword%");
                 });
                 break;
 
@@ -114,7 +478,7 @@ class CashTransactionController extends Controller
                 'code' => $item->code ?? '',
                 'name' => match ($type) {
                     'customer' => $item->name ?? '',
-                    'supplier' => $item->company_name ?? '',
+                    'supplier' => $item->name ?? '',
                     'employee' => $item->full_name ?? '',
                     default => '',
                 },
@@ -123,195 +487,6 @@ class CashTransactionController extends Controller
         });
 
         return response()->json($results);
-    }
-
-    public function store(Request $request)
-    {
-        $credentials = $request->validate([
-            'transaction_date' => ['required', 'date'],
-            'object_type' => ['required', Rule::in(['customer', 'supplier', 'employee', 'other'])],
-            'money_account_id' => ['required', 'exists:money_accounts,id'],
-            'objectable_id' => [
-                'required',
-                'integer',
-                Rule::when(
-                    $request->object_type === 'customer',
-                    ['exists:customers,id'],
-                ),
-                Rule::when(
-                    $request->object_type === 'supplier',
-                    ['exists:suppliers,id'],
-                ),
-                Rule::when(
-                    $request->object_type === 'employee',
-                    ['exists:employees,id'],
-                ),
-            ],
-            'type' => ['required', Rule::in(['income', 'expense'])],
-            'voucher_type_id' => ['required', 'exists:voucher_types,id'],
-            'amount' => ['required', 'numeric', 'min:0'],
-            'note' => ['nullable', 'string'],
-            'file_path' => ['nullable', 'file', 'max:2048', 'mimes:jpg,jpeg,png,pdf,webp'],
-            'contra_money_account_id' => 'nullable|exists:money_accounts,id'
-        ], __('request.messages'), [
-            'transaction_date' => 'ngày giao dịch',
-            'object_type' => 'loại đối tượng',
-            'money_account_id' => 'tài khoản tiền',
-            'objectable_id' => 'đối tượng',
-            'type' => 'loại giao dịch',
-            'voucher_type_id' => 'loại phiếu',
-            'amount' => 'số tiền',
-            'note' => 'ghi chú',
-            'file_path' => 'tệp đính kèm',
-            'contra_money_account_id' => 'tài khoản đối ứng'
-        ]);
-
-        // Map object_type => Model
-        $modelMap = [
-            'customer' => Customer::class,
-            'supplier' => Supplier::class,
-            'employee' => Employee::class,
-        ];
-
-        // Gán objectable_type
-        if (isset($credentials['object_type']) && isset($modelMap[$credentials['object_type']])) {
-            $credentials['objectable_type'] = $modelMap[$credentials['object_type']];
-        } else {
-            $credentials['objectable_type'] = null;
-        }
-
-        $credentials['created_by'] = auth('admin')->id();
-
-        // Tự động gán tài khoản đối ứng gọn hơn
-        $contraAccountId = match ($credentials['object_type']) {
-            'customer' => MoneyAccount::where('code', '131')->value('id'),
-            'supplier' => MoneyAccount::where('code', '331')->value('id'),
-            default => null,
-        };
-
-        $credentials['contra_money_account_id'] ??= $contraAccountId;
-
-        // Xử lý upload file nếu có
-        if ($request->hasFile('file_path')) {
-            $file = $request->file('file_path');
-            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('attachments/cash_transactions', $filename, 'public');
-            $credentials['file_path'] = "attachments/cash_transactions/$filename";
-        }
-
-        Receipt::create($credentials);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Tạo phiếu thu/chi thành công.',
-            'redirect' => '/admin/cash-transactions'
-        ]);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $receipt = Receipt::findOrFail($id);
-
-        $credentials = $request->validate([
-            'transaction_date' => ['required', 'date'],
-            'object_type' => ['required', Rule::in(['customer', 'supplier', 'employee', 'other'])],
-            'money_account_id' => ['required', 'exists:money_accounts,id'],
-            'objectable_id' => [
-                'required',
-                'integer',
-                Rule::when(
-                    $request->object_type === 'customer',
-                    ['exists:customers,id'],
-                ),
-                Rule::when(
-                    $request->object_type === 'supplier',
-                    ['exists:suppliers,id'],
-                ),
-                Rule::when(
-                    $request->object_type === 'employee',
-                    ['exists:employees,id'],
-                ),
-            ],
-            'type' => ['required', Rule::in(['income', 'expense'])],
-            'voucher_type_id' => ['required', 'exists:voucher_types,id'],
-            'amount' => ['required', 'numeric', 'min:0'],
-            'note' => ['nullable', 'string'],
-            'file_path' => ['nullable', 'file', 'max:2048', 'mimes:jpg,jpeg,png,pdf,webp'],
-            'contra_money_account_id' => 'nullable|exists:money_accounts,id'
-        ], __('request.messages'), [
-            'transaction_date' => 'ngày giao dịch',
-            'object_type' => 'loại đối tượng',
-            'money_account_id' => 'tài khoản tiền',
-            'objectable_id' => 'đối tượng',
-            'type' => 'loại giao dịch',
-            'voucher_type_id' => 'loại phiếu',
-            'amount' => 'số tiền',
-            'note' => 'ghi chú',
-            'file_path' => 'tệp đính kèm',
-            'contra_money_account_id' => 'tài khoản đối ứng',
-        ]);
-
-        // Map object_type => Model
-        $modelMap = [
-            'customer' => Customer::class,
-            'supplier' => Supplier::class,
-            'employee' => Employee::class,
-        ];
-
-        if (isset($credentials['object_type']) && isset($modelMap[$credentials['object_type']])) {
-            $credentials['objectable_type'] = $modelMap[$credentials['object_type']];
-        } else {
-            $credentials['objectable_type'] = null;
-        }
-
-        // Tự động gán tài khoản đối ứng nếu chưa chọn
-        $contraAccountId = match ($credentials['object_type']) {
-            'customer' => MoneyAccount::where('code', '131')->value('id'),
-            'supplier' => MoneyAccount::where('code', '331')->value('id'),
-            default => null,
-        };
-
-        $credentials['contra_money_account_id'] ??= $contraAccountId;
-
-        // Xử lý file đính kèm nếu có
-        if ($request->hasFile('file_path')) {
-            // Xóa file cũ nếu có
-            if ($receipt->file_path) {
-                deleteImage($receipt->file_path);
-            }
-
-            $file = $request->file('file_path');
-            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('attachments/cash_transactions', $filename, 'public');
-            $credentials['file_path'] = "attachments/cash_transactions/$filename";
-        }
-
-        // Xóa file khi user chọn xóa
-        if ($request->input('remove_attachment') == '1' && $receipt->file_path) {
-            deleteImage($receipt->file_path);
-            $credentials['file_path'] = null;
-        }
-
-        $receipt->update($credentials);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Cập nhật phiếu thu/chi thành công.',
-            'redirect' => '/admin/cash-transactions'
-        ]);
-    }
-
-
-    public function destroy(Request $request)
-    {
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:receipts,id'
-        ]);
-
-        Receipt::whereIn('id', $request->ids)->delete();
-
-        return successResponse(message: "Xóa phiếu thành công.", isResponse: true);
     }
 
     public function printMultiple(Request $request)
@@ -327,74 +502,106 @@ class CashTransactionController extends Controller
 
     public function list(Request $request)
     {
-        $query = Receipt::with(['objectable', 'cashAccount', 'contraMoneyAccount', 'voucherType', 'creator']);
+        $dateRange = $request->query('date_range');
+        $amounts = $request->query('amounts');
 
-        // Chỉ lấy các bản ghi là con của tài khoản code = 111 và is_default = 0
-        $query->whereHas('cashAccount.parent', function ($q) {
-            $q->where('code', '111');
-        });
+        $minAmount = null;
+        $maxAmount = null;
 
-        // Xử lý date_range
-        if ($request->filled('date_range')) {
-            $dates = preg_split('/\s*[-–đến]+\s*/', $request->input('date_range'));
-            if (count($dates) === 2) {
-                try {
-                    $start = Carbon::createFromFormat('d/m/Y', $dates[0])->startOfDay();
-                    $end = Carbon::createFromFormat('d/m/Y', $dates[1])->endOfDay();
-                    $query->whereBetween('transaction_date', [$start, $end]);
-                } catch (\Exception $e) {
-                    // Không lọc nếu lỗi format
-                }
-            }
+        if ($amounts) {
+            [$minRaw, $maxRaw] = array_pad(explode('-', $amounts), 2, null);
+            $minAmount = is_numeric(trim($minRaw)) ? floatval(trim($minRaw)) : null;
+            $maxAmount = is_numeric(trim($maxRaw)) ? floatval(trim($maxRaw)) : null;
+        }
+
+        if ($dateRange) {
+            [$from, $to] = explode(' - ', $dateRange);
+            $from = Carbon::createFromFormat('d/m/Y', $from)->toDateString();
+            $to = Carbon::createFromFormat('d/m/Y', $to)->toDateString();
         } else {
-            $start = now()->startOfDay();
-            $end = now()->addMonthNoOverflow()->startOfDay()->endOfDay();
-            $query->whereBetween('transaction_date', [$start, $end]);
+            $from = now()->subMonth()->toDateString();
+            $to = now()->toDateString();
         }
 
-        // Lọc theo account (cash / bank)
-        if ($request->filled('account')) {
-            $accountType = $request->input('account');
-            $query->where('money_account_id', $accountType);
-        }
+        // Lấy danh sách account_id của 111 và các con
+        $cashAccountIds = DB::table('money_accounts')
+            ->where(function ($q) {
+                $q->where('code', '111')
+                    ->orWhere('parent_id', function ($sub) {
+                        $sub->select('id')->from('money_accounts')->where('code', '111')->limit(1);
+                    });
+            })
+            ->pluck('id');
 
-        // Lọc theo voucher (yes / no)
-        if ($request->filled('voucher')) {
-            $voucherFilter = $request->input('voucher');
-            $query->where('voucher_type_id', $voucherFilter);
-        }
+        $entries = DB::table('transactions as t')
+            ->join('transaction_entries as te', 'te.transaction_id', '=', 't.id')
+            ->join('money_accounts as ma', 'ma.id', '=', 'te.account_id')
 
-        // Lọc theo amount chính xác
-        if ($request->filled('amount')) {
-            $query->where('amount', $request->input('amount'));
-        }
+            // Join lấy dòng đối ứng
+            ->join('transaction_entries as te_contra', function ($q) {
+                $q->on('te_contra.transaction_id', '=', 't.id')
+                    ->whereColumn('te_contra.id', '!=', 'te.id');
+            })
+            ->join('money_accounts as contra_acc', 'contra_acc.id', '=', 'te_contra.account_id')
 
-        $transactions = $query
-            ->orderByDesc('transaction_date')
-            ->orderByDesc('id')
+            // Lấy thông tin KH/NCC từ dòng đối ứng
+            ->leftJoin('customers as c', function ($q) {
+                $q->on('c.id', '=', 'te_contra.tableable_id')
+                    ->where('te_contra.tableable_type', 'App\\Models\\Customer');
+            })
+            ->leftJoin('suppliers as s', function ($q) {
+                $q->on('s.id', '=', 'te_contra.tableable_id')
+                    ->where('te_contra.tableable_type', 'App\\Models\\Supplier');
+            })
+            ->join('users as u', 'u.id', '=', 't.created_by')
+
+            ->where('t.type', '!=', 'other')
+            ->whereIn('te.account_id', $cashAccountIds)
+            ->whereBetween('t.transaction_date', [$from, $to])
+            ->when(!is_null($minAmount), fn($q) => $q->havingRaw('SUM(te.debit_amount) >= ?', [$minAmount]))
+            ->when(!is_null($maxAmount), fn($q) => $q->havingRaw('SUM(te.debit_amount) <= ?', [$maxAmount]))
+
+            ->groupBy(
+                't.id',
+                't.transaction_date',
+                't.reference_number',
+                't.description',
+                't.document_type',
+                't.attachment',
+                'u.name',
+                'u.code'
+            )
+            ->select(
+                't.id',
+                't.transaction_date',
+                't.reference_number',
+                't.description',
+                't.document_type',
+                't.attachment',
+                'u.name as creator_name',
+                'u.code as creator_code',
+                DB::raw("MAX(te.id) as entry_id"),
+                DB::raw("COALESCE(MAX(c.name), MAX(s.name)) as related_party"),
+                DB::raw("COALESCE(MAX(c.phone), MAX(s.phone)) as related_party_phone"),
+                DB::raw("MAX(ma.code) as account_code"),
+                DB::raw("MAX(ma.name) as account_name"),
+                DB::raw("MAX(contra_acc.code) as contra_code"),
+                DB::raw("MAX(contra_acc.name) as contra_name"),
+                DB::raw("SUM(te.debit_amount) as debit_amount"),
+                DB::raw("SUM(te.credit_amount) as credit_amount")
+            )
+            ->orderByDesc('t.transaction_date')
+            ->orderByDesc('t.id')
             ->get();
+
+        $type = 'cash';
 
         return response()->json([
             'success' => true,
-            'html' => view('admin.cash-transaction.table_rows', compact('transactions'))->render()
+            'html' => view('admin.cash-bank._table', compact('entries', 'type'))->render()
         ]);
     }
 
-
-    public function voucherType(Request $request)
-    {
-        $credentials = $request->validate([
-            'name' => 'required|unique:voucher_types,name',
-            'description' => 'nullable|string|max:255'
-        ]);
-
-        $voucherType = VoucherType::create($credentials);
-
-        return response()->json([
-            'data' => $voucherType,
-            'success' => true
-        ]);
-    }
 
     public function downloadSample()
     {
@@ -410,5 +617,19 @@ class CashTransactionController extends Controller
         Excel::import(new CashTransactionImport, $request->file('file'));
 
         return back()->with('success', 'Import thành công!');
+    }
+
+    private function sortAccountsHierarchically($accounts, $parentId = null, $level = 0)
+    {
+        $sorted = collect();
+
+        foreach ($accounts->where('parent_id', $parentId) as $account) {
+            $account->level_display = $level; // nếu cần thụt lề
+            $sorted->push($account);
+            $children = $this->sortAccountsHierarchically($accounts, $account->id, $level + 1);
+            $sorted = $sorted->merge($children);
+        }
+
+        return $sorted;
     }
 }

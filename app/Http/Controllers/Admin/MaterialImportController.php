@@ -34,7 +34,7 @@ class MaterialImportController extends Controller
                 fn($dataTable) =>
                 $dataTable
                     ->addColumn('payment_status', fn($row) => $row->payment_status)
-                    ->addColumn('supplier', fn($row) => $row->supplier->company_name)
+                    ->addColumn('supplier', fn($row) => $row->supplier->name)
                     ->addColumn('total', fn($row) => formatPrice($row->total))
                     ->addColumn('paid', fn($row) => formatPrice($row->paid))
                     ->editColumn('date', fn($row) => $row->date->format('d/m/Y'))

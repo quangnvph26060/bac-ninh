@@ -19,7 +19,7 @@ class SupplierSeeder extends Seeder
         for ($i = 1; $i <= 20; $i++) {
             $suppliers[] = [
                 'bank_id'             => rand(1, 63), // Giả sử có 5 ngân hàng
-                'company_name'        => 'Công ty TNHH ' . Str::random(8),
+                'name'        => 'Công ty TNHH ' . Str::random(8),
                 'representative_name' => 'Nguyễn Văn ' . chr(65 + $i), // A, B, C, ...
                 'position'            => 'Giám đốc',
                 'phone'               => '09' . rand(10000000, 99999999),

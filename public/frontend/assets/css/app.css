@@ -1322,7 +1322,6 @@ main::-webkit-scrollbar-thumb:hover {
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.4); /* nền tối */
     z-index: 9999;
-    display: none;
 }
 
 #loading {

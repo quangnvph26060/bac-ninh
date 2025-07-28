@@ -36,11 +36,11 @@
                                     Thao tác
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="actionDropdown">
-                                    <li>
+                                    {{-- <li>
                                         <a class="dropdown-item" href="#" id="print-selected">
                                             <i class="fas fa-print me-1"></i> In phiếu đã chọn
                                         </a>
-                                    </li>
+                                    </li> --}}
 
                                     <li>
                                         <a class="dropdown-item text-danger" href="#" id="delete-selected">
@@ -48,7 +48,7 @@
                                         </a>
                                     </li>
 
-                                    <li>
+                                    {{-- <li>
                                         <a class="dropdown-item" href="#" id="import-excel">
                                             <i class="fas fa-file-import me-1"></i> Import Excel
                                         </a>
@@ -61,29 +61,23 @@
                                             id="download-sample">
                                             <i class="fas fa-file-download me-1"></i> Tải file mẫu
                                         </a>
-                                    </li>
+                                    </li> --}}
                                 </ul>
 
                             </div>
                         </div>
+
                         <div class="row g-3 justify-content-end align-items-center">
-                            {{-- <div class="col-md-3">
-                                <select id="accountFilter" class="form-select">
-                                    <option value="">--- Tài khoản ---</option>
-                                    @foreach ($orderedAccounts as $account)
-                                        <option value="{{ $account->id }}">
-                                            {!! str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $account->level_display) !!} {{ $account->code }} - {{ $account->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div> --}}
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <input type="text" id="dateFilter" class="form-control" placeholder="Chọn khoảng ngày">
                             </div>
-
-                            <div class="col-md-4">
-                                <input type="text" id="amountFilter" class="form-control usd-price-format"
-                                    placeholder="Số tiền">
+                            <div class="col-md-5">
+                                <input type="text" id="nameFilter" class="form-control" placeholder="Tên đối tượng">
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" id="filterButton" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> Lọc
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -94,8 +88,7 @@
                     <table class="table table-hover table-bordered mb-0">
                         <thead>
                             <tr>
-                                <th style="width: 40px;">
-                                    <input type="checkbox" id="checked-all" class="form-check-input">
+                                <th style="width: 40px;"><input type="checkbox" id="checked-all" class="form-check-input">
                                 </th>
                                 <th>ID | Ngày</th>
                                 <th>Loại</th>
@@ -106,15 +99,14 @@
                                 <th>Có</th>
                                 <th>Ghi chú</th>
                                 <th>File đính kèm</th>
-                                <th class="text-center" style="width: 5%">
-                                    <i class="fas fa-cog"></i>
-                                </th>
+                                <th class="text-center" style="width: 5%"><i class="fas fa-cog"></i></th>
                             </tr>
                         </thead>
                         <tbody>
 
                         </tbody>
                     </table>
+
                 </div>
             </div>
         </div>
@@ -161,7 +153,7 @@
         $(document).ready(function() {
 
             // Mở modal import
-            document.getElementById('import-excel').addEventListener('click', function(e) {
+            document.getElementById('import-excel')?.addEventListener('click', function(e) {
                 e.preventDefault();
                 var modal = new bootstrap.Modal(document.getElementById('importExcelModal'));
                 modal.show();
@@ -205,21 +197,15 @@
             $('#dateFilter').on('apply.daterangepicker', function(ev, picker) {
                 $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format(
                     'DD/MM/YYYY'));
-                triggerFilter();
             });
 
-            // $('#dateFilter').on('cancel.daterangepicker', function() {
-            //     $(this).val('');
-            //     triggerFilter();
-            // });
-
-            $('#accountFilter, #voucherFilter').on('change', function() {
+            $('#filterButton').on('click', function() {
                 triggerFilter();
             });
 
             $('#checked-all').on('change', function() {
                 let isChecked = $(this).is(':checked');
-                $('.item-checkbox').prop('checked', isChecked);
+                $('input[type="checkbox"]').prop('checked', isChecked);
             });
 
             $(document).on('change', '.item-checkbox', function() {
@@ -268,7 +254,7 @@
         }
 
         $(document).on('click', '.action-delete', function() {
-            const id = $(this).data('id');
+            const id = $(this).data('transactionId');
             console.log('Deleting ID:', id);
             Swal.fire({
                 title: "Bạn có chắc chắn muốn xóa?",
@@ -282,10 +268,10 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: `/admin/journal-entries/destroy/${id}`,
+                        url: `/admin/cash-transactions/destroy`,
                         type: 'DELETE',
                         data: {
-                            _token: '{{ csrf_token() }}'
+                            ids: [id]
                         },
                         success: function(res) {
                             if (res.success) {
@@ -307,7 +293,7 @@
             e.preventDefault();
 
             let ids = $('.item-checkbox:checked').map(function() {
-                return $(this).data('id');
+                return $(this).val();
             }).get();
 
             if (ids.length === 0) {
@@ -327,10 +313,9 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: '/admin/journal-entries/bulk-delete', // route xử lý xoá hàng loạt
+                        url: '/admin/cash-transactions/destroy',
                         type: 'DELETE',
                         data: {
-                            _token: '{{ csrf_token() }}',
                             ids: ids
                         },
                         success: function(res) {
@@ -350,35 +335,14 @@
             });
         });
 
-
-
-        function debounce(func, delay) {
-            let timeoutId;
-            return function(...args) {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => {
-                    func.apply(this, args);
-                }, delay);
-            };
-        }
-
-        const debouncedFilter = debounce(triggerFilter, 500);
-
-        $('#amountFilter').on('input', function() {
-            debouncedFilter();
-        });
-
         // Hàm lọc chính
         function triggerFilter() {
-            let rawAmount = $('#amountFilter').val();
-            let cleanedAmount = rawAmount.replace(/,/g, '').trim();
 
             let filters = {
                 date_range: $('#dateFilter').val(),
-                amount: cleanedAmount,
+                name: $('#nameFilter').val(),
             };
 
-            console.log("Đang lọc với:", filters); // DEBUG
             loadJournalEntry(filters);
         }
 

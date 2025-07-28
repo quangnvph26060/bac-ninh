@@ -7,21 +7,20 @@
         </div>
 
         <div class="card p-3 mb-3 shadow-sm">
-            <div class="d-flex flex-wrap gap-2 justify-content-end align-items-end">
-                <div>
-                    <input type="text" class="form-control" name="date_range" id="dateFilter">
+            <div class="row g-3 justify-content-end align-items-center">
+                <div class="col-md-3">
+                    <input type="text" id="dateFilter" name="date_range" class="form-control" placeholder="Chọn khoảng ngày">
                 </div>
-                <div>
+                <div class="col-md-3">
                     <input type="text" class="form-control" name="name" placeholder="Tên khách hàng">
                 </div>
-                <div>
-                    <button type="button" class="btn btn-success btn-sm" id="filter">
-                        <i class="bi bi-funnel-fill"></i> Lọc
+                <div class="col-auto">
+                    <button type="button" id="filter" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Lọc
                     </button>
                 </div>
             </div>
         </div>
-
 
         <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle text-center mb-0" id="customerDebtTable">
@@ -29,7 +28,6 @@
                     <tr>
                         <th rowspan="3" style="width: 50px;">#</th>
                         <th rowspan="3">Khách hàng</th>
-                        <th rowspan="3">Số điện thoại</th>
                         <th colspan="2">Số dư đầu kỳ</th>
                         <th colspan="2">Phát sinh trong kỳ</th>
                         <th colspan="2">Số dư cuối kỳ</th>
@@ -39,24 +37,23 @@
                         <th>Có [Phải trả]</th>
                         <th>Ghi nợ</th>
                         <th>Ghi có</th>
-                        <th>Nợ [Phải thu] = 4 + 6 - 5 - 7</th>
-                        <th>Có [Phải trả] = 5 + 7 - 4 - 6</th>
+                        <th>Nợ [Phải thu] = 3 + 5 - 4 - 6</th>
+                        <th>Có [Phải trả] = 4 + 6 - 3 - 5</th>
                     </tr>
                     <tr>
+                        <th>[3]</th>
                         <th>[4]</th>
                         <th>[5]</th>
                         <th>[6]</th>
                         <th>[7]</th>
                         <th>[8]</th>
-                        <th>[9]</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($customerDebts as $index => $debt)
                         <tr>
                             <td>{{ $index + 1 }}</td>
-                            <td class="text-start">{{ $debt->customer_code }} - {{ $debt->customer_name }}</td>
-                            <td>{{ $debt->customer_phone }}</td>
+                            <td class="text-start">{{ $debt->customer_name }} <br /> SDT: {{ $debt->customer_phone }}</td>
                             <td class="text-end">{{ formatPriceHideZero($debt->opening_debit) }}</td>
                             <td class="text-end">{{ formatPriceHideZero($debt->opening_credit) }}</td>
                             <td class="text-end">{{ formatPriceHideZero($debt->period_debit) }}</td>
@@ -120,9 +117,9 @@
                 'DD/MM/YYYY'));
         });
 
-        $('#dateFilter').on('cancel.daterangepicker', function(ev, picker) {
-            $(this).val('');
-        });
+        // $('#dateFilter').on('cancel.daterangepicker', function(ev, picker) {
+        //     $(this).val('');
+        // });
 
         $('#filter').on('click', function() {
             let date_range = $('input[name="date_range"]').val();
@@ -157,8 +154,7 @@
                 tbody += `
             <tr>
                 <td>${index + 1}</td>
-                <td class="text-start">${debt.customer_code} - ${debt.customer_name}</td>
-                <td>${debt.customer_phone}</td>
+                <td class="text-start">${debt.customer_phone} - ${debt.customer_name}</td>
                 <td class="text-end">${debt.opening_debit != 0 ? formatNumber(debt.opening_debit) : ''}</td>
                 <td class="text-end">${debt.opening_credit != 0 ? formatNumber(debt.opening_credit) : ''}</td>
                 <td class="text-end">${debt.period_debit != 0 ? formatNumber(debt.period_debit) : ''}</td>

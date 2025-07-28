@@ -354,7 +354,7 @@ function autoGenerateSlug(fromSelector, toSelector) {
             .replace(/^-|-$/g, "")
             .trim();
 
-        $(toSelector).val(slug).trigger("input"); // ✅ cập nhật rồi trigger input để char count update
+        $(toSelector).val(slug).trigger("input");
     });
 }
 

@@ -15,7 +15,6 @@ class Receipt extends Model
         'voucher_type_id',
         'transaction_date',
         'type',
-        'object_type',
         'objectable_type',
         'objectable_id',
         'amount',

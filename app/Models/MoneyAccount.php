@@ -40,6 +40,17 @@ class MoneyAccount extends Model
         return $this->belongsTo(Employee::class, 'created_by');
     }
 
+    public function entries()
+    {
+        return $this->hasMany(TransactionEntry::class, 'account_id');
+    }
+
+    public function contraEntries()
+    {
+        return $this->hasMany(TransactionEntry::class, 'contra_account_id');
+    }
+
+
     protected $casts = [
         'is_default' => 'boolean'
     ];

@@ -63,7 +63,7 @@ class OrderImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            if (Order::where('order_code', $row['order_code'])->orWhere('order_name', $row['order_name'])->exists()) {
+            if (!empty($row['order_code']) && Order::where('order_code', $row['order_code'])->orWhere('order_name', $row['order_name'])->exists()) {
                 $this->failures[] = "Dòng $line: Mã hoặc tên đơn hàng đã tồn tại: {$row['order_code']} / {$row['order_name']}";
                 $this->updateProgress('processing');
                 continue;
@@ -151,13 +151,11 @@ class OrderImport implements ToCollection, WithHeadingRow
         $messages = [];
 
         $requiredFields = [
-            'order_code' => 'mã đơn hàng',
             'order_name' => 'tên đơn hàng',
             'product_name' => 'tên sản phẩm',
             'product_variant_sku' => 'SKU',
             'quantity' => 'số lượng',
             'first_name' => 'họ người nhận',
-            'last_name' => 'tên người nhận',
             'nation' => 'quốc gia',
             'state' => 'tỉnh/Bang',
             'city' => 'thành phố',
@@ -288,7 +286,7 @@ class OrderImport implements ToCollection, WithHeadingRow
         DB::transaction(function () use ($row, $product, $variant, $qty, $price, $lineTotal, $shipping, $deliveryMethod, $tax) {
             $order = Order::create([
                 'user_id' => $this->userId,
-                'order_code' => $row['order_code'],
+                'order_code' => !empty($row['order_code']) ? $row['order_code'] : generateOrderCode(),
                 'order_name' => $row['order_name'],
                 'first_name' => $row['first_name'],
                 'last_name' => $row['last_name'],
