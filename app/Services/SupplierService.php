@@ -16,7 +16,7 @@ class SupplierService extends BaseService
 
     public function pagination()
     {
-        $columns = ['id', 'company_name', 'representative_name', 'phone', 'email', 'status', 'bank_account_number', 'bank_id', 'tax_code'];
+        $columns = ['id', 'name', 'representative_name', 'phone', 'email', 'status', 'bank_account_number', 'bank_id', 'tax_code'];
 
         return $this->queryBuilder($columns, ['bank']);
     }
@@ -27,12 +27,13 @@ class SupplierService extends BaseService
 
     public function getAllSupplier(): array
     {
-        return $this->pluck(['id', 'company_name']);
+        return $this->pluck(['id', 'name']);
     }
 
     public function create(array $data)
     {
         return transaction(function () use ($data) {
+            $data['code'] = generateCode();
             if (!$supplier = parent::create($data)) {
                 return errorResponse('Đã có lỗi xảy ra. Vui lòng thử lại sau!!!');
             }

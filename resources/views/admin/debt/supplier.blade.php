@@ -3,28 +3,27 @@
 @section('content')
     <div class="page-inner">
         <div class="page-header">
-            <x-breadcrumb :items="[['name' => 'công nợ khách hàng']]" />
+            <x-breadcrumb :items="[['name' => 'công nợ nhà cung cấp']]" />
         </div>
 
         <div class="card p-3 mb-3 shadow-sm">
-            <div class="d-flex flex-wrap gap-2 justify-content-end align-items-end">
-                <div>
-                    <input type="text" class="form-control" name="date_range" id="dateFilter">
+            <div class="row g-3 justify-content-end align-items-center">
+                <div class="col-md-3">
+                    <input type="text" id="dateFilter" class="form-control" placeholder="Chọn khoảng ngày">
                 </div>
-                <div>
-                    <input type="text" class="form-control" name="company_name" placeholder="Tên nhà cung cấp">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="name" placeholder="Tên khách hàng">
                 </div>
-                <div>
-                    <button type="button" class="btn btn-success btn-sm" id="filter">
-                        <i class="bi bi-funnel-fill"></i> Lọc
+                <div class="col-auto">
+                    <button type="button" id="filter" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Lọc
                     </button>
                 </div>
             </div>
         </div>
 
-
         <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle text-center mb-0" id="customerDebtTable">
+            <table class="table table-bordered table-hover align-middle text-center mb-0" id="supplierDebtTable">
                 <thead class="table-light align-middle">
                     <tr>
                         <th rowspan="3" style="width: 50px;">#</th>
@@ -55,8 +54,8 @@
                         <tr>
                             <td>{{ $index + 1 }}</td>
                             <td class="text-start">
-                                {{ $debt->supplier_code }}  -  {{ $debt->supplier_name }} <br>
-                               SDT: {{ $debt->supplier_phone }}
+                                {{ $debt->supplier_name }} <br>
+                                SDT: {{ $debt->supplier_phone }}
                             </td>
                             <td class="text-end">{{ formatPriceHideZero($debt->opening_debit) }}</td>
                             <td class="text-end">{{ formatPriceHideZero($debt->opening_credit) }}</td>
@@ -73,7 +72,6 @@
                 </tbody>
             </table>
         </div>
-
     </div>
 @endsection
 
@@ -82,7 +80,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
     <script>
-        let start = moment().subtract(1, 'month'); // 15/06/2025
+        let start = moment().subtract(1, 'month');
         let end = moment();
 
         $('#dateFilter').daterangepicker({
@@ -105,36 +103,28 @@
                 'Hôm nay': [moment(), moment()],
                 'Ngày mai': [moment().add(1, 'days'), moment().add(1, 'days')],
                 'Tuần này': [moment().startOf('week'), moment().endOf('week')],
-                'Tuần sau': [moment().add(1, 'week').startOf('week'), moment().add(1, 'week').endOf(
-                    'week')],
+                'Tuần sau': [moment().add(1, 'week').startOf('week'), moment().add(1, 'week').endOf('week')],
                 'Tháng này': [moment().startOf('month'), moment().endOf('month')],
-                'Tháng sau': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf(
-                    'month')]
+                'Tháng sau': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
             }
         });
 
-        // Hiển thị mặc định trên input khi load
         $('#dateFilter').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
 
         $('#dateFilter').on('apply.daterangepicker', function(ev, picker) {
-            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format(
-                'DD/MM/YYYY'));
-        });
-
-        $('#dateFilter').on('cancel.daterangepicker', function(ev, picker) {
-            $(this).val('');
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
         });
 
         $('#filter').on('click', function() {
             let date_range = $('input[name="date_range"]').val();
-            let company_name = $('input[name="company_name"]').val();
+            let name = $('input[name="name"]').val();
 
             $.ajax({
-                url: '',
+                url: '', // dùng current URL
                 type: "GET",
                 data: {
                     date_range,
-                    company_name
+                    name: name
                 },
                 beforeSend: function() {
                     $("#loadingSpinner").fadeIn();
@@ -148,30 +138,34 @@
                 complete: function() {
                     $("#loadingSpinner").fadeOut();
                 },
+
             });
-        })
+        });
 
         function renderTable(data) {
             let tbody = '';
+            if (data.length === 0) {
+                tbody = `<tr><td colspan="9" class="text-center">Không có dữ liệu</td></tr>`;
+            } else {
+                data.forEach((debt, index) => {
+                    tbody += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td class="text-start">
+                            ${debt.supplier_name} <br/>
+                            SDT: ${debt.supplier_phone}
+                        </td>
+                        <td class="text-end">${debt.opening_debit != 0 ? formatNumber(debt.opening_debit) : ''}</td>
+                        <td class="text-end">${debt.opening_credit != 0 ? formatNumber(debt.opening_credit) : ''}</td>
+                        <td class="text-end">${debt.period_debit != 0 ? formatNumber(debt.period_debit) : ''}</td>
+                        <td class="text-end">${debt.period_credit != 0 ? formatNumber(debt.period_credit) : ''}</td>
+                        <td class="text-end">${debt.ending_debit != 0 ? formatNumber(debt.ending_debit) : ''}</td>
+                        <td class="text-end">${debt.ending_credit != 0 ? formatNumber(debt.ending_credit) : ''}</td>
+                    </tr>`;
+                });
+            }
 
-            data.forEach((debt, index) => {
-                tbody += `
-            <tr>
-                <td>${index + 1}</td>
-                <td class="text-start">
-                    ${debt.supplier_code} - ${debt.supplier_name} <br/>
-                    SDT: ${debt.supplier_phone}
-                </td>
-                <td class="text-end">${debt.opening_debit != 0 ? formatNumber(debt.opening_debit) : ''}</td>
-                <td class="text-end">${debt.opening_credit != 0 ? formatNumber(debt.opening_credit) : ''}</td>
-                <td class="text-end">${debt.period_debit != 0 ? formatNumber(debt.period_debit) : ''}</td>
-                <td class="text-end">${debt.period_credit != 0 ? formatNumber(debt.period_credit) : ''}</td>
-                <td class="text-end">${debt.ending_debit != 0 ? formatNumber(debt.ending_debit) : ''}</td>
-                <td class="text-end">${debt.ending_credit != 0 ? formatNumber(debt.ending_credit) : ''}</td>
-            </tr>`;
-            });
-
-            $('#customerDebtTable tbody').html(tbody);
+            $('#supplierDebtTable tbody').html(tbody);
         }
     </script>
 @endpush

@@ -264,7 +264,7 @@
                     // render thông tin ra các tab
                     $('#debt-code').text('#' + response.data.code);
                     $('#entry-code').text('#' + response.data.import.code);
-                    $('#supplierName').text(response.data.supplier.company_name);
+                    $('#supplierName').text(response.data.supplier.name);
                     $('#debtDate').text(dayjs(response.data.created_at).format('DD/MM/YYYY'));
                     $('#debtTotal').text(formatNumber(response.data.total_amount) + ' USD');
                     $('#debtPaid').text(formatNumber(response.data.paid_amount) + ' USD');

@@ -30,7 +30,7 @@ class SupplierDebtController extends Controller
                 fn($dataTable) => $dataTable
                     ->addIndexColumn()
                     ->editColumn('created_at', fn($row) => $row->created_at->format('d/m/Y'))
-                    ->addColumn('supplier_name', fn($row) => $row->supplier->company_name ?? 'N/A')
+                    ->addColumn('supplier_name', fn($row) => $row->supplier->name ?? 'N/A')
                     ->addColumn('debt_amount', fn($row) => number_format($row->total_amount - $row->paid_amount))
                     ->editColumn('total_amount', fn($row) => number_format($row->total_amount))
                     ->editColumn('paid_amount', fn($row) => number_format($row->paid_amount))

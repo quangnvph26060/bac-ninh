@@ -252,13 +252,23 @@
             {
                 "title": "Tài khoản kế toán",
                 "url": "admin.accounting-accounts.index"
+            },
+            {
+                "title": "Tổng hợp theo tài khoản",
+                "url": "admin.accounting-accounts.balance"
+            },
+            {
+                "title": "Bút toán",
+                "url": "admin.journal-entries.index"
             }
         ],
         "inRoutes": [
             "admin.cash-transactions.index",
             "admin.accounting-accounts.index",
             "admin.cash-transactions.save",
-            "admin.bank-transactions.index"
+            "admin.bank-transactions.index",
+            "admin.accounting-accounts.balance",
+            "admin.journal-entries.index"
         ]
     },
     {
@@ -285,19 +295,6 @@
             "admin.opening-balances.create",
             "admin.debts.supplier"
         ]
-    },
-    {
-        "title": "Bút toán",
-        "icon": "fas fa-solid fa-list-ul",
-        "url": "javascript:void(0)",
-        "id": "pen",
-        "children": [
-            {
-                "title": "Bút toán",
-                "url": "admin.journal-entries.index"
-            }
-        ],
-        "inRoutes": ["admin.debts.customer", "admin.opening-balances.create"]
     },
     {
         "title": "Cấu hình",

@@ -67,7 +67,7 @@
 
                                                 $objectName = match ($bankTransaction->object_type) {
                                                     'customer' => $bankTransaction->objectable->name ?? '',
-                                                    'supplier' => $bankTransaction->objectable->company_name ?? '',
+                                                    'supplier' => $bankTransaction->objectable->name ?? '',
                                                     'employee' => $bankTransaction->objectable->full_name ?? '',
                                                     default => '',
                                                 };

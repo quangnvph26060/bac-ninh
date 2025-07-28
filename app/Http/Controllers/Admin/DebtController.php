@@ -10,9 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class DebtController extends Controller
 {
+
     public function customer(Request $request)
     {
         $dateRange = $request->input('date_range');
+        $nameFilter = $request->input('name');
 
         if ($dateRange) {
             [$start, $end] = explode(' - ', $dateRange);
@@ -23,90 +25,79 @@ class DebtController extends Controller
             $startDate = $endDate->copy()->subMonth()->startOfDay();
         }
 
-        $query = DB::table('customers')
-            ->select(
-                'customers.id as customer_id',
-                'customers.code as customer_code',
-                'customers.name as customer_name',
-                'customers.phone as customer_phone',
-            )
-            // Tính opening_debit
-            ->selectSub(function ($query) use ($startDate) {
-                $query->from('opening_balances')
-                    ->selectRaw('COALESCE(SUM(amount), 0)')
-                    ->whereColumn('object_id', 'customers.id')
-                    ->where('object_type', 'customer')
-                    ->where('type', 'income')
-                    ->where('transaction_date', '<', $startDate->toDateString());
-            }, 'opening_debit')
-            // Tính opening_credit
-            ->selectSub(function ($query) use ($startDate) {
-                $query->from('opening_balances')
-                    ->selectRaw('COALESCE(SUM(amount), 0)')
-                    ->whereColumn('object_id', 'customers.id')
-                    ->where('object_type', 'customer')
-                    ->where('type', 'expense')
-                    ->where('transaction_date', '<', $startDate->toDateString());
-            }, 'opening_credit')
-            // Tính period_debit
-            ->selectSub(function ($query) use ($startDate, $endDate) {
-                $query->from('opening_balances')
-                    ->selectRaw('COALESCE(SUM(amount), 0)')
-                    ->whereColumn('object_id', 'customers.id')
-                    ->where('object_type', 'customer')
-                    ->where('type', 'income')
-                    ->whereBetween('transaction_date', [$startDate->toDateString(), $endDate->toDateString()]);
-            }, 'period_debit')
-            // Tính period_credit
-            ->selectSub(function ($query) use ($startDate, $endDate) {
-                $query->from('opening_balances')
-                    ->selectRaw('COALESCE(SUM(amount), 0)')
-                    ->whereColumn('object_id', 'customers.id')
-                    ->where('object_type', 'customer')
-                    ->where('type', 'expense')
-                    ->whereBetween('transaction_date', [$startDate->toDateString(), $endDate->toDateString()]);
-            }, 'period_credit');
+        $customersQuery = DB::table('customers as c')
+            ->select('c.id', 'c.name', 'c.code', 'c.phone');
 
-        // Lọc theo customer_name nếu có (tìm tương đối)
-        if ($request->filled('name')) {
-            $query->where('customers.name', 'LIKE', '%' . $request->input('name') . '%');
+        if ($nameFilter) {
+            $customersQuery->where('c.name', 'like', "%$nameFilter%");
         }
 
-        $customerDebts = $query
-            ->havingRaw('
-            opening_debit != 0 OR
-            opening_credit != 0 OR
-            period_debit != 0 OR
-            period_credit != 0
-        ')
-            ->get()
-            ->map(function ($item) {
-                $ending = $item->opening_debit + $item->period_debit - $item->opening_credit - $item->period_credit;
+        $debtReports = $customersQuery->get()
+            ->map(function ($customer) use ($startDate, $endDate) {
+                $so_du_no_dau = DB::table('transaction_entries as te')
+                    ->join('transactions as t', 't.id', '=', 'te.transaction_id')
+                    ->where('te.tableable_type', 'App\\Models\\Customer')
+                    ->where('te.tableable_id', $customer->id)
+                    ->where('t.transaction_date', '<', $startDate)
+                    ->sum('te.debit_amount');
 
-                if ($ending > 0) {
-                    $item->ending_debit = $ending;
-                    $item->ending_credit = 0;
-                } elseif ($ending < 0) {
-                    $item->ending_debit = 0;
-                    $item->ending_credit = abs($ending);
-                } else {
-                    $item->ending_debit = 0;
-                    $item->ending_credit = 0;
-                }
+                $so_du_co_dau = DB::table('transaction_entries as te')
+                    ->join('transactions as t', 't.id', '=', 'te.transaction_id')
+                    ->where('te.tableable_type', 'App\\Models\\Customer')
+                    ->where('te.tableable_id', $customer->id)
+                    ->where('t.transaction_date', '<', $startDate)
+                    ->sum('te.credit_amount');
 
-                return $item;
-            });
+                $ghi_no = DB::table('transaction_entries as te')
+                    ->join('transactions as t', 't.id', '=', 'te.transaction_id')
+                    ->where('te.tableable_type', 'App\\Models\\Customer')
+                    ->where('te.tableable_id', $customer->id)
+                    ->whereBetween('t.transaction_date', [$startDate, $endDate])
+                    ->sum('te.debit_amount');
+
+                $ghi_co = DB::table('transaction_entries as te')
+                    ->join('transactions as t', 't.id', '=', 'te.transaction_id')
+                    ->where('te.tableable_type', 'App\\Models\\Customer')
+                    ->where('te.tableable_id', $customer->id)
+                    ->whereBetween('t.transaction_date', [$startDate, $endDate])
+                    ->sum('te.credit_amount');
+
+                $so_du_rong = ($so_du_no_dau + $ghi_no) - ($so_du_co_dau + $ghi_co);
+
+                return (object)[
+                    'customer_code' => $customer->code,
+                    'customer_name' => $customer->name,
+                    'customer_phone' => $customer->phone,
+                    'opening_debit' => $so_du_no_dau,
+                    'opening_credit' => $so_du_co_dau,
+                    'period_debit' => $ghi_no,
+                    'period_credit' => $ghi_co,
+                    'ending_debit' => $so_du_rong > 0 ? $so_du_rong : 0,
+                    'ending_credit' => $so_du_rong < 0 ? abs($so_du_rong) : 0,
+                ];
+            })
+            ->filter(
+                fn($i) =>
+                $i->opening_debit || $i->opening_credit || $i->period_debit || $i->period_credit
+            )
+            ->values();
 
         if ($request->ajax()) {
-            return response()->json($customerDebts);
+            return response()->json($debtReports);
         }
 
-        return view('admin.debt.customer', compact('customerDebts', 'startDate', 'endDate'));
+        return view('admin.debt.customer', [
+            'customerDebts' => $debtReports,
+            'startDate' => $startDate,
+            'endDate' => $endDate
+        ]);
     }
+
 
     public function supplier(Request $request)
     {
         $dateRange = $request->input('date_range');
+        $nameFilter = $request->input('name');
 
         if ($dateRange) {
             [$start, $end] = explode(' - ', $dateRange);
@@ -117,79 +108,62 @@ class DebtController extends Controller
             $startDate = $endDate->copy()->subMonth()->startOfDay();
         }
 
-        $query = DB::table('suppliers')
-            ->select(
-                'suppliers.id as supplier_id',
-                'suppliers.code as supplier_code',
-                'suppliers.company_name as supplier_name',
-                'suppliers.phone as supplier_phone',
-            )
-            // Tính opening_debit
-            ->selectSub(function ($query) use ($startDate) {
-                $query->from('opening_balances')
-                    ->selectRaw('COALESCE(SUM(amount), 0)')
-                    ->whereColumn('object_id', 'suppliers.id')
-                    ->where('object_type', 'supplier')
-                    ->where('type', 'income')
-                    ->where('transaction_date', '<', $startDate->toDateString());
-            }, 'opening_debit')
-            // Tính opening_credit
-            ->selectSub(function ($query) use ($startDate) {
-                $query->from('opening_balances')
-                    ->selectRaw('COALESCE(SUM(amount), 0)')
-                    ->whereColumn('object_id', 'suppliers.id')
-                    ->where('object_type', 'supplier')
-                    ->where('type', 'expense')
-                    ->where('transaction_date', '<', $startDate->toDateString());
-            }, 'opening_credit')
-            // Tính period_debit
-            ->selectSub(function ($query) use ($startDate, $endDate) {
-                $query->from('opening_balances')
-                    ->selectRaw('COALESCE(SUM(amount), 0)')
-                    ->whereColumn('object_id', 'suppliers.id')
-                    ->where('object_type', 'supplier')
-                    ->where('type', 'income')
-                    ->whereBetween('transaction_date', [$startDate->toDateString(), $endDate->toDateString()]);
-            }, 'period_debit')
-            // Tính period_credit
-            ->selectSub(function ($query) use ($startDate, $endDate) {
-                $query->from('opening_balances')
-                    ->selectRaw('COALESCE(SUM(amount), 0)')
-                    ->whereColumn('object_id', 'suppliers.id')
-                    ->where('object_type', 'supplier')
-                    ->where('type', 'expense')
-                    ->whereBetween('transaction_date', [$startDate->toDateString(), $endDate->toDateString()]);
-            }, 'period_credit');
+        $suppliersQuery = DB::table('suppliers as s')
+            ->select('s.id', 's.name', 's.code', 's.phone');
 
-        // Lọc theo supplier_name nếu có (tìm tương đối)
-        if ($request->filled('name')) {
-            $query->where('suppliers.name', 'LIKE', '%' . $request->input('name') . '%');
+        if ($nameFilter) {
+            $suppliersQuery->where('s.name', 'like', "%$nameFilter%");
         }
 
-        $supplierDebts = $query
-            ->havingRaw('
-            opening_debit != 0 OR
-            opening_credit != 0 OR
-            period_debit != 0 OR
-            period_credit != 0
-        ')
-            ->get()
-            ->map(function ($item) {
-                $ending = $item->opening_debit + $item->period_debit - $item->opening_credit - $item->period_credit;
+        $supplierDebts = $suppliersQuery->get()
+            ->map(function ($supplier) use ($startDate, $endDate) {
+                $openingDebit = DB::table('transaction_entries as te')
+                    ->join('transactions as t', 't.id', '=', 'te.transaction_id')
+                    ->where('te.tableable_type', 'App\\Models\\Supplier')
+                    ->where('te.tableable_id', $supplier->id)
+                    ->where('t.transaction_date', '<', $startDate)
+                    ->sum('te.debit_amount');
 
-                if ($ending > 0) {
-                    $item->ending_debit = $ending;
-                    $item->ending_credit = 0;
-                } elseif ($ending < 0) {
-                    $item->ending_debit = 0;
-                    $item->ending_credit = abs($ending);
-                } else {
-                    $item->ending_debit = 0;
-                    $item->ending_credit = 0;
-                }
+                $openingCredit = DB::table('transaction_entries as te')
+                    ->join('transactions as t', 't.id', '=', 'te.transaction_id')
+                    ->where('te.tableable_type', 'App\\Models\\Supplier')
+                    ->where('te.tableable_id', $supplier->id)
+                    ->where('t.transaction_date', '<', $startDate)
+                    ->sum('te.credit_amount');
 
-                return $item;
-            });
+                $periodDebit = DB::table('transaction_entries as te')
+                    ->join('transactions as t', 't.id', '=', 'te.transaction_id')
+                    ->where('te.tableable_type', 'App\\Models\\Supplier')
+                    ->where('te.tableable_id', $supplier->id)
+                    ->whereBetween('t.transaction_date', [$startDate, $endDate])
+                    ->sum('te.debit_amount');
+
+                $periodCredit = DB::table('transaction_entries as te')
+                    ->join('transactions as t', 't.id', '=', 'te.transaction_id')
+                    ->where('te.tableable_type', 'App\\Models\\Supplier')
+                    ->where('te.tableable_id', $supplier->id)
+                    ->whereBetween('t.transaction_date', [$startDate, $endDate])
+                    ->sum('te.credit_amount');
+
+                $endingBalance = ($openingDebit + $periodDebit) - ($openingCredit + $periodCredit);
+
+                return (object)[
+                    'supplier_code' => $supplier->code,
+                    'supplier_name' => $supplier->name,
+                    'supplier_phone' => $supplier->phone,
+                    'opening_debit' => $openingDebit,
+                    'opening_credit' => $openingCredit,
+                    'period_debit' => $periodDebit,
+                    'period_credit' => $periodCredit,
+                    'ending_debit' => $endingBalance > 0 ? $endingBalance : 0,
+                    'ending_credit' => $endingBalance < 0 ? abs($endingBalance) : 0,
+                ];
+            })
+            ->filter(
+                fn($item) =>
+                $item->opening_debit || $item->opening_credit || $item->period_debit || $item->period_credit
+            )
+            ->values();
 
         if ($request->ajax()) {
             return response()->json($supplierDebts);

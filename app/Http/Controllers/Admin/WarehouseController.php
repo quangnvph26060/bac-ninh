@@ -168,7 +168,7 @@ class WarehouseController extends Controller
                 'quantity' => $item['quantity'],
                 'price' => $price,
                 'price_type' => $item['currency'],
-                'distributor' => $supplier ? $supplier->company_name : '',
+                'distributor' => $supplier ? $supplier->name : '',
                 'warehouse_id' => $warehouse->id,
                 'note' =>  $item['note']
             ]);

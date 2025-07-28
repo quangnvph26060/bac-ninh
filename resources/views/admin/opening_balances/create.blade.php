@@ -76,7 +76,7 @@
                             <h3 class="card-title fw-bold">Ghi chú</h3>
                         </div>
                         <div class="card-body">
-                            <textarea name="note" rows="3" class="form-control" id="note" placeholder="Nhập ghi chú"></textarea>
+                            <textarea name="description" rows="3" class="form-control" id="description" placeholder="Nhập ghi chú"></textarea>
                         </div>
                     </div>
                 </div>

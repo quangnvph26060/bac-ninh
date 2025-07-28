@@ -26,14 +26,14 @@ class SupplierController extends Controller
             return $this->processDataTable(
                 $query,
                 fn($datatable) => $datatable
-                    ->editColumn('company_name', function ($row) {
-                        return '<strong>' . e($row->company_name) . '</strong><br>' .
+                    ->editColumn('name', function ($row) {
+                        return '<strong>' . e($row->name) . '</strong><br>' .
                             '<a href="mailto:' . e($row->email) . '">' . e($row->email) . '</a><br>' .
                             '<a href="tel:' . e($row->phone) . '">' . e($row->phone) . '</a>';
                     })
                     ->addColumn('bank_account_number', fn($row) => $row->bank_account_number . ' - ' . ($row->bank?->shortName ?? 'Chưa cập nhật...'))
                     ->addColumn('operations', fn($row) => view('admin.components.operation', compact('row'))),
-                ['company_name', 'operations']
+                ['name', 'operations']
             );
         }
 

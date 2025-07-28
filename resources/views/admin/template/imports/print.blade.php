@@ -16,7 +16,7 @@
 
         <div style="margin-bottom: 20px;">
             <p><strong>Mã phiếu:</strong> {{ $materialImport->code }}</p>
-            <p><strong>Nhà cung cấp:</strong> {{ $materialImport->supplier->company_name }}</p>
+            <p><strong>Nhà cung cấp:</strong> {{ $materialImport->supplier->name }}</p>
             <p><strong>Người lập phiếu:</strong> {{ $materialImport->employee->full_name }}</p>
         </div>
 

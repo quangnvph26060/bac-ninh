@@ -119,7 +119,7 @@
                         <div class="col-md-6">
                             <p><strong>Mã phiếu nhập:</strong> ${data.code}</p>
                             <p><strong>Ngày giao dịch:</strong> ${dayjs(data.date).format('DD/MM/YYYY')}</p>
-                            <p><strong>Nhà cung cấp:</strong> ${data.supplier.company_name}</p>
+                            <p><strong>Nhà cung cấp:</strong> ${data.supplier.name}</p>
                         </div>
                         <div class="col-md-6">
                             <p><strong>Người tạo:</strong> ${data.employee?.full_name ?? '---'}</p>

@@ -107,9 +107,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('list', 'list')->name('list');
             Route::post('voucher-types', 'voucherType');
-            Route::get('save/{id?}', 'save')->name('save');
+            Route::get('save', 'save')->name('save');
             Route::post('store', 'store');
-            Route::put('update/{id}', 'update');
+            Route::put('update', 'update');
             Route::delete('destroy', 'destroy');
             Route::post('print-multiple', 'printMultiple');
             Route::get('download-sample-cash-transaction', 'downloadSample');
@@ -122,7 +122,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'list')->name('list');
             Route::get('save/{id?}', 'save')->name('save');
             Route::post('store', 'store')->name('store');
-            Route::put('update/{id}', 'update')->name('update');
+            Route::put('update', 'update')->name('update');
             Route::delete('destroy', 'destroy');
         });
 
@@ -148,6 +148,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::group(['prefix' => 'accounting-accounts', 'controller' => AccountController::class, 'as' => 'accounting-accounts.'], function () {
             Route::get('/', 'index')->name('index');
+            Route::get('balance', 'accountBalance')->name('balance');
             Route::get('list', 'list')->name('list');
             Route::get('search', 'search')->name('search');
             Route::post('/', 'store')->name('store');
@@ -291,7 +292,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('suppliers')->controller(SupplierController::class)->name('suppliers.')->group(function () {
             Route::get("/", 'index')->name('index');
             Route::get("create", 'create')->name('create');
-            Route::post("/", 'store')->name('store');
+            Route::post("create", 'store')->name('store');
             Route::get("edit/{id}", 'edit')->name('edit');
             Route::put("edit/{id}", 'update')->name('update');
         });
@@ -427,8 +428,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', [JournalEntryController::class, 'index'])->name('index');
         Route::delete('/destroy/{id}', [JournalEntryController::class, 'destroy'])->name('destroy');
         Route::delete('/bulk-delete', [JournalEntryController::class, 'bulkDelete'])->name('bulkDelete');
-
     });
+
+    Route::get('ledger-transactions', [JournalEntryController::class, 'ledgerTransactions']);
 });
 
 Route::post('/submit-table', [WarehouseController::class, 'store']);

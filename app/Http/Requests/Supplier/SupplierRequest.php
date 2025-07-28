@@ -23,7 +23,7 @@ class SupplierRequest extends FormRequest
     {
         $id = $this->route('id', null);
         return [
-            'company_name' => 'required|max:250|unique:suppliers,company_name,' . $id,
+            'name' => 'required|max:250|unique:suppliers,name,' . $id,
             'representative_name' => 'required|max:250',
             'position' => 'nullable|max:100',
             'phone' => ['required', 'regex:/^(0|\+84)[3-9][0-9]{8}$/', 'max:12'],

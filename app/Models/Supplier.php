@@ -11,7 +11,8 @@ class Supplier extends Model
 
     protected $fillable = [
         'bank_id',
-        'company_name',
+        'code',
+        'name',
         'representative_name',
         'position',
         'phone',

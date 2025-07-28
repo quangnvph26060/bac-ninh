@@ -35,7 +35,7 @@
                     $objectCode = $transaction->objectable->code ?? $transaction->objectable->employee_code;
                     $objectName = match ($transaction->object_type) {
                         'customer' => $transaction->objectable->name ?? '',
-                        'supplier' => $transaction->objectable->company_name ?? '',
+                        'supplier' => $transaction->objectable->name ?? '',
                         'employee' => $transaction->objectable->full_name ?? '',
                         default => '',
                     };

@@ -19,7 +19,7 @@
     </div>
 
     <div style="margin-bottom: 20px;">
-        <p style="margin: 4px 0;"><strong>Nhà cung cấp: </strong> {{ $supplierDebt->supplier->company_name }}</p>
+        <p style="margin: 4px 0;"><strong>Nhà cung cấp: </strong> {{ $supplierDebt->supplier->name }}</p>
         <p style="margin: 4px 0;"><strong>Ngày phát sinh: </strong> {{ $supplierDebt->created_at->format('d/m/Y') }}</p>
         <p style="margin: 4px 0;"><strong>Tổng tiền: </strong> {{ formatPrice($supplierDebt->total_amount) }} USD</p>
         <p style="margin: 4px 0;"><strong>Đã thanh toán: </strong> {{ formatPrice($supplierDebt->paid_amount) }} USD</p>

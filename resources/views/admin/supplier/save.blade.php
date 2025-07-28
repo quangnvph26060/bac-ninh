@@ -5,7 +5,7 @@
         <div class="page-header">
             <x-breadcrumb :items="[
                 ['name' => 'nhà cung cấp', 'url' => route('admin.suppliers.index')],
-                ['name' => $supplier ? $title . ' - ' . $supplier->company_name : $title],
+                ['name' => $supplier ? $title . ' - ' . $supplier->name : $title],
             ]" />
         </div>
 
@@ -22,10 +22,10 @@
                                 <div class="row">
 
                                     <div class="mb-3 position-relative col-md-12">
-                                        <label for="company_name" class="form-label required">Tên nhà cung cấp</label>
+                                        <label for="name" class="form-label required">Tên nhà cung cấp</label>
                                         <input type="text" placeholder="Tên sản phẩm" aria-required="true" required
-                                            class="form-control" name="company_name" id="company_name"
-                                            value="{{ optional($supplier)->company_name }}">
+                                            class="form-control" name="name" id="name"
+                                            value="{{ optional($supplier)->name }}">
                                     </div>
 
                                     <div class="mb-3 position-relative col-md-8">
@@ -135,7 +135,7 @@
 
     <script>
         const inputIds = [{
-                id: 'company_name',
+                id: 'name',
                 maxLength: 250
             },
             {

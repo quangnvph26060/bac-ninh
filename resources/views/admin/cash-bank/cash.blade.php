@@ -3,7 +3,7 @@
 @section('content')
     <div class="page-inner">
         <div class="page-header">
-            <x-breadcrumb :items="[['name' => 'thu chi ngân hàng']]" />
+            <x-breadcrumb :items="[['name' => 'thu chi tiền mặt']]" />
         </div>
 
         @if (session('success'))
@@ -26,7 +26,7 @@
                 <div class="filter-section">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="d-flex gap-2">
-                            <a href="/admin/bank-transactions/save" class="btn btn-success btn-sm">
+                            <a href="/admin/cash-transactions/save" class="btn btn-success btn-sm">
                                 <i class="bi bi-plus-circle me-1"></i>
                                 Thêm mới
                             </a>
@@ -54,7 +54,6 @@
                                         </a>
                                     </li>
 
-
                                     <li>
                                         <a class="dropdown-item"
                                             href="/admin/cash-transactions/download-sample-cash-transaction"
@@ -63,25 +62,19 @@
                                         </a>
                                     </li>
                                 </ul>
-
                             </div>
                         </div>
-
                         <div class="row g-3 justify-content-end align-items-center">
                             <div class="col-md-5">
                                 <input type="text" id="dateFilter" class="form-control" placeholder="Chọn khoảng ngày">
                             </div>
                             <div class="col-md-5">
-                                <div class="row g-2 align-items-center">
-                                    <div class="col">
-                                        <input type="text" id="minAmount" name="min_amount"
-                                            class="form-control usd-price-format" placeholder="Từ số tiền">
-                                    </div>
-                                    <div class="col-auto">–</div>
-                                    <div class="col">
-                                        <input type="text" id="maxAmount" name="max_amount"
-                                            class="form-control usd-price-format" placeholder="Đến số tiền">
-                                    </div>
+                                <div class="input-group">
+                                    <input type="text" id="minAmount" name="min_amount"
+                                        class="form-control usd-price-format" placeholder="Từ số tiền">
+                                    <span class="input-group-text px-2">–</span>
+                                    <input type="text" id="maxAmount" name="max_amount"
+                                        class="form-control usd-price-format" placeholder="Đến số tiền">
                                 </div>
                             </div>
                             <div class="col-auto">
@@ -90,8 +83,6 @@
                                 </button>
                             </div>
                         </div>
-
-
                     </div>
                 </div>
 
@@ -208,19 +199,11 @@
             $('#dateFilter').on('apply.daterangepicker', function(ev, picker) {
                 $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format(
                     'DD/MM/YYYY'));
-
-                triggerFilter();
             });
 
-            $('#dateFilter').on('cancel.daterangepicker', function(ev, picker) {
-                $(this).val('');
-                triggerFilter();
-
-            });
-
-            $('#accountFilter, #voucherFilter').on('change', function() {
-                triggerFilter();
-            });
+            // $('#dateFilter').on('cancel.daterangepicker', function(ev, picker) {
+            //     $(this).val('');
+            // });
 
             // Khi click vào checkbox "checked-all"
             $('#checked-all').on('change', function() {
@@ -239,10 +222,7 @@
                     $('#checked-all').prop('checked', false);
                 }
             });
-
-            loadCashTransactions();
         });
-
 
         $(document).on('click', '#delete-selected', function() {
             let ids = $('.item-checkbox:checked').map(function() {
@@ -266,7 +246,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: '/admin/bank-transactions/destroy',
+                        url: '/admin/cash-transactions/destroy',
                         type: 'DELETE',
                         data: {
                             ids: ids,
@@ -276,8 +256,6 @@
                         },
                         success: function(res) {
                             if (res.success) {
-                                $('input[type="checkbox"]:checked').prop('checked', false);
-
                                 Notifications(res.message, 'success');
                                 loadCashTransactions();
                             } else {
@@ -288,9 +266,12 @@
                         error: function() {
                             Notifications('Có lỗi xảy ra, vui lòng thử lại.',
                                 'error');
+                            $("#loadingSpinner").fadeOut();
+
                         },
                         complete: function() {
-                            $("#loadingSpinner").fadeIn();
+                            $("#loadingSpinner").fadeOut();
+
                         }
                     });
                 } else {
@@ -389,7 +370,7 @@
 
         function loadCashTransactions(filters = {}) {
             $.ajax({
-                url: "/admin/bank-transactions/list",
+                url: "/admin/cash-transactions/list",
                 type: "GET",
                 data: filters,
                 beforeSend: function() {
@@ -426,18 +407,27 @@
         });
 
         function triggerFilter() {
-            let rawAmount = $('#amountFilter').val();
-            let cleanedAmount = rawAmount.replace(/,/g, '').trim();
+            const rawMin = $('#minAmount').val().replace(/,/g, '').trim();
+            const rawMax = $('#maxAmount').val().replace(/,/g, '').trim();
+
+            let amounts = '';
+            if (rawMin || rawMax) {
+                amounts = `${rawMin || ''} - ${rawMax || ''}`.trim();
+            }
 
             let filters = {
                 date_range: $('#dateFilter').val(),
-                account: $('#accountFilter').val(),
-                voucher: $('#voucherFilter').val(),
-                amount: cleanedAmount
+                amounts: amounts
             };
 
             loadCashTransactions(filters);
         }
+
+        triggerFilter()
+
+        $('#filterButton').on('click', function() {
+            triggerFilter()
+        })
 
         // Close when clicking outside
         $(document).on('click', function() {

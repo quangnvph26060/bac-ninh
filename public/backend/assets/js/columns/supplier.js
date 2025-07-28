@@ -7,8 +7,8 @@ const columns = [
         searchable: false,
     },
     {
-        data: "company_name",
-        name: "company_name",
+        data: "name",
+        name: "name",
         title: "thông tin",
     },
     {

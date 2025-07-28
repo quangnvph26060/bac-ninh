@@ -11,18 +11,17 @@ class JournalEntry extends Model
 
     protected $fillable = [
         'type',
-        'object_type',
-        'object_id',
-        'document',
         'amount',
-        'debit_account',
-        'credit_account',
         'note',
-        'file',
-        'related_type',
-        'related_id',
+        'tableable_type',
+        'tableable_id',
         'transaction_date'
     ];
+
+    public function tableable()
+    {
+        return $this->morphTo();
+    }
 
     protected static function booted()
     {
@@ -36,16 +35,6 @@ class JournalEntry extends Model
                     break;
             }
         });
-    }
-
-    public function getObjectAttribute()
-    {
-        return match ($this->object_type) {
-            'customer' => Customer::query()->select('id', 'code', 'name')->where('id', $this->object_id)->first(),
-            'supplier' => Supplier::query()->select('id', 'code', 'company_name')->where('id', $this->object_id)->first(),
-            default => null,
-        };
-
     }
 
     public function getTypeLabelAttribute()
@@ -65,6 +54,4 @@ class JournalEntry extends Model
     protected $casts = [
         'transaction_date' => 'date'
     ];
-
-
 }

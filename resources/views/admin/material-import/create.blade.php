@@ -165,8 +165,8 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="mb-3 col-lg-6">
-                                <label for="company_name" class="form-label required">Tên nhà cung cấp</label>
-                                <input type="text" class="form-control" id="company_name" name="company_name">
+                                <label for="name" class="form-label required">Tên nhà cung cấp</label>
+                                <input type="text" class="form-control" id="name" name="name">
                             </div>
 
                             <div class="mb-3 col-lg-6">
