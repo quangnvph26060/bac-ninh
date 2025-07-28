@@ -158,7 +158,7 @@
         </div>
     </div> --}}
 
-    <div class="how_it_work_step_wrapper">
+    {{-- <div class="how_it_work_step_wrapper">
         <div data-aos="fade-down" data-aos-once="true" data-aos-delay="400" class="title_content">
             <h2 class="title_highlight">
                 4 simple steps for your business to become successful
@@ -250,7 +250,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     @if ($categories->isNotEmpty())
         <div data-aos="fade-down" data-aos-once="true" data-aos-delay="500" class="pw_category_product_wrapper">

@@ -26,6 +26,7 @@ class OrderImport implements ToCollection, WithHeadingRow
     protected $failures = [];
     protected int $current = 0;
     protected int $total = 0;
+    protected int $processed = 0;
 
     public function __construct($userId, $jobId)
     {
@@ -59,12 +60,14 @@ class OrderImport implements ToCollection, WithHeadingRow
 
             if (!empty($errors)) {
                 $this->failures = array_merge($this->failures, $errors);
+                $this->processed++;
                 $this->updateProgress('processing');
                 continue;
             }
 
             if (!empty($row['order_code']) && Order::where('order_code', $row['order_code'])->orWhere('order_name', $row['order_name'])->exists()) {
                 $this->failures[] = "Dòng $line: Mã hoặc tên đơn hàng đã tồn tại: {$row['order_code']} / {$row['order_name']}";
+                $this->processed++;
                 $this->updateProgress('processing');
                 continue;
             }
@@ -74,6 +77,7 @@ class OrderImport implements ToCollection, WithHeadingRow
 
             if (!$product || !$variant || $variant->product_id !== $product->id) {
                 $this->failures[] = "Dòng $line: Không tìm thấy sản phẩm hoặc biến thể khớp với SKU: {$row['product_variant_sku']}";
+                $this->processed++;
                 $this->updateProgress('processing');
                 continue;
             }
@@ -106,6 +110,7 @@ class OrderImport implements ToCollection, WithHeadingRow
             $this->createOrder($row, $product, $variant, $quantity, $price, $lineTotal, $shippingFee, $deliveryMethod, $tax);
 
             $this->current++;
+            $this->processed++;
             $this->updateProgress('processing');
         }
 
@@ -224,10 +229,12 @@ class OrderImport implements ToCollection, WithHeadingRow
             'status' => $status,
             'current' => $this->current,
             'total' => $this->total,
-            'percent' => $this->total > 0 ? round($this->current * 100 / $this->total) : 0,
+            'processed' => $this->processed,
+            'percent' => $this->total > 0 ? round($this->processed * 100 / $this->total) : 0,
             'failures' => $this->failures,
         ], now()->addMinutes(10));
     }
+
 
     protected function convertGoogleDriveUrl($url): ?string
     {
