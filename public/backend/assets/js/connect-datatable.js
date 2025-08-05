@@ -255,16 +255,36 @@ const dataTables = (
 
     const targetDiv = $(".dt-layout-cell.dt-layout-start .dt-length");
 
-    let _html = `
-    <div id="actionDiv" style="display: none;">
-        <div class="d-flex">
-            <select id="actionSelect" class="form-select">
-                <option value="">-- Hành động --</option>
-                <option value="delete">Xóa</option>
+    let _html = "";
+    let currentPath = window.location.pathname;
+    console.log(currentPath);
+
+    if (currentPath.includes("/orders")) {
+        // Trang đơn hàng: Hiển thị select trạng thái
+        _html = `
+            <select id="orderStatusSelect" class="form-select d-none">
+                <option value="" disabled selected>-- Thay đổi trạng thái --</option>
+                <option value="pending">Chờ xác nhận</option>
+                <option value="confirmed_pending_production">Đã xác nhận, chờ sản xuất</option>
+                <option value="in_production">Đang sản xuất</option>
+                <option value="produced_awaiting_completion">Đã sản xuất xong, chờ hoàn thiện</option>
+                <option value="completed_waiting_for_shipment">Đã hoàn thiện, chờ giao hàng</option>
+                <option value="shipped">Đã giao hàng</option>
             </select>
-        </div>
-    </div>
-    `;
+            `;
+    } else {
+        // Trang khác: Hiển thị hành động mặc định
+        _html = `
+            <div id="actionDiv" style="display: none;">
+                <div class="d-flex">
+                    <select id="actionSelect" class="form-select">
+                        <option value="">-- Hành động --</option>
+                        <option value="delete">Xóa</option>
+                    </select>
+                </div>
+            </div>
+            `;
+    }
 
     targetDiv.after(_html);
 
@@ -301,7 +321,7 @@ const dataTables = (
 
     if (hasDateRange) {
         const datePickerHtml = `
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center w-75">
                 <input type="text" id="dateRangePicker" name="date_range" class="form-control" placeholder="Chọn khoảng ngày" />
             </div>
         `;
@@ -406,6 +426,54 @@ const dataTables = (
         toggleActionDiv();
     });
 
+    $(document).on("change", "#orderStatusSelect", function () {
+        const status = $(this).val();
+
+        const selectedIds = $(".row-checkbox:checked")
+            .map(function () {
+                return $(this).val();
+            })
+            .get();
+
+        if (selectedIds.length <= 0) {
+            Notifications("Vui lòng chọn ít nhất 1 bản ghi!", "danger");
+        }
+
+        $.ajax({
+            url: "/admin/orders/change-status",
+            method: "POST",
+            data: {
+                ids: selectedIds,
+                model: model,
+                status,
+            },
+            success: (res) => {
+                table.ajax.reload(function () {
+                    let newPageInfo = table.page.info();
+
+                    // Nếu trang hiện tại vẫn còn dữ liệu, giữ nguyên
+                    if (pageInfo.page < newPageInfo.pages) {
+                        table.page(pageInfo.page).draw(false);
+                    } else {
+                        // Nếu không còn dữ liệu ở trang hiện tại, quay về trang trước đó
+                        table.page(Math.max(pageInfo.page - 1, 0)).draw(false);
+                    }
+                }, false); // Sử dụng biến table thay vì gọi lại $('#myTable').DataTable()
+                Notifications(res.message, "success");
+                $("#actionSelect").val("");
+                $('input[type="checkbox"]').prop("checked", false);
+                toggleActionDiv();
+            },
+            error: (xhr) => {
+                Notifications(
+                    xhr.responseJSON?.message ||
+                        "Đã có lỗi xảy ra, vui lòng thử lại sau!",
+                    "danger"
+                );
+            },
+        });
+    });
+
     $("#actionSelect").on("change", function () {
         const selectedAction = $("#actionSelect").val();
 
@@ -484,8 +552,10 @@ function updateOrderInDatabase(order, model) {
 function toggleActionDiv() {
     if ($(".row-checkbox:checked").length > 0) {
         $("#actionDiv").show();
+        $("#orderStatusSelect").removeClass("d-none");
     } else {
         $("#actionDiv").hide();
+        $("#orderStatusSelect").addClass("d-none");
     }
 }
 

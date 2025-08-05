@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Milon\Barcode\Facades\DNS1DFacade;
+use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
@@ -195,6 +196,153 @@ class OrderController extends Controller
         $order->update(['tracking' => $request->tracking]);
 
         return successResponse("Cập nhật tracking thành công.", '', 200, true);
+    }
+
+    public function handleChangeStatus(Request $request)
+    {
+        // Danh sách trạng thái hợp lệ theo thứ tự
+        $validStatuses = [
+            'pending',
+            'confirmed_pending_production',
+            'in_production',
+            'produced_awaiting_completion',
+            'completed_waiting_for_shipment',
+            'shipped',
+            'cancelled',
+        ];
+
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'model' => 'required|string',
+            'status' => ['required', Rule::in($validStatuses)],
+        ]);
+
+        $modelClass = "App\\Models\\{$request->model}";
+
+        if (!class_exists($modelClass)) {
+            return response()->json(['message' => 'Model không hợp lệ.'], 400);
+        }
+
+        try {
+            $model = new $modelClass;
+
+            $orders = $model::whereIn('id', $request->ids)->get();
+
+            if ($orders->count() !== count($request->ids)) {
+                return response()->json(['message' => 'Một số đơn hàng không tồn tại.'], 404);
+            }
+
+            // ✅ Kiểm tra trạng thái hiện tại
+            $currentStatuses = $orders->pluck('status')->unique();
+            if ($currentStatuses->count() !== 1) {
+                return response()->json([
+                    'message' => 'Tất cả đơn hàng phải có cùng một trạng thái hiện tại.'
+                ], 422);
+            }
+
+            $currentStatus = $currentStatuses->first();
+            $newStatus = $request->status;
+
+            // ✅ Kiểm tra trạng thái thanh toán
+            $paymentStatuses = $orders->pluck('payment_status')->unique();
+            if ($paymentStatuses->count() !== 1) {
+                return response()->json([
+                    'message' => 'Tất cả đơn hàng phải có cùng trạng thái thanh toán.'
+                ], 422);
+            }
+
+            $paymentStatus = $paymentStatuses->first();
+
+            // ❌ Không cập nhật đơn đã được hoàn tiền
+            if ($paymentStatus === 'refunded') {
+                return response()->json([
+                    'message' => 'Không thể thay đổi trạng thái đơn hàng đã được hoàn tiền.'
+                ], 422);
+            }
+
+            // ❌ Không cập nhật nếu đang pending + chưa thanh toán
+            if ($currentStatus === 'pending' && $paymentStatus === 'pending') {
+                return response()->json([
+                    'message' => 'Không thể thay đổi trạng thái đơn hàng khi chưa thanh toán và đang chờ xử lý.'
+                ], 422);
+            }
+
+
+            // ❌ Không cập nhật đơn đã bị hủy
+            if ($currentStatus === 'cancelled') {
+                return response()->json([
+                    'message' => 'Không thể thay đổi trạng thái đơn hàng đã bị hủy.'
+                ], 422);
+            }
+
+            // ❌ Không hủy đơn đã hoàn thành hoặc đã giao
+            if (
+                $newStatus === 'cancelled' &&
+                in_array($currentStatus, ['completed_waiting_for_shipment', 'shipped'])
+            ) {
+                return response()->json([
+                    'message' => 'Không thể hủy đơn hàng đã hoàn thành hoặc đã giao.'
+                ], 422);
+            }
+
+            // ❌ Không cho cập nhật lùi trạng thái
+            $currentIndex = array_search($currentStatus, $validStatuses);
+            $newIndex = array_search($newStatus, $validStatuses);
+
+            if ($newIndex < $currentIndex) {
+                return response()->json([
+                    'message' => 'Không thể cập nhật lùi trạng thái.'
+                ], 422);
+            }
+
+            // ❌ Không được cập nhật nếu trạng thái giống nhau
+            if ($newIndex === $currentIndex) {
+                return response()->json([
+                    'message' => 'Trạng thái mới trùng với trạng thái hiện tại.'
+                ], 422);
+            }
+
+            // ❌ Không cho chuyển sang trạng thái đã thanh toán nếu chưa thanh toán
+            if (
+                in_array($newStatus, ['completed_waiting_for_shipment', 'shipped']) &&
+                $paymentStatus !== 'completed'
+            ) {
+                return response()->json([
+                    'message' => 'Chỉ có thể cập nhật sang trạng thái giao hàng hoặc hoàn thành khi đơn hàng đã được thanh toán.'
+                ], 422);
+            }
+
+            // ❌ Không cập nhật đơn đã được hoàn tiền
+            if ($paymentStatus === 'refunded') {
+                return response()->json([
+                    'message' => 'Không thể thay đổi trạng thái đơn hàng đã được hoàn tiền.'
+                ], 422);
+            }
+
+            // ✅ Nếu tất cả đơn hàng đã có đúng trạng thái → không cập nhật
+            $allSameStatus = $orders->every(function ($order) use ($newStatus) {
+                return $order->status === $newStatus;
+            });
+
+            if ($allSameStatus) {
+                return response()->json([
+                    'message' => 'Tất cả đơn hàng đã có trạng thái này. Không cần cập nhật.'
+                ], 200);
+            }
+
+            // ✅ Thực hiện cập nhật
+            $affected = $model::whereIn('id', $request->ids)
+                ->update(['status' => $newStatus]);
+
+            return response()->json([
+                'message' => 'Cập nhật trạng thái thành công.',
+                'affected' => $affected
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi cập nhật trạng thái: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
 

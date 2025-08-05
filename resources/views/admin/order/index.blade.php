@@ -56,7 +56,7 @@
     <script>
         $(document).ready(function() {
             const api = "{{ route('admin.orders.index') }}"
-            dataTables(api, columns, 'Brand', {}, false, true, false, true)
+            dataTables(api, columns, 'Order', {}, false, true, true, true)
         })
 
         let oldCode = null;
